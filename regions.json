@@ -1,1 +1,430 @@
-{}
+{
+  "world_map": {
+    "armia": {
+      "x": 913,
+      "y": 879,
+      "w": 53,
+      "h": 46,
+      "type": "button",
+      "template": "templates/world_map/armia.png"
+    },
+    "watchtower_locked": {
+      "x": 672,
+      "y": 876,
+      "w": 36,
+      "h": 26,
+      "type": "button",
+      "template": "templates/world_map/watchtower_locked.png"
+    },
+    "watchtower_unlocked": {
+      "x": 672,
+      "y": 876,
+      "w": 36,
+      "h": 26,
+      "type": "button",
+      "template": "templates/world_map/watchtower_unlocked.png"
+    },
+    "okno_wiadomości": {
+      "x": 1220,
+      "y": 951,
+      "w": 31,
+      "h": 33,
+      "type": "button",
+      "template": "templates/world_map/okno_wiadomosci.png"
+    },
+    "wood": {
+      "x": 729,
+      "y": 45,
+      "w": 29,
+      "h": 27,
+      "type": "icon",
+      "template": "templates/world_map/wood.png"
+    },
+    "wood_count": {
+      "x": 761,
+      "y": 48,
+      "w": 46,
+      "h": 21,
+      "type": "number",
+      "template": "templates/world_map/wood_count.png"
+    },
+    "iron": {
+      "x": 818,
+      "y": 45,
+      "w": 29,
+      "h": 27,
+      "type": "icon",
+      "template": "templates/world_map/iron.png"
+    },
+    "iron_count": {
+      "x": 851,
+      "y": 45,
+      "w": 58,
+      "h": 26,
+      "type": "number",
+      "template": "templates/world_map/iron_count.png"
+    },
+    "stone": {
+      "x": 913,
+      "y": 46,
+      "w": 32,
+      "h": 23,
+      "type": "icon",
+      "template": "templates/world_map/stone.png"
+    },
+    "stone_count": {
+      "x": 948,
+      "y": 48,
+      "w": 56,
+      "h": 23,
+      "type": "number",
+      "template": "templates/world_map/stone_count.png"
+    },
+    "food": {
+      "x": 1008,
+      "y": 46,
+      "w": 33,
+      "h": 23,
+      "type": "icon",
+      "template": "templates/world_map/food.png"
+    },
+    "food_count": {
+      "x": 1041,
+      "y": 50,
+      "w": 55,
+      "h": 21,
+      "type": "number",
+      "template": "templates/world_map/food_count.png"
+    },
+    "silver": {
+      "x": 1100,
+      "y": 46,
+      "w": 32,
+      "h": 23,
+      "type": "icon",
+      "template": "templates/world_map/silver.png"
+    },
+    "silver_count": {
+      "x": 1133,
+      "y": 48,
+      "w": 63,
+      "h": 21,
+      "type": "number",
+      "template": "templates/world_map/silver_count.png"
+    },
+    "gold": {
+      "x": 1198,
+      "y": 48,
+      "w": 35,
+      "h": 23,
+      "type": "icon",
+      "template": "templates/world_map/gold.png"
+    },
+    "gold_count": {
+      "x": 1237,
+      "y": 46,
+      "w": 51,
+      "h": 25,
+      "type": "number",
+      "template": "templates/world_map/gold_count.png"
+    },
+    "scroll_button": {
+      "x": 1290,
+      "y": 45,
+      "w": 23,
+      "h": 27,
+      "type": "button",
+      "template": "templates/world_map/scroll_button.png"
+    },
+    "action_list": {
+      "x": 975,
+      "y": 76,
+      "w": 316,
+      "h": 56,
+      "type": "list",
+      "template": "templates/world_map/action_list.png"
+    },
+    "action_list_full_button": {
+      "x": 1113,
+      "y": 135,
+      "w": 43,
+      "h": 21,
+      "type": "button",
+      "template": "templates/world_map/action_list_full_button.png"
+    },
+    "bonus_panel": {
+      "x": 1856,
+      "y": 357,
+      "w": 34,
+      "h": 29,
+      "type": "button",
+      "template": "templates/world_map/bonus_panel.png"
+    },
+    "premium_panel": {
+      "x": 1856,
+      "y": 409,
+      "w": 34,
+      "h": 31,
+      "type": "button",
+      "template": "templates/world_map/premium_panel.png"
+    },
+    "events_panel": {
+      "x": 26,
+      "y": 664,
+      "w": 65,
+      "h": 71,
+      "type": "button",
+      "template": "templates/world_map/events_panel.png"
+    },
+    "player_name": {
+      "x": 714,
+      "y": 76,
+      "w": 200,
+      "h": 20,
+      "type": "anchor",
+      "template": "templates/world_map/player_name.png"
+    },
+    "vip_panel": {
+      "x": 642,
+      "y": 133,
+      "w": 30,
+      "h": 19,
+      "type": "button",
+      "template": "templates/world_map/vip_panel.png"
+    },
+    "hero_view": {
+      "x": 632,
+      "y": 55,
+      "w": 45,
+      "h": 59,
+      "type": "button",
+      "template": "templates/world_map/hero_view.png"
+    },
+    "hero_current_lvl": {
+      "x": 674,
+      "y": 46,
+      "w": 24,
+      "h": 25,
+      "type": "icon",
+      "template": "templates/world_map/hero_current_lvl.png"
+    },
+    "temple": {
+      "x": 914,
+      "y": 796,
+      "w": 46,
+      "h": 41,
+      "type": "button",
+      "template": "templates/world_map/temple.png"
+    },
+    "walls_to_renew": {
+      "x": 843,
+      "y": 806,
+      "w": 44,
+      "h": 41,
+      "type": "button",
+      "template": "templates/world_map/walls_to_renew.png"
+    },
+    "switch_to_city_mode": {
+      "x": 636,
+      "y": 916,
+      "w": 56,
+      "h": 50,
+      "type": "button",
+      "template": "templates/world_map/switch_to_city_mode.png"
+    },
+    "help_other_button": {
+      "x": 1263,
+      "y": 881,
+      "w": 31,
+      "h": 33,
+      "type": "button",
+      "template": "templates/world_map/help_other_button.png"
+    },
+    "increase_zoom_view": {
+      "x": 1879,
+      "y": 924,
+      "w": 26,
+      "h": 20,
+      "type": "button",
+      "template": "templates/world_map/increase_zoom_view.png"
+    },
+    "current_zoom_view": {
+      "x": 1828,
+      "y": 924,
+      "w": 46,
+      "h": 20,
+      "type": "anchor",
+      "template": "templates/world_map/current_zoom_view.png"
+    },
+    "decrease_zoom_view": {
+      "x": 1803,
+      "y": 924,
+      "w": 21,
+      "h": 20,
+      "type": "button",
+      "template": "templates/world_map/decrease_zoom_view.png"
+    },
+    "clan_view": {
+      "x": 995,
+      "y": 873,
+      "w": 42,
+      "h": 52,
+      "type": "button",
+      "template": "templates/world_map/clan_view.png"
+    },
+    "research_view": {
+      "x": 1068,
+      "y": 893,
+      "w": 38,
+      "h": 32,
+      "type": "button",
+      "template": "templates/world_map/research_view.png"
+    },
+    "items_view": {
+      "x": 1190,
+      "y": 891,
+      "w": 31,
+      "h": 38,
+      "type": "button",
+      "template": "templates/world_map/items_view.png"
+    },
+    "events_view": {
+      "x": 839,
+      "y": 904,
+      "w": 50,
+      "h": 21,
+      "type": "button",
+      "template": "templates/world_map/events_view.png"
+    },
+    "forge_view": {
+      "x": 783,
+      "y": 893,
+      "w": 42,
+      "h": 32,
+      "type": "button",
+      "template": "templates/world_map/forge_view.png"
+    },
+    "tasks_view": {
+      "x": 721,
+      "y": 901,
+      "w": 22,
+      "h": 24,
+      "type": "button",
+      "template": "templates/world_map/tasks_view.png"
+    },
+    "group_marches_placeholder": {
+      "x": 980,
+      "y": 793,
+      "w": 42,
+      "h": 42,
+      "type": "button",
+      "template": "templates/world_map/group_marches_placeholder.png"
+    }
+  },
+  "army_training": {
+    "current_trainin_army": {
+      "x": 649,
+      "y": 248,
+      "w": 610,
+      "h": 88,
+      "type": "anchor",
+      "template": "templates/army_training/current_trainin_army.png"
+    },
+    "troops_types": {
+      "x": 484,
+      "y": 255,
+      "w": 128,
+      "h": 387,
+      "type": "list",
+      "template": "templates/army_training/troops_types.png"
+    },
+    "unit_troop_level": {
+      "x": 646,
+      "y": 363,
+      "w": 21,
+      "h": 118,
+      "type": "list",
+      "template": "templates/army_training/unit_troop_level.png"
+    },
+    "speedup_panel": {
+      "x": 1080,
+      "y": 288,
+      "w": 129,
+      "h": 33,
+      "type": "button",
+      "template": "templates/army_training/speedup_panel.png"
+    },
+    "current_unit_troop_count": {
+      "x": 816,
+      "y": 581,
+      "w": 66,
+      "h": 32,
+      "type": "number",
+      "template": "templates/army_training/current_unit_troop_count.png"
+    },
+    "unit_troop_count_to_train": {
+      "x": 789,
+      "y": 621,
+      "w": 95,
+      "h": 26,
+      "type": "number",
+      "template": "templates/army_training/unit_troop_count_to_train.png"
+    },
+    "unit_troop_coount_scroll": {
+      "x": 652,
+      "y": 647,
+      "w": 232,
+      "h": 21,
+      "type": "anchor",
+      "template": "templates/army_training/unit_troop_coount_scroll.png"
+    },
+    "unit_troop_coount_scroll_button": {
+      "x": 853,
+      "y": 649,
+      "w": 27,
+      "h": 16,
+      "type": "button",
+      "template": "templates/army_training/unit_troop_coount_scroll_button.png"
+    },
+    "unit_troop_require_silver_to_train": {
+      "x": 662,
+      "y": 677,
+      "w": 91,
+      "h": 30,
+      "type": "number",
+      "template": "templates/army_training/unit_troop_require_silver_to_train.png"
+    },
+    "unit_troop_require_time_to_train": {
+      "x": 771,
+      "y": 676,
+      "w": 109,
+      "h": 29,
+      "type": "number",
+      "template": "templates/army_training/unit_troop_require_time_to_train.png"
+    },
+    "unit_troop_train_button": {
+      "x": 774,
+      "y": 712,
+      "w": 108,
+      "h": 35,
+      "type": "button",
+      "template": "templates/army_training/unit_troop_train_button.png"
+    },
+    "close_army_screen_button": {
+      "x": 1420,
+      "y": 242,
+      "w": 20,
+      "h": 27,
+      "type": "button",
+      "template": "templates/army_training/close_army_screen_button.png"
+    },
+    "unit_troop_food_production_load": {
+      "x": 661,
+      "y": 714,
+      "w": 89,
+      "h": 26,
+      "type": "number",
+      "template": "templates/army_training/unit_troop_food_production_load.png"
+    }
+  }
+}

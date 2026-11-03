@@ -1,0 +1,10 @@
+{
+  "default_min_confidence": 94.6,
+  "screens": {
+    "world_map": {}
+  },
+  "resource_ocr": {
+    "minimum_confidence": 70,
+    "food_color_min_pixels": 20
+  }
+}

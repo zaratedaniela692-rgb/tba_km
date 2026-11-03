@@ -5,7 +5,7 @@
 2. Jedno zadanie naraz, małe zmiany. Nie przepisuj działającego kodu przy okazji.
 3. Nie zgaduj współrzędnych na podstawie oglądania obrazu. Korzystaj z `regions.json` i szablonów. Jeśli brakuje zaznaczenia, poproś o jego przygotowanie w `tools/annotate.py`.
 4. Współrzędne zapisuj względem obszaru okna gry, nie całego ekranu. Rozdzielczość, DPI i rozmiar okna powinny być zapisane w `docs/game/konfiguracja.md`.
-5. Stałe symbole rozpoznawaj szablonami. OCR stosuj do zmiennych liczb i tekstów; przygotuj obraz i waliduj wynik.
+5. Stałe symbole rozpoznawaj szablonami, kadrując stabilny środek ikony/przycisku bez nadmiarowego, zmiennego tła. Jeśli kolor tła jest sygnałem stanu, obejmij szablonem tylko ten potrzebny obszar. OCR stosuj do zmiennych liczb i tekstów; przygotuj obraz i waliduj wynik.
 6. Koniec listy wykrywaj po braku zmiany obrazu po przewinięciu, nie po stałej liczbie przewinięć.
 7. Każdy flow modeluj jako maszynę stanów: stan, warunek rozpoznania, akcja, oczekiwany następny stan, limit czasu i obsługa błędu.
 8. Każdy flow powinien mieć tryb dry-run (loguje planowane kliknięcia bez ich wykonywania) i awaryjne zatrzymanie klawiszem.
@@ -18,14 +18,19 @@
 ## Założenia techniczne
 - Bot działa lokalnie i wizualnie: obraz gry -> rozpoznanie -> decyzja -> kliknięcie.
 - Rozpoznawanie stałych elementów odbywa się przez OpenCV template matching; OCR (Tesseract) służy do zmiennych tekstów i liczb.
+- Odczyt danych ze stanu gry projektuj jako funkcje niezależne od feature'ów: zwracają surową wartość, wynik normalizacji, kolor/pewność i czas odczytu, bez klikania ani decyzji biznesowych. Feature deklaruje potrzebne pola, waliduje je i dopiero wtedy podejmuje akcję.
+- Cache danych planuj per pole i per profil; szybko zmienne dane odczytuj przed użyciem, a stabilne unieważniaj po akcjach, które mogły je zmienić.
 - Nie analizujemy screenów modelem AI w czasie działania bota.
 - Nie odczytujemy pamięci procesu, nie przechwytujemy ruchu sieciowego, nie wstrzykujemy kodu i nie obchodzimy zabezpieczeń gry.
 - Gra ma dwa główne konteksty: mapa i armia. Mają różne ekrany i dostępne akcje; wspólne elementy interfejsu mogą współdzielić wzorce.
-- Logowanie i uruchamianie gry pozostaje po stronie użytkowniczki.
+- Docelowo bot ma obsługiwać co najmniej cztery okna gry, równolegle lub przez przełączanie. Każde okno/konto ma własny profil i izolowany stan: przechwycony obraz, rozpoznany tryb, parametry, wyniki OCR, cache i logi. Nie wolno mieszać danych ani akcji pomiędzy profilami.
+- Logowanie i uruchamianie gry pozostaje po stronie użytkowniczki; profile nie przechowują haseł.
 
 ## Struktura projektu
 - `automate.py` – istniejący wspólny mechanizm przechwytywania ekranu, dopasowywania wzorców, OCR i kliknięć.
 - `crypt.py`, `mines.py`, `watchtower_mines.py`, `login.py`, `troops.py`, `chest_counter.py` – istniejące skrypty automatyzujące poszczególne czynności.
+- `army_training_plan.py` – nieinteraktywny model planu zleceń szkolenia z trwałym zapisem per profil; nie wykonuje OCR ani kliknięć w grze.
+- `profiles/<profil>/army_training.json` – lokalny plan zleceń danego profilu. Nie przechowuje haseł i jest ignorowany przez Git.
 - `samples/` – istniejące wzorce używane przez aktualne skrypty. Nie przenoś ich ani nie zastępuj bez uzgodnienia.
 - `templates/<ekran>/` – nowe, opisane szablony elementów.
 - `regions.json` – obszary i elementy opisane współrzędnymi względem okna gry.
@@ -46,6 +51,9 @@ python .\crypt.py --help
 python .\crypt.py --type common --min-progress 50
 python .\mines.py --help
 python .\watchtower_mines.py --help
+python .\tools\verify.py --screen world_map --input .\tests\data\world_map
+python .\tools\resource_ocr.py --screen world_map --input .\tests\data\world_map
+python -m pytest
 python .\login.py .\credentials.json
 python .\troops.py .\troops.json
 python .\chest_counter.py

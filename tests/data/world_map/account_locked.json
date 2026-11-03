@@ -1,0 +1,15 @@
+{
+  "screen": "world_map",
+  "image": "account_locked.png",
+  "position_tolerance": 2,
+  "expected": {
+    "armia": {"visible": true, "position": [913, 879]},
+    "watchtower_locked": {"visible": true, "position": [672, 876]},
+    "watchtower_unlocked": {"visible": false},
+    "okno_wiadomości": {"visible": true, "position": [1220, 951]}
+  },
+  "resources": {
+    "food": {"raw": "13.8M", "value": 13800000, "color": "white"},
+    "silver": {"raw": "327M", "value": 327000000, "color": "white"}
+  }
+}

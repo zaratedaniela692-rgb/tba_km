@@ -3,6 +3,7 @@
 
 import argparse
 import base64
+import filecmp
 import json
 import math
 import os
@@ -10,6 +11,7 @@ import re
 import shutil
 import tempfile
 import tkinter as tk
+import unicodedata
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
@@ -35,6 +37,42 @@ def rect_to_region(start, end, scale, image_width, image_height):
     end_x = max(x + 1, min(image_width, math.ceil(right / scale - epsilon)))
     end_y = max(y + 1, min(image_height, math.ceil(bottom / scale - epsilon)))
     return {"x": x, "y": y, "w": end_x - x, "h": end_y - y}
+
+
+def ascii_slug(value):
+    value = value.replace("ł", "l").replace("Ł", "L")
+    normalized = unicodedata.normalize("NFKD", value)
+    ascii_value = normalized.encode("ascii", "ignore").decode("ascii")
+    slug = re.sub(r"[^A-Za-z0-9_-]+", "_", ascii_value).strip("_-")
+    if not slug:
+        raise ValueError("Nazwa nie zawiera znaków możliwych do użycia w nazwie pliku ASCII.")
+    return slug
+
+
+def screenshot_output_paths(image_path, screen_dir):
+    image_path = Path(image_path).resolve()
+    screen_dir = Path(screen_dir)
+    canonical_path = screen_dir / "pelny.png"
+
+    if image_path == canonical_path.resolve() or not canonical_path.exists():
+        return canonical_path, screen_dir / "opisany.png"
+
+    source_slug = ascii_slug(image_path.stem)
+    suffix = source_slug
+    index = 2
+    while True:
+        full_path = screen_dir / f"pelny_{suffix}.png"
+        if not full_path.exists():
+            break
+        try:
+            if filecmp.cmp(image_path, full_path, shallow=False):
+                break
+        except OSError:
+            pass
+        suffix = f"{source_slug}_{index}"
+        index += 1
+
+    return full_path, screen_dir / f"opisany_{suffix}.png"
 
 
 def load_regions(path):
@@ -64,8 +102,12 @@ class Annotator:
             raise ValueError(f"Nie można otworzyć obrazu PNG: {self.image_path}")
         self.image_height, self.image_width = self.image.shape[:2]
 
-        scale_x = MAX_PREVIEW_SIZE[0] / self.image_width
-        scale_y = MAX_PREVIEW_SIZE[1] / self.image_height
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        max_preview_width = max(320, min(MAX_PREVIEW_SIZE[0], screen_width - 40))
+        max_preview_height = max(240, min(MAX_PREVIEW_SIZE[1], screen_height - 210))
+        scale_x = max_preview_width / self.image_width
+        scale_y = max_preview_height / self.image_height
         self.preview_scale = min(1.0, scale_x, scale_y)
         self.preview_width = max(1, round(self.image_width * self.preview_scale))
         self.preview_height = max(1, round(self.image_height * self.preview_scale))
@@ -82,18 +124,23 @@ class Annotator:
 
         self._build_ui()
         self._draw_regions()
+        self.screen_name.trace_add("write", self._screen_name_changed)
         self.root.protocol("WM_DELETE_WINDOW", self.quit)
         self.root.bind_all("<KeyPress>", self._on_shortcut)
 
     def _build_ui(self):
         self.root.title("Total Battle - zaznaczanie elementów")
         self.root.geometry(f"{self.preview_width + 30}x{self.preview_height + 175}")
-        self.root.minsize(800, 500)
+        self.root.minsize(
+            min(800, self.root.winfo_screenwidth()),
+            min(500, self.root.winfo_screenheight()),
+        )
 
         fields = ttk.Frame(self.root, padding=(10, 8))
         fields.pack(fill="x")
         ttk.Label(fields, text="Ekran:").grid(row=0, column=0, sticky="w")
-        ttk.Entry(fields, textvariable=self.screen_name, width=22).grid(row=0, column=1, padx=(5, 16))
+        self.screen_entry = ttk.Entry(fields, textvariable=self.screen_name, width=22)
+        self.screen_entry.grid(row=0, column=1, padx=(5, 16))
         ttk.Label(fields, text="Nazwa elementu:").grid(row=0, column=2, sticky="w")
         self.name_entry = ttk.Entry(fields, textvariable=self.element_name, width=22)
         self.name_entry.grid(row=0, column=3, padx=(5, 16))
@@ -132,6 +179,9 @@ class Annotator:
     def _screen_regions(self):
         regions = self.regions.get(self.screen_name.get().strip(), {})
         return regions if isinstance(regions, dict) else {}
+
+    def _screen_name_changed(self, *_):
+        self._draw_regions()
 
     def _draw_box(self, region, number, color):
         x1 = round(region["x"] * self.preview_scale)
@@ -212,6 +262,12 @@ class Annotator:
         if not self._valid_identifier(name):
             messagebox.showerror("Nieprawidłowa nazwa", "Nazwa elementu może zawierać litery, cyfry, '_' i '-'.", parent=self.root)
             return False
+        try:
+            screen_slug = ascii_slug(screen)
+            name_slug = ascii_slug(name)
+        except ValueError as error:
+            messagebox.showerror("Nieprawidłowa nazwa", str(error), parent=self.root)
+            return False
         if self.selection is None:
             messagebox.showerror("Brak zaznaczenia", "Zaznacz prostokąt na obrazie.", parent=self.root)
             return False
@@ -219,6 +275,12 @@ class Annotator:
         existing = self._screen_regions()
         if name in existing or any(region["name"] == name for region in self.pending):
             messagebox.showerror("Nazwa zajęta", f"Element '{name}' już istnieje dla tego ekranu.", parent=self.root)
+            return False
+        if any(ascii_slug(existing_name).casefold() == name_slug.casefold() for existing_name in existing):
+            messagebox.showerror("Nazwa zajęta", "Ta nazwa koliduje z nazwą pliku istniejącego szablonu.", parent=self.root)
+            return False
+        if any(ascii_slug(region["name"]).casefold() == name_slug.casefold() for region in self.pending):
+            messagebox.showerror("Nazwa zajęta", "Ta nazwa koliduje z nazwą pliku innego oczekującego szablonu.", parent=self.root)
             return False
 
         x1, y1, x2, y2 = self.selection
@@ -232,9 +294,10 @@ class Annotator:
         region.update({
             "name": name,
             "type": self.element_type.get(),
-            "template": f"templates/{screen}/{name}.png",
+            "template": f"templates/{screen_slug}/{name_slug}.png",
         })
         self.pending.append(region)
+        self.screen_entry.configure(state="disabled")
         self.selection = None
         self.element_name.set("")
         self._draw_regions()
@@ -245,6 +308,8 @@ class Annotator:
             self.selection = None
         elif self.pending:
             self.pending.pop()
+            if not self.pending:
+                self.screen_entry.configure(state="normal")
         else:
             return
         self._draw_regions()
@@ -285,18 +350,10 @@ class Annotator:
             return False
 
         screen = self.screen_name.get().strip()
-        screen_dir = ROOT_DIR / "screenshots" / screen
-        template_dir = ROOT_DIR / "templates" / screen
-        full_path = screen_dir / "pelny.png"
-        annotated_path = screen_dir / "opisany.png"
-        if full_path.exists() and full_path.resolve() != self.image_path:
-            replace = messagebox.askyesno(
-                "Zastąpić screen?",
-                f"{full_path.relative_to(ROOT_DIR)} już istnieje. Zastąpić go wybranym obrazem?",
-                parent=self.root,
-            )
-            if not replace:
-                return False
+        screen_slug = ascii_slug(screen)
+        screen_dir = ROOT_DIR / "screenshots" / screen_slug
+        template_dir = ROOT_DIR / "templates" / screen_slug
+        full_path, annotated_path = screenshot_output_paths(self.image_path, screen_dir)
 
         screen_dir.mkdir(parents=True, exist_ok=True)
         template_dir.mkdir(parents=True, exist_ok=True)
@@ -341,6 +398,7 @@ class Annotator:
 
         self.regions = updated_regions
         self.pending.clear()
+        self.screen_entry.configure(state="normal")
         self._draw_regions()
         messagebox.showinfo("Zapisano", f"Zapisano {len(screen_regions)} elementów dla ekranu '{screen}'.", parent=self.root)
         return True
