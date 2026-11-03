@@ -15,6 +15,7 @@ TEST_DATA_DIR = ROOT_DIR / "tests" / "data" / "world_map"
     ("text", "expected"),
     [
         ("38.2M", 38200000),
+        ("2.09M", 2090000),
         ("38,2M", 38200000),
         ("567M", 567000000),
         ("1K", 1000),

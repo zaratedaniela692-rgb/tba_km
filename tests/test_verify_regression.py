@@ -45,3 +45,22 @@ def test_template_detections_match_expected_regions(expected_path):
             assert abs(actual_y - expected_y) <= tolerance, (
                 f"{expected_path.name}: {name} y={actual_y}, expected {expected_y} +/- {tolerance}"
             )
+
+
+def test_numeric_regions_are_not_loaded_as_templates():
+    regions = json.loads(REGIONS_PATH.read_text(encoding="utf-8"))
+    config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    screen_regions = regions["world_map"]
+    numeric_names = {
+        name for name, region in screen_regions.items()
+        if region.get("type") == "number"
+    }
+
+    templates = load_templates(regions, "world_map", config)
+    template_names = {name for name, _, _, _ in templates}
+
+    assert numeric_names == {
+        "wood_count", "iron_count", "stone_count",
+        "food_count", "silver_count", "gold_count",
+    }
+    assert numeric_names.isdisjoint(template_names)

@@ -7,6 +7,7 @@ from army_training_plan import (
     TrainingPlanError,
     confirm_active_order_run_completed,
     create_guard_training_plan,
+    get_active_training_target,
     load_plan,
     profile_plan_path,
     record_training_check,
@@ -19,22 +20,28 @@ from army_training_scanner import read_army_training_snapshot
 BASE_TIME = datetime(2026, 11, 2, 12, 0, tzinfo=timezone.utc)
 
 
-def test_guard_plan_contains_six_orders_and_nine_runs():
+def test_guard_plan_contains_six_slot_targets_and_nine_runs():
     plan = create_guard_training_plan("account-a")
 
     assert len(plan["orders"]) == 6
     assert sum(order["requested_runs"] for order in plan["orders"]) == 9
-    assert "flying" not in {order["unit_type"] for order in plan["orders"]}
-    for unit_type in ("archers", "spearmen", "cavalry"):
-        orders = [order for order in plan["orders"] if order["unit_type"] == unit_type]
-        assert [(order["global_level"], order["requested_runs"]) for order in orders] == [(5, 1), (4, 2)]
+    assert [(order["global_level"], order["match_number"], order["requested_runs"]) for order in plan["orders"]] == [
+        (5, 1, 1),
+        (4, 1, 2),
+        (5, 2, 1),
+        (4, 2, 2),
+        (5, 3, 1),
+        (4, 3, 2),
+    ]
+    assert all("unit_type" not in order for order in plan["orders"])
 
 
 def test_only_one_order_can_be_active():
     plan = create_guard_training_plan("account-a")
     first = start_next_order(plan, BASE_TIME)
 
-    assert first["order_id"] == "archers_level_5"
+    assert first["order_id"] == "level_5_match_1"
+    assert get_active_training_target(plan) == {"global_level": 5, "match_number": 1}
     assert start_next_order(plan, BASE_TIME + timedelta(minutes=1)) is None
     assert record_training_check(plan, BASE_TIME + timedelta(minutes=30)) == (
         BASE_TIME + timedelta(minutes=75)
@@ -49,7 +56,8 @@ def test_repeat_order_requires_two_confirmed_completions_and_reset_delay():
     lower_order = start_next_order(plan, BASE_TIME + timedelta(minutes=10, seconds=4))
     assert lower_order is None
     lower_order = start_next_order(plan, BASE_TIME + timedelta(minutes=10, seconds=5))
-    assert lower_order["order_id"] == "archers_level_4"
+    assert lower_order["order_id"] == "level_4_match_1"
+    assert get_active_training_target(plan) == {"global_level": 4, "match_number": 1}
 
     first_run = confirm_active_order_run_completed(plan, BASE_TIME + timedelta(minutes=20))
     assert first_run["completed_runs"] == 1

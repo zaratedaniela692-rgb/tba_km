@@ -78,7 +78,11 @@ def load_templates(regions, screen, config):
 
     templates = []
     for name, region in screens.items():
-        if not isinstance(region, dict) or "template" not in region:
+        if not isinstance(region, dict):
+            raise VerificationError(f"Brak poprawnego wpisu lub ścieżki template dla elementu '{name}'.")
+        if region.get("type") == "number":
+            continue
+        if "template" not in region:
             raise VerificationError(f"Brak poprawnego wpisu lub ścieżki template dla elementu '{name}'.")
         template_path = Path(region["template"])
         if not template_path.is_absolute():

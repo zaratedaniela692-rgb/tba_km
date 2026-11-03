@@ -17,6 +17,7 @@ Regiony pochodzą z `regions.json`; współrzędne odnoszą się do obszaru gry 
 ### Zasoby i tożsamość
 - `wood`, `iron`, `stone`, `food`, `silver`, `gold` – ikony zasobów, kandydaci na stabilne szablony.
 - `wood_count`, `iron_count`, `stone_count`, `food_count`, `silver_count`, `gold_count` – zmienne wartości liczbowe. W szkoleniu armii wymagane będą przede wszystkim `food_count` i `silver_count`, odczytane OCR bezpośrednio przed działaniem.
+- The template verifier skips regions with `type: number`; resource values are checked through `tools/resource_ocr.py`, not fixed-image matching.
 - Dla szkolenia: `food_count` może blokować rekrutację zależnie od koloru tekstu: biały i wartość > 0 pozwalają kontynuować; czerwony, zero lub niepewny odczyt oznaczają stop i komunikat. To kolor tekstu wartości, nie kolor tła.
 - Liczniki używają sufiksów `K/M/B/T` o kolejnych potęgach 1000; `38.2M` oznacza `38 200 000`. Wartości są zmienne i nie powinny być rozpoznawane przez template matching.
 - `tools/resource_ocr.py` odczytuje wszystkie sześć liczników z PNG bez klikania i zwraca ich pomiary bez decyzji feature'owych. Oczekiwane wartości i testy regresji skupiają się obecnie na `food_count` i `silver_count`. Na obu dostępnych screenach food ma biały tekst; nie mamy jeszcze rzeczywistego screena z czerwonym tekstem food.
@@ -75,3 +76,4 @@ Pozostałe rozpoznane wzrokowo części ekranu, które nie są jeszcze regionami
 - 2026-10-31 – próba dymna `verify.py` dopasowała wszystkie trzy szablony z wynikiem 100% na `pelny.png` i `zrzut_pulpitu.png`; w pełnym zrzucie pulpitu pozycje mają przesunięcie Y o 39 px względem kadru klienta. `opisany.png` wypada poniżej progu, bo ramki i etykiety zmieniają piksele szablonów.
 - 2026-11-02 – szkolenie armii nie wymaga przejścia do trybu miasta; zasoby odczytujemy z bieżącego ekranu mapy.
 - 2026-11-02 – rekrutacja dozwolona tylko przy białym tekście `food_count` i wartości większej od zera; czerwony, zero lub niepewny odczyt oznaczają komunikat i przerwanie. Akcja naprawiająca czerwony stan będzie osobnym, późniejszym flow.
+- 2026-11-03 – Numeric resource regions are excluded from template matching because their displayed values vary between accounts; OCR remains the validation path.

@@ -30,7 +30,10 @@
 - `automate.py` – istniejący wspólny mechanizm przechwytywania ekranu, dopasowywania wzorców, OCR i kliknięć.
 - `crypt.py`, `mines.py`, `watchtower_mines.py`, `login.py`, `troops.py`, `chest_counter.py` – istniejące skrypty automatyzujące poszczególne czynności.
 - `army_training_plan.py` – nieinteraktywny model planu zleceń szkolenia z trwałym zapisem per profil; nie wykonuje OCR ani kliknięć w grze.
+- `task_controller.py` – persistent typed task queue and lifecycle state per profile; does not perform OCR or game clicks.
+- Current integration scope is army training only. Building upgrades and academy research may remain represented as task types, but do not implement or connect their game flows until requested.
 - `profiles/<profil>/army_training.json` – lokalny plan zleceń danego profilu. Nie przechowuje haseł i jest ignorowany przez Git.
+- `profiles/<profil>/tasks.json` – persistent task queue for one profile; it does not store passwords and is ignored by Git.
 - `samples/` – istniejące wzorce używane przez aktualne skrypty. Nie przenoś ich ani nie zastępuj bez uzgodnienia.
 - `templates/<ekran>/` – nowe, opisane szablony elementów.
 - `regions.json` – obszary i elementy opisane współrzędnymi względem okna gry.

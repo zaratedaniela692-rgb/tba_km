@@ -12,10 +12,12 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent
 PROFILES_DIR = ROOT_DIR / "profiles"
-PLAN_SCHEMA_VERSION = 1
+PLAN_SCHEMA_VERSION = 2
 DEFAULT_CHECK_INTERVAL_SECONDS = 45 * 60
 RESET_DELAY_SECONDS = 5
-DEFAULT_GUARD_TYPES = ("archers", "spearmen", "cavalry")
+MATCH_COUNTS_BY_LEVEL = {**{level: 3 for level in range(1, 5)}, **{level: 4 for level in range(5, 10)}}
+DEFAULT_GUARD_LEVELS = ((5, 1), (4, 2))
+DEFAULT_GUARD_MATCH_COUNT = 3
 ORDER_STATUSES = {"pending", "active", "completed"}
 
 
@@ -61,23 +63,16 @@ def create_guard_training_plan(profile_id, check_interval_seconds=DEFAULT_CHECK_
         raise TrainingPlanError("profile_id musi być niepustym tekstem.")
 
     orders = []
-    for unit_type in DEFAULT_GUARD_TYPES:
-        orders.append({
-            "order_id": f"{unit_type}_level_5",
-            "unit_type": unit_type,
-            "global_level": 5,
-            "requested_runs": 1,
-            "completed_runs": 0,
-            "status": "pending",
-        })
-        orders.append({
-            "order_id": f"{unit_type}_level_4",
-            "unit_type": unit_type,
-            "global_level": 4,
-            "requested_runs": 2,
-            "completed_runs": 0,
-            "status": "pending",
-        })
+    for match_number in range(1, DEFAULT_GUARD_MATCH_COUNT + 1):
+        for global_level, requested_runs in DEFAULT_GUARD_LEVELS:
+            orders.append({
+                "order_id": f"level_{global_level}_match_{match_number}",
+                "global_level": global_level,
+                "match_number": match_number,
+                "requested_runs": requested_runs,
+                "completed_runs": 0,
+                "status": "pending",
+            })
 
     plan = {
         "schema_version": PLAN_SCHEMA_VERSION,
@@ -119,17 +114,21 @@ def validate_plan(plan, expected_profile_id=None):
         if not isinstance(order, dict):
             raise TrainingPlanError("Każde zlecenie musi być obiektem JSON.")
         order_id = order.get("order_id")
-        unit_type = order.get("unit_type")
         global_level = order.get("global_level")
+        match_number = order.get("match_number")
         requested_runs = order.get("requested_runs")
         completed_runs = order.get("completed_runs")
         status = order.get("status")
         if not isinstance(order_id, str) or not order_id or order_id in order_ids:
             raise TrainingPlanError(f"Nieprawidłowe lub powtórzone order_id: {order_id!r}")
-        if not isinstance(unit_type, str) or not unit_type:
-            raise TrainingPlanError(f"Nieprawidłowy unit_type dla {order_id}.")
-        if isinstance(global_level, bool) or not isinstance(global_level, int) or global_level <= 0:
+        if isinstance(global_level, bool) or not isinstance(global_level, int) or global_level not in MATCH_COUNTS_BY_LEVEL:
             raise TrainingPlanError(f"Nieprawidłowy global_level dla {order_id}.")
+        if (
+            isinstance(match_number, bool)
+            or not isinstance(match_number, int)
+            or not 1 <= match_number <= MATCH_COUNTS_BY_LEVEL[global_level]
+        ):
+            raise TrainingPlanError(f"Nieprawidłowy match_number dla {order_id}.")
         if isinstance(requested_runs, bool) or not isinstance(requested_runs, int) or requested_runs <= 0:
             raise TrainingPlanError(f"Nieprawidłowy requested_runs dla {order_id}.")
         if isinstance(completed_runs, bool) or not isinstance(completed_runs, int) or not 0 <= completed_runs <= requested_runs:
@@ -198,6 +197,19 @@ def start_next_order(plan, now=None):
     plan["next_check_at"] = (current_time + timedelta(seconds=plan["check_interval_seconds"])).isoformat()
     plan["not_before_next_order_at"] = None
     return dict(order)
+
+
+def get_active_training_target(plan):
+    """Return only the single level/slot target for the active training run."""
+    validate_plan(plan)
+    active_order_id = plan["active_order_id"]
+    if active_order_id is None:
+        raise TrainingPlanError("Brak aktywnego zlecenia do wykonania.")
+    order = next(item for item in plan["orders"] if item["order_id"] == active_order_id)
+    return {
+        "global_level": order["global_level"],
+        "match_number": order["match_number"],
+    }
 
 
 def record_training_check(plan, now=None):
