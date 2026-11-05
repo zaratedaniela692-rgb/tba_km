@@ -13,13 +13,18 @@ import tempfile
 import tkinter as tk
 import unicodedata
 from pathlib import Path
+import sys
 from tkinter import filedialog, messagebox, ttk
 
 import cv2
 
-
 ROOT_DIR = Path(__file__).resolve().parents[1]
-REGIONS_PATH = ROOT_DIR / "regions.json"
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from ui_variants import UIVariantError, resolve_asset_path, resolve_variant
+
+
 ELEMENT_TYPES = ("button", "list", "number", "icon", "anchor")
 MAX_PREVIEW_SIZE = (1150, 650)
 
@@ -86,16 +91,18 @@ def load_regions(path):
 
 
 class Annotator:
-    def __init__(self, root, image_path, screen_name=""):
+    def __init__(self, root, image_path, screen_name="", variant_id=None):
         self.root = root
         self.image_path = Path(image_path).resolve()
+        self.variant = resolve_variant(variant_id)
+        self.regions_path = self.variant["regions"]
         self.screen_name = tk.StringVar(value=screen_name)
         self.element_name = tk.StringVar()
         self.element_type = tk.StringVar(value="button")
         self.pending = []
         self.selection = None
         self.drag_origin = None
-        self.regions = load_regions(REGIONS_PATH)
+        self.regions = load_regions(self.regions_path)
 
         self.image = cv2.imread(str(self.image_path), cv2.IMREAD_COLOR)
         if self.image is None:
@@ -294,7 +301,7 @@ class Annotator:
         region.update({
             "name": name,
             "type": self.element_type.get(),
-            "template": f"templates/{screen_slug}/{name_slug}.png",
+            "template": (self.variant["templates"] / screen_slug / f"{name_slug}.png").relative_to(ROOT_DIR).as_posix(),
         })
         self.pending.append(region)
         self.screen_entry.configure(state="disabled")
@@ -329,12 +336,12 @@ class Annotator:
         return "break"
 
     def _save_regions_json(self, regions):
-        fd, temp_name = tempfile.mkstemp(prefix="regions-", suffix=".json", dir=ROOT_DIR)
+        fd, temp_name = tempfile.mkstemp(prefix="regions-", suffix=".json", dir=self.regions_path.parent)
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as file:
                 json.dump(regions, file, ensure_ascii=False, indent=2)
                 file.write("\n")
-            os.replace(temp_name, REGIONS_PATH)
+            os.replace(temp_name, self.regions_path)
         except Exception:
             try:
                 os.unlink(temp_name)
@@ -351,8 +358,8 @@ class Annotator:
 
         screen = self.screen_name.get().strip()
         screen_slug = ascii_slug(screen)
-        screen_dir = ROOT_DIR / "screenshots" / screen_slug
-        template_dir = ROOT_DIR / "templates" / screen_slug
+        screen_dir = self.variant["screenshots"] / screen_slug
+        template_dir = self.variant["templates"] / screen_slug
         full_path, annotated_path = screenshot_output_paths(self.image_path, screen_dir)
 
         screen_dir.mkdir(parents=True, exist_ok=True)
@@ -377,7 +384,7 @@ class Annotator:
             name = region["name"]
             x, y, width, height = (region[key] for key in ("x", "y", "w", "h"))
             crop = self.image[y:y + height, x:x + width]
-            template_path = ROOT_DIR / region["template"]
+            template_path = resolve_asset_path(self.variant, region["template"])
             if crop.size == 0 or not cv2.imwrite(str(template_path), crop):
                 messagebox.showerror("Błąd zapisu", f"Nie udało się zapisać wzorca: {template_path}", parent=self.root)
                 return False
@@ -421,6 +428,7 @@ def main():
     parser = argparse.ArgumentParser(description="Zaznaczaj elementy ekranu i zapisuj ich szablony.")
     parser.add_argument("--image", help="ścieżka do wejściowego screena PNG; bez opcji otworzy się wybór pliku")
     parser.add_argument("--screen", default="", help="nazwa ekranu do wstępnego wpisania w oknie")
+    parser.add_argument("--variant", help="wariant interfejsu; domyślnie legacy")
     args = parser.parse_args()
 
     root = tk.Tk()
@@ -436,8 +444,8 @@ def main():
         return
 
     try:
-        app = Annotator(root, image_path, args.screen)
-    except (OSError, ValueError, json.JSONDecodeError) as error:
+        app = Annotator(root, image_path, args.screen, args.variant)
+    except (OSError, ValueError, json.JSONDecodeError, UIVariantError) as error:
         messagebox.showerror("Nie można uruchomić narzędzia", str(error), parent=root)
         root.destroy()
         return

@@ -14,8 +14,10 @@
 11. Wiedzę z poprawek użytkowniczki dopisz do karty ekranu w sekcji „Wiedza z poprawek” lub do `docs/game/mechaniki.md`.
 12. Nie czytaj całych folderów `debug/` ani `screenshots/`. Poproś o konkretne pliki.
 13. Po zakończonym kroku zaproponuj commit z opisem. Nie rób push bez zgody.
+14. Before implementing a behavior or algorithm change, update its authoritative workflow document with the agreed terms, algorithm/diagram, confirmed facts versus assumptions, uncertain/deferred cases, current code status, and expected tests. Keep that document synchronized with code and tests as behavior changes. Present the contract and implementation plan for explicit user approval before changing code; do not promote an assumed visual candidate to verified game state.
 
 ## Założenia techniczne
+- Plan obsługi klienta desktopowego i przeglądarkowego znajduje się w `docs/game/ui_variants_plan.md`. Obecna aplikacja desktopowa ma zachować działający UI bez zmian; nowy UI przeglądarkowy wymaga osobnych screenów, regionów i szablonów. Traktuj plan jako niezaimplementowane wymaganie; przed wdrożeniem obsługi przeglądarki uzyskaj zgodę użytkowniczki i nie kopiuj współrzędnych ani wzorców desktopowych.
 - Bot działa lokalnie i wizualnie: obraz gry -> rozpoznanie -> decyzja -> kliknięcie.
 - Rozpoznawanie stałych elementów odbywa się przez OpenCV template matching; OCR (Tesseract) służy do zmiennych tekstów i liczb.
 - Odczyt danych ze stanu gry projektuj jako funkcje niezależne od feature'ów: zwracają surową wartość, wynik normalizacji, kolor/pewność i czas odczytu, bez klikania ani decyzji biznesowych. Feature deklaruje potrzebne pola, waliduje je i dopiero wtedy podejmuje akcję.

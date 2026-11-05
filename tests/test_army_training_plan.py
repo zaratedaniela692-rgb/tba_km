@@ -7,6 +7,7 @@ from army_training_plan import (
     TrainingPlanError,
     confirm_active_order_run_completed,
     create_guard_training_plan,
+    evaluate_slot_replenishment,
     get_active_training_target,
     load_plan,
     profile_plan_path,
@@ -18,6 +19,72 @@ from army_training_scanner import read_army_training_snapshot
 
 
 BASE_TIME = datetime(2026, 11, 2, 12, 0, tzinfo=timezone.utc)
+
+
+def test_slot_replenishment_uses_eighty_percent_of_its_own_reference_limit():
+    result = evaluate_slot_replenishment(
+        global_level=5,
+        match_number=1,
+        highest_unlocked_level=5,
+        current_troop_count=1600,
+        current_count_confidence=96,
+        queue_limits_by_level={4: 1000, 5: 700},
+        training_level=5,
+    )
+
+    assert result == {
+        "status": "satisfied",
+        "slot": {"global_level": 5, "match_number": 1},
+        "highest_unlocked_level": 5,
+        "reference_level": 4,
+        "training_level": 5,
+        "current_troop_count": 1600,
+        "reference_queue_limit": 1000,
+        "selected_level_queue_limit": 700,
+        "target_count": 2000,
+        "completion_count": 1600,
+        "remaining_count": 400,
+        "count_confidence": 96,
+        "minimum_count_confidence": 70,
+        "count_confidence_ok": True,
+        "recommended_training_count": 0,
+    }
+
+
+def test_slot_replenishment_caps_order_by_gap_and_slot_specific_queue_limit():
+    near_goal = evaluate_slot_replenishment(5, 1, 5, 1599, 96, {4: 1000, 5: 700}, 5)
+    large_gap = evaluate_slot_replenishment(5, 1, 5, 0, 96, {4: 1000, 5: 700}, 5)
+    other_slot = evaluate_slot_replenishment(5, 2, 5, 0, 96, {4: 500, 5: 300}, 5)
+
+    assert near_goal["status"] == "replenish"
+    assert near_goal["recommended_training_count"] == 401
+    assert large_gap["recommended_training_count"] == 700
+    assert other_slot["target_count"] == 1000
+    assert other_slot["recommended_training_count"] == 300
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        (5, 1, 5, -1, 96, {4: 100, 5: 50}, 5),
+        (5, 1, 1, 0, 96, {1: 50}, 1),
+        (5, 1, 5, 0, 96, {5: 0}, 5),
+        (5, 1, 5, True, 96, {4: 100, 5: 50}, 5),
+        (5, 1, 5, 0, 96, {5: 50}, 5),
+    ],
+)
+def test_slot_replenishment_rejects_invalid_counts_and_limits(arguments):
+    with pytest.raises(TrainingPlanError):
+        evaluate_slot_replenishment(*arguments)
+
+
+def test_slot_replenishment_does_not_decide_from_uncertain_ocr():
+    result = evaluate_slot_replenishment(5, 1, 5, 1600, 69, {4: 1000, 5: 700}, 5)
+
+    assert result["status"] == "uncertain"
+    assert result["count_confidence_ok"] is False
+    assert result["remaining_count"] is None
+    assert result["recommended_training_count"] == 0
 
 
 def test_guard_plan_contains_six_slot_targets_and_nine_runs():
@@ -89,5 +156,30 @@ def test_army_training_snapshot_detects_active_training_and_speedup_button():
 
     assert snapshot["has_active_training"] is True
     assert snapshot["speedup_button_detected"] is True
-    assert snapshot["queue_count"] is not None
-    assert isinstance(snapshot["queue_count"], int)
+    assert snapshot["status"] == "active"
+    assert isinstance(snapshot["trained_unit_count_raw"], str)
+    if snapshot["trained_unit_count"] is not None:
+        assert isinstance(snapshot["trained_unit_count"], int)
+        assert isinstance(snapshot["trained_unit_count_confidence"], float)
+        assert 0 <= snapshot["trained_unit_count_confidence"] <= 100
+
+
+def test_army_training_snapshot_detects_empty_queue_from_unit_image():
+    image_path = Path(__file__).resolve().parents[1] / "screenshots" / "army_training" / "pelny_army_training_empty_queue.png"
+
+    snapshot = read_army_training_snapshot(image_path)
+
+    assert snapshot["has_active_training"] is False
+    assert snapshot["status"] == "idle"
+    assert snapshot["training_unit_image_detail"] < 8
+
+
+@pytest.mark.parametrize("image_name", ("army_training1.png", "army_training3.png", "army_training4.png"))
+def test_army_training_snapshot_detects_active_unit_image(image_name):
+    image_path = Path(__file__).resolve().parents[1] / "templates" / image_name
+
+    snapshot = read_army_training_snapshot(image_path)
+
+    assert snapshot["has_active_training"] is True
+    assert snapshot["status"] == "active"
+    assert snapshot["training_unit_image_detail"] >= 20

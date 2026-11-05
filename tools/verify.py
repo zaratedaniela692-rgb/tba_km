@@ -11,11 +11,15 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-
 ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from ui_variants import UIVariantError, resolve_asset_path, resolve_variant
+
+
 REGIONS_PATH = ROOT_DIR / "regions.json"
 CONFIG_PATH = ROOT_DIR / "config.json"
-OUTPUT_DIR = ROOT_DIR / "debug" / "verify"
 
 
 class VerificationError(Exception):
@@ -71,7 +75,7 @@ def get_threshold(config, screen, element):
     return validate_threshold(screen_config[element], f"screens.{screen}.{element}")
 
 
-def load_templates(regions, screen, config):
+def load_templates(regions, screen, config, variant=None):
     screens = regions.get(screen)
     if not isinstance(screens, dict) or not screens:
         raise VerificationError(f"Brak elementów dla ekranu '{screen}' w regions.json.")
@@ -84,9 +88,7 @@ def load_templates(regions, screen, config):
             continue
         if "template" not in region:
             raise VerificationError(f"Brak poprawnego wpisu lub ścieżki template dla elementu '{name}'.")
-        template_path = Path(region["template"])
-        if not template_path.is_absolute():
-            template_path = ROOT_DIR / template_path
+        template_path = resolve_asset_path(variant or resolve_variant(), region["template"])
         template = read_image(template_path)
         threshold = get_threshold(config, screen, name)
         templates.append((name, region, template, threshold))
@@ -162,7 +164,7 @@ def add_legend(image, results):
     return output
 
 
-def verify_image(image_path, screen, templates):
+def verify_image(image_path, screen, templates, output_dir=None):
     image = read_image(image_path)
     output = image.copy()
     results = []
@@ -178,26 +180,28 @@ def verify_image(image_path, screen, templates):
         })
 
     output = add_legend(output, results)
-    output_path = OUTPUT_DIR / screen / image_path.name
+    output_path = (output_dir or ROOT_DIR / "debug" / "verify" / "legacy") / screen / image_path.name
     write_image(output_path, output)
     return results, output_path
 
 
-def run(screen, input_dir, regions_path=REGIONS_PATH, config_path=CONFIG_PATH):
+def run(screen, input_dir, regions_path=None, config_path=CONFIG_PATH, variant_id=None):
     if not input_dir.is_dir():
         raise VerificationError(f"Folder wejściowy nie istnieje: {input_dir}")
 
+    variant = resolve_variant(variant_id)
+    regions_path = Path(regions_path) if regions_path is not None else variant["regions"]
     regions = load_json(regions_path, "regions.json")
     config = load_json(config_path, "config.json")
     if not isinstance(regions, dict) or not isinstance(config, dict):
         raise VerificationError("regions.json i config.json muszą zawierać obiekty JSON.")
-    templates = load_templates(regions, screen, config)
+    templates = load_templates(regions, screen, config, variant)
     inputs = sorted(path for path in input_dir.iterdir() if path.is_file() and path.suffix.lower() == ".png")
     if not inputs:
         raise VerificationError(f"Nie znaleziono plików PNG w folderze: {input_dir}")
 
     for image_path in inputs:
-        results, output_path = verify_image(image_path, screen, templates)
+        results, output_path = verify_image(image_path, screen, templates, variant["verification_output"])
         print(f"\n{image_path.name}")
         for item in results:
             confidence = "brak" if item["confidence"] is None else f"{item['confidence']:.1f}%"
@@ -213,13 +217,14 @@ def main():
     parser = argparse.ArgumentParser(description="Weryfikuj szablony ekranu na zrzutach PNG.")
     parser.add_argument("--screen", required=True, help="nazwa ekranu z regions.json")
     parser.add_argument("--input", required=True, help="folder zawierający wejściowe pliki PNG")
-    parser.add_argument("--regions", default=str(REGIONS_PATH), help="ścieżka do regions.json")
+    parser.add_argument("--variant", help="wariant interfejsu; domyślnie legacy")
+    parser.add_argument("--regions", help="nadpisz ścieżkę do regions.json dla wybranego wariantu")
     parser.add_argument("--config", default=str(CONFIG_PATH), help="ścieżka do config.json z progami")
     args = parser.parse_args()
 
     try:
-        run(args.screen, Path(args.input), Path(args.regions), Path(args.config))
-    except VerificationError as error:
+        run(args.screen, Path(args.input), args.regions, Path(args.config), args.variant)
+    except (VerificationError, UIVariantError) as error:
         print(f"Błąd: {error}", file=sys.stderr)
         return 2
     return 0

@@ -1,0 +1,21 @@
+{
+  "default_variant": "legacy",
+  "variants": {
+    "legacy": {
+      "status": "ready",
+      "regions": "regions.json",
+      "templates": "templates",
+      "screenshots": "screenshots",
+      "tests": "tests",
+      "verification_output": "debug/verify"
+    },
+    "modern": {
+      "status": "planned",
+      "regions": null,
+      "templates": null,
+      "screenshots": null,
+      "tests": null,
+      "verification_output": null
+    }
+  }
+}

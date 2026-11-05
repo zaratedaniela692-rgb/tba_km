@@ -18,11 +18,116 @@ RESET_DELAY_SECONDS = 5
 MATCH_COUNTS_BY_LEVEL = {**{level: 3 for level in range(1, 5)}, **{level: 4 for level in range(5, 10)}}
 DEFAULT_GUARD_LEVELS = ((5, 1), (4, 2))
 DEFAULT_GUARD_MATCH_COUNT = 3
+TARGET_QUEUE_LIMIT_MULTIPLIER = 2
+TARGET_COMPLETION_PERCENT = 80
+MIN_TROOP_COUNT_OCR_CONFIDENCE = 70
 ORDER_STATUSES = {"pending", "active", "completed"}
 
 
 class TrainingPlanError(ValueError):
     """Raised when a profile training plan is invalid or has an invalid transition."""
+
+
+def evaluate_slot_replenishment(
+    global_level,
+    match_number,
+    highest_unlocked_level,
+    current_troop_count,
+    current_count_confidence,
+    queue_limits_by_level,
+    training_level,
+    min_count_confidence=MIN_TROOP_COUNT_OCR_CONFIDENCE,
+):
+    """Evaluate one unit slot using its observed limits, without identifying its name."""
+    if isinstance(global_level, bool) or not isinstance(global_level, int) or global_level not in MATCH_COUNTS_BY_LEVEL:
+        raise TrainingPlanError("global_level musi wskazywać poprawny poziom globalny.")
+    if (
+        isinstance(match_number, bool)
+        or not isinstance(match_number, int)
+        or not 1 <= match_number <= MATCH_COUNTS_BY_LEVEL[global_level]
+    ):
+        raise TrainingPlanError("match_number musi wskazywać poprawny slot dla global_level.")
+    if (
+        isinstance(highest_unlocked_level, bool)
+        or not isinstance(highest_unlocked_level, int)
+        or highest_unlocked_level < 2
+    ):
+        raise TrainingPlanError("highest_unlocked_level musi wynosić co najmniej 2.")
+    if (
+        isinstance(training_level, bool)
+        or not isinstance(training_level, int)
+        or not 1 <= training_level <= highest_unlocked_level
+    ):
+        raise TrainingPlanError("training_level musi być odblokowanym poziomem tego slotu.")
+    if not isinstance(queue_limits_by_level, dict):
+        raise TrainingPlanError("queue_limits_by_level musi być mapą poziomów i limitów.")
+    if current_troop_count is not None and (
+        isinstance(current_troop_count, bool)
+        or not isinstance(current_troop_count, int)
+        or current_troop_count < 0
+    ):
+        raise TrainingPlanError("current_troop_count musi być nieujemną liczbą całkowitą albo None.")
+    if current_count_confidence is not None and (
+        isinstance(current_count_confidence, bool)
+        or not isinstance(current_count_confidence, (int, float))
+        or not 0 <= current_count_confidence <= 100
+    ):
+        raise TrainingPlanError("current_count_confidence musi należeć do zakresu 0-100 albo być None.")
+    if (
+        isinstance(min_count_confidence, bool)
+        or not isinstance(min_count_confidence, (int, float))
+        or not 0 <= min_count_confidence <= 100
+    ):
+        raise TrainingPlanError("min_count_confidence musi należeć do zakresu 0-100.")
+
+    reference_level = highest_unlocked_level - 1
+    reference_queue_limit = queue_limits_by_level.get(reference_level)
+    selected_level_queue_limit = queue_limits_by_level.get(training_level)
+    values = {
+        "reference_queue_limit": reference_queue_limit,
+        "selected_level_queue_limit": selected_level_queue_limit,
+    }
+    for name, value in values.items():
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise TrainingPlanError(f"{name} musi być nieujemną liczbą całkowitą.")
+    if reference_queue_limit == 0 or selected_level_queue_limit == 0:
+        raise TrainingPlanError("Limity kolejki muszą być większe od zera.")
+
+    target_count = reference_queue_limit * TARGET_QUEUE_LIMIT_MULTIPLIER
+    completion_count = (
+        target_count * TARGET_COMPLETION_PERCENT + 99
+    ) // 100
+    count_reliable = (
+        current_troop_count is not None
+        and current_count_confidence is not None
+        and current_count_confidence >= min_count_confidence
+    )
+    remaining_count = (
+        max(0, target_count - current_troop_count)
+        if count_reliable
+        else None
+    )
+    satisfied = count_reliable and current_troop_count >= completion_count
+
+    return {
+        "status": "uncertain" if not count_reliable else "satisfied" if satisfied else "replenish",
+        "slot": {"global_level": global_level, "match_number": match_number},
+        "highest_unlocked_level": highest_unlocked_level,
+        "reference_level": reference_level,
+        "training_level": training_level,
+        "current_troop_count": current_troop_count,
+        "reference_queue_limit": reference_queue_limit,
+        "selected_level_queue_limit": selected_level_queue_limit,
+        "target_count": target_count,
+        "completion_count": completion_count,
+        "remaining_count": remaining_count,
+        "count_confidence": current_count_confidence,
+        "minimum_count_confidence": min_count_confidence,
+        "count_confidence_ok": count_reliable,
+        "recommended_training_count": 0 if not count_reliable or satisfied else min(
+            remaining_count, selected_level_queue_limit
+        ),
+    }
 
 
 def _utc_time(value=None):

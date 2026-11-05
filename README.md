@@ -1,5 +1,9 @@
 # Total Battle Automation
 
+## Development Notes
+
+- [UI variants preparation plan](docs/game/ui_variants_plan.md) describes how to preserve the current interface as `legacy` and prepare isolated support for the new interface without implementing it prematurely.
+
 Total Battle is a terrible game that manipulates its players into spending as much money and time on it as possible.
 This project contains some scripts intended to reduce the amount of time spent.
 

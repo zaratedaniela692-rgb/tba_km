@@ -425,6 +425,14 @@
       "h": 26,
       "type": "number",
       "template": "templates/army_training/unit_troop_food_production_load.png"
+    },
+    "current_training_unit": {
+      "x": 667,
+      "y": 262,
+      "w": 60,
+      "h": 58,
+      "type": "icon",
+      "template": "templates/army_training/current_training_unit.png"
     }
   }
 }

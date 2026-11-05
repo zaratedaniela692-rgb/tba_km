@@ -7,15 +7,20 @@ import re
 import sys
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
+import sys
 
 import cv2
 import numpy as np
 import pytesseract
 from pytesseract import Output
 
-
 ROOT_DIR = Path(__file__).resolve().parents[1]
-REGIONS_PATH = ROOT_DIR / "regions.json"
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from ui_variants import UIVariantError, resolve_variant
+
+
 CONFIG_PATH = ROOT_DIR / "config.json"
 RESOURCE_NAMES = ("wood", "iron", "stone", "food", "silver", "gold")
 SUFFIX_MULTIPLIERS = {
@@ -126,7 +131,9 @@ def read_resource_region(image, region, min_confidence=70, min_color_pixels=20):
     }
 
 
-def read_resource_snapshot(image_path, screen="world_map", regions_path=REGIONS_PATH, config_path=CONFIG_PATH):
+def read_resource_snapshot(image_path, screen="world_map", regions_path=None, config_path=CONFIG_PATH, variant_id=None):
+    variant = resolve_variant(variant_id)
+    regions_path = Path(regions_path) if regions_path is not None else variant["regions"]
     try:
         regions_data = json.loads(Path(regions_path).read_text(encoding="utf-8"))
         config = json.loads(Path(config_path).read_text(encoding="utf-8"))
@@ -162,6 +169,7 @@ def main():
     parser = argparse.ArgumentParser(description="Odczytaj food i silver z obrazu bez klikania w grze.")
     parser.add_argument("--screen", default="world_map", help="nazwa ekranu w regions.json")
     parser.add_argument("--input", required=True, help="plik PNG albo folder PNG")
+    parser.add_argument("--variant", help="wariant interfejsu; domyślnie legacy")
     args = parser.parse_args()
 
     input_path = Path(args.input)
@@ -172,7 +180,7 @@ def main():
 
     try:
         for image_path in images:
-            reading = read_resource_snapshot(image_path, args.screen)
+            reading = read_resource_snapshot(image_path, args.screen, variant_id=args.variant)
             print(f"\n{image_path.name}")
             for name in RESOURCE_NAMES:
                 item = reading[name]
@@ -183,7 +191,7 @@ def main():
                     f"color={item['color']}, OCR={confidence} ({confidence_state}, "
                     f"min={item['minimum_confidence']:.0f}%)"
                 )
-    except ResourceReadError as error:
+    except (ResourceReadError, UIVariantError) as error:
         print(f"Błąd: {error}", file=sys.stderr)
         return 2
     return 0

@@ -227,6 +227,15 @@ def get_next_task(queue, available_resources, now=None):
     for task in queue["tasks"]:
         if task["status"] not in {"queued", "waiting_resources"}:
             continue
+        if task["payload"].get("goal_kind") == "slot_stock_v1":
+            process = task["payload"].get("process", {})
+            valid_until = _parse_time(process.get("decision_valid_until"))
+            if (
+                process.get("state") != "needs_preflight"
+                or valid_until is None
+                or current_time >= valid_until
+            ):
+                continue
         next_check = _parse_time(task.get("next_check_at"))
         if next_check is not None and current_time < next_check:
             continue
