@@ -6,6 +6,20 @@
 
 The queue manager schedules stock goals. The visual reader identifies the visible unit training slots and gathers measurements from each slot independently. It does not identify troop names and does not click or scroll the game.
 
+## Running the Read-Only Dry-Run
+
+From the repository root in PowerShell, run:
+
+```powershell
+python .\army_training_dry_run.py `
+    --input .\screenshots\army_training\pelny_army_training_empty_queue.png `
+    --tesseract "C:\Program Files\Tesseract-OCR\tesseract.exe"
+```
+
+Replace `--input` with the screenshot to inspect and `--tesseract` with the local path to `tesseract.exe`. If Tesseract is on `PATH`, omit `--tesseract`. Use `python .\army_training_dry_run.py --help` to see CLI options. The report is read-only: it does not click, save a task, or change the game queue. It currently evaluates the configured target `{global_level: 5, match_number: 1}`; that target is not yet resolved dynamically from a profile queue.
+
+For another computer, copy/clone the repository with its `regions.json`, `templates/`, and screenshot fixtures. Install Python and the runtime packages used by the scanner (`opencv-python`, `numpy`, `pytesseract`) plus the Tesseract OCR executable. `requirements-dev.txt` currently lists only `pytest`, not these runtime dependencies, so provision them separately. Verify local paths and run the command above before using another screenshot.
+
 ## Terms
 
 - **Slot:** one unit training panel, including its level selector, city count, training amount, slider, costs, duration, food load, and Train button.
