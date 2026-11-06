@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 import pytesseract
 
-from army_training_levels import _read_badge_label, detect_selector_badges, read_slot_selector_levels
+from army_training_levels import read_slot_selector_levels
 from army_training_scanner import ArmyTrainingScannerError, _load_regions, read_army_training_snapshot_from_image
 from army_training_slot_reader import read_slot_readings
 from army_training_slots import STATUS_OK, locate_slots, slot_crop
@@ -94,22 +94,6 @@ def _select_max_minus_one(frame, variant, slot):
         "badge_count": len(centers),
         "selector_shape": selector.shape[:2],
     }
-
-
-def _verify_selected_level(frame, slot, requested_level, expected_local_y):
-    selector = slot_crop(frame, slot, "unit_troop_level")
-    badges = detect_selector_badges(selector)
-    if not badges:
-        return False
-    largest_index = max(range(len(badges)), key=lambda index: badges[index][2])
-    selected = badges[largest_index]
-    label = _read_badge_label(selector, selected)
-    return (
-        label is not None
-        and label[0] == requested_level
-        and (largest_index == len(badges) - 2)
-        and abs(selected[1] - expected_local_y) <= 3
-    )
 
 
 def _read_current_training_state(frame, variant):
@@ -213,6 +197,7 @@ def run_one_shot(capture_fn=None, click_fn=None, execute=False, confirmation="",
         "slot_column": second_slot.column,
         "presumed_highest_level": read_slot_selector_levels(frame, second_slot).highest_visible_level,
         "requested_level": selection["level"],
+        "selection_confirmed": False,
         "selection": selection,
         "status": "PREVIEW_ONLY",
         "blockers": ["dry_run_no_game_actions"],
@@ -240,9 +225,9 @@ def run_one_shot(capture_fn=None, click_fn=None, execute=False, confirmation="",
             result["blockers"] = ["capture_geometry_changed_after_level_selection"]
             return result
         same_slot, current_slot = _slot_position_is_same(selected_frame, variant, second_slot)
-        if not same_slot or not _verify_selected_level(selected_frame, current_slot, selection["level"], selection["local_y"]):
+        if not same_slot:
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
-            result["blockers"] = ["selected_level_or_slot_not_confirmed"]
+            result["blockers"] = ["same_slot_not_confirmed_after_level_click"]
             return result
 
         read_frame, read_origin = capture_fn()
@@ -251,9 +236,9 @@ def run_one_shot(capture_fn=None, click_fn=None, execute=False, confirmation="",
             result["blockers"] = ["capture_geometry_changed_before_slot_read"]
             return result
         same_slot, read_slot = _slot_position_is_same(read_frame, variant, second_slot)
-        if not same_slot or not _verify_selected_level(read_frame, read_slot, selection["level"], selection["local_y"]):
+        if not same_slot:
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
-            result["blockers"] = ["slot_or_selection_changed_before_slot_read"]
+            result["blockers"] = ["same_slot_not_confirmed_before_slot_read"]
             return result
         plan = _build_selected_slot_plan(read_frame, variant, read_slot)
         result["preflight"] = plan
@@ -268,9 +253,9 @@ def run_one_shot(capture_fn=None, click_fn=None, execute=False, confirmation="",
             result["blockers"] = ["capture_geometry_changed_before_train"]
             return result
         same_slot, final_slot = _slot_position_is_same(fresh_frame, variant, second_slot)
-        if not same_slot or not _verify_selected_level(fresh_frame, final_slot, selection["level"], selection["local_y"]):
+        if not same_slot:
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
-            result["blockers"] = ["slot_or_level_changed_before_train"]
+            result["blockers"] = ["same_slot_not_confirmed_before_train"]
             return result
         final_state = _read_current_training_state(fresh_frame, variant)
         if final_state["status"] != "idle":

@@ -10,7 +10,7 @@ The current algorithm, decisions, diagram, implementation status, and MVP bounda
 - `army_training_slot_reader.py` reads each slot's queue amount/limit, city count, and silver cost independently, with raw OCR and confidence.
 - `army_training_levels.py` chooses the largest selector badge as the presumed highest level, under the agreed assumption that the highest level is selected by default. It OCRs that badge's local Roman numeral and identifies the immediately preceding visible badge as the one-below candidate.
 - `army_training_dry_run.py` now reports detected slots, level candidates, and per-slot readings. It stays read-only and blocks rather than assigning a frame index to an unverified persistent `match_number`.
-- `army_training_live_e2e.py` implements an isolated one-shot flow for the second currently visible slot's max-1 level. Preview is the default. Live execution requires `--execute --confirm "TRAIN SECOND SLOT MAX-1"`, captures the primary monitor at 1920x1080, and can click Train at most once. It rechecks idle state/slot/selection, preflights resources and stock, and never retries an uncertain Train action. Tests are mocked; no supervised live run has been performed.
+- `army_training_live_e2e.py` implements an isolated one-shot flow for the second currently visible slot's max-1 level. Preview is the default. Live execution requires `--execute --confirm "TRAIN SECOND SLOT MAX-1"`, captures the primary monitor at 1920x1080, and can click Train at most once. The post-click enlarged-marker/level OCR check was removed; the report explicitly says `selection_confirmed=false`. It still rechecks the same slot geometry, idle state, resources and stock, and never retries an uncertain Train action. Tests are mocked; no supervised live run has been performed.
 - `army_training_plan.py` contains pure per-slot stock-goal calculations, including the 80% completion threshold.
 - `army_training_process.py` has typed stock-goal, observation, decision, reconciliation, and persistent queue integration. Reconciliation defaults to dry-run. A reliable reading exactly one below a requested target completes that target with reason `target_level_unavailable_for_slot`; no replacement goal is generated.
 - Tests cover the detector, per-slot measurements, selector candidates, stock-goal decisions, and queue persistence.
@@ -22,7 +22,7 @@ The current algorithm, decisions, diagram, implementation status, and MVP bounda
 - Frame-local slot indexes are not persistent `{global_level, match_number}` identities.
 - No adapter currently assembles slot reads, level evidence, profile, timestamp, training state, and source screenshot into a complete `SlotObservation`.
 - The adapter must keep each slot's own queue limit and, by the agreed rule, supply that same limit for both relevant levels of that slot.
-- Food preflight, live-window capture, scrolling, selection clicks, Train clicks, Help, and post-click confirmation remain outside this MVP.
+- Persistent queue-manager identity and `SlotObservation` integration remain unimplemented. The one-shot live path does primary-monitor capture, max-1 selector click (without marker verification), same-slot re-detection, resource/stock preflight, at most one Train click, and post-click active-state confirmation. Scrolling and Help/Speed Up remain out of scope.
 
 ## Latest Validation
 

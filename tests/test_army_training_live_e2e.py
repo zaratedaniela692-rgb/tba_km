@@ -5,7 +5,6 @@ import numpy as np
 import pytest
 
 import army_training_live_e2e as live
-from army_training_levels import read_slot_selector_levels
 from army_training_scanner import _read_image
 from army_training_slots import find_slots
 
@@ -18,14 +17,12 @@ def _live_fixtures(monkeypatch, post_status="active"):
     variant = live.resolve_variant()
     regions = live._load_regions(variant["regions"])
     layout = find_slots(EMPTY)
-    actual_level = read_slot_selector_levels(image, layout.slots[1])
     clicked = []
     captured = []
 
     monkeypatch.setattr(live, "capture_primary_monitor", lambda: (image.copy(), (0, 0)))
     monkeypatch.setattr(live, "_read_current_training_state", lambda frame, selected_variant: {"status": "idle"})
     monkeypatch.setattr(live, "_slot_position_is_same", lambda frame, selected_variant, expected: (True, layout.slots[1]))
-    monkeypatch.setattr(live, "_verify_selected_level", lambda frame, slot, requested, y: True)
     monkeypatch.setattr(live, "_check_emergency_stop", lambda: None)
     monkeypatch.setattr(live, "_build_selected_slot_plan", lambda frame, selected_variant, slot: {
         "training": {"status": "idle"}, "readings": {}, "resources": {},
@@ -53,6 +50,7 @@ def test_preview_is_for_second_visible_slot_and_does_not_click(monkeypatch):
 
     assert result["slot_frame_index"] == 1
     assert result["requested_level"] == 6
+    assert result["selection_confirmed"] is False
     assert result["status"] == "PREVIEW_ONLY"
     assert clicked == []
     assert result["queue_modified"] is False
@@ -63,17 +61,6 @@ def test_execute_requires_exact_confirmation(monkeypatch):
 
     with pytest.raises(live.LiveTrainingError, match="confirmation phrase"):
         live.run_one_shot(execute=True, confirmation="yes", click_fn=click)
-
-
-def test_selected_lower_level_is_verified_by_enlarged_second_last_badge(monkeypatch):
-    image = _read_image(EMPTY)
-    slot = find_slots(EMPTY).slots[1]
-    badges = ((10.0, 7.0, 9.0), (10.0, 33.0, 12.0), (10.0, 58.0, 9.0))
-    monkeypatch.setattr("army_training_live_e2e.detect_selector_badges", lambda selector: badges)
-    monkeypatch.setattr("army_training_live_e2e._read_badge_label", lambda selector, badge: (6, 90.0))
-
-    assert live._verify_selected_level(image, slot, 6, 33.0)
-    assert not live._verify_selected_level(image, slot, 7, 33.0)
 
 
 def test_non_1920_capture_is_rejected_before_actions(monkeypatch):
@@ -100,6 +87,30 @@ def test_preflight_block_stops_after_level_selection_without_train(monkeypatch):
     assert result["level_click_issued"] is True
     assert "train_click_issued" not in result
     assert len(clicked) == 1
+
+
+def test_unconfirmed_selection_still_requires_same_slot_and_fresh_preflight(monkeypatch):
+    clicked, captured, _, _, click = _live_fixtures(monkeypatch)
+    slot_checks = []
+
+    def same_slot(frame, variant, expected):
+        slot_checks.append(True)
+        return True, find_slots(EMPTY).slots[1]
+
+    monkeypatch.setattr(live, "_slot_position_is_same", same_slot)
+
+    result = live.run_one_shot(
+        execute=True,
+        confirmation=live.CONFIRMATION_PHRASE,
+        click_fn=click,
+        sleep_fn=lambda _: None,
+    )
+
+    assert result["selection_confirmed"] is False
+    assert result["status"] == "START_CONFIRMED"
+    assert len(slot_checks) == 3
+    assert len(clicked) == 2
+    assert len(captured) >= 4
 
 
 def test_capture_failure_after_level_click_reports_action_and_unknown(monkeypatch):
