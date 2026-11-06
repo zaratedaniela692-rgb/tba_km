@@ -125,8 +125,8 @@ def test_preflight_failure_never_moves_or_scrolls(tmp_path, frame, display_size,
     assert json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))["scrolls"] == []
 
 
-def test_scroll_limit_is_capped_at_ten(tmp_path):
-    with pytest.raises(CalibrationError, match="between 1 and 10"):
+def test_scroll_limit_is_capped_at_twenty(tmp_path):
+    with pytest.raises(CalibrationError, match="between 1 and 20"):
         run_scroll_calibration(
             lambda: (image(), (0, 0)),
             lambda *_: None,
@@ -134,7 +134,7 @@ def test_scroll_limit_is_capped_at_ten(tmp_path):
             lambda: FRAME_SIZE,
             tmp_path / "run",
             regions=REGIONS,
-            max_steps=11,
+            max_steps=21,
         )
 
 

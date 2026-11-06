@@ -50,7 +50,7 @@ Położenia wierszy zależą od przewinięcia, więc wiersze trzeba znajdować w
 ## Przejścia
 
 - Fixture offline → rozpoznaj nagłówek i kontekst → odczytaj timer oraz widoczne wiersze → raport obserwacji albo jawny wynik `unknown/incomplete`.
-- Kalibracja live: przy otwartym dialogu uruchom `python .\speedup_calibration.py --calibrate-scroll --confirm "SCROLL SPEEDUP LIST"`. Polecenie zapisuje widok początkowy, przed każdym pojedynczym przewinięciem ustawia kursor na środku oznaczonego panelu (959, 585), a potem zapisuje kolejny screen. Domyślny limit to 10 kroków; pierwszy niezmieniony widok jest zapisany i kończy kalibrację. Zrzuty i manifest trafiają do `debug/speedup/calibration_<timestamp>/`.
+- Kalibracja live: przy otwartym dialogu uruchom `python .\speedup_calibration.py --calibrate-scroll --confirm "SCROLL SPEEDUP LIST"`. Polecenie zapisuje widok początkowy, przed każdym pojedynczym przewinięciem ustawia kursor na środku oznaczonego panelu (959, 585), a potem zapisuje kolejny screen. Domyślny limit to 20 kroków; pierwszy niezmieniony widok jest zapisany i kończy kalibrację. Zrzuty i manifest trafiają do `debug/speedup/calibration_<timestamp>/`.
 - Kalibracja nie rozpoznaje wszystkich wierszy, nie używa przyspieszeń i nie kupuje przedmiotów. Nie przeciąga uchwytu paska.
 - Brak zmiany viewportu po przewinięciu oznacza koniec listy. Uchwyt paska może wspierać, ale nie zastępować porównania obrazu. Osiągnięcie limitu przewinięć bez potwierdzenia końca oznacza skan niekompletny.
 - Nie używaj przyspieszeń, nie kupuj, nie klikaj „Pomoc” i nie zmieniaj kolejki.
