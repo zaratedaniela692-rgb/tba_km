@@ -1,0 +1,95 @@
+{
+  "army_training": {
+    "troops_types": {
+      "x": 485,
+      "y": 318,
+      "w": 128,
+      "h": 387,
+      "type": "list",
+      "template": "templates/army_training/troops_types.png"
+    },
+    "unit_troop_level": {
+      "x": 647,
+      "y": 425,
+      "w": 21,
+      "h": 118,
+      "type": "list",
+      "template": "templates/army_training/unit_troop_level.png"
+    },
+    "current_unit_troop_count": {
+      "x": 817,
+      "y": 643,
+      "w": 66,
+      "h": 32,
+      "type": "number"
+    },
+    "unit_troop_count_to_train": {
+      "x": 790,
+      "y": 683,
+      "w": 95,
+      "h": 26,
+      "type": "number"
+    },
+    "unit_troop_coount_scroll": {
+      "x": 653,
+      "y": 709,
+      "w": 232,
+      "h": 21,
+      "type": "anchor",
+      "template": "templates/army_training/unit_troop_coount_scroll.png"
+    },
+    "unit_troop_coount_scroll_button": {
+      "x": 854,
+      "y": 711,
+      "w": 27,
+      "h": 16,
+      "type": "button",
+      "template": "templates/army_training/unit_troop_coount_scroll_button.png"
+    },
+    "unit_troop_require_silver_to_train": {
+      "x": 663,
+      "y": 739,
+      "w": 91,
+      "h": 30,
+      "type": "number"
+    },
+    "unit_troop_require_time_to_train": {
+      "x": 772,
+      "y": 738,
+      "w": 109,
+      "h": 29,
+      "type": "number"
+    },
+    "unit_troop_food_production_load": {
+      "x": 662,
+      "y": 776,
+      "w": 89,
+      "h": 26,
+      "type": "number"
+    },
+    "unit_troop_train_button": {
+      "x": 775,
+      "y": 774,
+      "w": 108,
+      "h": 35,
+      "type": "button",
+      "template": "templates/army_training/unit_troop_train_button.png"
+    },
+    "current_training_unit": {
+      "x": 668,
+      "y": 326,
+      "w": 60,
+      "h": 58,
+      "type": "icon",
+      "template": "templates/army_training/current_training_unit.png"
+    },
+    "close_army_screen_button": {
+      "x": 1421,
+      "y": 305,
+      "w": 20,
+      "h": 27,
+      "type": "button",
+      "template": "templates/army_training/close_army_screen_button.png"
+    }
+  }
+}

@@ -169,7 +169,7 @@ def main():
     parser = argparse.ArgumentParser(description="Odczytaj food i silver z obrazu bez klikania w grze.")
     parser.add_argument("--screen", default="world_map", help="nazwa ekranu w regions.json")
     parser.add_argument("--input", required=True, help="plik PNG albo folder PNG")
-    parser.add_argument("--variant", help="wariant interfejsu; domyślnie legacy")
+    parser.add_argument("--variant", help="wariant interfejsu; domyślnie desktop")
     args = parser.parse_args()
 
     input_path = Path(args.input)

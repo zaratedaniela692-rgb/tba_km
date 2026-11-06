@@ -12,6 +12,14 @@ Current slot-detection and stock-goal rules, flow diagram, implementation status
 - Region `current_training_unit` jest oznaczony na pustym zrzucie. Skaner lokalizuje panel bieżącego szkolenia, aby uwzględnić jego pionowe przesunięcie, a następnie ocenia względny wycinek obrazu jednostki. Detal obrazu `>= 20` przy odnalezionym panelu oznacza `active`; stan `idle` wymaga dopasowania co najmniej `0.90` do pustego wzorca w jego zapisanym położeniu. W pozostałych przypadkach wynik to `unknown`. Dostępne aktywne próbki mają detal `55.84–70.07`, pusty wzorzec dopasowuje się z wynikiem `1.0`; progi nie są jeszcze zweryfikowane dla wszystkich jednostek i skal.
 - Stan aktywnego szkolenia jest klasyfikowany wyłącznie z obrazu jednostki w panelu bieżącego szkolenia; rozpoznawany jest tylko stan `active`, `idle` lub `unknown`.
 
+## Klient przeglądarkowy
+
+- Fixture: `ui/browser/tests/army_training/zrzut_pulpitu_website.png` (1920x1080, zawiera chrome przeglądarki).
+- Browser regions i templates są osobne w `ui/browser/`. `python .\army_training_slots.py .\ui\browser\tests\army_training\zrzut_pulpitu_website.png --variant browser` rozpoznaje trzy widoczne sloty i ich wartości liczbowe.
+- Fixture'y `ui/browser/tests/army_training/army_training_active_website.png` i `army_training_nonactive_website.png` pokazują odpowiednio aktywne i puste szkolenie. Browserowy skaner używa ROI `current_training_unit`: pusty wzorzec >= 0.90 oznacza `idle`; w innym przypadku detal obrazu >= 20 oznacza `active`; pozostałe lub sprzeczne przypadki są `unknown`. Progi sprawdzono na tej jednej parze screenów.
+- Selektor poziomu nie został wiarygodnie odczytany; stan przycisku Pomoc/Przyspiesz i zasoby nie są rozpoznawane dla browsera. Nie wykonuj akcji w przeglądarce na podstawie tych danych.
+- Szablony wycięte z tego samego fixture dają 100% w `verify.py`; potwierdza to ścieżki i pozycje, nie odporność na inne zrzuty, skale ani stany.
+
 ## Elementy (wg regionów i opisany.png)
 Współrzędne są względem kadru `screenshots/army_training/pelny.png`; nazwy odpowiadają `regions.json`.
 

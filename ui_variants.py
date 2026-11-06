@@ -25,6 +25,10 @@ def load_registry(path=REGISTRY_PATH):
 def resolve_variant(variant_id=None, registry_path=REGISTRY_PATH):
     registry = load_registry(registry_path)
     selected_id = variant_id or registry.get("default_variant")
+    aliases = registry.get("aliases", {})
+    if not isinstance(aliases, dict):
+        raise UIVariantError("UI variant registry 'aliases' must be an object.")
+    selected_id = aliases.get(selected_id, selected_id)
     variants = registry["variants"]
     if not isinstance(selected_id, str) or selected_id not in variants:
         raise UIVariantError(f"Unknown UI variant: {selected_id!r}.")

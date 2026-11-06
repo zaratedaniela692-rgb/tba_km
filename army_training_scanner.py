@@ -83,6 +83,52 @@ def _classify_training_unit_image(crop):
     return "unknown", detail_score
 
 
+def _read_browser_training_snapshot(image, screen, regions, variant):
+    training_unit_region = regions.get("current_training_unit")
+    if training_unit_region is None:
+        raise ArmyTrainingScannerError("Brak regionu 'current_training_unit' dla wariantu browser.")
+    template_path = training_unit_region.get("template")
+    if not template_path:
+        raise ArmyTrainingScannerError("Brak szablonu pustego pola szkolenia dla wariantu browser.")
+    empty_unit_template_path = resolve_asset_path(variant, template_path)
+    empty_unit_template = cv2.imread(str(empty_unit_template_path), cv2.IMREAD_COLOR)
+    if empty_unit_template is None:
+        raise ArmyTrainingScannerError(f"Nie można odczytać wzorca: {empty_unit_template_path}")
+
+    unit_crop = _region_crop(image, training_unit_region)
+    if unit_crop.shape != empty_unit_template.shape:
+        raise ArmyTrainingScannerError(
+            "Wymiary pola bieżącego szkolenia nie zgadzają się z pustym wzorcem browser."
+        )
+    empty_unit_score = float(
+        cv2.matchTemplate(unit_crop, empty_unit_template, cv2.TM_CCOEFF_NORMED)[0, 0]
+    )
+    detail_score = float(cv2.cvtColor(unit_crop, cv2.COLOR_BGR2GRAY).std())
+    matches_empty = empty_unit_score >= 0.90
+    has_active_detail = detail_score >= 20
+
+    if matches_empty == has_active_detail:
+        queue_state = "unknown"
+    elif matches_empty:
+        queue_state = "idle"
+    else:
+        queue_state = "active"
+
+    return {
+        "screen": screen,
+        "has_active_training": True if queue_state == "active" else False if queue_state == "idle" else None,
+        "speedup_button_detected": None,
+        "trained_unit_count": None,
+        "trained_unit_count_raw": "",
+        "trained_unit_count_confidence": None,
+        "trained_unit_count_error": "not_supported_for_browser_variant",
+        "training_unit_image_detail": detail_score,
+        "empty_unit_template_score": empty_unit_score,
+        "training_panel_match_score": None,
+        "status": queue_state,
+    }
+
+
 def _ocr_numeric_crop(crop):
     if crop is None or crop.size == 0:
         return {"raw": "", "value": None, "confidence": None}
@@ -139,6 +185,8 @@ def read_army_training_snapshot_from_image(image, screen="army_training", region
     regions = _load_regions(regions_path).get(screen)
     if not isinstance(regions, dict):
         raise ArmyTrainingScannerError(f"Brak regionów dla ekranu '{screen}'.")
+    if variant["id"] == "browser":
+        return _read_browser_training_snapshot(image, screen, regions, variant)
 
     current_panel_region = regions.get("current_trainin_army")
     training_unit_region = regions.get("current_training_unit")
@@ -224,7 +272,7 @@ def main():
     parser = argparse.ArgumentParser(description="Odczytaj stan ekranu szkolenia armii bez klikania.")
     parser.add_argument("--screen", default="army_training", help="nazwa ekranu w regions.json")
     parser.add_argument("--input", required=True, help="ścieżka do pliku PNG z obrazem ekranu")
-    parser.add_argument("--variant", help="wariant interfejsu; domyślnie legacy")
+    parser.add_argument("--variant", help="wariant interfejsu; domyślnie desktop")
     args = parser.parse_args()
 
     try:
