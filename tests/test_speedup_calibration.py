@@ -1,15 +1,19 @@
 import json
+from pathlib import Path
 
+import cv2
 import numpy as np
 import pytest
 
 from speedup_calibration import (
     CalibrationError,
     CONFIRMATION_PHRASE,
+    dialog_anchor_matches,
     run_scroll_calibration,
 )
 
 
+ROOT = Path(__file__).resolve().parents[1]
 FRAME_SIZE = (1920, 1080)
 REGIONS = {
     "speedup_inventory_viewport": {"x": 10, "y": 20, "w": 100, "h": 50},
@@ -142,3 +146,23 @@ def test_cli_requires_explicit_calibration_confirmation(capsys):
 
     assert error.value.code == 2
     assert CONFIRMATION_PHRASE in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "relative_path, expected",
+    [
+        ("debug/speedup/calibration_20261106_195223_110853/step_000_initial.png", True),
+        ("debug/speedup/calibration_20261106_195249_832058/step_000_initial.png", True),
+        ("debug/speedup/calibration_20261106_195330_491310/step_000_initial.png", True),
+        ("screenshots/speedup_module/after_click_7days_speedup.png", True),
+        ("screenshots/speedup_module/speedup_view.png", True),
+        ("screenshots/speedup_module/speedup_view2.png", True),
+        ("screenshots/speedup_module/speedup_view3.png", True),
+        ("screenshots/speedup_module/academy_speeduo_button.png", False),
+    ],
+)
+def test_dialog_anchor_recognition_handles_small_offset_and_rejects_other_screens(relative_path, expected):
+    frame = cv2.imread(str(ROOT / relative_path))
+
+    assert frame is not None, relative_path
+    assert dialog_anchor_matches(frame) is expected

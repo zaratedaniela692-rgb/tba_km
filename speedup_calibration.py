@@ -20,6 +20,7 @@ DEFAULT_STEPS = 10
 SETTLE_SECONDS = 0.35
 CONFIRMATION_PHRASE = "SCROLL SPEEDUP LIST"
 ANCHOR_THRESHOLD = 0.95
+ANCHOR_SEARCH_MARGIN = 8
 CHANGE_THRESHOLD = 0.003
 
 
@@ -52,10 +53,16 @@ def dialog_anchor_matches(frame, regions=None, root_dir=ROOT_DIR):
     if template is None:
         raise CalibrationError(f"Could not load dialog anchor template: {template_path}")
     region_left, region_top, width, height = (int(region[key]) for key in ("x", "y", "w", "h"))
-    crop = frame[region_top:region_top + height, region_left:region_left + width]
-    if crop.shape[:2] != template.shape[:2]:
+    margin = ANCHOR_SEARCH_MARGIN
+    search_left = max(0, region_left - margin)
+    search_top = max(0, region_top - margin)
+    search_right = min(frame.shape[1], region_left + width + margin)
+    search_bottom = min(frame.shape[0], region_top + height + margin)
+    search = frame[search_top:search_bottom, search_left:search_right]
+    if search.shape[0] < template.shape[0] or search.shape[1] < template.shape[1]:
         return False
-    score = float(cv2.matchTemplate(crop, template, cv2.TM_CCOEFF_NORMED)[0, 0])
+    scores = cv2.matchTemplate(search, template, cv2.TM_CCOEFF_NORMED)
+    _, score, _, _ = cv2.minMaxLoc(scores)
     return score >= ANCHOR_THRESHOLD
 
 

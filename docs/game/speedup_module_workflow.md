@@ -18,6 +18,8 @@ Public operation: `finish_with_speedups(capture_fn, read_dialog_fn, click_fn, sc
 
 The calibration command is a separate, non-finishing mode. The user opens the speedup dialog before starting it. It captures the initial screen, then performs up to 10 single downward wheel steps and saves a fresh, ordered screenshot after each step. It performs no item, purchase, or task-control clicks and cannot invoke the planner or item-use loop.
 
+Dialog recognition searches for the annotated `speedup_dialog_anchor` within an 8 px margin around its expected location, with normalized template-match score at least 0.95. This tolerance is based on the three bot captures from 2026-11-06: the title was consistently detected at (902, 255), 2 px right and 5 px down from the annotated (900, 250), with score 0.9973. The captured frame and display were both 1920x1080. The expected annotation itself remains unchanged.
+
 Before every wheel step, move the pointer to the center of the annotated `speedup_inventory_viewport` region (x=959, y=585 in the 1920x1080 desktop fixture), safely inside the list and away from the navigation bar and Use/Buy controls. Then send one wheel notch downward and capture after a short settle. Capture uses the primary monitor and adds its desktop origin to the region-relative pointer point. Refuse to scroll if the captured frame is not 1920x1080 or the pointer-coordinate display size does not match the capture size.
 
 Save `step_000_initial.png` and each resulting `step_NNN_after_scroll.png`, plus a JSON manifest with timestamps, action, point, frame geometry and viewport change score, under a unique `debug/speedup/calibration_<timestamp>/` folder. Compare only the annotated inventory viewport between consecutive captures. Save the first unchanged view and stop there; otherwise stop after the configured maximum (default 10). The calibration report does not claim that all inventory rows were recognized or that the end of the inventory was reached.
@@ -58,8 +60,8 @@ Navigation details remain evidence-dependent. The existing contract approves bou
 
 ### Calibration implementation and validation
 
-1. Implemented: dialog-anchor and display-geometry preflight, pointer reposition before each wheel step, per-step screenshots and manifest, first-no-change stop, and emergency-stop handling.
-2. Implemented: fake-adapter tests for action order, pointer coordinates, captures, preflight failures, step limits and emergency stop.
+1. Implemented: bounded dialog-anchor search based on bot captures, display-geometry preflight, pointer reposition before each wheel step, per-step screenshots and manifest, first-no-change stop, and emergency-stop handling.
+2. Implemented: tests for bot-capture and fixture anchor recognition, non-dialog rejection, action order, pointer coordinates, captures, preflight failures, step limits and emergency stop.
 3. Pending: the user opens the desktop dialog, runs the confirmed calibration command, then shares or confirms the generated captures for review.
 4. Deferred: full image-based inventory reader, completeness/overlap scanner, direct-run item-use mode and army adapter.
 5. Validation: run focused and full tests; run `tools/verify.py` if screen recognition assets or regions change. Live validation remains a supervised user-run operation.
