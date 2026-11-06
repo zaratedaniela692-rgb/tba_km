@@ -16,7 +16,7 @@ def active_task(quick_finish=False):
 
 def stock_goal_queue(city_count):
     queue = create_task_queue("p")
-    task = enqueue_training_goal(queue, TrainingGoal("p", Slot(7, 1)), NOW)
+    task = enqueue_training_goal(queue, TrainingGoal("p", Slot("guardsmen", 7, 1)), NOW)
     task = queue["tasks"][0]
     task["status"] = "waiting_completion"
     task["started_at"] = NOW.isoformat()
@@ -25,7 +25,7 @@ def stock_goal_queue(city_count):
     task["payload"]["process"]["state"] = "waiting_training"
     observation = SlotObservation(
         profile_id="p",
-        slot=Slot(7, 1),
+        slot=Slot("guardsmen", 7, 1),
         observed_at=NOW + timedelta(hours=1),
         source="fixture",
         training_status="idle",

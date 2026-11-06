@@ -19,6 +19,7 @@ from army_training_live_e2e import (
 )
 from army_training_process import Slot, _transition, ProcessState
 from army_training_resolver import STATUS_OK, resolve_goal_slot
+from army_unit_types import DEFAULT_UNIT_TYPE
 from army_training_slot_time import read_slot_training_time
 from army_training_slots import STATUS_OK as LAYOUT_OK, locate_slots, slot_crop
 from task_controller import ACTIVE_STATUSES, DEFAULT_SPEEDUP_RETRY_SECONDS, _parse_time, mark_task_started
@@ -103,6 +104,8 @@ def execute_training_goal(
     variant = resolve_variant()
     regions = _load_regions(variant["regions"])
     goal_slot = Slot(**task["payload"]["slot"])
+    if goal_slot.unit_type != DEFAULT_UNIT_TYPE:
+        raise LiveTrainingError("Training execution is not verified for this unit type.")
 
     def observe():
         frame, origin = capture_fn()
@@ -112,7 +115,9 @@ def execute_training_goal(
         if layout.status != LAYOUT_OK:
             raise LiveTrainingError("Visible slot geometry is not confirmed.")
         level_readings = tuple(read_slot_selector_levels(frame, slot) for slot in layout.slots)
-        resolution = resolve_goal_slot(level_readings, goal_slot.global_level, goal_slot.match_number)
+        resolution = resolve_goal_slot(
+            level_readings, goal_slot.unit_type, goal_slot.global_level, goal_slot.match_number,
+        )
         if resolution.status != STATUS_OK:
             raise LiveTrainingError(f"Goal slot resolution failed: {resolution.reason}")
         return frame, origin, layout.slots[resolution.frame_index], _read_current_training_state(frame, variant)

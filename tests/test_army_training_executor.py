@@ -17,7 +17,7 @@ class FakeVariant(dict):
 
 def _setup(monkeypatch, level=6, click_error_at=None, post_state="active"):
     queue = create_task_queue("p")
-    task = enqueue_training_goal(queue, TrainingGoal("p", Slot(level, 1)), NOW)
+    task = enqueue_training_goal(queue, TrainingGoal("p", Slot("guardsmen", level, 1)), NOW)
     image = np.zeros((1080, 1920, 3), dtype=np.uint8)
     slot = SimpleNamespace(
         index=0, dx=0, dy=0, regions={

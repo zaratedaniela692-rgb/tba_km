@@ -70,17 +70,65 @@ This test uses the second visible slot in one frame; it does not mean global `ma
 
 ### Implementation Notes (2026-11-06)
 
-- `army_campaign.py`: campaign policy (`max`, `max_minus_1`, `fixed`), persistence in `profiles/<profile>/army_campaign.json`, expansion into goals `(L, 1..N)` with `created` / `rearmed` / `kept` actions.
+- `army_campaign.py`: typed campaign policy (`max`, `max_minus_1`, `fixed`), persistence in `profiles/<profile>/army_campaign.json`, expansion into goals `(T, L, 1..N)` with `created` / `rearmed` / `kept` actions.
 - `army_state.py`: max-level cache in `profiles/<profile>/army_state.json`, TTL 24 hours; a fresh read wins.
 - `army_training_levels.py`: `lowest_visible_level` from consecutive badges (gaps 20-30 px); `None` when gaps are irregular. The fixtures show gaps of about 25 px.
-- `army_training_resolver.py`: m-th slot, in frame order, whose range contains `L`; `unsupported` without scrolling, `blocked` on uncertain ranges. Assumes the frame starts at the top of the list.
+- `army_training_resolver.py`: m-th slot, in frame order, whose range contains `L` for the requested type `T`; non-Gwardzist mappings return `unit_type_slot_map_unverified`. Assumes the frame starts at the top of the list.
 - `army_training_observation.py`: builds `SlotObservation`; the same slot limit is stored for the goal level, the highest level and the one below. Selection counts as verified only when the largest badge equals the goal level (default-highest assumption). For a lower goal level the decision is `selection_unverified` and the manager reports `select_level_then_reobserve`, because the displayed city count belongs to the selected level.
-- `army_training_manager.py`: CLI `enqueue`, `set-campaign`, `expand`, `run`, and `execute`. `run --image` is an offline decision check, read-only unless `--save`. `execute` without flags previews only the required task startup; `execute --navigate-only --execute` tests live screen navigation without evaluating a goal; normal live `execute --execute` performs startup, then chooses one eligible goal by task priority.
+- `army_training_manager.py`: typed CLI `enqueue --unit-type`, `remove --unit-type --level --match`, `set-campaign --unit-type`, and `run --unit-type`; `expand` uses the campaign's type. `run --image` is an offline decision check, read-only unless `--save`. `execute` without flags previews only the required task startup; `execute --navigate-only --execute` tests live screen navigation without evaluating a goal; normal live `execute --execute` performs startup, then chooses one eligible goal by task priority and calls the category-selection hook before scanning slots.
 - `army_training_executor.py`: resolves the goal again from a fresh primary-monitor capture, selects the target badge when needed, re-detects the same slot, checks idle/resources/stock/time, clicks Train once, and requires active-state confirmation before marking the task started. An uncertain result after a Train attempt pauses the profile queue to prevent a duplicate.
 - `army_training_lifecycle.py`: coordinates Help/Speed Up/completion transitions only from explicit recognized states; it never clicks. Confirmed idle plus a fresh `SlotObservation` completes or requeues the same stock goal. The visual Help classifier and click adapter are pending because no verified Help fixture/template exists. Quick-finish acceleration remains manual.
 - Manager startup preview: `python .\army_training_manager.py --profile <profile> execute`. For a live navigation-only check, use `python .\army_training_manager.py --profile <profile> execute --navigate-only --execute --confirm "EXECUTE ARMY TRAINING"`; it does not inspect a goal or click Train. Normal live `execute --execute --confirm "EXECUTE ARMY TRAINING"` continues from confirmed Barracks into the selected task and may click Train after all existing gates. The assistant has not performed a live run.
 - `army_training_slot_time.py`: full-queue training time of a slot (day/hour resolution) is segmented first, then each digit is OCRed at two scales. The value is `None` unless all reads agree and every digit is fixture-verified (currently 1-5); unverified digits fail closed. It is correct on all six fixture slots; under JPEG/noise stress it returned no value rather than a wrong value. The manager executor requires this reading before Train and passes it to `mark_task_started` after active state is confirmed.
 - Dry-run on `pelny_army_training_empty_queue.png`: goal `(7, 1)` -> `needs_preflight`, 1269 to train; `(6, 1)` -> `select_level_then_reobserve`; `(6, 4)` -> `match_not_visible_without_scrolling`.
+
+## Army Training Task Startup (Approved 2026-11-06)
+
+## Queue Maintenance Commands (Approved 2026-11-06)
+
+## Goal
+
+The queue manager receives a **campaign** such as "replenish Gwardzists at level `max-1` to 2x the queue limit". A decomposer expands it into per-slot **stock goals**. A single slot can also be ordered directly as one goal. All goals run through the same manager, priority queue (see [task_manager.md](task_manager.md)) and executor.
+
+### Contract
+
+1. Both commands require the target `--profile` and operate only on that profile's validated task queue. Changes use the existing atomic queue save.
+2. `remove --unit-type <type> --level <level> --match <number>` removes the matching inactive stock goal. It may remove queued, resource-waiting, or completed tasks. An active task is never removed.
+3. `clear --confirm "CLEAR ARMY QUEUE"` removes all tasks, including completed history, only when the queue is not paused and contains no active tasks. It preserves profile identity, settings, and other queue metadata.
+4. Missing task IDs, active-task removal, a paused queue, active tasks during clear, or missing/incorrect clear confirmation produce a status report without modifying the queue.
+5. No force option or automatic unpause is provided. A paused queue or active task requires separate reconciliation before clearing.
+
+### Flow
+
+```mermaid
+flowchart TD
+    A[Load and validate profile queue] --> B{Command}
+    B -->|remove typed goal| C{Goal exists and inactive?}
+    C -->|No| X[Report; no mutation]
+    C -->|Yes| E[Remove selected task]
+    B -->|clear with confirmation| D{Confirmed, unpaused, no active tasks?}
+    D -->|No| X
+    D -->|Yes| F[Clear task list; preserve queue settings]
+    E --> G[Atomic save]
+    F --> G
+```
+
+### Confirmed, Assumed, and Deferred
+
+- Confirmed by the user: the manager needs commands to remove one queued task and clear a task queue.
+- Approved behavior: individual removal is limited to non-active tasks; bulk clear requires the exact confirmation phrase and is blocked for paused queues or active tasks.
+- Deferred: force deletion, unpausing as part of clear, and undo/history restoration.
+
+### Current Code Status
+
+Implemented in `army_training_manager.py` and covered by manager regression tests. `remove` protects active tasks; `clear` requires the exact phrase and protects paused or active queues.
+
+### Expected Tests
+
+- Remove deletes only the requested inactive task and preserves other tasks and queue settings.
+- Remove of a missing or active task reports a blocker and does not save.
+- Clear requires the exact confirmation phrase and refuses paused queues or queues with active tasks without mutation.
+- Successful clear removes all tasks while preserving queue identity and settings.
 
 ## Army Training Task Startup (Approved 2026-11-06)
 
@@ -142,27 +190,29 @@ The queue manager receives a **campaign** such as "replenish level `max-1` to 2x
 ### Terms
 
 - **Campaign:** profile-level policy `{level_policy, enabled}` where `level_policy` is `max`, `max_minus_1`, or a fixed global level. It is stored separately from the task queue (`profiles/<profile>/army_campaign.json`, ignored by Git) and is never a task, so `get_next_task` cannot return it for execution.
-- **Max level:** highest unit level shown in the Barracks. It changes rarely (every few days). It is read from the current frame at the start of each run and cached per profile in `profiles/<profile>/army_state.json` with `observed_at`, source, confidence, and a TTL (default 24 hours). A fresh read always wins; a cached value is used only when a read fails and it is within TTL; otherwise the run is blocked.
-- **Stock goal `(L, m)`:** existing `slot_stock_v1` task with id `army_stock:level_{L}:match_{m}`. `m` is the 1-based position of the slot among all list slots whose selector range contains `L`, in list order.
+- **Max level:** highest unit level shown for one unit type in the Barracks. It changes rarely (every few days). It is read from the current frame at the start of each run and cached per profile and unit type in `profiles/<profile>/army_state.json` with `observed_at`, source, confidence, and a TTL (default 24 hours). A fresh read always wins; a cached value is used only when a read fails and it is within TTL; otherwise the run is blocked.
+- **Unit type:** one of `guardsmen`, `specialists`, `engineer_corps`, `dragons`, `elementals`, `giants`, or `beasts`. Unit type is mandatory in new goal and command APIs; two categories may have the same level/match without being the same goal.
+- **Stock goal `(T, L, m)`:** identity is `{unit_type: T, global_level: L, match_number: m}`. `m` is the 1-based position of a slot within type `T` among slots whose selector range contains `L`, in that category's verified list order.
+- **Legacy stock goal `(L, m)`:** old `slot_stock_v1` payloads without unit type are migrated in memory/persisted as `guardsmen`, the only type supported when they were created. Their existing task IDs are retained so open-training markers and fallback lifecycle references remain valid. New goals use a type-scoped task ID.
 - **Selector range:** levels offered by a slot, derived as `highest - n + 1 .. highest` from the `n` consecutive badges and the OCRed highest numeral. **Assumption:** badges are consecutive and cover the full range for that slot; verify on more accounts.
-- **Slots per level:** `MATCH_COUNTS_BY_LEVEL`: levels 1-4 have 3 slots, levels 5-9 have 4.
+- **Verified slots per level:** Gwardzists only: `MATCH_COUNTS_BY_LEVEL`, where levels 1-4 have 3 slots and levels 5-9 have 4. Other types must use separately verified mappings.
 
 ### Rules
 
-1. Decomposition: for resolved level `L`, create goals `(L, 1) .. (L, N)` where `N = MATCH_COUNTS_BY_LEVEL[L]`. `max` resolves to the max level, `max_minus_1` to `max - 1`; a level outside 1-9 blocks the campaign with a reason.
+1. Decomposition: for resolved type `T` and level `L`, create goals `(T, L, 1) .. (T, L, N)` using the verified count for that category. Only the Gwardzists mapping is currently verified; campaigns for other types remain blocked until their slot maps are documented. `max` resolves using the selected type's max-level reading; `max_minus_1` to `max - 1`.
 2. Goals are sequenced one at a time: only one training runs in the game. After each completed order the manager waits for the view to reset (about 5 s), captures a fresh frame, and re-reads stock before deciding on the same goal again or moving on.
-3. Resolving `(L, m)` to a physical slot uses the current frame only. If `m` is beyond the visible slots, the goal is `unsupported` in this version (no scrolling) and is never guessed.
+3. Resolving `(T, L, m)` to a physical slot uses the current category's fresh frame only. If `m` is beyond the visible slots, the goal is `unsupported` in this version (no scrolling) and is never guessed.
 4. If no visible slot can be identified with certainty (ambiguous geometry, uncertain badges, local I/II), the goal stays blocked and is not retried automatically.
 5. The existing decision rules apply unchanged: slot highest `== L-1` completes the goal with `target_level_unavailable_for_slot`; highest `< L-1` blocks; stock `>= ceil(0.8 * 2 * limit)` completes with `stock_threshold_met`.
 6. Both levels of one slot share that slot's queue limit; the adapter builds `SlotObservation` from the slot's own readings only.
-7. A single-slot order is a campaign-less goal `(L, m)` added through the same enqueue function and executed by the same manager. No separate script logic.
+7. A single-slot order is a campaign-less goal `(T, L, m)` added through the same enqueue function and executed by the same manager. No separate script logic.
 8. Goals inherit the `army_training` priority unless a priority is given; a campaign may supply one for all its goals.
 9. Execution is dry-run by default. The manager's `execute` command requires `--execute` plus the exact confirmation phrase, checks the emergency-stop file before clicks, and enables PyAutoGUI fail-safe. It executes at most one goal per invocation. The selector marker is still not verified; reports keep `selection_confirmed=false`.
 10. Before Train, require a reliable full-queue time reading. After Train, mark the task started only if a fresh frame confirms active training. Any uncertain result after a Train attempt pauses the profile queue and is never retried automatically.
 
 ### Re-arming (decided)
 
-`enqueue_training_goal` is idempotent per `(L, m)` and a completed goal is never recreated, so a new campaign run re-arms completed goals by setting `status=queued`, process state `needs_observation` and clearing decision data; a `rearmed` history entry is appended and history is kept.
+`enqueue_training_goal` is idempotent per `(T, L, m)` and a completed goal is never recreated, so a new campaign run re-arms completed goals by setting `status=queued`, process state `needs_observation` and clearing decision data; a `rearmed` history entry is appended and history is kept.
 
 ### Flow
 
@@ -195,6 +245,33 @@ flowchart TD
 - Assumed: consecutive badges form the whole selector range; TTL 24 h for the cached max level; 5 s view-reset wait; list order is stable between frames.
 - Deferred: scrolling and access to off-screen slots, unlock/dim detection, local I/II mapping, timer OCR for `initial_remaining_seconds`, Help/speed-up automation, multi-profile parallelism. The new Barracks navigation route is implemented but awaits supervised live confirmation.
 
+### Unit-Type Scope (Approved 2026-11-06)
+
+**Goal:** Keep army-training goals distinct by Barracks category so equal level/match numbers in Gwardzists and Specialists cannot collide or resolve to the wrong card.
+
+**Confirmed:** The Barracks category list includes Gwardzists, Specialists, Engineers, Dragons, Elementals, Giants, and Beasts. Current army-training fixtures and the first integrated training workflow cover Gwardzists only. The game-mechanics contract requires `{unit_type, global_level}` for unit identity; matching number is scoped within that type and level.
+
+**Assumptions to verify:** Category names and their ordering are taken from the observed UI labels. No assumption is made that category slot counts, unit order, level ranges, or scrolling behavior are identical across categories.
+
+**API contract:** `enqueue --unit-type`, `remove --unit-type --level --match`, `Slot`, `TrainingGoal`, campaigns, resolver calls, persisted goal payloads, and new goal IDs carry an explicit `unit_type`. `remove` addresses a goal by type, global level, and match number rather than an opaque ID. Legacy goals without a type are migrated to Gwardzists while preserving task ID, status, process history, and open-training references. New max-level cache entries are keyed by type; the legacy untyped cache entry maps to Gwardzists.
+
+**Category-selection hook:** Immediately after Barracks is confirmed and before goal slot scanning, call `select_army_type(unit_type)` with the queued goal's type. The current mock performs no UI input, permits the existing Gwardzists default path as an explicit assumption, and blocks every other category. No non-Gwardzist goal may reach the executor until category selection, fixtures, and type-specific slot mapping are verified.
+
+**Category facts and deferred work:** The Barracks lists Gwardzists, Specialists, Engineers, Dragons, Elementals, Giants, and Beasts. Current fixtures and verified slot counts cover Gwardzists only. No assumption is made that category slot counts, unit order, level ranges, or scrolling behavior are identical. Dedicated non-Gwardzist fixtures, real category-selection input/confirmation, and category-specific slot mapping remain deferred.
+
+**CLI examples:**
+
+```powershell
+python .\army_training_manager.py --profile army_test enqueue --unit-type guardsmen --level 7 --match 1
+python .\army_training_manager.py --profile army_test remove --unit-type guardsmen --level 7 --match 1
+python .\army_training_manager.py --profile army_test set-campaign --unit-type guardsmen --policy max_minus_1
+python .\army_training_manager.py --profile army_test run --unit-type guardsmen --image .\screenshots\army_training\pelny_army_training_empty_queue.png
+```
+
+Non-Gwardzist goals can be explicitly represented in the queue, but the current category mock blocks their live scan and execution. They must not be run until category selection, fixtures, and slot mappings are verified.
+
+**Expected tests:** Equal level/match targets in two types produce distinct task IDs; enqueue/remove require and honor type; resolver and stock observations retain type; legacy Gwardzist goals migrate without losing active lifecycle references; the category mock allows only the documented default Gwardzists path and blocks unsupported categories before execution.
+
 ### Planned Code
 
 | Step | Module | Notes |
@@ -212,12 +289,12 @@ flowchart TD
 
 ### Expected Tests
 
-- Expansion: level 4 yields 3 goals, level 6 yields 4; repeated expansion creates no duplicates; re-arm resets only completed goals.
+- Expansion: level 4 yields 3 goals, level 6 yields 4 for Gwardzists; repeated expansion creates no duplicates; re-arm resets only completed goals.
 - Policy resolution `max`, `max_minus_1`, fixed; out-of-range level blocks.
 - Max-level cache: fresh read wins, stale cache blocks, fresh cache used on read failure.
-- Selector range derived from badges on both fixtures; resolver returns the right slot for `(L, m)`, `unsupported` for `m` beyond visible slots, `ambiguous` on uncertain geometry.
+- Selector range derived from badges on both fixtures; resolver returns the right slot for `(T, L, m)`, `unsupported` for `m` beyond visible slots, `ambiguous` on uncertain geometry, and blocks unverified types.
 - Fixture to `SlotObservation` to manager decision with persisted reason; both levels share the same limit.
-- Single-slot enqueue produces the same task as the campaign for the same `(L, m)`.
+- Single-slot enqueue produces the same task as the campaign for the same `(T, L, m)`.
 - Executor with mocks: one Train click, no retry, failure after click is uncertain; manager sequencing re-observes after each order.
 
 ## Training Completion Without Wake-ups (Approved 2026-11-06)

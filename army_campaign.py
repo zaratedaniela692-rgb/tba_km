@@ -15,6 +15,7 @@ from army_training_process import (
     goal_task_id,
     rearm_training_goal,
 )
+from army_unit_types import DEFAULT_UNIT_TYPE, validate_unit_type
 from task_controller import PROFILES_DIR, task_queue_path
 
 POLICY_KINDS = ("max", "max_minus_1", "fixed")
@@ -26,17 +27,22 @@ class CampaignError(ValueError):
 
 @dataclass(frozen=True)
 class Campaign:
+    unit_type: str
     level_policy: str
     fixed_level: int | None = None
     enabled: bool = True
     priority: int | None = None
 
     def __post_init__(self):
+        try:
+            validate_unit_type(self.unit_type)
+        except ValueError as error:
+            raise CampaignError(str(error)) from error
         if self.level_policy not in POLICY_KINDS:
             raise CampaignError(f"Unknown level policy: {self.level_policy!r}")
         if self.level_policy == "fixed":
-            if type(self.fixed_level) is not int or self.fixed_level not in MATCH_COUNTS_BY_LEVEL:
-                raise CampaignError("A fixed policy needs a level between 1 and 9.")
+            if type(self.fixed_level) is not int or self.fixed_level < 1:
+                raise CampaignError("A fixed policy needs a positive global level.")
         elif self.fixed_level is not None:
             raise CampaignError("fixed_level is only valid for the fixed policy.")
         if type(self.enabled) is not bool:
@@ -54,6 +60,7 @@ def load_campaign(path):
         return None
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
+        data.setdefault("unit_type", DEFAULT_UNIT_TYPE)
         return Campaign(**data)
     except (OSError, json.JSONDecodeError, TypeError) as error:
         raise CampaignError(f"Cannot read campaign: {error}") from error
@@ -74,22 +81,39 @@ def save_campaign(campaign, path):
 
 
 def resolve_campaign_level(campaign, max_level):
-    """Global level the campaign targets; raises when it falls outside 1-9."""
+    """Global level the campaign targets."""
     if campaign.level_policy == "fixed":
         return campaign.fixed_level
     level = max_level if campaign.level_policy == "max" else max_level - 1
-    if type(level) is not int or level not in MATCH_COUNTS_BY_LEVEL:
+    if type(level) is not int or level < 1:
         raise CampaignError("campaign_level_out_of_range")
     return level
 
 
-def expand_goals(queue, level, now: datetime, priority=None):
-    """Enqueue goals (level, 1..N); re-arm completed ones. Idempotent for open goals."""
+def expand_goals(queue, unit_type, level, now: datetime, priority=None):
+    """Enqueue goals for a category with a verified slot-count map."""
+    try:
+        validate_unit_type(unit_type)
+    except ValueError as error:
+        raise CampaignError(str(error)) from error
+    if unit_type != DEFAULT_UNIT_TYPE:
+        raise CampaignError("campaign_unit_type_slot_map_unverified")
+    if level not in MATCH_COUNTS_BY_LEVEL:
+        raise CampaignError("campaign_level_out_of_range")
+
     results = []
     for match_number in range(1, MATCH_COUNTS_BY_LEVEL[level] + 1):
-        slot = Slot(level, match_number)
+        slot = Slot(unit_type, level, match_number)
         task_id = goal_task_id(slot)
-        existing = next((task for task in queue["tasks"] if task["task_id"] == task_id), None)
+        existing = next((
+            task for task in queue["tasks"]
+            if task["task_type"] == "army_training"
+            and task["payload"].get("goal_kind") == "slot_stock_v1"
+            and task["payload"].get("slot") in (
+                {"unit_type": unit_type, "global_level": level, "match_number": match_number},
+                {"global_level": level, "match_number": match_number},
+            )
+        ), None)
         if existing is None:
             enqueue_training_goal(queue, TrainingGoal(queue["profile_id"], slot), now, priority)
             action = "created"
@@ -98,7 +122,7 @@ def expand_goals(queue, level, now: datetime, priority=None):
             action = "rearmed"
         else:
             action = "kept"
-        results.append({"task_id": task_id, "level": level, "match_number": match_number, "action": action})
+        results.append({"task_id": existing["task_id"] if existing else task_id, "unit_type": unit_type, "level": level, "match_number": match_number, "action": action})
     return results
 
 
@@ -106,4 +130,4 @@ def expand_campaign(queue, campaign, max_level, now: datetime):
     if not campaign.enabled:
         return []
     level = resolve_campaign_level(campaign, max_level)
-    return expand_goals(queue, level, now, campaign.priority)
+    return expand_goals(queue, campaign.unit_type, level, now, campaign.priority)

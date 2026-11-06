@@ -164,7 +164,7 @@ def test_fallback_schedules_retry_without_speedup_adapter(tmp_path, monkeypatch)
 
 def _executor_setup(monkeypatch, states):
     queue = create_task_queue("p")
-    enqueue_training_goal(queue, TrainingGoal("p", Slot(7, 1)), NOW)
+    enqueue_training_goal(queue, TrainingGoal("p", Slot("guardsmen", 7, 1)), NOW)
     slot = SimpleNamespace(index=0, dx=0, dy=0, regions={
         "unit_troop_level": {"x": 100, "y": 100, "w": 30, "h": 120},
         "unit_troop_train_button": {"x": 400, "y": 500, "w": 50, "h": 20},
@@ -193,13 +193,13 @@ def test_executor_records_marker_after_confirmed_start(tmp_path, monkeypatch):
     path = army_state_path("p", tmp_path)
 
     result = executor.execute_training_goal(
-        queue, "army_stock:level_7:match_1", NOW, execute=True, confirmation=executor.CONFIRMATION_PHRASE,
+        queue, "army_stock:unit_guardsmen:level_7:match_1", NOW, execute=True, confirmation=executor.CONFIRMATION_PHRASE,
         capture_fn=capture, click_fn=click, sleep_fn=lambda _: None, state_path=path,
     )
 
     stored = open_training(load_army_state(path))
     assert result["status"] == "START_CONFIRMED"
-    assert stored["task_id"] == "army_stock:level_7:match_1"
+    assert stored["task_id"] == "army_stock:unit_guardsmen:level_7:match_1"
     assert stored["expires_at"] == queue["tasks"][0]["expires_at"]
 
 
@@ -208,7 +208,7 @@ def test_executor_blocks_on_foreign_training_without_clicking(tmp_path, monkeypa
     path = army_state_path("p", tmp_path)
 
     result = executor.execute_training_goal(
-        queue, "army_stock:level_7:match_1", NOW, execute=True, confirmation=executor.CONFIRMATION_PHRASE,
+        queue, "army_stock:unit_guardsmen:level_7:match_1", NOW, execute=True, confirmation=executor.CONFIRMATION_PHRASE,
         capture_fn=capture, click_fn=click, sleep_fn=lambda _: None, state_path=path,
     )
 
@@ -223,14 +223,14 @@ def test_executor_finishes_previous_training_then_starts_next(tmp_path, monkeypa
     open_training_marker(path, "old", "old-task", {}, NOW - timedelta(hours=1), NOW - timedelta(minutes=30))
 
     result = executor.execute_training_goal(
-        queue, "army_stock:level_7:match_1", NOW, execute=True, confirmation=executor.CONFIRMATION_PHRASE,
+        queue, "army_stock:unit_guardsmen:level_7:match_1", NOW, execute=True, confirmation=executor.CONFIRMATION_PHRASE,
         capture_fn=capture, click_fn=click, sleep_fn=lambda _: None, state_path=path,
         speedup_fn=lambda: "idle",
     )
 
     assert result["status"] == "START_CONFIRMED"
     assert result["finish"]["status"] == "finished"
-    assert open_training(load_army_state(path))["order_id"].startswith("army_stock:level_7:match_1@")
+    assert open_training(load_army_state(path))["order_id"].startswith("army_stock:unit_guardsmen:level_7:match_1@")
     assert len(clicks) == 1
 
 
@@ -240,7 +240,7 @@ def test_executor_unavailable_speedup_blocks_goal_until_next_attempt(tmp_path, m
     open_training_marker(path, "old", "old-task", {}, NOW - timedelta(hours=1), NOW - timedelta(minutes=30))
 
     result = executor.execute_training_goal(
-        queue, "army_stock:level_7:match_1", NOW, execute=True, confirmation=executor.CONFIRMATION_PHRASE,
+        queue, "army_stock:unit_guardsmen:level_7:match_1", NOW, execute=True, confirmation=executor.CONFIRMATION_PHRASE,
         capture_fn=capture, click_fn=click, sleep_fn=lambda _: None, state_path=path,
     )
 

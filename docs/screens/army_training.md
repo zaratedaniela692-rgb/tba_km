@@ -23,7 +23,7 @@ Current slot-detection and stock-goal rules, flow diagram, implementation status
 ## Elementy (wg regionów i opisany.png)
 Współrzędne są względem kadru `screenshots/army_training/pelny.png`; nazwy odpowiadają `regions.json`.
 
-1. `troops_types` – lista kategorii: Gwardziści, Specjaliści, Korpus inżynierów, Smoki, Żywiołaki, Olbrzymy, Bestie. Szczegółowe zachowanie kategorii poza Gwardzistami nie zostało jeszcze sprawdzone.
+1. `troops_types` – lista kategorii: Gwardziści, Specjaliści, Korpus inżynierów, Smoki, Żywiołaki, Olbrzymy, Bestie. Obecne fixture'y i zintegrowany workflow szkolenia dotyczą wyłącznie Gwardzistów. Nie przełączaj ani nie szkol innych kategorii automatycznie, dopóki ich listy, sloty i poziomy nie zostaną zweryfikowane osobnymi screenami.
 2. `unit_troop_level` – selector badges are ordered vertically and can differ per slot. The MVP treats the largest badge as the presumed highest because the highest level is selected by default in about 99% of cases. This is an assumption, not direct locked/unlocked verification; a manually selected lower level is an acknowledged edge case. The read-only detector OCRs only the largest badge's numeral and derives the one-below candidate from the immediately preceding badge when its center is 20–30 px above.
 3. Stan zaznaczenia poziomu – aktualnie wybrany poziom ma lekko powiększony krążek z numerem. MVP używa tego sygnału jako założenia o najwyższym poziomie; nie potwierdza jeszcze osobno stanu odblokowania. Weryfikacja zaznaczenia po kliknięciu będzie wymagana przed przyszłym wykonaniem akcji.
 4. `current_trainin_army` – obszar bieżącego szkolenia: typ/poziom jednostki i liczba aktualnie szkolonych wojsk. To kluczowy stan blokujący rozpoczęcie następnego szkolenia.
@@ -44,7 +44,7 @@ Współrzędne są względem kadru `screenshots/army_training/pelny.png`; nazwy 
 - W ostatnich czterech slotach numeracja rzymska zaczyna się ponownie: łucznik, włócznik, jeździec i jednostka latająca pojawiają się z oznaczeniem I/II, które odpowiada globalnym poziomom VIII/IX.
 - Po odblokowaniu wyższych poziomów interfejs automatycznie przewija listę ku nowszym jednostkom; starsze sloty mogą zniknąć z widoku. Koniec listy wykrywaj po braku zmiany obrazu po przewinięciu.
 - Jednostkę identyfikuj po typie oraz globalnym poziomie, wyprowadzonym z sekwencji; nie używaj samego numeru rzymskiego ani bieżącej pozycji na ekranie. Potwierdź odblokowanie oraz powiększony znacznik aktualnego wyboru osobno.
-- Nie identyfikuj konkretnego typu jednostki. Cel jest określony globalnym poziomem i numerem pasującego slotu w ustalonej kolejności listy.
+- Unit identity is `{unit_type, global_level, match_number}`; `match_number` is counted only within a verified category and level. The manager persists category identity, while live selection and execution remain blocked for categories without verified fixtures and slot mappings.
 - Poziomy 1-4 mają po trzy sloty jednostek, a poziomy 5-9 po cztery. Szukaj wszystkich slotów z żądanym poziomem i wybieraj wymagany numer dopasowania; nie zakładaj stałej współrzędnej ani nie szkol pierwszej widocznej karty bez sprawdzenia poziomu.
 - Numery lokalne mogą się powtarzać (np. I/II dla globalnych poziomów VIII/IX), dlatego oznaczenie poziomu interpretuj w kontekście sekwencji listy.
 - Lista zachowuje zasadniczo stałą kolejność, ale karty mogą zaczynać się w różnym miejscu lub zmieniać widoczność przy przewijaniu. Przeszukuj listę do końca, a koniec potwierdzaj brakiem zmiany obrazu po przewinięciu.
@@ -52,7 +52,7 @@ Współrzędne są względem kadru `screenshots/army_training/pelny.png`; nazwy 
 
 ## Army replenishment algorithm
 
-The intended plan is to maintain a target troop count per profile and matching unit slot, rather than blindly executing a fixed number of training runs. Do not identify the troop by its name: identify the matching slot in the army list and read that slot's own queue limits. Let `L_ref` be the queue limit for this slot at one level below its highest unlocked level, and `L_train` be the queue limit for the level selected for the next order:
+The intended plan is to maintain a target troop count per profile and matching unit slot, rather than blindly executing a fixed number of training runs. Identify the Barracks category (`unit_type`) and matching slot, but do not require a separate troop name to calculate the stock goal. Read that slot's own queue limits. Let `L_ref` be the queue limit for this slot at one level below its highest unlocked level, and `L_train` be the queue limit for the level selected for the next order:
 
 ```text
 target_count = 2 * L_ref
@@ -66,7 +66,7 @@ The planner contains a pure `evaluate_slot_replenishment` calculation for this f
 
 ### Process architecture and persistence
 
-- `Slot` identifies a target by global level and matching number, never by troop name or screen coordinates. `TrainingGoal` binds it to a profile.
+- The `Slot` identity includes unit category, global level, and matching number; it never uses screen coordinates. `TrainingGoal` binds the typed slot to a profile. Current verified fixtures and live execution cover Gwardzists only.
 - `NumericReading` carries value, OCR confidence, and raw text. `SlotObservation` binds all readings to one profile, slot, capture time, source frame, training state, and verified selection. The capture adapter must assemble readings from the same verified slot/level; a declared identity is not proof of correct detection.
 - `decide_training_goal` is pure. By default it rejects captures older than 30 seconds, future timestamps, mismatched profiles/slots, unverified selection, and numbers with confidence below 70. Both queue limits and the highest unlocked level need reliable evidence, not just the city count.
 - `enqueue_training_goal` creates one idempotent `army_training` task with `goal_kind=slot_stock_v1`. There is no requested number of runs. Existing run-based campaign APIs remain supported; they do not automatically migrate into stock goals. Choose one scheduling mode per campaign; do not generate legacy runs alongside equivalent stock goals.
@@ -184,6 +184,7 @@ The plan may contain many unit goals, but the executor starts only one in-game o
 - Czwarty slot poziomu V, opisywany wcześniej jako latająca jednostka, jest poza pierwszą kampanią. Nie traktuj go jako brakującego celu ani nie rozszerzaj zakresu automatycznie.
 - Karty innych jednostek są analogiczne według informacji użytkowniczki, ale nie są jeszcze zweryfikowane ekranami.
 - Poziomy I–V są poziomami Gwardzistów w tym przykładzie. Przygaszony wygląd oznacza poziom jeszcze nieodblokowany.
+- 2026-11-06 – Gwardziści są jedyną kategorią objętą obecnymi fixture'ami szkolenia i zintegrowanym managerem. Pozostałe kategorie wymagają osobnych fixture'ów; nie zakładamy identycznych slotów, poziomów ani kolejności.
 - Nie polegaj na domyślnym zaznaczeniu najwyższego odblokowanego poziomu. Przed ustawieniem liczby wojsk jawnie wybierz poziom docelowy.
 - Użytkowniczka często szkoli niższy poziom, na którym zwykle szkoli najwięcej jednostek. Docelowy poziom powinien być parametrem feature'u, a nie stałą zakodowaną jako „najwyższy odblokowany”.
 - Czerwony tekst food oznacza zbyt duże obciążenie wojskiem: zatrzymaj rekrutację i zgłoś stan. Sprawdzanie bonusów jest osobnym, odroczonym feature'em.

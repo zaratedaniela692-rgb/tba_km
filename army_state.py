@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from task_controller import PROFILES_DIR, task_queue_path
+from army_unit_types import DEFAULT_UNIT_TYPE, validate_unit_type
 
 DEFAULT_MAX_LEVEL_TTL = timedelta(hours=24)
 MIN_LEVEL = 1
@@ -61,13 +62,20 @@ def _write_state(path, state):
     return state
 
 
-def save_max_level(path, level, observed_at, source, confidence=None):
+def save_max_level(path, unit_type, level, observed_at, source, confidence=None):
+    try:
+        validate_unit_type(unit_type)
+    except ValueError as error:
+        raise ArmyStateError(str(error)) from error
     if not _valid_level(level):
         raise ArmyStateError("Max level must be an integer 1-9.")
     if observed_at.tzinfo is None:
         raise ArmyStateError("observed_at must be timezone-aware.")
     state = load_army_state(path)
-    state["max_level"] = {
+    max_levels = state.setdefault("max_levels", {})
+    if "max_level" in state:
+        max_levels.setdefault(DEFAULT_UNIT_TYPE, state.pop("max_level"))
+    max_levels[unit_type] = {
         "level": level,
         "observed_at": observed_at.astimezone(timezone.utc).isoformat(),
         "source": source,
@@ -137,13 +145,19 @@ def parse_marker_time(marker, key):
     return parsed
 
 
-def resolve_max_level(fresh_level, state, now, ttl=DEFAULT_MAX_LEVEL_TTL):
+def resolve_max_level(unit_type, fresh_level, state, now, ttl=DEFAULT_MAX_LEVEL_TTL):
     """A fresh read wins; the cache is used only when the read failed and is within TTL."""
+    try:
+        validate_unit_type(unit_type)
+    except ValueError:
+        return MaxLevelResult("blocked", None, "none", "unit_type_unknown")
     if fresh_level is not None:
         if not _valid_level(fresh_level):
             return MaxLevelResult("blocked", None, "none", "fresh_max_level_out_of_range")
         return MaxLevelResult("ok", fresh_level, "fresh", "read_from_barracks")
-    cached = (state or {}).get("max_level")
+    cached = (state or {}).get("max_levels", {}).get(unit_type)
+    if cached is None and unit_type == DEFAULT_UNIT_TYPE:
+        cached = (state or {}).get("max_level")
     if not isinstance(cached, dict) or not _valid_level(cached.get("level")):
         return MaxLevelResult("blocked", None, "none", "max_level_unavailable")
     try:

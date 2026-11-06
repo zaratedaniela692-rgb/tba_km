@@ -12,8 +12,8 @@ NOW = datetime(2026, 11, 6, 12, 0, tzinfo=timezone.utc)
 
 def test_expansion_creates_three_goals_for_low_levels_and_four_for_high_levels():
     queue = create_task_queue("p")
-    low = expand_campaign(queue, Campaign("fixed", 4), None, NOW)
-    high = expand_campaign(queue, Campaign("fixed", 6), None, NOW)
+    low = expand_campaign(queue, Campaign("guardsmen", "fixed", 4), None, NOW)
+    high = expand_campaign(queue, Campaign("guardsmen", "fixed", 6), None, NOW)
 
     assert [goal["match_number"] for goal in low] == [1, 2, 3]
     assert [goal["match_number"] for goal in high] == [1, 2, 3, 4]
@@ -21,18 +21,18 @@ def test_expansion_creates_three_goals_for_low_levels_and_four_for_high_levels()
 
 
 def test_policies_resolve_from_max_level_and_reject_out_of_range():
-    assert resolve_campaign_level(Campaign("max"), 7) == 7
-    assert resolve_campaign_level(Campaign("max_minus_1"), 7) == 6
-    assert resolve_campaign_level(Campaign("fixed", 3), 7) == 3
+    assert resolve_campaign_level(Campaign("guardsmen", "max"), 7) == 7
+    assert resolve_campaign_level(Campaign("guardsmen", "max_minus_1"), 7) == 6
+    assert resolve_campaign_level(Campaign("guardsmen", "fixed", 3), 7) == 3
     with pytest.raises(CampaignError):
-        resolve_campaign_level(Campaign("max_minus_1"), 1)
+        resolve_campaign_level(Campaign("guardsmen", "max_minus_1"), 1)
     with pytest.raises(CampaignError):
-        Campaign("fixed")
+        Campaign("guardsmen", "fixed")
 
 
 def test_repeated_expansion_keeps_open_goals_and_rearms_only_completed_ones():
     queue = create_task_queue("p")
-    campaign = Campaign("max_minus_1", priority=2)
+    campaign = Campaign("guardsmen", "max_minus_1", priority=2)
     expand_campaign(queue, campaign, 7, NOW)
     done = queue["tasks"][0]
     done["status"] = "completed"
@@ -49,16 +49,16 @@ def test_repeated_expansion_keeps_open_goals_and_rearms_only_completed_ones():
 
 def test_rearm_rejects_open_goal():
     queue = create_task_queue("p")
-    task = enqueue_training_goal(queue, TrainingGoal("p", Slot(5, 1)), NOW)
+    task = enqueue_training_goal(queue, TrainingGoal("p", Slot("guardsmen", 5, 1)), NOW)
     with pytest.raises(TrainingProcessError):
         rearm_training_goal(queue, task["task_id"], NOW)
 
 
 def test_single_slot_goal_equals_campaign_goal():
     single = create_task_queue("p")
-    enqueue_training_goal(single, TrainingGoal("p", Slot(6, 2)), NOW)
+    enqueue_training_goal(single, TrainingGoal("p", Slot("guardsmen", 6, 2)), NOW)
     campaign = create_task_queue("p")
-    expand_campaign(campaign, Campaign("fixed", 6), None, NOW)
+    expand_campaign(campaign, Campaign("guardsmen", "fixed", 6), None, NOW)
 
     assert single["tasks"][0]["payload"]["slot"] == campaign["tasks"][1]["payload"]["slot"]
     assert single["tasks"][0]["task_id"] == campaign["tasks"][1]["task_id"]
@@ -66,27 +66,54 @@ def test_single_slot_goal_equals_campaign_goal():
 
 def test_disabled_campaign_expands_nothing_and_goals_are_not_ready_without_a_decision():
     queue = create_task_queue("p")
-    assert expand_campaign(queue, Campaign("max", enabled=False), 7, NOW) == []
-    expand_campaign(queue, Campaign("max"), 7, NOW)
+    assert expand_campaign(queue, Campaign("guardsmen", "max", enabled=False), 7, NOW) == []
+    expand_campaign(queue, Campaign("guardsmen", "max"), 7, NOW)
     assert get_next_task(queue, {}, now=NOW) is None
 
 
 def test_campaign_round_trip_in_profile_directory(tmp_path):
     path = campaign_path("p", tmp_path)
     assert load_campaign(path) is None
-    save_campaign(Campaign("max_minus_1", priority=2), path)
-    assert load_campaign(path) == Campaign("max_minus_1", priority=2)
+    save_campaign(Campaign("guardsmen", "max_minus_1", priority=2), path)
+    assert load_campaign(path) == Campaign("guardsmen", "max_minus_1", priority=2)
+
+
+def test_legacy_campaign_defaults_to_guardsmen_and_unverified_type_cannot_expand(tmp_path):
+    path = campaign_path("p", tmp_path)
+    path.parent.mkdir(parents=True)
+    path.write_text('{"level_policy":"max_minus_1","fixed_level":null,"enabled":true,"priority":null}', encoding="utf-8")
+    assert load_campaign(path).unit_type == "guardsmen"
+
+    queue = create_task_queue("p")
+    with pytest.raises(CampaignError, match="slot_map_unverified"):
+        expand_campaign(queue, Campaign("specialists", "fixed", 5), None, NOW)
+    assert queue["tasks"] == []
 
 
 def test_max_level_fresh_wins_cache_only_within_ttl(tmp_path):
     path = army_state_path("p", tmp_path)
-    save_max_level(path, 7, NOW, "test", 90)
+    save_max_level(path, "guardsmen", 7, NOW, "test", 90)
     state = load_army_state(path)
 
-    assert resolve_max_level(8, state, NOW).source == "fresh"
-    cached = resolve_max_level(None, state, NOW + timedelta(hours=1))
+    assert resolve_max_level("guardsmen", 8, state, NOW).source == "fresh"
+    cached = resolve_max_level("guardsmen", None, state, NOW + timedelta(hours=1))
     assert (cached.status, cached.level, cached.source) == ("ok", 7, "cache")
-    stale = resolve_max_level(None, state, NOW + timedelta(hours=25))
+    stale = resolve_max_level("guardsmen", None, state, NOW + timedelta(hours=25))
     assert (stale.status, stale.reason) == ("blocked", "cached_max_level_stale")
-    assert resolve_max_level(None, {}, NOW).reason == "max_level_unavailable"
-    assert resolve_max_level(12, state, NOW).status == "blocked"
+    assert resolve_max_level("guardsmen", None, {}, NOW).reason == "max_level_unavailable"
+    assert resolve_max_level("guardsmen", 12, state, NOW).status == "blocked"
+
+
+def test_max_level_cache_is_isolated_by_unit_type_and_reads_legacy_guard_cache(tmp_path):
+    path = army_state_path("typed", tmp_path)
+    save_max_level(path, "guardsmen", 7, NOW, "test", 90)
+    save_max_level(path, "specialists", 5, NOW, "test", 90)
+    state = load_army_state(path)
+
+    assert resolve_max_level("guardsmen", None, state, NOW).level == 7
+    assert resolve_max_level("specialists", None, state, NOW).level == 5
+    assert resolve_max_level("dragons", None, state, NOW).reason == "max_level_unavailable"
+
+    legacy = {"max_level": state["max_levels"]["guardsmen"]}
+    assert resolve_max_level("guardsmen", None, legacy, NOW).level == 7
+    assert resolve_max_level("specialists", None, legacy, NOW).reason == "max_level_unavailable"
