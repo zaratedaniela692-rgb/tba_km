@@ -20,6 +20,50 @@ Replace `--input` with the screenshot to inspect and `--tesseract` with the loca
 
 For another computer, copy/clone the repository with its `regions.json`, `templates/`, and screenshot fixtures. Install Python and the runtime packages used by the scanner (`opencv-python`, `numpy`, `pytesseract`) plus the Tesseract OCR executable. `requirements-dev.txt` currently lists only `pytest`, not these runtime dependencies, so provision them separately. Verify local paths and run the command above before using another screenshot.
 
+## One-Shot Live E2E Contract (Implemented; Supervised Live Run Pending)
+
+The first live E2E is a one-shot experiment, not a persistent stock goal and not a permanent `match_number` assignment:
+
+1. The user launches the game and places the Barracks screen fully visible on the primary monitor. Capture the primary monitor at the configured 1920x1080 size. Do not select or attach to another process/window.
+2. Detect all visible slots in the fresh frame. Choose the second visible slot in top-left-to-bottom-right order. If fewer than two slots are detected, or geometry is ambiguous, stop.
+3. Use the existing default-highest assumption for that slot. Find its immediately preceding visible selector badge as the requested `max-1` level. Click only that level badge, then capture again and verify the requested label and enlarged selected badge before reading costs or proceeding. If selection cannot be verified, stop.
+4. Require the current training state to be idle. If active or unknown, stop without clicking Train.
+5. Read this slot's city count, displayed training amount/limit, selected-level silver cost, and global food/silver. Require reliable OCR, white positive food, and sufficient silver.
+6. Use the stock planner math for this one-shot goal: `target=2*slot_limit`, completion threshold `ceil(0.8*target)`, order amount `min(target-city_count, slot_limit)`. The UI quantity must equal the planned amount. If it differs, stop; quantity-slider manipulation is not part of this first executor.
+7. Default execution is dry-run. Real execution requires explicit `--execute`. Immediately before Train, capture and recheck idle state, selected level, same slot/anchor, resources, and displayed amount. Then issue exactly one click at the Train button's position detected in that fresh primary-monitor frame.
+8. Capture after the click and classify training. Only a fresh `active` result confirms acceptance. `idle` or `unknown` is reported as uncertain; never retry the click automatically.
+9. Keep queue/goal state in memory for this one-shot test; do not persist a frame index as `{global_level, match_number}`. No Help/Speed Up clicks, scrolling, or additional training orders.
+10. Honor PyAutoGUI's fail-safe and check the project's emergency-stop file before selector and Train clicks. The current executor does not write timestamped logs or save debug frames; uncertain outcomes are printed in the JSON report and require manual inspection.
+
+## Live E2E Implementation Status
+
+Implemented as an isolated, opt-in one-shot executor in `army_training_live_e2e.py`. Preview is the default. Live mode requires both `--execute` and the exact confirmation phrase, requires a 1920x1080 primary-monitor capture, and does not persist queue state. Mocked tests cover its gates, click sequence, and failures after a click. A real, supervised game run has not yet been performed.
+
+The current workstation lacks `mss` and `pyautogui`. The preview was attempted and safely returned `BLOCKED` with `Live capture requires the 'mss' package`, `actions_executed=false`, and `queue_modified=false`. Primary-monitor capture and physical clicks have not been exercised here. Install the declared runtime packages on the intended PC and inspect the preview there before executing. The one-below click still relies on the default-highest assumption. The planned order must equal the currently displayed amount; slider manipulation is deliberately not implemented. The executor does not create a persistent manager goal or `match_number`.
+
+### Operator Procedure
+
+1. From the repository root, install project runtime dependencies and install Tesseract OCR. Ensure `tesseract.exe` is on `PATH`.
+2. Launch the game manually, open Barracks, and leave the full game visible on the primary monitor at 1920x1080. Close overlays/notifications. Confirm there is no active training.
+3. Run preview first. It captures the current monitor but performs no clicks and does not change the queue:
+
+```powershell
+python -m pip install -r .\requirements-dev.txt
+python .\army_training_live_e2e.py
+```
+
+4. Review the JSON. Confirm `slot_frame_index` is 1, `requested_level` is the intended max-1, `preflight.blockers` is empty, the game is idle, resources are sufficient, and `planned_quantity` equals the full displayed queue amount. Do not execute if any value is uncertain or the preview is blocked.
+5. To execute the one-shot test, enter the explicit confirmation command. The program clicks max-1, captures again to verify selection and same visible slot, repeats resource/stock checks, then can click Train once:
+
+```powershell
+python .\army_training_live_e2e.py --execute --confirm "TRAIN SECOND SLOT MAX-1"
+```
+
+6. Interpret `START_CONFIRMED` as the only success. `BLOCKED` means Train was not submitted, though the level selector may already have been clicked. `UNKNOWN_AFTER_CLICK` means Train may have been submitted: inspect the game manually and do not rerun automatically.
+7. Emergency stop: create `%USERPROFILE%\.tba_stop` before the next gated action. PyAutoGUI's corner fail-safe is also enabled for real clicks.
+
+This test uses the second visible slot in one frame; it does not mean global `match_number=2`. It does not persist a manager goal, scroll the list, click Help, or automatically retry.
+
 ## Terms
 
 - **Slot:** one unit training panel, including its level selector, city count, training amount, slider, costs, duration, food load, and Train button.
@@ -146,7 +190,9 @@ flowchart TD
 | Connect the CLI dry-run report to slot detection, level candidates, and per-slot readings | Implemented; reports candidates but does not mutate any queue | `army_training_dry_run.py` |
 | Bind a dry-run candidate to persistent `{global_level, match_number}` and call the stock-goal manager | Not implemented; no list-origin/scroll identity proof or `SlotObservation` adapter | `army_training_dry_run.py`, `army_training_process.py` |
 | Food/silver live resource preflight and Train/Help click flow | Not implemented | Out of MVP scope |
-| Live-window capture and scroll workflow | Not implemented | Out of MVP scope |
+| Primary-monitor capture in isolated one-shot executor | Implemented; requires `mss`, fixed 1920x1080 frame | `army_training_live_e2e.py` |
+| Opt-in selection, preflight, one Train click, post-click confirmation | Implemented; mocked tests only, not yet run against a live game | `army_training_live_e2e.py`, `tests/test_army_training_live_e2e.py` |
+| Window selection and scroll workflow | Not implemented | Out of MVP scope |
 
 ## Contract Checks
 
@@ -160,9 +206,10 @@ Use the tests below as executable checks for the corresponding documented rules.
 | Dry-run reports visible target candidates but does not claim an unverified match number | `tests/test_army_training_dry_run.py::test_dry_run_reads_resources_and_blocks_unverified_training`, `test_dry_run_reports_idle_training_without_active_training_block`, `test_target_candidate_classifies_exact_one_below_for_manager_skip` |
 | Exact `L-1` completes with a reason without count/limit reads; more than one level below remains blocked | `tests/test_army_training_process.py::test_slot_one_level_below_target_completes_goal_without_other_readings`, `test_slot_more_than_one_level_below_target_stays_blocked` |
 | Stale, mismatched, active, or low-confidence evidence cannot authorize training | `tests/test_army_training_process.py::test_uncertain_evidence_blocks_action`, `test_active_training_cannot_satisfy_goal_or_start_another_order` |
+| Click/capture failures after an action are reported as uncertain and never retried | `tests/test_army_training_live_e2e.py::test_capture_failure_after_level_click_reports_action_and_unknown`, `test_train_click_exception_is_unknown_and_never_retried`, `test_uncertain_post_click_does_not_retry` |
 
 For a future change that connects components, add an integration test that starts with a screenshot fixture, constructs a `SlotObservation`, and verifies the manager decision and persisted reason. Until that adapter exists, component tests do not prove the full screenshot-to-queue flow.
 
 ## Next Integration Step
 
-First establish the requested `{global_level, match_number}` against the visible list without treating frame index as identity. The current dry-run finds V candidates on `pelny.png`, but training is active; the idle fixture shows VII/VI, not the configured V target. A clean idle frame of the intended profile/list position is required to validate the first task. Then add the read-only adapter that binds the slot, level evidence, per-slot measurements, training state, profile, timestamp, and source into `SlotObservation`; exercise the manager in dry-run and test the screenshot-to-decision path. Live-window capture, lower-level selection clicks, and the actual Train click remain a separate opt-in stage.
+Install the declared runtime dependencies on the intended PC, keep the game's Barracks fully visible at 1920x1080 on the primary monitor, and run preview first. The first supervised `--execute` run will use only the second visible slot in the current frame and will not persist a manager goal. It can select max-1, run slot-specific preflight, click Train at most once, and confirm active state. If preview blocks because stock is already at target, a queue is active, resources are insufficient, or the planned order is not exactly one full queue, do not bypass the blocker. After that one-shot E2E works, separately build the persistent queue-manager adapter and prove the global `match_number` over the full list.

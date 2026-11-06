@@ -10,6 +10,7 @@ The current algorithm, decisions, diagram, implementation status, and MVP bounda
 - `army_training_slot_reader.py` reads each slot's queue amount/limit, city count, and silver cost independently, with raw OCR and confidence.
 - `army_training_levels.py` chooses the largest selector badge as the presumed highest level, under the agreed assumption that the highest level is selected by default. It OCRs that badge's local Roman numeral and identifies the immediately preceding visible badge as the one-below candidate.
 - `army_training_dry_run.py` now reports detected slots, level candidates, and per-slot readings. It stays read-only and blocks rather than assigning a frame index to an unverified persistent `match_number`.
+- `army_training_live_e2e.py` implements an isolated one-shot flow for the second currently visible slot's max-1 level. Preview is the default. Live execution requires `--execute --confirm "TRAIN SECOND SLOT MAX-1"`, captures the primary monitor at 1920x1080, and can click Train at most once. It rechecks idle state/slot/selection, preflights resources and stock, and never retries an uncertain Train action. Tests are mocked; no supervised live run has been performed.
 - `army_training_plan.py` contains pure per-slot stock-goal calculations, including the 80% completion threshold.
 - `army_training_process.py` has typed stock-goal, observation, decision, reconciliation, and persistent queue integration. Reconciliation defaults to dry-run. A reliable reading exactly one below a requested target completes that target with reason `target_level_unavailable_for_slot`; no replacement goal is generated.
 - Tests cover the detector, per-slot measurements, selector candidates, stock-goal decisions, and queue persistence.
@@ -25,10 +26,12 @@ The current algorithm, decisions, diagram, implementation status, and MVP bounda
 
 ## Latest Validation
 
-- Full test suite: `107 passed` on 2026-11-05 after integrating slot evidence into the CLI dry-run report.
+- Full test suite: 114 passed after adding the mocked live E2E executor.
+- Live E2E executor tests are fully mocked; they do not capture the desktop or send clicks. Failure tests cover capture errors after selector click and uncertain Train-click exceptions with no retry.
+- Local live-preview attempt safely returned `BLOCKED: Live capture requires the 'mss' package` with `actions_executed=false` and `queue_modified=false`. Install dependencies before attempting preview on this PC.
 - `tools/verify.py --screen army_training --input screenshots/army_training` completed. State-dependent matches below threshold are expected and recorded in the workflow document.
 - Pylance reported no errors in the changed selector reader and tests.
 
 ## Next Step
 
-Resolve the first target's persistent `{global_level, match_number}` binding from the intended profile/list position, then create the read-only adapter to `SlotObservation` and call the manager in dry-run. The current fixtures do not prove this binding: `pelny.png` has active training and the idle fixture shows VII/VI rather than the configured V target. Preserve the distinction between visible local-level evidence and a verified global highest-unlocked level. Do not add clicks or scrolling as part of this adapter.
+Install dependencies via `python -m pip install -r .\requirements-dev.txt` and install Tesseract OCR. Run the preview and review every reported gate before using the exact `--execute --confirm` command from the workflow document. After one successful one-shot experiment, continue with persistent queue-manager identity (`match_number`) and the `SlotObservation` adapter.

@@ -128,6 +128,14 @@ def read_army_training_snapshot(image_path, screen="army_training", regions_path
     variant = resolve_variant(variant_id)
     regions_path = Path(regions_path) if regions_path is not None else variant["regions"]
     image = _read_image(image_path)
+    return read_army_training_snapshot_from_image(image, screen, regions_path, variant)
+
+
+def read_army_training_snapshot_from_image(image, screen="army_training", regions_path=None, variant=None):
+    """Classify training state from an existing BGR frame without writing it to disk."""
+    if variant is None:
+        variant = resolve_variant()
+    regions_path = Path(regions_path) if regions_path is not None else variant["regions"]
     regions = _load_regions(regions_path).get(screen)
     if not isinstance(regions, dict):
         raise ArmyTrainingScannerError(f"Brak regionów dla ekranu '{screen}'.")
