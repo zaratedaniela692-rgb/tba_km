@@ -75,12 +75,63 @@ This test uses the second visible slot in one frame; it does not mean global `ma
 - `army_training_levels.py`: `lowest_visible_level` from consecutive badges (gaps 20-30 px); `None` when gaps are irregular. The fixtures show gaps of about 25 px.
 - `army_training_resolver.py`: m-th slot, in frame order, whose range contains `L`; `unsupported` without scrolling, `blocked` on uncertain ranges. Assumes the frame starts at the top of the list.
 - `army_training_observation.py`: builds `SlotObservation`; the same slot limit is stored for the goal level, the highest level and the one below. Selection counts as verified only when the largest badge equals the goal level (default-highest assumption). For a lower goal level the decision is `selection_unverified` and the manager reports `select_level_then_reobserve`, because the displayed city count belongs to the selected level.
-- `army_training_manager.py`: CLI `enqueue`, `set-campaign`, `expand`, `run`, and `execute`. `run` is read-only unless `--save`; `execute` is preview-only unless `--execute` and the confirmation phrase are supplied. It chooses one eligible goal by task priority.
+- `army_training_manager.py`: CLI `enqueue`, `set-campaign`, `expand`, `run`, and `execute`. `run --image` is an offline decision check, read-only unless `--save`. `execute` without flags previews only the required task startup; `execute --navigate-only --execute` tests live screen navigation without evaluating a goal; normal live `execute --execute` performs startup, then chooses one eligible goal by task priority.
 - `army_training_executor.py`: resolves the goal again from a fresh primary-monitor capture, selects the target badge when needed, re-detects the same slot, checks idle/resources/stock/time, clicks Train once, and requires active-state confirmation before marking the task started. An uncertain result after a Train attempt pauses the profile queue to prevent a duplicate.
 - `army_training_lifecycle.py`: coordinates Help/Speed Up/completion transitions only from explicit recognized states; it never clicks. Confirmed idle plus a fresh `SlotObservation` completes or requeues the same stock goal. The visual Help classifier and click adapter are pending because no verified Help fixture/template exists. Quick-finish acceleration remains manual.
-- Manager preview: `python .\army_training_manager.py --profile <profile> execute`. Live execution requires the operator to inspect that preview, then explicitly run `python .\army_training_manager.py --profile <profile> execute --execute --confirm "EXECUTE ARMY TRAINING"`. The assistant has not performed a live run.
+- Manager startup preview: `python .\army_training_manager.py --profile <profile> execute`. For a live navigation-only check, use `python .\army_training_manager.py --profile <profile> execute --navigate-only --execute --confirm "EXECUTE ARMY TRAINING"`; it does not inspect a goal or click Train. Normal live `execute --execute --confirm "EXECUTE ARMY TRAINING"` continues from confirmed Barracks into the selected task and may click Train after all existing gates. The assistant has not performed a live run.
 - `army_training_slot_time.py`: full-queue training time of a slot (day/hour resolution) is segmented first, then each digit is OCRed at two scales. The value is `None` unless all reads agree and every digit is fixture-verified (currently 1-5); unverified digits fail closed. It is correct on all six fixture slots; under JPEG/noise stress it returned no value rather than a wrong value. The manager executor requires this reading before Train and passes it to `mark_task_started` after active state is confirmed.
 - Dry-run on `pelny_army_training_empty_queue.png`: goal `(7, 1)` -> `needs_preflight`, 1269 to train; `(6, 1)` -> `select_level_then_reobserve`; `(6, 4)` -> `match_not_visible_without_scrolling`.
+
+## Army Training Task Startup (Approved 2026-11-06)
+
+### Goal
+
+Each army-training task starts from a predictable screen state and opens its own Barracks screen. Reset and navigation are part of the task startup, not separate queue tasks. The Escape reset is a shared helper that future task types can reuse before opening their own screens.
+
+### Contract
+
+1. Require explicit live-execution opt-in and the existing confirmation phrase before sending game input. The game must already be the foreground application; window activation is not implemented.
+2. Invoke the shared `clear_game_screen` helper to send exactly three rapid Escape presses. Do not capture or analyze the screen between presses.
+3. Capture a fresh primary-monitor frame. Locate the existing `world_map.armia` template inside its annotated region; click only when the match reaches the configured confidence threshold. Do not use a guessed coordinate or click if the control is not confidently found.
+4. Wait for the navigation transition, capture a fresh frame, and require `locate_slots` to identify a valid Barracks layout before goal evaluation or any training action.
+5. If the button or Barracks layout is missing, ambiguous, or outside the supported desktop geometry, stop the task without continuing to goal execution. Do not retry clicks automatically.
+6. This startup is mandatory for each army-training task execution, including a manager cycle that then reports no executable goal. Other task types can reuse the reset helper and define their own navigation after reset.
+7. Dry-run reports the planned reset and Barracks navigation without sending keys or clicks. Use `--navigate-only --execute --confirm "EXECUTE ARMY TRAINING"` for a supervised live navigation check; it sends the reset and Armia click but never evaluates a goal or clicks Train. Review that route before running a queued goal live.
+
+### Operator Check: Navigation Only
+
+The first live check opens Barracks and does not submit training. Keep the desktop game in the foreground on the primary 1920x1080 monitor. Preview the route:
+
+```powershell
+python .\army_training_manager.py --profile army_test execute --navigate-only
+```
+
+Then, only when ready to let the program send three Escape presses and click the detected Armia button, run:
+
+```powershell
+python .\army_training_manager.py --profile army_test execute --navigate-only --execute --confirm "EXECUTE ARMY TRAINING"
+```
+
+The command reports `BARRACKS_OPENED` only after slot geometry is detected. Any other status means stop and inspect the report; no goal or Train click is attempted. `army_test` is an operator-chosen profile label; navigation-only does not save or modify its queue.
+
+### Confirmed, Assumed, and Deferred
+
+- Confirmed by the user: each army-training task starts with three rapid Escape presses and then opens Barracks; this is intrinsic task startup, not a separate queue task. Reset behavior is shared for reuse by other task types.
+- Existing evidence: the world-map `armia` button has an annotated region and template, matching both world-map account fixtures at 100%; Barracks fixtures contain detectable training slots.
+- Assumed until supervised live check: clicking `world_map.armia` opens the Barracks panel and the three Escape presses reliably return to the default world-map view.
+- Deferred: openers for other task types and browser-client support.
+
+### Current Code Status
+
+`game_screen.clear_game_screen` and `army_training_navigation.open_army_training_screen` are implemented and covered by injected-input tests. `army_training_manager execute` runs this startup for live training; `--navigate-only` isolates it from goal evaluation and Train. A supervised live navigation check is still required to confirm the click-to-Barracks transition in the actual game.
+
+### Expected Tests
+
+- The shared helper emits exactly three Escape presses in live mode and none in dry-run; tests use an injected key-press function and never send real keys.
+- Army startup orders reset, scoped `Armia` template match/click, then a fresh Barracks layout check.
+- Missing or uncertain `Armia` match or Barracks layout blocks task actions and no Train click occurs.
+- A navigation-only live test can verify the route without submitting a training order.
+- Existing manager and executor tests continue to verify that no Train click occurs without explicit live opt-in and all existing preflight gates.
 
 ### Goal
 
@@ -140,7 +191,7 @@ flowchart TD
 
 - Confirmed (user): goal means m-th slot containing level `L`; 3 or 4 slots per level; campaign decomposes into slot goals; single-slot orders required; max level changes rarely and is read from the Barracks; one training at a time; first version without scrolling.
 - Assumed: consecutive badges form the whole selector range; TTL 24 h for the cached max level; 5 s view-reset wait; list order is stable between frames.
-- Deferred: scrolling and access to off-screen slots, Barracks navigation, unlock/dim detection, local I/II mapping, timer OCR for `initial_remaining_seconds`, Help/speed-up automation, multi-profile parallelism.
+- Deferred: scrolling and access to off-screen slots, unlock/dim detection, local I/II mapping, timer OCR for `initial_remaining_seconds`, Help/speed-up automation, multi-profile parallelism. The new Barracks navigation route is implemented but awaits supervised live confirmation.
 
 ### Planned Code
 
@@ -218,7 +269,7 @@ flowchart TD
 
 - Confirmed (user): task ends at expiry; the next army task finishes the previous training; a last-task mechanism exists; Speed Ups may run out and about hourly retry is acceptable; minimise screen visits and clicks.
 - Assumed: help window 30 min, grace 10 min, retry 1 hour, one active-training panel shared by all slots, the marker is the only proof that the bot owns the active training.
-- Deferred: Barracks navigation (the Barracks must already be open), Help/Speed Up/dialog recognition and clicks, item selection, stock re-evaluation by the fallback task.
+- Deferred: Help/Speed Up/dialog recognition and clicks, item selection, stock re-evaluation by the fallback task. Army task startup now resets and opens Barracks; its click transition awaits supervised live confirmation.
 
 ### Code Status
 

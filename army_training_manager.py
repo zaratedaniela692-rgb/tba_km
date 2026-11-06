@@ -186,12 +186,49 @@ def _parse_next_check(task):
 
 def _command_execute(args, profiles_dir, now):
     from army_training_live_e2e import capture_primary_monitor
+    from army_training_navigation import open_army_training_screen
+
+    if args.execute and args.confirm != CONFIRMATION_PHRASE:
+        return {
+            "status": "BLOCKED_CONFIRMATION",
+            "actions_executed": False,
+            "queue_modified": False,
+            "blockers": [f"Live execution requires confirmation phrase: {CONFIRMATION_PHRASE}"],
+        }
 
     queue, path = _load_or_create_queue(args.profile, profiles_dir)
     state_path = army_state_path(args.profile, profiles_dir)
+    if args.navigate_only:
+        navigation = open_army_training_screen(execute=args.execute)
+        return {
+            **navigation,
+            "navigation": navigation,
+            "queue_modified": False,
+            "queue_path": str(path),
+        }
+    if not args.execute:
+        navigation = open_army_training_screen(execute=False)
+        return {
+            "status": "PREVIEW_ONLY",
+            "actions_executed": False,
+            "queue_modified": False,
+            "navigation": navigation,
+            "queue_path": str(path),
+        }
+
     housekeeping = process_expirations(queue, state_path, now)
     if args.execute:
         save_task_queue(queue, path)
+    navigation = open_army_training_screen(execute=args.execute)
+    if args.execute and navigation.get("status") != "BARRACKS_OPENED":
+        return {
+            "status": "BLOCKED_TASK_STARTUP",
+            "actions_executed": navigation.get("actions_executed", False),
+            "queue_modified": False,
+            "navigation": navigation,
+            "housekeeping": housekeeping,
+            "queue_path": str(path),
+        }
     due_finish = next((
         task for task in queue["tasks"]
         if task["payload"].get("goal_kind") == FALLBACK_GOAL_KIND
@@ -205,7 +242,10 @@ def _command_execute(args, profiles_dir, now):
         )
         if args.execute:
             save_task_queue(queue, path)
-        result.update(task_id=due_finish["task_id"], housekeeping=housekeeping, queue_path=str(path))
+        result.update(
+            task_id=due_finish["task_id"], housekeeping=housekeeping,
+            navigation=navigation, queue_path=str(path),
+        )
         return result
     image, _ = capture_primary_monitor()
     frame = observe_image(image, now)
@@ -224,7 +264,7 @@ def _command_execute(args, profiles_dir, now):
             save_task_queue(queue, path)
         return {
             "status": "NO_EXECUTABLE_GOAL", "actions_executed": False, "queue_modified": False,
-            "evaluation": report, "housekeeping": housekeeping,
+            "evaluation": report, "housekeeping": housekeeping, "navigation": navigation,
         }
     task_id = eligible[0]["task_id"]
     result = execute_training_goal(
@@ -239,6 +279,7 @@ def _command_execute(args, profiles_dir, now):
         save_task_queue(queue, path)
     result["evaluation"] = report
     result["housekeeping"] = housekeeping
+    result["navigation"] = navigation
     result["queue_path"] = str(path)
     return result
 
@@ -274,6 +315,10 @@ def build_parser():
     execute = commands.add_parser("execute", help="execute at most one ready goal; preview unless --execute is provided")
     execute.add_argument("--execute", action="store_true", help="allow selector and at most one Train click")
     execute.add_argument("--confirm", default="", help=f"type exactly: {CONFIRMATION_PHRASE}")
+    execute.add_argument(
+        "--navigate-only", action="store_true",
+        help="run or preview the army-training startup navigation without evaluating or training a goal",
+    )
     execute.set_defaults(handler=_command_execute)
     return parser
 

@@ -1,6 +1,10 @@
 from datetime import datetime, timezone
+from pathlib import Path
 from types import SimpleNamespace
 
+import army_training_live_e2e as live
+import army_training_manager as manager
+import army_training_navigation as navigation
 from army_training_levels import SelectorLevelReading
 from army_training_manager import FrameObservation, evaluate_goals, frame_max_level
 from army_training_observation import build_slot_observation
@@ -107,3 +111,104 @@ def test_active_training_and_bad_layout_block_decisions():
     broken = frame()
     broken.layout_status, broken.levels = "ambiguous", None
     assert evaluate_goals(queue, broken, NOW)["goals"][0]["reason"] == "slot_layout_ambiguous"
+
+
+def test_execute_blocks_goal_when_task_startup_does_not_open_barracks(monkeypatch, tmp_path):
+    queue = create_task_queue("p")
+    queue_path = tmp_path / "tasks.json"
+    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
+    monkeypatch.setattr(manager, "process_expirations", lambda *_: {})
+    monkeypatch.setattr(manager, "save_task_queue", lambda *_: None)
+    monkeypatch.setattr(manager, "army_state_path", lambda *_: tmp_path / "army_state.json")
+    monkeypatch.setattr(
+        navigation,
+        "open_army_training_screen",
+        lambda execute: {"status": "BLOCKED_BARRACKS_NOT_CONFIRMED", "actions_executed": True},
+    )
+    monkeypatch.setattr(
+        live,
+        "capture_primary_monitor",
+        lambda: (_ for _ in ()).throw(AssertionError("goal observation must not run")),
+    )
+    args = SimpleNamespace(
+        profile="p", execute=True, confirm=manager.CONFIRMATION_PHRASE, navigate_only=False,
+    )
+
+    result = manager._command_execute(args, tmp_path, NOW)
+
+    assert result["status"] == "BLOCKED_TASK_STARTUP"
+    assert result["navigation"]["status"] == "BLOCKED_BARRACKS_NOT_CONFIRMED"
+    assert result["actions_executed"] is True
+    assert result["queue_modified"] is False
+
+
+def test_navigate_only_skips_housekeeping_and_task_processing(monkeypatch, tmp_path):
+    queue = create_task_queue("p")
+    queue_path = tmp_path / "tasks.json"
+    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
+    monkeypatch.setattr(manager, "army_state_path", lambda *_: tmp_path / "army_state.json")
+    monkeypatch.setattr(
+        manager,
+        "process_expirations",
+        lambda *_: (_ for _ in ()).throw(AssertionError("navigate-only must not run housekeeping")),
+    )
+    monkeypatch.setattr(
+        navigation,
+        "open_army_training_screen",
+        lambda execute: {"status": "BARRACKS_OPENED", "actions_executed": execute},
+    )
+    monkeypatch.setattr(
+        live,
+        "capture_primary_monitor",
+        lambda: (_ for _ in ()).throw(AssertionError("navigate-only must not evaluate goals")),
+    )
+    args = SimpleNamespace(
+        profile="p", execute=True, confirm=manager.CONFIRMATION_PHRASE, navigate_only=True,
+    )
+
+    result = manager._command_execute(args, tmp_path, NOW)
+
+    assert result["status"] == "BARRACKS_OPENED"
+    assert result["queue_modified"] is False
+    assert result["navigation"]["actions_executed"] is True
+
+
+def test_execute_requires_confirmation_before_any_navigation(monkeypatch, tmp_path):
+    calls = []
+    monkeypatch.setattr(
+        navigation,
+        "open_army_training_screen",
+        lambda **kwargs: calls.append(kwargs),
+    )
+    args = SimpleNamespace(profile="p", execute=True, confirm="wrong", navigate_only=True)
+
+    result = manager._command_execute(args, tmp_path, NOW)
+
+    assert result["status"] == "BLOCKED_CONFIRMATION"
+    assert result["actions_executed"] is False
+    assert calls == []
+
+
+def test_execute_preview_only_reports_navigation_without_capturing_screen(monkeypatch, tmp_path):
+    queue = create_task_queue("p")
+    queue_path = tmp_path / "tasks.json"
+    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
+    monkeypatch.setattr(manager, "army_state_path", lambda *_: tmp_path / "army_state.json")
+    monkeypatch.setattr(
+        navigation,
+        "open_army_training_screen",
+        lambda execute: {"status": "PREVIEW_ONLY", "actions_executed": False},
+    )
+    monkeypatch.setattr(
+        live,
+        "capture_primary_monitor",
+        lambda: (_ for _ in ()).throw(AssertionError("preview must not inspect the current screen")),
+    )
+    args = SimpleNamespace(profile="p", execute=False, confirm="", navigate_only=False)
+
+    result = manager._command_execute(args, tmp_path, NOW)
+
+    assert result["status"] == "PREVIEW_ONLY"
+    assert result["navigation"]["status"] == "PREVIEW_ONLY"
+    assert result["actions_executed"] is False
+    assert result["queue_modified"] is False

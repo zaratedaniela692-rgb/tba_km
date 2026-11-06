@@ -9,7 +9,7 @@
 ## Elementy (numery jak na opisany.png)
 Regiony pochodzą z `regions.json`; współrzędne odnoszą się do obszaru gry z danego wariantu screena. Nazwy i funkcje poza wcześniej potwierdzonymi są wstępne.
 
-1. `armia` – button; dolny pasek nawigacyjny, szablon `templates/world_map/armia.png`, region `x=913, y=879, w=53, h=46`. Etykieta wskazuje przejście do kontekstu armii; przejście nie było jeszcze sprawdzone w działającej grze.
+1. `armia` – button; dolny pasek nawigacyjny, szablon `templates/world_map/armia.png`, region `x=913, y=879, w=53, h=46`. Szablon dopasowuje się do dwóch fixture'ów kont z wynikiem 100%. Start zadania szkolenia po `3x Escape` lokalizuje ten przycisk w jego regionie, klika środek dopasowanego szablonu i potwierdza otwarcie Koszar przez wykrycie slotów. Reakcja kliknięcia wymaga jeszcze nadzorowanego potwierdzenia na żywo.
 2. `watchtower_locked` – przycisk Watchtower w stanie braku dostępu; czerwone tło, szablon `templates/world_map/watchtower_locked.png`, region `x=672, y=876, w=36, h=26`.
 3. `watchtower_unlocked` – ten sam przycisk w stanie wykupionej usługi; niebieskie tło, szablon `templates/world_map/watchtower_unlocked.png`, ten sam region `x=672, y=876, w=36, h=26`.
 4. `okno_wiadomości` – button otwierający panel komunikacji z innymi graczami i klanami; region `x=1220, y=951, w=31, h=33`. Szablon: `templates/world_map/okno_wiadomosci.png`. Etykieta zachowuje polskie znaki, a nazwa pliku jest ASCII dla zgodności z OpenCV na Windows.
@@ -48,7 +48,7 @@ Regiony pochodzą z `regions.json`; współrzędne odnoszą się do obszaru gry 
 Pozostałe rozpoznane wzrokowo części ekranu, które nie są jeszcze regionami: nagłówek Total Battle (wspólna powłoka), pasek gracza i zasobów, obszar mapy, minimapa, boczne ikony, dolny pasek nawigacyjny i pasek statusu. Stałe ikony mogą być szablonami; zmienne liczby i elementy mapy nie powinny być traktowane jako stałe wzorce.
 
 ## Przejścia
-- Przycisk „Armia” sugeruje przejście do kontekstu armii; wymaga potwierdzenia na działającej grze.
+- Zadanie szkolenia armii po wspólnym resecie `3x Escape` klika rozpoznany przycisk „Armia”, a następnie wymaga potwierdzenia widoku Koszar przez wykrycie slotów. Kod nie uznaje samego kliknięcia za potwierdzenie przejścia.
 - Przycisk „Miasto” sugeruje przejście do widoku miasta; wymaga potwierdzenia.
 - Pozostałe przejścia nieustalone.
 
