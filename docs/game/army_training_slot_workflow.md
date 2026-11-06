@@ -64,6 +64,170 @@ python .\army_training_live_e2e.py --execute --confirm "TRAIN SECOND SLOT MAX-1"
 
 This test uses the second visible slot in one frame; it does not mean global `match_number=2`. It does not persist a manager goal, scroll the list, click Help, or automatically retry.
 
+## Manager-Driven Replenishment Contract (Phases B-D Implemented; Supervised Run Pending)
+
+**Status:** approved 2026-11-06 and implemented through the manager-owned one-goal executor (phases B-D). No supervised live run has been performed. Re-arming follows the recommended option (completed goals are reopened by a new campaign run, history kept). The legacy one-shot executor remains unchanged; the manager executor owns the persistent goal flow.
+
+### Implementation Notes (2026-11-06)
+
+- `army_campaign.py`: campaign policy (`max`, `max_minus_1`, `fixed`), persistence in `profiles/<profile>/army_campaign.json`, expansion into goals `(L, 1..N)` with `created` / `rearmed` / `kept` actions.
+- `army_state.py`: max-level cache in `profiles/<profile>/army_state.json`, TTL 24 hours; a fresh read wins.
+- `army_training_levels.py`: `lowest_visible_level` from consecutive badges (gaps 20-30 px); `None` when gaps are irregular. The fixtures show gaps of about 25 px.
+- `army_training_resolver.py`: m-th slot, in frame order, whose range contains `L`; `unsupported` without scrolling, `blocked` on uncertain ranges. Assumes the frame starts at the top of the list.
+- `army_training_observation.py`: builds `SlotObservation`; the same slot limit is stored for the goal level, the highest level and the one below. Selection counts as verified only when the largest badge equals the goal level (default-highest assumption). For a lower goal level the decision is `selection_unverified` and the manager reports `select_level_then_reobserve`, because the displayed city count belongs to the selected level.
+- `army_training_manager.py`: CLI `enqueue`, `set-campaign`, `expand`, `run`, and `execute`. `run` is read-only unless `--save`; `execute` is preview-only unless `--execute` and the confirmation phrase are supplied. It chooses one eligible goal by task priority.
+- `army_training_executor.py`: resolves the goal again from a fresh primary-monitor capture, selects the target badge when needed, re-detects the same slot, checks idle/resources/stock/time, clicks Train once, and requires active-state confirmation before marking the task started. An uncertain result after a Train attempt pauses the profile queue to prevent a duplicate.
+- `army_training_lifecycle.py`: coordinates Help/Speed Up/completion transitions only from explicit recognized states; it never clicks. Confirmed idle plus a fresh `SlotObservation` completes or requeues the same stock goal. The visual Help classifier and click adapter are pending because no verified Help fixture/template exists. Quick-finish acceleration remains manual.
+- Manager preview: `python .\army_training_manager.py --profile <profile> execute`. Live execution requires the operator to inspect that preview, then explicitly run `python .\army_training_manager.py --profile <profile> execute --execute --confirm "EXECUTE ARMY TRAINING"`. The assistant has not performed a live run.
+- `army_training_slot_time.py`: full-queue training time of a slot (day/hour resolution) is segmented first, then each digit is OCRed at two scales. The value is `None` unless all reads agree and every digit is fixture-verified (currently 1-5); unverified digits fail closed. It is correct on all six fixture slots; under JPEG/noise stress it returned no value rather than a wrong value. The manager executor requires this reading before Train and passes it to `mark_task_started` after active state is confirmed.
+- Dry-run on `pelny_army_training_empty_queue.png`: goal `(7, 1)` -> `needs_preflight`, 1269 to train; `(6, 1)` -> `select_level_then_reobserve`; `(6, 4)` -> `match_not_visible_without_scrolling`.
+
+### Goal
+
+The queue manager receives a **campaign** such as "replenish level `max-1` to 2x the queue limit". A decomposer expands it into per-slot **stock goals**. A single slot can also be ordered directly as one goal. All goals run through the same manager, priority queue (see [task_manager.md](task_manager.md)) and executor.
+
+### Terms
+
+- **Campaign:** profile-level policy `{level_policy, enabled}` where `level_policy` is `max`, `max_minus_1`, or a fixed global level. It is stored separately from the task queue (`profiles/<profile>/army_campaign.json`, ignored by Git) and is never a task, so `get_next_task` cannot return it for execution.
+- **Max level:** highest unit level shown in the Barracks. It changes rarely (every few days). It is read from the current frame at the start of each run and cached per profile in `profiles/<profile>/army_state.json` with `observed_at`, source, confidence, and a TTL (default 24 hours). A fresh read always wins; a cached value is used only when a read fails and it is within TTL; otherwise the run is blocked.
+- **Stock goal `(L, m)`:** existing `slot_stock_v1` task with id `army_stock:level_{L}:match_{m}`. `m` is the 1-based position of the slot among all list slots whose selector range contains `L`, in list order.
+- **Selector range:** levels offered by a slot, derived as `highest - n + 1 .. highest` from the `n` consecutive badges and the OCRed highest numeral. **Assumption:** badges are consecutive and cover the full range for that slot; verify on more accounts.
+- **Slots per level:** `MATCH_COUNTS_BY_LEVEL`: levels 1-4 have 3 slots, levels 5-9 have 4.
+
+### Rules
+
+1. Decomposition: for resolved level `L`, create goals `(L, 1) .. (L, N)` where `N = MATCH_COUNTS_BY_LEVEL[L]`. `max` resolves to the max level, `max_minus_1` to `max - 1`; a level outside 1-9 blocks the campaign with a reason.
+2. Goals are sequenced one at a time: only one training runs in the game. After each completed order the manager waits for the view to reset (about 5 s), captures a fresh frame, and re-reads stock before deciding on the same goal again or moving on.
+3. Resolving `(L, m)` to a physical slot uses the current frame only. If `m` is beyond the visible slots, the goal is `unsupported` in this version (no scrolling) and is never guessed.
+4. If no visible slot can be identified with certainty (ambiguous geometry, uncertain badges, local I/II), the goal stays blocked and is not retried automatically.
+5. The existing decision rules apply unchanged: slot highest `== L-1` completes the goal with `target_level_unavailable_for_slot`; highest `< L-1` blocks; stock `>= ceil(0.8 * 2 * limit)` completes with `stock_threshold_met`.
+6. Both levels of one slot share that slot's queue limit; the adapter builds `SlotObservation` from the slot's own readings only.
+7. A single-slot order is a campaign-less goal `(L, m)` added through the same enqueue function and executed by the same manager. No separate script logic.
+8. Goals inherit the `army_training` priority unless a priority is given; a campaign may supply one for all its goals.
+9. Execution is dry-run by default. The manager's `execute` command requires `--execute` plus the exact confirmation phrase, checks the emergency-stop file before clicks, and enables PyAutoGUI fail-safe. It executes at most one goal per invocation. The selector marker is still not verified; reports keep `selection_confirmed=false`.
+10. Before Train, require a reliable full-queue time reading. After Train, mark the task started only if a fresh frame confirms active training. Any uncertain result after a Train attempt pauses the profile queue and is never retried automatically.
+
+### Re-arming (decided)
+
+`enqueue_training_goal` is idempotent per `(L, m)` and a completed goal is never recreated, so a new campaign run re-arms completed goals by setting `status=queued`, process state `needs_observation` and clearing decision data; a `rearmed` history entry is appended and history is kept.
+
+### Flow
+
+```mermaid
+flowchart TD
+    A[Campaign or single-slot order] --> B[Read max level from Barracks frame]
+    B --> C{Read ok?}
+    C -->|No, cache fresh| D[Use cached max level]
+    C -->|No, cache stale| X[Block campaign]
+    C -->|Yes| E[Resolve L from policy]
+    D --> E
+    E --> F[Expand goals L,1..N; enqueue or re-arm]
+    F --> G[Manager picks next ready goal by priority]
+    G --> H[Resolve slot from fresh frame]
+    H --> I{Slot visible and certain?}
+    I -->|No| Y[Unsupported or blocked; next goal]
+    I -->|Yes| J[Build SlotObservation; decide goal]
+    J --> K{Needs training?}
+    K -->|No: completed| G
+    K -->|Yes| P[Executor: selector click, same-slot recheck, preflight, one Train]
+    P --> M[Confirm active; mark started with remaining time]
+    M --> N[Help flow, wait, completion]
+    N --> O[Wait for view reset; re-observe same goal]
+    O --> J
+```
+
+### Confirmed vs Assumed vs Deferred
+
+- Confirmed (user): goal means m-th slot containing level `L`; 3 or 4 slots per level; campaign decomposes into slot goals; single-slot orders required; max level changes rarely and is read from the Barracks; one training at a time; first version without scrolling.
+- Assumed: consecutive badges form the whole selector range; TTL 24 h for the cached max level; 5 s view-reset wait; list order is stable between frames.
+- Deferred: scrolling and access to off-screen slots, Barracks navigation, unlock/dim detection, local I/II mapping, timer OCR for `initial_remaining_seconds`, Help/speed-up automation, multi-profile parallelism.
+
+### Planned Code
+
+| Step | Module | Notes |
+| --- | --- | --- |
+| Campaign model and expander | `army_campaign.py` | implemented |
+| Max-level cache | `army_state.py` | implemented |
+| Selector range and slot resolver | `army_training_levels.py`, `army_training_resolver.py` | implemented |
+| `SlotObservation` adapter | `army_training_observation.py` | implemented |
+| Manager dry-run runner and CLI | `army_training_manager.py` | implemented |
+| Full-queue time reader | `army_training_slot_time.py` | implemented; 1-5 digits validated on fixtures; unsupported digits fail closed |
+| Manager-owned one-goal executor | `army_training_executor.py` | implemented; explicit opt-in, at most one Train, timer required, unknown post-click pauses queue |
+| Manager execution command | `army_training_manager.py execute` | implemented; selects the highest-priority eligible goal; dry-run unless `--execute` |
+| Help/Speed Up/completion transition coordinator | `army_training_lifecycle.py` | implemented as pure state transitions; visual classifier and click adapter pending |
+| Quick-finish acceleration dialog and item selection | future executor step | pending; no verified dialog fixture |
+
+### Expected Tests
+
+- Expansion: level 4 yields 3 goals, level 6 yields 4; repeated expansion creates no duplicates; re-arm resets only completed goals.
+- Policy resolution `max`, `max_minus_1`, fixed; out-of-range level blocks.
+- Max-level cache: fresh read wins, stale cache blocks, fresh cache used on read failure.
+- Selector range derived from badges on both fixtures; resolver returns the right slot for `(L, m)`, `unsupported` for `m` beyond visible slots, `ambiguous` on uncertain geometry.
+- Fixture to `SlotObservation` to manager decision with persisted reason; both levels share the same limit.
+- Single-slot enqueue produces the same task as the campaign for the same `(L, m)`.
+- Executor with mocks: one Train click, no retry, failure after click is uncertain; manager sequencing re-observes after each order.
+
+## Training Completion Without Wake-ups (Approved 2026-11-06)
+
+**Status:** approved and being implemented. It supersedes the earlier idea of parking a task and waking it to speed up; the pure coordinator in `army_training_lifecycle.py` stays but its wake-up path is not used by this flow.
+
+### Goal
+
+After a confirmed Train the queue task only waits for a configurable window so other players can Help. When it expires the queue closes the task. The next army task (or one fallback task) finishes the in-game training with Speed Up. Other task types run in between.
+
+### Terms
+
+- **Help window:** per-order time before `expires_at` (default 30 minutes; per-task `help_window_seconds` or queue setting). Because the Help click is not automated yet, the window is anchored at the confirmed Train plus the post-order delay.
+- **Open training marker:** `open_training` in `profiles/<profile>/army_state.json` with `order_id`, `task_id`, `goal`, `started_at`, `expires_at`, `speedup_attempts`, `last_attempt_at`, `next_attempt_at`. It means the bot started a training whose end is not yet confirmed.
+- **Grace:** extra time after `expires_at` (default 10 minutes) before the fallback task is created.
+- **Finish step:** read the active-training state on the open Barracks screen. Idle clears the marker; active with an open marker runs the Speed Up adapter, waits for the view reset (about 5 s), re-observes, and clears the marker only when idle is confirmed.
+- **Fallback task:** one army task `finish_training_v1` with id `army_finish:<order_id>`.
+
+### Rules
+
+1. After a confirmed Train, write the marker and set the task `expires_at`.
+2. Expiry runs on every manager cycle and at start: an active task past `expires_at` becomes `completed` with `completed_reason=window_expired`. The marker stays open.
+3. Every army task starts with the finish step; there is no extra navigation.
+4. Active training without a marker is a blocker; Speed Ups are never spent on it.
+5. If the marker is still open after `expires_at + grace`, create the fallback task once. If it runs after the marker was cleared, it completes without opening a screen.
+6. A failed or impossible Speed Up does not pause the profile and keeps the marker. Set `next_attempt_at = now + retry interval` (default 1 hour) and mirror it in the blocked task's `next_check_at`. Army tasks stay blocked until then; other task types continue.
+7. Retries continue at the interval. After `needs_attention_after_attempts` attempts (default 3) the report says `needs_attention`, but retries do not stop.
+8. The fallback task does not re-evaluate stock; the next campaign run (`expand`) re-arms goals.
+9. The Speed Up dialog, item selection and the Help/Speed Up recognizers are separate modules. Until they exist the Speed Up adapter is absent and every finish attempt reports `speedup_module_unavailable` and schedules the next attempt.
+
+### Flow
+
+```mermaid
+flowchart TD
+    A[Train confirmed] --> B[Marker open; expires_at set]
+    B --> C[Other task types run]
+    C --> D{expires_at reached?}
+    D -->|Yes| E[Task completed: window_expired; marker stays]
+    E --> F{Army task starts within grace?}
+    F -->|Yes| G[Its finish step clears marker]
+    F -->|No| H[Create fallback task once]
+    H --> I[Finish step]
+    G --> J[Continue with its own training]
+    I --> K{Idle confirmed?}
+    K -->|Yes| L[Marker cleared]
+    K -->|No| M[next_attempt_at = now + retry]
+    M --> I
+```
+
+### Confirmed vs Assumed vs Deferred
+
+- Confirmed (user): task ends at expiry; the next army task finishes the previous training; a last-task mechanism exists; Speed Ups may run out and about hourly retry is acceptable; minimise screen visits and clicks.
+- Assumed: help window 30 min, grace 10 min, retry 1 hour, one active-training panel shared by all slots, the marker is the only proof that the bot owns the active training.
+- Deferred: Barracks navigation (the Barracks must already be open), Help/Speed Up/dialog recognition and clicks, item selection, stock re-evaluation by the fallback task.
+
+### Code Status
+
+Implemented (mock and fixture level): `expires_at`/`help_window_seconds` and `expire_tasks`/`complete_task` in `task_controller.py`; marker helpers in `army_state.py`; `army_training_finish.py` (finish step, expiry processing, fallback creation and execution); integration in `army_training_executor.py` and `army_training_manager.py`. The Speed Up adapter itself is not implemented.
+
+### Tests
+
+`tests/test_army_training_finish.py` and the expiry cases in `tests/test_task_controller.py`: expiry reason and persistent marker, later army task clears the marker, a single fallback task and its no-op, foreign training blocker without a click, retry timing without pausing the queue, legacy queues without `expires_at`.
+
 ## Terms
 
 - **Slot:** one unit training panel, including its level selector, city count, training amount, slider, costs, duration, food load, and Train button.
@@ -189,7 +353,8 @@ flowchart TD
 | Stock-goal queue and dry-run reconciliation | Implemented | `army_training_process.py`, `task_controller.py` |
 | Connect the CLI dry-run report to slot detection, level candidates, and per-slot readings | Implemented; reports candidates but does not mutate any queue | `army_training_dry_run.py` |
 | Bind a dry-run candidate to persistent `{global_level, match_number}` and call the stock-goal manager | Not implemented; no list-origin/scroll identity proof or `SlotObservation` adapter | `army_training_dry_run.py`, `army_training_process.py` |
-| Food/silver live resource preflight and Train/Help click flow | Not implemented | Out of MVP scope |
+| Food/silver live resource preflight and one Train click | Implemented in opt-in manager executor; fixture/mock validation only | `army_training_executor.py` |
+| Help and speed-up click flow | Not implemented | Follow-up after supervised executor run |
 | Primary-monitor capture in isolated one-shot executor | Implemented; requires `mss`, fixed 1920x1080 frame | `army_training_live_e2e.py` |
 | Opt-in max-1 selector click, same-slot re-detection, preflight, one Train click, post-click confirmation | Implemented; selector marker is not verified and report says `selection_confirmed=false`; mocked tests only | `army_training_live_e2e.py`, `tests/test_army_training_live_e2e.py` |
 | Window selection and scroll workflow | Not implemented | Out of MVP scope |
@@ -208,6 +373,9 @@ Use the tests below as executable checks for the corresponding documented rules.
 | Stale, mismatched, active, or low-confidence evidence cannot authorize training | `tests/test_army_training_process.py::test_uncertain_evidence_blocks_action`, `test_active_training_cannot_satisfy_goal_or_start_another_order` |
 | Click/capture failures after an action are reported as uncertain and never retried | `tests/test_army_training_live_e2e.py::test_capture_failure_after_level_click_reports_action_and_unknown`, `test_train_click_exception_is_unknown_and_never_retried`, `test_uncertain_post_click_does_not_retry` |
 | Skipping marker verification does not skip same-slot redetection or fresh preflight | `tests/test_army_training_live_e2e.py::test_unconfirmed_selection_still_requires_same_slot_and_fresh_preflight` |
+| Manager executor starts at most one order, requires reliable time, never retries uncertain Train, and pauses on unknown result | `tests/test_army_training_executor.py` |
+| Day/hour time reader returns exact fixture values and rejects merged or incomplete glyph layouts | `tests/test_army_training_slot_time.py` |
+| Help timing, Speed Up confirmation, uncertain Help pause, and completion re-observation | `tests/test_army_training_lifecycle.py` |
 
 For a future change that connects components, add an integration test that starts with a screenshot fixture, constructs a `SlotObservation`, and verifies the manager decision and persisted reason. Until that adapter exists, component tests do not prove the full screenshot-to-queue flow.
 

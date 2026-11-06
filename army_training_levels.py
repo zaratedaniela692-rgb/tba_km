@@ -37,6 +37,7 @@ class SelectorLevelReading:
     one_below_visible_level: int | None = None
     confidence: float | None = None
     uses_default_highest_assumption: bool = True
+    lowest_visible_level: int | None = None  # None when badge gaps are not consecutive
 
 
 @dataclass(frozen=True)
@@ -122,6 +123,15 @@ def _read_badge_label(selector, badge):
     return ROMAN_LEVELS[label], confidence
 
 
+def _consecutive_lowest_level(badges, highest_level):
+    """Lowest level if every badge gap looks like one level step, else None."""
+    for upper, lower in zip(badges, badges[1:]):
+        if not ADJACENT_ROW_MIN_DISTANCE <= lower[1] - upper[1] <= ADJACENT_ROW_MAX_DISTANCE:
+            return None
+    lowest = highest_level - len(badges) + 1
+    return lowest if lowest >= 1 else None
+
+
 def read_slot_selector_levels(image, slot):
     """Read only the last visible level label in one slot."""
     selector = slot_crop(image, slot, "unit_troop_level")
@@ -161,6 +171,7 @@ def read_slot_selector_levels(image, slot):
         highest_visible_level=highest_reading[0],
         one_below_visible_level=one_below_level,
         confidence=highest_reading[1],
+        lowest_visible_level=_consecutive_lowest_level(badges, highest_reading[0]),
     )
 
 

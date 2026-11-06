@@ -31,6 +31,13 @@ DEFAULT_RESOURCE_RETRY_SECONDS = 45 * 60
 DEFAULT_POST_ORDER_DELAY_SECONDS = 2.0
 DEFAULT_HELP_TO_SPEEDUP_DELAY_SECONDS = 0.2
 DEFAULT_PARALLEL_WAIT_THRESHOLD_SECONDS = 60
+MIN_PRIORITY = 1  # highest
+MAX_PRIORITY = 5  # lowest
+DEFAULT_TASK_PRIORITY = 3
+DEFAULT_TASK_TYPE_PRIORITIES = {"army_training": 1}
+DEFAULT_HELP_WINDOW_SECONDS = 30 * 60
+DEFAULT_FINISH_GRACE_SECONDS = 10 * 60
+DEFAULT_SPEEDUP_RETRY_SECONDS = 60 * 60
 
 
 class TaskQueueError(ValueError):
@@ -110,6 +117,36 @@ def _validate_settings(settings):
             raise TaskQueueError(f"{key} musi być nieujemną liczbą.")
     if not 1 <= settings["post_order_delay_seconds"] <= 3:
         raise TaskQueueError("post_order_delay_seconds musi należeć do zakresu 1-3.")
+    type_priorities = settings.get("task_type_priorities")
+    if type_priorities is not None:
+        if not isinstance(type_priorities, dict):
+            raise TaskQueueError("task_type_priorities musi być obiektem JSON.")
+        for task_type, priority in type_priorities.items():
+            if task_type not in TASK_TYPES:
+                raise TaskQueueError(f"Nieobsługiwany typ zadania w task_type_priorities: {task_type!r}")
+            _validate_priority(priority)
+    for key in ("help_window_seconds", "finish_grace_seconds", "speedup_retry_seconds"):
+        if settings.get(key) is not None:
+            _validate_positive_seconds(settings[key], key)
+
+
+def _validate_positive_seconds(value, name):
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise TaskQueueError(f"{name} musi być dodatnią liczbą całkowitą.")
+
+
+def _validate_priority(priority):
+    if isinstance(priority, bool) or not isinstance(priority, int) or not MIN_PRIORITY <= priority <= MAX_PRIORITY:
+        raise TaskQueueError(f"Priorytet musi być liczbą całkowitą {MIN_PRIORITY}-{MAX_PRIORITY}.")
+
+
+def effective_priority(queue, task):
+    """Task priority, else the profile's type default, else the built-in default."""
+    if task.get("priority") is not None:
+        return task["priority"]
+    configured = queue["settings"].get("task_type_priorities") or {}
+    task_type = task["task_type"]
+    return configured.get(task_type, DEFAULT_TASK_TYPE_PRIORITIES.get(task_type, DEFAULT_TASK_PRIORITY))
 
 
 def validate_task_queue(queue, expected_profile_id=None):
@@ -153,8 +190,14 @@ def validate_task_queue(queue, expected_profile_id=None):
                 raise TaskQueueError(f"Nieprawidłowa ilość zasobu w zadaniu {task_id}.")
         if not isinstance(task.get("quick_finish"), bool):
             raise TaskQueueError(f"quick_finish zadania {task_id} musi być wartością logiczną.")
+        if task.get("priority") is not None:
+            _validate_priority(task["priority"])
+        if task.get("help_window_seconds") is not None:
+            _validate_positive_seconds(task["help_window_seconds"], "help_window_seconds")
+        if task.get("completed_reason") is not None and not isinstance(task["completed_reason"], str):
+            raise TaskQueueError(f"completed_reason zadania {task_id} musi być tekstem.")
         for key in ("created_at", "next_check_at", "started_at", "help_due_at", "help_requested_at",
-                    "speedup_check_at", "speedup_available_at", "completed_at"):
+                    "speedup_check_at", "speedup_available_at", "completed_at", "expires_at"):
             _parse_time(task.get(key))
         for key in ("initial_remaining_seconds", "last_remaining_seconds"):
             value = task.get(key)
@@ -171,10 +214,17 @@ def _find_task(queue, task_id):
     return task
 
 
-def enqueue_task(queue, task_type, payload=None, required_resources=None, quick_finish=False, task_id=None, now=None):
+def enqueue_task(
+    queue, task_type, payload=None, required_resources=None, quick_finish=False, task_id=None, now=None,
+    priority=None, help_window_seconds=None,
+):
     validate_task_queue(queue)
     if task_type not in TASK_TYPES:
         raise TaskQueueError(f"Nieobsługiwany typ zadania: {task_type!r}")
+    if priority is not None:
+        _validate_priority(priority)
+    if help_window_seconds is not None:
+        _validate_positive_seconds(help_window_seconds, "help_window_seconds")
     if payload is not None and not isinstance(payload, dict):
         raise TaskQueueError("payload musi być obiektem JSON.")
     if not isinstance(quick_finish, bool):
@@ -194,6 +244,10 @@ def enqueue_task(queue, task_type, payload=None, required_resources=None, quick_
         "payload": deepcopy(payload or {}),
         "required_resources": dict(resources),
         "quick_finish": quick_finish,
+        "priority": priority,
+        "help_window_seconds": help_window_seconds,
+        "expires_at": None,
+        "completed_reason": None,
         "status": "queued",
         "created_at": _utc_time(now).isoformat(),
         "next_check_at": None,
@@ -224,9 +278,12 @@ def get_next_task(queue, available_resources, now=None):
 
     current_time = _utc_time(now)
     active_tasks = [task for task in queue["tasks"] if task["status"] in ACTIVE_STATUSES]
-    for task in queue["tasks"]:
-        if task["status"] not in {"queued", "waiting_resources"}:
-            continue
+    # sorted() is stable, so equal (priority, created_at) keeps list order.
+    candidates = sorted(
+        (task for task in queue["tasks"] if task["status"] in {"queued", "waiting_resources"}),
+        key=lambda task: (effective_priority(queue, task), _parse_time(task["created_at"])),
+    )
+    for task in candidates:
         if task["payload"].get("goal_kind") == "slot_stock_v1":
             process = task["payload"].get("process", {})
             valid_until = _parse_time(process.get("decision_valid_until"))
@@ -285,12 +342,17 @@ def mark_task_started(queue, task_id, initial_remaining_seconds, now=None):
     if isinstance(initial_remaining_seconds, bool) or not isinstance(initial_remaining_seconds, int) or initial_remaining_seconds < 0:
         raise TaskQueueError("initial_remaining_seconds musi być nieujemną liczbą całkowitą.")
     started_at = _utc_time(now)
+    window = task.get("help_window_seconds") or queue["settings"].get("help_window_seconds") or DEFAULT_HELP_WINDOW_SECONDS
     task.update({
         "status": "waiting_help_delay",
         "started_at": started_at.isoformat(),
         "initial_remaining_seconds": initial_remaining_seconds,
         "last_remaining_seconds": initial_remaining_seconds,
         "help_due_at": (started_at + timedelta(seconds=queue["settings"]["post_order_delay_seconds"])).isoformat(),
+        # Help is not automated yet, so the window starts at the confirmed order plus the post-order delay.
+        "expires_at": (
+            started_at + timedelta(seconds=queue["settings"]["post_order_delay_seconds"] + window)
+        ).isoformat(),
         "next_check_at": None,
     })
     validate_task_queue(queue)
@@ -338,6 +400,35 @@ def update_task_remaining_time(queue, task_id, remaining_seconds):
     task["last_remaining_seconds"] = remaining_seconds
     validate_task_queue(queue)
     return remaining_seconds
+
+
+def expire_tasks(queue, now=None):
+    """Close active tasks whose Help window ended; the game may still be training."""
+    validate_task_queue(queue)
+    current_time = _utc_time(now)
+    expired = []
+    for task in queue["tasks"]:
+        expires_at = _parse_time(task.get("expires_at"))
+        if task["status"] in ACTIVE_STATUSES and expires_at is not None and current_time >= expires_at:
+            task["status"] = "completed"
+            task["completed_at"] = current_time.isoformat()
+            task["completed_reason"] = "window_expired"
+            expired.append(deepcopy(task))
+    validate_task_queue(queue)
+    return expired
+
+
+def complete_task(queue, task_id, reason, now=None):
+    """Close a pending task whose work is already done or no longer needed."""
+    validate_task_queue(queue)
+    task = _find_task(queue, task_id)
+    if task["status"] not in {"queued", "waiting_resources"}:
+        raise TaskQueueError("Tylko oczekujące zadanie można zamknąć bez wykonania.")
+    task["status"] = "completed"
+    task["completed_at"] = _utc_time(now).isoformat()
+    task["completed_reason"] = reason
+    validate_task_queue(queue)
+    return deepcopy(task)
 
 
 def confirm_task_completed(queue, task_id, now=None):

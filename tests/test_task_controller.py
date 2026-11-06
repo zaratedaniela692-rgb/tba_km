@@ -5,8 +5,10 @@ from task_controller import (
     TASK_TYPES,
     TaskQueueError,
     create_task_queue,
+    effective_priority,
     enqueue_task,
     get_next_task,
+    validate_task_queue,
     mark_task_started,
     mark_help_requested,
     mark_speedup_available,
@@ -224,3 +226,98 @@ def test_repeated_training_order_advances_only_after_confirmed_run():
     assert next_run["payload"]["run_number"] == 1
     assert plan["orders"][1]["completed_runs"] == 2
     assert plan["orders"][1]["status"] == "completed"
+
+
+def _later(seconds):
+    return BASE_TIME + timedelta(seconds=seconds)
+
+
+def test_higher_priority_added_later_is_selected_first():
+    queue = create_task_queue("account-a")
+    enqueue_task(queue, "building_upgrade", now=_later(0))
+    academy = enqueue_task(queue, "academy_research", priority=1, now=_later(1))
+
+    assert get_next_task(queue, {}, now=_later(2))["task_id"] == academy["task_id"]
+
+
+def test_type_default_and_task_override_decide_priority():
+    queue = create_task_queue("account-a")
+    queue["settings"]["task_type_priorities"] = {"building_upgrade": 2}
+    building = enqueue_task(queue, "building_upgrade", now=_later(0))
+    academy = enqueue_task(queue, "academy_research", now=_later(1))
+
+    assert effective_priority(queue, building) == 2
+    assert effective_priority(queue, academy) == 3
+    assert get_next_task(queue, {}, now=_later(2))["task_id"] == building["task_id"]
+
+    academy["priority"] = 1
+    assert get_next_task(queue, {}, now=_later(2))["task_id"] == academy["task_id"]
+
+
+def test_army_training_defaults_to_highest_priority():
+    queue = create_task_queue("account-a")
+    enqueue_task(queue, "building_upgrade", now=_later(0))
+    training = enqueue_task(queue, "army_training", now=_later(1))
+
+    assert effective_priority(queue, training) == 1
+    assert get_next_task(queue, {}, now=_later(2))["task_id"] == training["task_id"]
+
+
+def test_equal_priority_is_fifo_by_creation_time():
+    queue = create_task_queue("account-a")
+    first = enqueue_task(queue, "building_upgrade", now=_later(0))
+    enqueue_task(queue, "academy_research", now=_later(1))
+    # Creation time wins over list position.
+    queue["tasks"].reverse()
+
+    assert get_next_task(queue, {}, now=_later(2))["task_id"] == first["task_id"]
+
+
+def test_blocked_high_priority_does_not_block_lower_and_returns_first_when_ready():
+    queue = create_task_queue("account-a", resource_retry_seconds=60)
+    high = enqueue_task(queue, "academy_research", priority=1, required_resources={"silver": 500}, now=_later(0))
+    low = enqueue_task(queue, "building_upgrade", priority=4, now=_later(0))
+
+    assert get_next_task(queue, {"silver": 0}, now=_later(1))["task_id"] == low["task_id"]
+    assert high["status"] == "waiting_resources"
+
+    assert get_next_task(queue, {"silver": 500}, now=_later(61))["task_id"] == high["task_id"]
+
+
+def test_active_task_of_same_type_still_blocks_regardless_of_priority():
+    queue = create_task_queue("account-a")
+    active = enqueue_task(queue, "building_upgrade", priority=5, now=_later(0))
+    mark_task_started(queue, active["task_id"], initial_remaining_seconds=300, now=_later(0))
+    enqueue_task(queue, "building_upgrade", priority=1, now=_later(1))
+
+    assert get_next_task(queue, {}, now=_later(2)) is None
+
+
+def test_invalid_priorities_are_rejected():
+    queue = create_task_queue("account-a")
+    for bad in (0, 6, True, "high", 2.5):
+        try:
+            enqueue_task(queue, "building_upgrade", priority=bad)
+        except TaskQueueError:
+            continue
+        raise AssertionError(f"Priority {bad!r} must be rejected.")
+
+    queue["settings"]["task_type_priorities"] = {"building_upgrade": 9}
+    try:
+        validate_task_queue(queue)
+    except TaskQueueError:
+        pass
+    else:
+        raise AssertionError("Invalid type priority must be rejected.")
+
+
+def test_queue_without_priority_fields_still_validates_and_orders_by_type_default():
+    queue = create_task_queue("account-a")
+    building = enqueue_task(queue, "building_upgrade", now=_later(0))
+    training = enqueue_task(queue, "army_training", now=_later(1))
+    for task in queue["tasks"]:
+        del task["priority"]
+
+    assert validate_task_queue(queue) is True
+    assert effective_priority(queue, building) == 3
+    assert get_next_task(queue, {}, now=_later(2))["task_id"] == training["task_id"]

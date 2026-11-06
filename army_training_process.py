@@ -156,11 +156,15 @@ def decide_training_goal(
     )
 
 
-def enqueue_training_goal(queue: dict, goal: TrainingGoal, now: datetime) -> dict:
+def goal_task_id(slot: Slot) -> str:
+    return f"army_stock:level_{slot.global_level}:match_{slot.match_number}"
+
+
+def enqueue_training_goal(queue: dict, goal: TrainingGoal, now: datetime, priority: int | None = None) -> dict:
     """Materialize one stock goal, not a preselected number of training runs."""
     validate_task_queue(queue, expected_profile_id=goal.profile_id)
     timestamp = _utc(now).isoformat()
-    task_id = f"army_stock:level_{goal.slot.global_level}:match_{goal.slot.match_number}"
+    task_id = goal_task_id(goal.slot)
     existing = next((task for task in queue["tasks"] if task["task_id"] == task_id), None)
     if existing is not None:
         _goal_task(queue, task_id)
@@ -168,7 +172,7 @@ def enqueue_training_goal(queue: dict, goal: TrainingGoal, now: datetime) -> dic
     if queue["paused"]:
         raise TrainingProcessError("Cannot enqueue a goal while the profile is paused.")
     task = enqueue_task(
-        queue, "army_training", task_id=task_id, now=now,
+        queue, "army_training", task_id=task_id, now=now, priority=priority,
         payload={
             "goal_kind": "slot_stock_v1",
             "slot": asdict(goal.slot),
@@ -250,6 +254,21 @@ def reconcile_training_goal(
     task["next_check_at"] = None
     validate_task_queue(queue)
     return decision
+
+
+def rearm_training_goal(queue: dict, task_id: str, now: datetime) -> dict:
+    """Reopen a completed goal for a new campaign run; history is kept."""
+    task = _goal_task(queue, task_id)
+    if task["status"] != "completed":
+        raise TrainingProcessError("Only a completed goal can be re-armed.")
+    if queue["paused"]:
+        raise TrainingProcessError("Profile queue is paused.")
+    process = task["payload"]["process"]
+    _transition(task, ProcessState.NEEDS_OBSERVATION, "rearmed", now)
+    process.update({"decision": None, "decision_valid_until": None, "observation": None})
+    task.update({"status": "queued", "completed_at": None, "next_check_at": None})
+    validate_task_queue(queue)
+    return deepcopy(task)
 
 
 def resume_training_goal(queue: dict, task_id: str, now: datetime) -> dict:
