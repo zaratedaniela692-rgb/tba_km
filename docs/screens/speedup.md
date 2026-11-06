@@ -1,6 +1,6 @@
 # Ekran: speedup
 
-Status: parsery OCR czasu, nominałów i ilości są zaimplementowane w `speedup_readings.py`, ale brak regionów dialogu i obrazu OCR readera. Skanowanie fixture'ów wymaga najpierw adnotacji regionów narzędziem `tools/annotate.py`.
+Status: parsery OCR czasu, nominałów i ilości są zaimplementowane w `speedup_readings.py`. Calibration-only live scrolling jest zaimplementowany w `speedup_calibration.py` i pokryty testami adapterów; nie był uruchamiany na żywej grze. Regiony i wzorce dialogu są oznaczone jako **kandydaci do korekty przez użytkowniczkę**. Obraz referencyjny z nałożonymi ramkami: `screenshots/speedup/opisany.png`. Odczyt wierszy inventory i kompletny skan listy nie istnieją.
 
 Autorytatywny kontrakt odczytu, zakres, diagram i ograniczenia są w [docs/game/speedup_module_workflow.md](../game/speedup_module_workflow.md).
 
@@ -30,10 +30,28 @@ Autorytatywny kontrakt odczytu, zakres, diagram i ograniczenia są w [docs/game/
 
 Współrzędne regionów należy oznaczyć narzędziem `tools/annotate.py` na wybranych fixture'ach. Nie wyznaczaj ich przez szacowanie na podstawie podglądu obrazu. Kadr i regiony mają być określone względem okna gry; obecny mechanizm przechwytywania wybiera pierwszy monitor, a nie konkretne okno gry. Pure parsers preserve the raw OCR string and return explicit low-confidence or unrecognized statuses; they do not imply that any image has been scanned.
 
+## Regiony kandydackie (ekran `speedup` w `regions.json`, układ `speedup_view.png`)
+
+| Element | x, y, w, h | Uwagi |
+| --- | --- | --- |
+| `speedup_dialog_anchor` | 900, 250, 120, 24 | nagłówek „Przyspieszenia”; ten sam punkt na 4 zrzutach (>=0,997) |
+| `speedup_task_context` | 716, 278, 232, 70 | ikona, nazwa zadania i „Pozostało”; nazwa zależy od zadania, więc nie dowodzi rodzaju |
+| `speedup_remaining_time` | 1064, 322, 110, 22 | klepsydra (największy glif, odfiltrowywana) i tekst `13 d.:7 g.`; czytnik `speedup_reader.py` segmentuje cyfry, zweryfikowane cyfry: 1, 3, 4, 6, 7 |
+| `speedup_inventory_viewport` | 678, 376, 562, 418 | obszar wierszy |
+| `speedup_use_button` | 1050, 445, 145, 27 | wiersze co 110 px (wzorzec 1,0 w widokach); wzorzec „Kup” daje ok. 0,6 |
+| `speedup_item_icon` | 723, 396, 72, 72 | ikona przedmiotu, 49 px nad przyciskiem |
+| `speedup_item_duration` | 723, 402, 40, 20 | nominał w lewym górnym rogu ikony; OCR niepotwierdzony |
+| `speedup_item_quantity` | 755, 446, 42, 22 | ilość w prawym dolnym rogu ikony; OCR niepotwierdzony |
+| `speedup_purchase_offer` | 1050, 746, 145, 27 | z `speedup_view3.png`; przycisk „Kup” |
+| `speedup_scroll_track` / `speedup_scroll_thumb` | 1218, 380, 12, 414 / 1218, 392, 12, 62 | uchwyt podąża za listą (y=392, 603, 716); granice toru niepotwierdzone |
+
+Położenia wierszy zależą od przewinięcia, więc wiersze trzeba znajdować wzorcem `speedup_use_button`, a nie stałą współrzędną. Do korekty: nominał i ilość (OCR na ikonach niczego pewnego nie zwrócił), granice toru oraz kontekst zadania.
+
 ## Przejścia
 
 - Fixture offline → rozpoznaj nagłówek i kontekst → odczytaj timer oraz widoczne wiersze → raport obserwacji albo jawny wynik `unknown/incomplete`.
-- Opcjonalny skan live (niezaimplementowany): wymagane osobne opt-in; dry-run domyślny. Po potwierdzeniu panelu przewiń kółkiem wyłącznie nad oznaczonym obszarem listy, wykonaj świeży zrzut i porównaj zawartość viewportu. Nie przeciągaj uchwytu paska.
+- Kalibracja live: przy otwartym dialogu uruchom `python .\speedup_calibration.py --calibrate-scroll --confirm "SCROLL SPEEDUP LIST"`. Polecenie zapisuje widok początkowy, przed każdym pojedynczym przewinięciem ustawia kursor na środku oznaczonego panelu (959, 585), a potem zapisuje kolejny screen. Domyślny limit to 10 kroków; pierwszy niezmieniony widok jest zapisany i kończy kalibrację. Zrzuty i manifest trafiają do `debug/speedup/calibration_<timestamp>/`.
+- Kalibracja nie rozpoznaje wszystkich wierszy, nie używa przyspieszeń i nie kupuje przedmiotów. Nie przeciąga uchwytu paska.
 - Brak zmiany viewportu po przewinięciu oznacza koniec listy. Uchwyt paska może wspierać, ale nie zastępować porównania obrazu. Osiągnięcie limitu przewinięć bez potwierdzenia końca oznacza skan niekompletny.
 - Nie używaj przyspieszeń, nie kupuj, nie klikaj „Pomoc” i nie zmieniaj kolejki.
 
@@ -49,4 +67,4 @@ Współrzędne regionów należy oznaczyć narzędziem `tools/annotate.py` na wy
 
 ## Wiedza z poprawek
 
-- 2026-11-06 – Użytkowniczka potwierdziła skan listy kółkiem myszy nad jej obszarem (nie przeciąganie uchwytu), z dry-run jako domyślnym i opt-in dla przewijania na żywo. Użytkowanie i zakup przedmiotów są poza zakresem.
+- 2026-11-06 – The user approved mouse-wheel calibration over the annotated inventory list (not dragging the thumb). Before every wheel step, move the pointer to a safe point inside the list (the panel center is used), away from the game navigation bar and Use/Buy controls; capture after each step and stop at the first unchanged view. Item use and purchases remain out of scope for calibration.

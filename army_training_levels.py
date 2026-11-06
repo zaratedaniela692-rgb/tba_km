@@ -1,6 +1,7 @@
 """Read the presumed highest visible selector level without clicking the game."""
 
 from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor
 
 import cv2
 import pytesseract
@@ -177,7 +178,11 @@ def read_slot_selector_levels(image, slot):
 
 def read_layout_selector_levels(image, slots):
     """Read each slot's maximum visible level and identify slots at global max and max-1."""
-    readings = tuple(read_slot_selector_levels(image, slot) for slot in slots)
+    if len(slots) > 1:
+        with ThreadPoolExecutor(max_workers=min(3, len(slots))) as pool:
+            readings = tuple(pool.map(lambda slot: read_slot_selector_levels(image, slot), slots))
+    else:
+        readings = tuple(read_slot_selector_levels(image, slot) for slot in slots)
     if not readings or any(reading.status != "candidate" for reading in readings):
         return LayoutLevelReading("unknown", "one_or_more_slot_levels_uncertain", None, None, (), (), readings)
     global_max = max(reading.highest_visible_level for reading in readings)

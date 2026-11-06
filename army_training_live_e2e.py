@@ -96,8 +96,10 @@ def _select_max_minus_one(frame, variant, slot):
     }
 
 
-def _read_current_training_state(frame, variant):
-    return read_army_training_snapshot_from_image(frame, variant=variant)
+def _read_current_training_state(frame, variant, include_numeric=True):
+    return read_army_training_snapshot_from_image(
+        frame, variant=variant, include_numeric=include_numeric,
+    )
 
 
 def _reading_is_reliable(reading):

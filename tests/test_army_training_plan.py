@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
+import cv2
 
 from army_training_plan import (
     TrainingPlanError,
@@ -15,7 +16,7 @@ from army_training_plan import (
     save_plan,
     start_next_order,
 )
-from army_training_scanner import read_army_training_snapshot
+from army_training_scanner import read_army_training_snapshot, read_training_button_state_from_image
 
 
 BASE_TIME = datetime(2026, 11, 2, 12, 0, tzinfo=timezone.utc)
@@ -173,6 +174,24 @@ def test_army_training_snapshot_detects_empty_queue_from_unit_image():
     assert snapshot["has_active_training"] is False
     assert snapshot["status"] == "idle"
     assert snapshot["training_unit_image_detail"] < 8
+
+
+def test_training_panel_button_state_matches_help_and_speedup_fixtures():
+    screenshot_dir = Path(__file__).resolve().parents[1] / "screenshots" / "army_training"
+    fixtures = (
+        ("after_succesfully_added_armyunit_to_train.png", "help"),
+        ("after_click_help_button.png", "speedup"),
+    )
+
+    for filename, expected_state in fixtures:
+        image_path = screenshot_dir / filename
+        image = cv2.imread(str(image_path), cv2.IMREAD_COLOR)
+        result = read_training_button_state_from_image(image)
+
+        assert result["button_state"] == expected_state
+        assert result["button_region"] == {"x": 1080, "y": 288, "w": 129, "h": 33}
+        score_key = "help_score" if expected_state == "help" else "speedup_score"
+        assert result[score_key] >= 0.85
 
 
 @pytest.mark.parametrize("image_name", ("army_training1.png", "army_training3.png", "army_training4.png"))

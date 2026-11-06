@@ -171,6 +171,46 @@ def _command_enqueue(args, profiles_dir, now):
     return {"status": "ok", "task_id": task["task_id"], "unit_type": args.unit_type, "queue": str(path)}
 
 
+def _command_list(args, profiles_dir, now):
+    path = task_queue_path(args.profile, profiles_dir)
+    queue_exists = path.exists()
+    queue = load_task_queue(path, expected_profile_id=args.profile) if queue_exists else None
+    tasks = []
+    for task in queue["tasks"] if queue is not None else []:
+        payload = task.get("payload", {})
+        item = {
+            "task_id": task["task_id"],
+            "task_type": task["task_type"],
+            "status": task["status"],
+            "priority": task.get("priority"),
+            "created_at": task.get("created_at"),
+            "next_check_at": task.get("next_check_at"),
+            "completed_reason": task.get("completed_reason"),
+        }
+        slot = payload.get("slot")
+        if payload.get("goal_kind") == "slot_stock_v1" and isinstance(slot, dict):
+            item.update(
+                unit_type=slot.get("unit_type", DEFAULT_UNIT_TYPE),
+                level=slot.get("global_level"),
+                match_number=slot.get("match_number"),
+                process_state=payload.get("process", {}).get("state"),
+            )
+        elif payload.get("goal_kind") == FALLBACK_GOAL_KIND:
+            item["order_id"] = payload.get("order_id")
+        tasks.append(item)
+    return {
+        "status": "QUEUE_LISTED" if tasks else "QUEUE_EMPTY",
+        "profile_id": args.profile,
+        "queue_exists": queue_exists,
+        "paused": queue["paused"] if queue is not None else False,
+        "pause_reason": queue["pause_reason"] if queue is not None else None,
+        "task_count": len(tasks),
+        "tasks": tasks,
+        "queue_modified": False,
+        "queue_path": str(path),
+    }
+
+
 def _command_remove(args, profiles_dir, now):
     queue, path = _load_or_create_queue(args.profile, profiles_dir)
     target_slot = Slot(args.unit_type, args.level, args.match)
@@ -414,6 +454,9 @@ def build_parser():
     parser.add_argument("--profiles-dir", default=str(PROFILES_DIR))
     parser.add_argument("--tesseract", help="path to tesseract.exe")
     commands = parser.add_subparsers(dest="command", required=True)
+
+    list_command = commands.add_parser("list", help="list tasks in a profile queue without modifying it")
+    list_command.set_defaults(handler=_command_list)
 
     enqueue = commands.add_parser("enqueue", help="add one stock goal (level, match number)")
     enqueue.add_argument("--unit-type", choices=UNIT_TYPES, required=True)

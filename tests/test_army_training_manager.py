@@ -298,6 +298,52 @@ def test_clear_command_refuses_paused_or_active_queue_without_saving(monkeypatch
     assert saves == []
 
 
+def test_list_command_shows_typed_and_legacy_goals_without_migrating_or_saving(monkeypatch, tmp_path):
+    queue = queue_with((7, 1))
+    typed_task = queue["tasks"][0]
+    legacy_task = dict(typed_task)
+    legacy_task["task_id"] = "army_stock:level_6:match_1"
+    legacy_task["payload"] = {
+        **typed_task["payload"],
+        "slot": {"global_level": 6, "match_number": 1},
+    }
+    queue["tasks"].append(legacy_task)
+    queue_path = tmp_path / "tasks.json"
+    queue_path.touch()
+    saves = []
+    monkeypatch.setattr(manager, "task_queue_path", lambda *_: queue_path)
+    monkeypatch.setattr(manager, "load_task_queue", lambda *_, **__: queue)
+    monkeypatch.setattr(manager, "save_task_queue", lambda *args: saves.append(args))
+    args = SimpleNamespace(profile="p")
+
+    report = manager._command_list(args, tmp_path, NOW)
+
+    assert report["status"] == "QUEUE_LISTED"
+    assert report["task_count"] == 2
+    assert report["queue_modified"] is False
+    assert report["tasks"][0]["unit_type"] == "guardsmen"
+    assert (report["tasks"][1]["unit_type"], report["tasks"][1]["level"]) == ("guardsmen", 6)
+    assert "unit_type" not in legacy_task["payload"]["slot"]
+    assert saves == []
+
+
+def test_list_command_reports_missing_queue_without_creating_file(monkeypatch, tmp_path):
+    queue_path = tmp_path / "missing" / "tasks.json"
+    monkeypatch.setattr(manager, "task_queue_path", lambda *_: queue_path)
+    monkeypatch.setattr(
+        manager, "load_task_queue",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("missing queue must not be loaded")),
+    )
+
+    report = manager._command_list(SimpleNamespace(profile="p"), tmp_path, NOW)
+
+    assert report["status"] == "QUEUE_EMPTY"
+    assert report["queue_exists"] is False
+    assert report["tasks"] == []
+    assert report["queue_modified"] is False
+    assert queue_path.exists() is False
+
+
 def test_category_hook_runs_after_barracks_and_before_capture(monkeypatch, tmp_path):
     queue = queue_with((7, 1))
     events = []

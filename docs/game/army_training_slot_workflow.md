@@ -93,16 +93,18 @@ The queue manager receives a **campaign** such as "replenish Gwardzists at level
 ### Contract
 
 1. Both commands require the target `--profile` and operate only on that profile's validated task queue. Changes use the existing atomic queue save.
-2. `remove --unit-type <type> --level <level> --match <number>` removes the matching inactive stock goal. It may remove queued, resource-waiting, or completed tasks. An active task is never removed.
-3. `clear --confirm "CLEAR ARMY QUEUE"` removes all tasks, including completed history, only when the queue is not paused and contains no active tasks. It preserves profile identity, settings, and other queue metadata.
-4. Missing task IDs, active-task removal, a paused queue, active tasks during clear, or missing/incorrect clear confirmation produce a status report without modifying the queue.
-5. No force option or automatic unpause is provided. A paused queue or active task requires separate reconciliation before clearing.
+2. `list` reads the selected profile queue and reports task IDs, types, statuses, priorities, and typed army goal coordinates. It reports an absent queue as empty and never creates, migrates, or saves queue data.
+3. `remove --unit-type <type> --level <level> --match <number>` removes the matching inactive stock goal. It may remove queued, resource-waiting, or completed tasks. An active task is never removed.
+4. `clear --confirm "CLEAR ARMY QUEUE"` removes all tasks, including completed history, only when the queue is not paused and contains no active tasks. It preserves profile identity, settings, and other queue metadata.
+5. Active-task removal, a paused queue, active tasks during clear, or missing/incorrect clear confirmation produce a status report without modifying the queue.
+6. No force option or automatic unpause is provided. A paused queue or active task requires separate reconciliation before clearing.
 
 ### Flow
 
 ```mermaid
 flowchart TD
     A[Load and validate profile queue] --> B{Command}
+    B -->|list| L[Report tasks; no mutation]
     B -->|remove typed goal| C{Goal exists and inactive?}
     C -->|No| X[Report; no mutation]
     C -->|Yes| E[Remove selected task]
@@ -121,11 +123,12 @@ flowchart TD
 
 ### Current Code Status
 
-Implemented in `army_training_manager.py` and covered by manager regression tests. `remove` protects active tasks; `clear` requires the exact phrase and protects paused or active queues.
+Implemented in `army_training_manager.py` and covered by manager regression tests. `list` is read-only and does not migrate legacy entries; `remove` protects active tasks; `clear` requires the exact phrase and protects paused or active queues.
 
 ### Expected Tests
 
 - Remove deletes only the requested inactive task and preserves other tasks and queue settings.
+- List shows typed and legacy goals without changing the saved queue; a missing file is reported as empty without being created.
 - Remove of a missing or active task reports a blocker and does not save.
 - Clear requires the exact confirmation phrase and refuses paused queues or queues with active tasks without mutation.
 - Successful clear removes all tasks while preserving queue identity and settings.
@@ -303,11 +306,12 @@ Non-Gwardzist goals can be explicitly represented in the queue, but the current 
 
 ### Goal
 
-After a confirmed Train the queue task only waits for a configurable window so other players can Help. When it expires the queue closes the task. The next army task (or one fallback task) finishes the in-game training with Speed Up. Other task types run in between.
+After a confirmed Train, the executor waits for the configured post-order delay, confirms the active training and its Help button, clicks Help once, and confirms that the same button changes to Speed Up. This completes the immediate order-start execution, not the training lifecycle: the queue task remains active through its configured Help window and later completion handling. When the window expires the queue closes the task. The next army task (or one fallback task) finishes the in-game training with Speed Up. Other task types run in between according to the lifecycle gates.
 
 ### Terms
 
-- **Help window:** per-order time before `expires_at` (default 30 minutes; per-task `help_window_seconds` or queue setting). Because the Help click is not automated yet, the window is anchored at the confirmed Train plus the post-order delay.
+- **Help request:** after the configured `post_order_delay_seconds` (1-3 seconds, default 2), require a fresh observation of active training and the central panel's Help button, click it once, then verify active training and Speed Up after `help_to_speedup_delay_seconds` (default 0.2 seconds). The compact Help buttons in the top task list are not targets.
+- **Help window:** per-order time before `expires_at` (default 30 minutes; per-task `help_window_seconds` or queue setting). It remains anchored at the confirmed Train plus the post-order delay; requesting Help does not complete the training task.
 - **Open training marker:** `open_training` in `profiles/<profile>/army_state.json` with `order_id`, `task_id`, `goal`, `started_at`, `expires_at`, `speedup_attempts`, `last_attempt_at`, `next_attempt_at`. It means the bot started a training whose end is not yet confirmed.
 - **Grace:** extra time after `expires_at` (default 10 minutes) before the fallback task is created.
 - **Finish step:** read the active-training state on the open Barracks screen. Idle clears the marker; active with an open marker runs the Speed Up adapter, waits for the view reset (about 5 s), re-observes, and clears the marker only when idle is confirmed.
@@ -316,47 +320,56 @@ After a confirmed Train the queue task only waits for a configurable window so o
 ### Rules
 
 1. After a confirmed Train, write the marker and set the task `expires_at`.
-2. Expiry runs on every manager cycle and at start: an active task past `expires_at` becomes `completed` with `completed_reason=window_expired`. The marker stays open.
-3. Every army task starts with the finish step; there is no extra navigation.
-4. Active training without a marker is a blocker; Speed Ups are never spent on it.
-5. If the marker is still open after `expires_at + grace`, create the fallback task once. If it runs after the marker was cleared, it completes without opening a screen.
-6. A failed or impossible Speed Up does not pause the profile and keeps the marker. Set `next_attempt_at = now + retry interval` (default 1 hour) and mirror it in the blocked task's `next_check_at`. Army tasks stay blocked until then; other task types continue.
-7. Retries continue at the interval. After `needs_attention_after_attempts` attempts (default 3) the report says `needs_attention`, but retries do not stop.
-8. The fallback task does not re-evaluate stock; the next campaign run (`expand`) re-arms goals.
-9. The Speed Up dialog, item selection and the Help/Speed Up recognizers are separate modules. Until they exist the Speed Up adapter is absent and every finish attempt reports `speedup_module_unavailable` and schedules the next attempt.
+2. After the post-order delay, capture a fresh frame and require both active training and the Help button in the central current-training panel. If either is absent or uncertain, do not click.
+3. Check the emergency stop again, then click Help at most once. If stop is requested after Train, retain the confirmed active task and return without clicking Help. After the configured settle delay, require active training and the same panel button changed to Speed Up. Only then record the Help request and advance the task lifecycle. If the click result is uncertain, pause the queue and never retry automatically.
+4. Expiry runs on every manager cycle and at start: an active task past `expires_at` becomes `completed` with `completed_reason=window_expired`. The marker stays open.
+5. Every army task starts with the finish step; there is no extra navigation.
+6. Active training without a marker is a blocker; Speed Ups are never spent on it.
+7. If the marker is still open after `expires_at + grace`, create the fallback task once. If it runs after the marker was cleared, it completes without opening a screen.
+8. A failed or impossible Speed Up does not pause the profile and keeps the marker. Set `next_attempt_at = now + retry interval` (default 1 hour) and mirror it in the blocked task's `next_check_at`. Army tasks stay blocked until then; other task types continue.
+9. Retries continue at the interval. After `needs_attention_after_attempts` attempts (default 3) the report says `needs_attention`, but retries do not stop.
+10. The fallback task does not re-evaluate stock; the next campaign run (`expand`) re-arms goals.
+11. The Speed Up dialog and item selection remain separate modules. Desktop Help and Speed Up recognition use the central panel region and separate templates; Help execution is implemented for the manager executor and confirmed against the supplied pre-click and post-click fixtures. Browser recognition/clicking remains unsupported. A supervised live Help click has not yet been performed. Until the Speed Up adapter exists, finish attempts report `speedup_module_unavailable` and schedule the next attempt.
 
 ### Flow
 
 ```mermaid
 flowchart TD
     A[Train confirmed] --> B[Marker open; expires_at set]
-    B --> C[Other task types run]
-    C --> D{expires_at reached?}
-    D -->|Yes| E[Task completed: window_expired; marker stays]
-    E --> F{Army task starts within grace?}
-    F -->|Yes| G[Its finish step clears marker]
-    F -->|No| H[Create fallback task once]
-    H --> I[Finish step]
-    G --> J[Continue with its own training]
-    I --> K{Idle confirmed?}
-    K -->|Yes| L[Marker cleared]
-    K -->|No| M[next_attempt_at = now + retry]
-    M --> I
+    B --> C[Wait configured post-order delay]
+    C --> D{Active training and Help confirmed?}
+    D -->|No or unknown| E[No Help click; stop or remain pending for safe re-observation]
+    D -->|Yes| F[Click Help once]
+    F --> G{Active training and Speed Up confirmed?}
+    G -->|No or unknown| H[Pause; never retry the click]
+    G -->|Yes| I[Record Help request; task waits through Help window]
+    I --> J[Other task types run]
+    J --> K{expires_at reached?}
+    K -->|Yes| L[Task completed: window_expired; marker stays]
+    L --> M{Army task starts within grace?}
+    M -->|Yes| N[Its finish step clears marker]
+    M -->|No| O[Create fallback task once]
+    O --> P[Finish step]
+    N --> Q[Continue with its own training]
+    P --> R{Idle confirmed?}
+    R -->|Yes| S[Marker cleared]
+    R -->|No| T[next_attempt_at = now + retry]
+    T --> P
 ```
 
 ### Confirmed vs Assumed vs Deferred
 
-- Confirmed (user): task ends at expiry; the next army task finishes the previous training; a last-task mechanism exists; Speed Ups may run out and about hourly retry is acceptable; minimise screen visits and clicks.
+- Confirmed (user): after Train is visually confirmed, request Help from the central active-training panel after the configured delay and verify the button changes to Speed Up; this ends the immediate order-start execution but not the training lifecycle. The task remains active through its Help window; the next army task finishes the previous training; a last-task mechanism exists; Speed Ups may run out and about hourly retry is acceptable; minimise screen visits and clicks.
 - Assumed: help window 30 min, grace 10 min, retry 1 hour, one active-training panel shared by all slots, the marker is the only proof that the bot owns the active training.
-- Deferred: Help/Speed Up/dialog recognition and clicks, item selection, stock re-evaluation by the fallback task. Army task startup now resets and opens Barracks; its click transition awaits supervised live confirmation.
+- Deferred: Speed Up dialog recognition, item selection, stock re-evaluation by the fallback task, supervised live confirmation, and browser Help recognition/clicking. Desktop Help/Speed Up button recognition and the one-click Help flow are implemented and fixture-tested at 1920x1080; do not treat fixture validation as proof of a successful live game click.
 
 ### Code Status
 
-Implemented (mock and fixture level): `expires_at`/`help_window_seconds` and `expire_tasks`/`complete_task` in `task_controller.py`; marker helpers in `army_state.py`; `army_training_finish.py` (finish step, expiry processing, fallback creation and execution); integration in `army_training_executor.py` and `army_training_manager.py`. The Speed Up adapter itself is not implemented.
+Implemented (mock and fixture level): `expires_at`/`help_window_seconds` and `expire_tasks`/`complete_task` in `task_controller.py`; marker helpers in `army_state.py`; `army_training_finish.py` (finish step, expiry processing, fallback creation and execution); integration in `army_training_executor.py` and `army_training_manager.py`. Desktop Help recognition/clicking and post-click Speed Up confirmation are integrated into the manager executor and pass fixture/mocked tests. A supervised live click, Speed Up dialog recognition, and item selection are not implemented/verified.
 
 ### Tests
 
-`tests/test_army_training_finish.py` and the expiry cases in `tests/test_task_controller.py`: expiry reason and persistent marker, later army task clears the marker, a single fallback task and its no-op, foreign training blocker without a click, retry timing without pausing the queue, legacy queues without `expires_at`.
+`tests/test_army_training_finish.py` and the expiry cases in `tests/test_task_controller.py`: expiry reason and persistent marker, later army task clears the marker, a single fallback task and its no-op, foreign training blocker without a click, retry timing without pausing the queue, legacy queues without `expires_at`. `tests/test_army_training_executor.py` and `tests/test_army_training_plan.py` cover the confirmed Help-to-Speed-Up transition, fixture classification, uncertain pre-click state, and no retry after an attempted click.
 
 ## Terms
 

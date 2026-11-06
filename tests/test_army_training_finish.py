@@ -178,7 +178,23 @@ def _executor_setup(monkeypatch, states):
     monkeypatch.setattr(executor, "_load_regions", lambda _: {"army_training": {}})
     monkeypatch.setattr(executor, "locate_slots", lambda *args: SimpleNamespace(status="ok", slots=(slot,)))
     monkeypatch.setattr(executor, "read_slot_selector_levels", lambda *args: reading)
-    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args: {"status": next(iterator)})
+    def read_state(*args, **kwargs):
+        value = next(iterator)
+        if isinstance(value, dict):
+            return value
+        if value == "help":
+            return {
+                "status": "active", "button_state": "help",
+                "training_button_region": {"x": 1080, "y": 288, "w": 129, "h": 33},
+            }
+        if value == "speedup":
+            return {
+                "status": "active", "button_state": "speedup",
+                "training_button_region": {"x": 1080, "y": 288, "w": 129, "h": 33},
+            }
+        return {"status": value}
+
+    monkeypatch.setattr(executor, "_read_current_training_state", read_state)
     monkeypatch.setattr(executor, "_build_selected_slot_plan", lambda *args: {"blockers": []})
     monkeypatch.setattr(executor, "read_slot_training_time", lambda *args: NumericReading(3600, 100, "1d.0g."))
     monkeypatch.setattr(executor, "_check_emergency_stop", lambda: None)
@@ -189,7 +205,9 @@ def _executor_setup(monkeypatch, states):
 
 
 def test_executor_records_marker_after_confirmed_start(tmp_path, monkeypatch):
-    queue, clicks, capture, click = _executor_setup(monkeypatch, ["idle", "idle", "active"])
+    queue, clicks, capture, click = _executor_setup(
+        monkeypatch, ["idle", "idle", "active", "help", "speedup"],
+    )
     path = army_state_path("p", tmp_path)
 
     result = executor.execute_training_goal(
@@ -218,7 +236,9 @@ def test_executor_blocks_on_foreign_training_without_clicking(tmp_path, monkeypa
 
 
 def test_executor_finishes_previous_training_then_starts_next(tmp_path, monkeypatch):
-    queue, clicks, capture, click = _executor_setup(monkeypatch, ["active", "idle", "idle", "active"])
+    queue, clicks, capture, click = _executor_setup(
+        monkeypatch, ["active", "idle", "idle", "active", "help", "speedup"],
+    )
     path = army_state_path("p", tmp_path)
     open_training_marker(path, "old", "old-task", {}, NOW - timedelta(hours=1), NOW - timedelta(minutes=30))
 
@@ -231,7 +251,7 @@ def test_executor_finishes_previous_training_then_starts_next(tmp_path, monkeypa
     assert result["status"] == "START_CONFIRMED"
     assert result["finish"]["status"] == "finished"
     assert open_training(load_army_state(path))["order_id"].startswith("army_stock:unit_guardsmen:level_7:match_1@")
-    assert len(clicks) == 1
+    assert len(clicks) == 2
 
 
 def test_executor_unavailable_speedup_blocks_goal_until_next_attempt(tmp_path, monkeypatch):

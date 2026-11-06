@@ -55,8 +55,39 @@ def _setup(monkeypatch, level=6, click_error_at=None, post_state="active"):
 
 def test_execute_selects_target_level_then_train_once_and_marks_started(monkeypatch):
     queue, task, clicks, click, capture = _setup(monkeypatch)
-    states = iter(({"status": "idle"}, {"status": "idle"}, {"status": "active"}))
-    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args: next(states))
+    button_region = {"x": 1080, "y": 288, "w": 129, "h": 33}
+    states = iter((
+        {"status": "idle"},
+        {"status": "idle"},
+        {"status": "active"},
+        {"status": "active", "button_state": "help", "training_button_region": button_region},
+        {"status": "active", "button_state": "speedup", "training_button_region": button_region},
+    ))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
+    sleeps = []
+
+    result = executor.execute_training_goal(
+        queue, task["task_id"], NOW, execute=True,
+        confirmation=executor.CONFIRMATION_PHRASE,
+        capture_fn=capture, click_fn=click, sleep_fn=sleeps.append,
+    )
+
+    assert result["status"] == "START_CONFIRMED"
+    assert result["help_action"] == "confirmed"
+    assert result["selection_confirmed"] is False
+    assert len(clicks) == 3
+    assert [delay for delay in sleeps if delay in (2, 0.2)] == [2.0, 0.2]
+    assert queue["tasks"][0]["status"] == "waiting_completion"
+    assert queue["tasks"][0]["initial_remaining_seconds"] == 3600
+
+
+def test_unconfirmed_help_button_pauses_without_clicking_help(monkeypatch):
+    queue, task, clicks, click, capture = _setup(monkeypatch)
+    states = iter((
+        {"status": "idle"}, {"status": "idle"}, {"status": "active"},
+        {"status": "active", "button_state": "absent", "training_button_region": None},
+    ))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
 
     result = executor.execute_training_goal(
         queue, task["task_id"], NOW, execute=True,
@@ -64,17 +95,16 @@ def test_execute_selects_target_level_then_train_once_and_marks_started(monkeypa
         capture_fn=capture, click_fn=click, sleep_fn=lambda _: None,
     )
 
-    assert result["status"] == "START_CONFIRMED"
-    assert result["selection_confirmed"] is False
+    assert result["status"] == "START_CONFIRMED_HELP_UNCERTAIN"
+    assert queue["paused"] is True
+    assert queue["pause_reason"].startswith("uncertain_help_action:")
     assert len(clicks) == 2
-    assert queue["tasks"][0]["status"] == "waiting_help_delay"
-    assert queue["tasks"][0]["initial_remaining_seconds"] == 3600
 
 
 def test_train_click_failure_pauses_queue_and_is_not_retried(monkeypatch):
     queue, task, clicks, click, capture = _setup(monkeypatch, click_error_at=2)
     states = iter(({"status": "idle"}, {"status": "idle"}))
-    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args: next(states))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
 
     result = executor.execute_training_goal(
         queue, task["task_id"], NOW, execute=True,
@@ -92,7 +122,7 @@ def test_train_click_failure_pauses_queue_and_is_not_retried(monkeypatch):
 def test_unconfirmed_post_click_state_pauses_queue(monkeypatch):
     queue, task, clicks, click, capture = _setup(monkeypatch)
     states = iter(({"status": "idle"}, {"status": "idle"}, {"status": "unknown"}))
-    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args: next(states))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
 
     result = executor.execute_training_goal(
         queue, task["task_id"], NOW, execute=True,
@@ -105,10 +135,82 @@ def test_unconfirmed_post_click_state_pauses_queue(monkeypatch):
     assert len(clicks) == 2
 
 
+def test_uncertain_help_click_is_not_retried(monkeypatch):
+    queue, task, clicks, click, capture = _setup(monkeypatch, click_error_at=3)
+    button_region = {"x": 1080, "y": 288, "w": 129, "h": 33}
+    states = iter((
+        {"status": "idle"}, {"status": "idle"}, {"status": "active"},
+        {"status": "active", "button_state": "help", "training_button_region": button_region},
+    ))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
+
+    result = executor.execute_training_goal(
+        queue, task["task_id"], NOW, execute=True,
+        confirmation=executor.CONFIRMATION_PHRASE,
+        capture_fn=capture, click_fn=click, sleep_fn=lambda _: None,
+    )
+
+    assert result["status"] == "UNKNOWN_AFTER_HELP_CLICK_ATTEMPT"
+    assert queue["paused"] is True
+    assert queue["pause_reason"].startswith("uncertain_help_action:")
+    assert len(clicks) == 3
+
+
+def test_emergency_stop_after_train_blocks_help_and_returns_queue_state(monkeypatch):
+    queue, task, clicks, click, capture = _setup(monkeypatch)
+    button_region = {"x": 1080, "y": 288, "w": 129, "h": 33}
+    states = iter((
+        {"status": "idle"}, {"status": "idle"}, {"status": "active"},
+        {"status": "active", "button_state": "help", "training_button_region": button_region},
+    ))
+    checks = []
+
+    def check_stop():
+        checks.append(True)
+        if len(checks) == 4:
+            raise RuntimeError("stop requested")
+
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
+    monkeypatch.setattr(executor, "_check_emergency_stop", check_stop)
+
+    result = executor.execute_training_goal(
+        queue, task["task_id"], NOW, execute=True,
+        confirmation=executor.CONFIRMATION_PHRASE,
+        capture_fn=capture, click_fn=click, sleep_fn=lambda _: None,
+    )
+
+    assert result["status"] == "START_CONFIRMED_HELP_BLOCKED"
+    assert queue["tasks"][0]["status"] == "waiting_help_delay"
+    assert queue["paused"] is False
+    assert len(clicks) == 2
+
+
+def test_help_click_without_speedup_confirmation_pauses_without_retry(monkeypatch):
+    queue, task, clicks, click, capture = _setup(monkeypatch)
+    button_region = {"x": 1080, "y": 288, "w": 129, "h": 33}
+    states = iter((
+        {"status": "idle"}, {"status": "idle"}, {"status": "active"},
+        {"status": "active", "button_state": "help", "training_button_region": button_region},
+        {"status": "active", "button_state": "help", "training_button_region": button_region},
+    ))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
+
+    result = executor.execute_training_goal(
+        queue, task["task_id"], NOW, execute=True,
+        confirmation=executor.CONFIRMATION_PHRASE,
+        capture_fn=capture, click_fn=click, sleep_fn=lambda _: None,
+    )
+
+    assert result["status"] == "UNKNOWN_AFTER_HELP_CLICK"
+    assert queue["paused"] is True
+    assert queue["pause_reason"].startswith("uncertain_help_action:")
+    assert len(clicks) == 3
+
+
 def test_missing_or_unreliable_time_blocks_before_train(monkeypatch):
     queue, task, clicks, click, capture = _setup(monkeypatch)
     states = iter(({"status": "idle"}, {"status": "idle"}))
-    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args: next(states))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
     monkeypatch.setattr(executor, "read_slot_training_time", lambda *args: NumericReading(None, None, "?d.?g."))
 
     result = executor.execute_training_goal(

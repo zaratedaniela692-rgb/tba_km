@@ -2,8 +2,10 @@
 
 import time
 from dataclasses import asdict
+from datetime import datetime, timedelta, timezone
 
 from army_state import open_training_marker
+from army_training_lifecycle import advance_training_lifecycle, confirm_help_action
 from army_training_finish import CONFIRMATION_PHRASE, VIEW_RESET_SECONDS, finish_open_training
 from army_training_levels import read_slot_selector_levels
 from army_training_live_e2e import (
@@ -63,6 +65,11 @@ def _record_uncertain(task, reason, now, pause=False, queue=None):
     if pause and queue is not None:
         queue["paused"] = True
         queue["pause_reason"] = f"uncertain_training_start:{task['task_id']}"
+
+
+def _pause_uncertain_help(queue, task_id):
+    queue["paused"] = True
+    queue["pause_reason"] = f"uncertain_help_action:{task_id}"
 
 
 def execute_training_goal(
@@ -234,14 +241,104 @@ def execute_training_goal(
         _record_uncertain(task, result["status"], now, pause=True, queue=queue)
         return result
 
-    mark_task_started(queue, task_id, time_reading.value, now=now)
+    started_at = datetime.now(timezone.utc)
+    mark_task_started(queue, task_id, time_reading.value, now=started_at)
     if state_path is not None:
         open_training_marker(
-            state_path, f"{task_id}@{now.isoformat()}", task_id, asdict(goal_slot), now,
+            state_path, f"{task_id}@{started_at.isoformat()}", task_id, asdict(goal_slot), started_at,
             _parse_time(task["expires_at"]),
         )
+    post_order_delay = queue["settings"]["post_order_delay_seconds"]
+    sleep_fn(post_order_delay)
+    help_requested_at = started_at + timedelta(seconds=post_order_delay)
+    try:
+        help_frame, help_origin = capture_fn()
+        if help_origin != origin or (help_frame.shape[1], help_frame.shape[0]) != EXPECTED_SIZE:
+            raise LiveTrainingError("Capture geometry changed before Help click.")
+        help_state = _read_current_training_state(help_frame, variant, include_numeric=False)
+    except Exception as error:
+        _pause_uncertain_help(queue, task_id)
+        result.update(
+            status="START_CONFIRMED_HELP_UNCERTAIN",
+            blockers=[f"help_state_read_failed_do_not_click:{error}"],
+            queue_modified=True,
+        )
+        return result
+    result["help_button_state_before_click"] = help_state.get("button_state", "unknown")
+    button_region = help_state.get("training_button_region")
+    if help_state["status"] != "active" or help_state.get("button_state") != "help" or not button_region:
+        _pause_uncertain_help(queue, task_id)
+        result.update(
+            status="START_CONFIRMED_HELP_UNCERTAIN",
+            blockers=["active_training_and_panel_help_button_not_confirmed_do_not_click"],
+            queue_modified=True,
+        )
+        return result
+
+    help_point = (
+        button_region["x"] + button_region["w"] // 2,
+        button_region["y"] + button_region["h"] // 2,
+    )
+    try:
+        _check_emergency_stop()
+    except Exception as error:
+        result.update(
+            status="START_CONFIRMED_HELP_BLOCKED",
+            blockers=[f"emergency_stop_before_help_click:{error}"],
+            queue_modified=True,
+        )
+        return result
+    result["help_click_attempted"] = True
+    try:
+        click_fn(help_point, origin)
+        result["help_click_issued"] = True
+    except Exception as error:
+        _pause_uncertain_help(queue, task_id)
+        result.update(
+            status="UNKNOWN_AFTER_HELP_CLICK_ATTEMPT",
+            blockers=[f"help_click_result_uncertain_do_not_retry:{error}"],
+            queue_modified=True,
+        )
+        return result
+
+    settle_delay = queue["settings"]["help_to_speedup_delay_seconds"]
+    sleep_fn(settle_delay)
+    try:
+        confirmed_frame, confirmed_origin = capture_fn()
+        if confirmed_origin != origin or (confirmed_frame.shape[1], confirmed_frame.shape[0]) != EXPECTED_SIZE:
+            raise LiveTrainingError("Capture geometry changed after Help click.")
+        confirmed_state = _read_current_training_state(
+            confirmed_frame, variant, include_numeric=False,
+        )
+    except Exception as error:
+        _pause_uncertain_help(queue, task_id)
+        result.update(
+            status="UNKNOWN_AFTER_HELP_CLICK",
+            blockers=[f"help_confirmation_failed_do_not_retry:{error}"],
+            queue_modified=True,
+        )
+        return result
+    result["help_button_state_after_click"] = confirmed_state.get("button_state", "unknown")
+    if confirmed_state["status"] != "active" or confirmed_state.get("button_state") != "speedup":
+        _pause_uncertain_help(queue, task_id)
+        result.update(
+            status="UNKNOWN_AFTER_HELP_CLICK",
+            blockers=["speedup_button_not_confirmed_after_help_do_not_retry"],
+            queue_modified=True,
+        )
+        return result
+    confirm_help_action(
+        queue, task_id,
+        help_requested_at,
+        training_status="active", button_state="speedup",
+    )
+    advance_training_lifecycle(
+        queue, task_id, help_requested_at + timedelta(seconds=settle_delay),
+        training_status="active", button_state="speedup", dry_run=False,
+    )
     result.update(
         status="START_CONFIRMED",
+        help_action="confirmed",
         queue_modified=True,
         actions_executed=True,
         initial_remaining_seconds=time_reading.value,

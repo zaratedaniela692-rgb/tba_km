@@ -434,5 +434,95 @@
       "type": "icon",
       "template": "templates/army_training/current_training_unit.png"
     }
+  },
+  "speedup": {
+    "speedup_dialog_anchor": {
+      "x": 900,
+      "y": 250,
+      "w": 120,
+      "h": 24,
+      "type": "anchor",
+      "template": "templates/speedup/speedup_dialog_anchor.png"
+    },
+    "speedup_task_context": {
+      "x": 716,
+      "y": 278,
+      "w": 232,
+      "h": 70,
+      "type": "icon",
+      "template": "templates/speedup/speedup_task_context.png"
+    },
+    "speedup_remaining_time": {
+      "x": 1064,
+      "y": 322,
+      "w": 110,
+      "h": 22,
+      "type": "number",
+      "template": "templates/speedup/speedup_remaining_time.png"
+    },
+    "speedup_inventory_viewport": {
+      "x": 678,
+      "y": 376,
+      "w": 562,
+      "h": 418,
+      "type": "list",
+      "template": "templates/speedup/speedup_inventory_viewport.png"
+    },
+    "speedup_use_button": {
+      "x": 1050,
+      "y": 445,
+      "w": 145,
+      "h": 27,
+      "type": "button",
+      "template": "templates/speedup/speedup_use_button.png"
+    },
+    "speedup_item_icon": {
+      "x": 723,
+      "y": 396,
+      "w": 72,
+      "h": 72,
+      "type": "icon",
+      "template": "templates/speedup/speedup_item_icon.png"
+    },
+    "speedup_item_duration": {
+      "x": 723,
+      "y": 402,
+      "w": 40,
+      "h": 20,
+      "type": "number",
+      "template": "templates/speedup/speedup_item_duration.png"
+    },
+    "speedup_item_quantity": {
+      "x": 755,
+      "y": 446,
+      "w": 42,
+      "h": 22,
+      "type": "number",
+      "template": "templates/speedup/speedup_item_quantity.png"
+    },
+    "speedup_purchase_offer": {
+      "x": 1050,
+      "y": 746,
+      "w": 145,
+      "h": 27,
+      "type": "button",
+      "template": "templates/speedup/speedup_purchase_offer.png"
+    },
+    "speedup_scroll_track": {
+      "x": 1218,
+      "y": 380,
+      "w": 12,
+      "h": 414,
+      "type": "list",
+      "template": "templates/speedup/speedup_scroll_track.png"
+    },
+    "speedup_scroll_thumb": {
+      "x": 1218,
+      "y": 392,
+      "w": 12,
+      "h": 62,
+      "type": "icon",
+      "template": "templates/speedup/speedup_scroll_thumb.png"
+    }
   }
 }
