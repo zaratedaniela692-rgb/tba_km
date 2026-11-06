@@ -6,6 +6,8 @@ import numpy as np
 import pytest
 
 from speedup_calibration import (
+    CHECKPOINT_LABELS,
+    CHECKPOINT_STEPS,
     CalibrationError,
     CONFIRMATION_PHRASE,
     dialog_anchor_matches,
@@ -146,6 +148,75 @@ def test_cli_requires_explicit_calibration_confirmation(capsys):
 
     assert error.value.code == 2
     assert CONFIRMATION_PHRASE in capsys.readouterr().err
+
+
+def test_checkpoint_mode_saves_only_three_landmarks_and_stops_at_sixteen(tmp_path):
+    frames = [image(0)] + [image(40 if step % 2 else 0) for step in range(1, 17)]
+    result, events, saved = run_calibration(
+        tmp_path,
+        frames,
+        checkpoints=CHECKPOINT_STEPS,
+        max_steps=16,
+    )
+
+    assert result.status == "CHECKPOINTS_CAPTURED"
+    assert result.scrolls == 16
+    assert result.captures == 3
+    assert saved == [
+        "checkpoint_003_after_scroll.png",
+        "checkpoint_011_after_scroll.png",
+        "checkpoint_016_after_scroll.png",
+    ]
+    assert events.count(("scroll", -1)) == 16
+    manifest = json.loads((tmp_path / "run" / "manifest.json").read_text(encoding="utf-8"))
+    assert len(manifest["checks"]) == 16
+    assert [item["step"] for item in manifest["checkpoints"]] == [3, 11, 16]
+    assert [item["reported_visible_durations"] for item in manifest["checkpoints"]] == [
+        list(CHECKPOINT_LABELS[3]),
+        list(CHECKPOINT_LABELS[11]),
+        list(CHECKPOINT_LABELS[16]),
+    ]
+    assert not list((tmp_path / "run").glob("step_*.png"))
+
+
+def test_checkpoint_mode_stops_if_view_is_unchanged_before_checkpoint(tmp_path):
+    frames = [image(0), image(40), image(40)]
+    result, events, saved = run_calibration(
+        tmp_path,
+        frames,
+        checkpoints=CHECKPOINT_STEPS,
+        max_steps=16,
+    )
+
+    assert result.status == "LANDMARK_MISMATCH"
+    assert result.reason == "viewport_unchanged_before_checkpoint:2"
+    assert result.scrolls == 2
+    assert saved == []
+    assert events.count(("scroll", -1)) == 2
+
+
+def test_checkpoint_cli_uses_approved_steps_without_live_input(tmp_path, monkeypatch, capsys):
+    import speedup_calibration
+
+    observed = {}
+
+    def fake_run(*args, **kwargs):
+        observed.update(kwargs)
+        return speedup_calibration.CalibrationResult("CHECKPOINTS_CAPTURED", "all_checkpoints_reached", str(tmp_path), 3, 16)
+
+    monkeypatch.setattr(speedup_calibration, "ROOT_DIR", tmp_path)
+    monkeypatch.setattr(speedup_calibration, "run_scroll_calibration", fake_run)
+
+    exit_code = speedup_calibration.main([
+        "--checkpoint-scan",
+        "--confirm",
+        CONFIRMATION_PHRASE,
+    ])
+
+    assert exit_code == 0
+    assert observed["max_steps"] == 16
+    assert observed["checkpoints"] == CHECKPOINT_STEPS
+    assert json.loads(capsys.readouterr().out)["status"] == "CHECKPOINTS_CAPTURED"
 
 
 @pytest.mark.parametrize(

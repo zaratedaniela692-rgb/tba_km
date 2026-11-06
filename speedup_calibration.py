@@ -17,6 +17,12 @@ STOP_FILE = Path.home() / ".tba_stop"
 EXPECTED_SIZE = (1920, 1080)
 MAX_STEPS = 20
 DEFAULT_STEPS = 20
+CHECKPOINT_STEPS = (3, 11, 16)
+CHECKPOINT_LABELS = {
+    3: ("15m", "1h", "3h", "8h"),
+    11: ("15h", "1d", "3d", "7d"),
+    16: ("3d", "7d", "30d"),
+}
 SETTLE_SECONDS = 0.35
 CONFIRMATION_PHRASE = "SCROLL SPEEDUP LIST"
 ANCHOR_THRESHOLD = 0.95
@@ -108,10 +114,17 @@ def run_scroll_calibration(
     anchor_fn=dialog_anchor_matches,
     regions=None,
     max_steps=DEFAULT_STEPS,
+    checkpoints=None,
     expected_size=EXPECTED_SIZE,
 ):
     if not 1 <= max_steps <= MAX_STEPS:
         raise CalibrationError(f"max_steps must be between 1 and {MAX_STEPS}")
+    if checkpoints is not None:
+        checkpoints = tuple(checkpoints)
+        if not checkpoints or tuple(sorted(set(checkpoints))) != checkpoints:
+            raise CalibrationError("checkpoints must be a non-empty, increasing sequence")
+        if checkpoints[-1] > max_steps:
+            raise CalibrationError("all checkpoints must be within max_steps")
 
     regions = regions or load_speedup_regions()
     viewport = regions["speedup_inventory_viewport"]
@@ -127,7 +140,9 @@ def run_scroll_calibration(
         "viewport": {key: int(viewport[key]) for key in ("x", "y", "w", "h")},
         "pointer_frame_point": {"x": pointer_x, "y": pointer_y},
         "expected_frame_size": list(expected_size),
+        "mode": "checkpoint" if checkpoints is not None else "step_by_step",
         "captures": [],
+        "checks": [],
         "scrolls": [],
         "reason": None,
     }
@@ -143,14 +158,15 @@ def run_scroll_calibration(
     frame_size = (int(frame.shape[1]), int(frame.shape[0]))
     manifest["frame_size"] = list(frame_size)
     manifest["monitor_origin"] = [int(origin[0]), int(origin[1])]
-    initial_path = output_dir / "step_000_initial.png"
-    save_frame_fn(initial_path, frame)
-    manifest["captures"].append({
-        "step": 0,
-        "action": "initial",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "file": initial_path.name,
-    })
+    if checkpoints is None:
+        initial_path = output_dir / "step_000_initial.png"
+        save_frame_fn(initial_path, frame)
+        manifest["captures"].append({
+            "step": 0,
+            "action": "initial",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "file": initial_path.name,
+        })
 
     if frame_size != tuple(expected_size):
         return finish("BLOCKED", f"unexpected_frame_size:{frame_size}")
@@ -183,32 +199,61 @@ def run_scroll_calibration(
         sleep_fn(SETTLE_SECONDS)
         frame, next_origin = capture_fn()
         next_size = (int(frame.shape[1]), int(frame.shape[0]))
-        capture_path = output_dir / f"step_{step:03d}_after_scroll.png"
-        save_frame_fn(capture_path, frame)
-        capture_record = {
-            "step": step,
-            "action": "after_scroll",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "file": capture_path.name,
-            "dialog_recognized": False,
-            "viewport_changed_fraction": None,
-        }
-        manifest["captures"].append(capture_record)
         if next_size != frame_size or tuple(next_origin) != tuple(origin):
             _write_manifest(manifest_path, manifest)
             return finish("BLOCKED", "capture_geometry_changed")
         if not anchor_fn(frame, regions):
+            if checkpoints is None:
+                capture_path = output_dir / f"step_{step:03d}_after_scroll.png"
+                save_frame_fn(capture_path, frame)
+                manifest["captures"].append({"step": step, "action": "after_scroll", "file": capture_path.name})
             _write_manifest(manifest_path, manifest)
             return finish("BLOCKED", "speedup_dialog_not_recognized_after_scroll")
-        capture_record["dialog_recognized"] = True
         current_viewport = _viewport_crop(frame, viewport)
         changed_fraction = _viewport_change(previous_viewport, current_viewport)
-        capture_record["viewport_changed_fraction"] = changed_fraction
+        check_record = {
+            "step": step,
+            "dialog_recognized": True,
+            "viewport_changed_fraction": changed_fraction,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        manifest["checks"].append(check_record)
+        if checkpoints is None:
+            capture_path = output_dir / f"step_{step:03d}_after_scroll.png"
+            save_frame_fn(capture_path, frame)
+            manifest["captures"].append({
+                "step": step,
+                "action": "after_scroll",
+                "timestamp": check_record["timestamp"],
+                "file": capture_path.name,
+                "dialog_recognized": True,
+                "viewport_changed_fraction": changed_fraction,
+            })
+        elif changed_fraction <= CHANGE_THRESHOLD:
+            _write_manifest(manifest_path, manifest)
+            return finish("LANDMARK_MISMATCH", f"viewport_unchanged_before_checkpoint:{step}")
+        elif step in checkpoints:
+            capture_path = output_dir / f"checkpoint_{step:03d}_after_scroll.png"
+            save_frame_fn(capture_path, frame)
+            checkpoint_record = {
+                "step": step,
+                "action": "checkpoint",
+                "timestamp": check_record["timestamp"],
+                "file": capture_path.name,
+                "reported_visible_durations": list(CHECKPOINT_LABELS.get(step, ())),
+            }
+            manifest["captures"].append(checkpoint_record)
+            manifest.setdefault("checkpoints", []).append(checkpoint_record)
         _write_manifest(manifest_path, manifest)
         if changed_fraction <= CHANGE_THRESHOLD:
             return finish("COMPLETE", "viewport_unchanged")
         previous_viewport = current_viewport
 
+    if checkpoints is not None:
+        captured_steps = tuple(record["step"] for record in manifest.get("checkpoints", []))
+        if captured_steps == checkpoints:
+            return finish("CHECKPOINTS_CAPTURED", "all_checkpoints_reached")
+        return finish("LANDMARK_MISMATCH", f"checkpoint_sequence_incomplete:{captured_steps}")
     return finish("STEP_LIMIT", "maximum_scroll_steps_reached")
 
 
@@ -247,15 +292,18 @@ def _emergency_stop():
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Capture the speedup list while safely calibrating wheel scrolling.")
-    parser.add_argument("--calibrate-scroll", action="store_true", help="capture the open speedup list after wheel steps")
-    parser.add_argument("--steps", type=int, default=DEFAULT_STEPS, help=f"maximum single wheel steps (1-{MAX_STEPS}, default: {DEFAULT_STEPS})")
+    modes = parser.add_mutually_exclusive_group(required=True)
+    modes.add_argument("--calibrate-scroll", action="store_true", help="capture the open speedup list after each wheel step")
+    modes.add_argument("--checkpoint-scan", action="store_true", help="save only the approved 3, 11, and 16 scroll checkpoints")
+    parser.add_argument("--steps", type=int, help=f"maximum single wheel steps (1-{MAX_STEPS}, default: {DEFAULT_STEPS})")
     parser.add_argument("--confirm", default="", help=f"type exactly: {CONFIRMATION_PHRASE}")
     args = parser.parse_args(argv)
-    if not args.calibrate_scroll:
-        parser.error("--calibrate-scroll is required")
     if args.confirm != CONFIRMATION_PHRASE:
         parser.error(f"live calibration requires --confirm \"{CONFIRMATION_PHRASE}\"")
-    if not 1 <= args.steps <= MAX_STEPS:
+    if args.checkpoint_scan and args.steps is not None:
+        parser.error("--steps cannot be combined with --checkpoint-scan")
+    max_steps = args.steps if args.steps is not None else DEFAULT_STEPS
+    if not 1 <= max_steps <= MAX_STEPS:
         parser.error(f"--steps must be between 1 and {MAX_STEPS}")
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
@@ -268,13 +316,14 @@ def main(argv=None):
             _desktop_size,
             output_dir,
             stop_fn=_emergency_stop,
-            max_steps=args.steps,
+            max_steps=16 if args.checkpoint_scan else max_steps,
+            checkpoints=CHECKPOINT_STEPS if args.checkpoint_scan else None,
         )
     except (CalibrationError, OSError, ValueError, KeyError) as error:
         print(json.dumps({"status": "BLOCKED", "reason": str(error)}, ensure_ascii=False, indent=2), file=sys.stderr)
         return 2
     print(json.dumps(asdict(result), ensure_ascii=False, indent=2))
-    return 0 if result.status in {"COMPLETE", "STEP_LIMIT"} else 2
+    return 0 if result.status in {"COMPLETE", "STEP_LIMIT", "CHECKPOINTS_CAPTURED"} else 2
 
 
 if __name__ == "__main__":

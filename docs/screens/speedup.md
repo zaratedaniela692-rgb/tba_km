@@ -51,6 +51,7 @@ Położenia wierszy zależą od przewinięcia, więc wiersze trzeba znajdować w
 
 - Fixture offline → rozpoznaj nagłówek i kontekst → odczytaj timer oraz widoczne wiersze → raport obserwacji albo jawny wynik `unknown/incomplete`.
 - Kalibracja live: przy otwartym dialogu uruchom `python .\speedup_calibration.py --calibrate-scroll --confirm "SCROLL SPEEDUP LIST"`. Polecenie zapisuje widok początkowy, przed każdym pojedynczym przewinięciem ustawia kursor na środku oznaczonego panelu (959, 585), a potem zapisuje kolejny screen. Domyślny limit to 20 kroków; pierwszy niezmieniony widok jest zapisany i kończy kalibrację. Zrzuty i manifest trafiają do `debug/speedup/calibration_<timestamp>/`.
+- Test checkpointowy: po ustawieniu listy na górze uruchom `python .\speedup_calibration.py --checkpoint-scan --confirm "SCROLL SPEEDUP LIST"`. Kursor jest ustawiany na środku panelu przed każdym scroll-em; każda klatka jest sprawdzana w pamięci, ale zapisują się tylko screeny po 3, 11 i 16 scrollach. Nie wykonuje się 17. scrolla. Wynik należy potem ręcznie sprawdzić pod kątem widocznych nominałów i czytelności przycisków „Użyj”.
 - Kalibracja nie rozpoznaje wszystkich wierszy, nie używa przyspieszeń i nie kupuje przedmiotów. Nie przeciąga uchwytu paska.
 - Brak zmiany viewportu po przewinięciu oznacza koniec listy. Uchwyt paska może wspierać, ale nie zastępować porównania obrazu. Osiągnięcie limitu przewinięć bez potwierdzenia końca oznacza skan niekompletny.
 - Nie używaj przyspieszeń, nie kupuj, nie klikaj „Pomoc” i nie zmieniaj kolejki.
@@ -68,3 +69,5 @@ Położenia wierszy zależą od przewinięcia, więc wiersze trzeba znajdować w
 ## Wiedza z poprawek
 
 - 2026-11-06 – The user approved mouse-wheel calibration over the annotated inventory list (not dragging the thumb). Before every wheel step, move the pointer to a safe point inside the list (the panel center is used), away from the game navigation bar and Use/Buy controls; capture after each step and stop at the first unchanged view. Item use and purchases remain out of scope for calibration.
+- 2026-11-07 – User-reported cumulative list landmarks from a run starting at the top: after 3 scrolls 15m/1h/3h/8h; after 11 scrolls 15h/1d/3d/7d; after 16 scrolls 3d/7d/30d and reported end-of-list. The 1m item may be omitted from required coverage. These are observations pending screenshot verification, not OCR-confirmed facts.
+- 2026-11-07 – The user approved checkpoint-only calibration: save screenshots only after scrolls 3, 11 and 16; validate each intermediate frame in memory; stop before a checkpoint if the viewport does not change; never send scroll 17. The next review checks the item labels and readability of the visible Use buttons; it does not yet execute item use.

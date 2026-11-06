@@ -34,6 +34,40 @@ python .\speedup_calibration.py --calibrate-scroll --confirm "SCROLL SPEEDUP LIS
 
 Use `--steps N` to request a different limit from 1 to 20; the default and maximum is 20. The command stops earlier when consecutive inventory viewport captures are unchanged.
 
+### User-reported list landmarks and approved checkpoint test
+
+The user reports these cumulative wheel-scroll observations from a run starting at the top of the list:
+
+| Cumulative scrolls | Reported visible speedup durations |
+|---:|---|
+| 3 | 15m, 1h, 3h, 8h |
+| 11 | 15h, 1d, 3d, 7d |
+| 16 | 3d, 7d, 30d; reported list end |
+
+The 1m acceleration may be omitted from the eventual inventory coverage requirement. These labels and scroll counts are user observations, not yet independently verified from calibration captures or OCR.
+
+Approved next calibration run: begin with the list manually positioned at the top, perform exactly 16 single-notch downward scrolls (groups of 3, then 8, then 5), and analyze only the named checkpoints at cumulative steps 3, 11 and 16. Capture the initial frame and intermediate frames in memory for dialog/viewport checks, but save screenshots only at those three checkpoints. Do not scroll past 16. If the viewport becomes unchanged before a checkpoint, stop and report a landmark mismatch. Do not click the scrollbar, any item, or the Buy offer. The user's duration labels remain visual guidance for later review, not an OCR assertion.
+
+```mermaid
+flowchart LR
+    A[Open list at top] --> B[Scroll 1-3; check frames in memory]
+    B --> C[Checkpoint 3: 15m, 1h, 3h, 8h]
+    C --> D[Scroll 4-11; check frames in memory]
+    D --> E[Checkpoint 11: 15h, 1d, 3d, 7d]
+    E --> F[Scroll 12-16; check frames in memory]
+    F --> G[Checkpoint 16: 3d, 7d, 30d]
+```
+
+Run the checkpoint-only test from the project directory with:
+
+```powershell
+python .\speedup_calibration.py --checkpoint-scan --confirm "SCROLL SPEEDUP LIST"
+```
+
+The run saves only `checkpoint_003_after_scroll.png`, `checkpoint_011_after_scroll.png`, and `checkpoint_016_after_scroll.png`, plus the manifest. Each intervening frame is checked in memory to confirm the dialog remains open and the list is moving; if the viewport becomes unchanged before step 16, it stops with `LANDMARK_MISMATCH`. It performs no 17th scroll. The user and assistant then inspect the three saved screens for row labels and readable `Użyj` buttons; this phase does not automatically identify every item or click a button.
+
+The checkpoint-only mode is implemented as a separate CLI option. Tests verify that only checkpoint frames are saved; every scroll still has an in-memory capture and dialog/viewport check; checkpoints are recorded at cumulative 3, 11 and 16; no 1m coverage requirement; early unchanged-view abort before a checkpoint; and a hard stop at 16 with no 17th scroll.
+
 The full standalone finisher remains separate: the future `--execute` path must not be added until the inventory reader and use verification are fixture-backed.
 
 ## Direct-run finishing workflow (deferred)
