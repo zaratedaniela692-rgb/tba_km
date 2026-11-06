@@ -1,0 +1,42 @@
+{
+  "started_at": "2026-11-06T18:53:30.502661+00:00",
+  "status": "BLOCKED",
+  "region": "speedup_inventory_viewport",
+  "viewport": {
+    "x": 678,
+    "y": 376,
+    "w": 562,
+    "h": 418
+  },
+  "pointer_frame_point": {
+    "x": 959,
+    "y": 585
+  },
+  "expected_frame_size": [
+    1920,
+    1080
+  ],
+  "captures": [
+    {
+      "step": 0,
+      "action": "initial",
+      "timestamp": "2026-11-06T18:53:30.821684+00:00",
+      "file": "step_000_initial.png"
+    }
+  ],
+  "scrolls": [],
+  "reason": "speedup_dialog_not_recognized",
+  "frame_size": [
+    1920,
+    1080
+  ],
+  "monitor_origin": [
+    0,
+    0
+  ],
+  "display_size": [
+    1920,
+    1080
+  ],
+  "finished_at": "2026-11-06T18:53:31.017284+00:00"
+}
