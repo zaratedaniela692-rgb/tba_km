@@ -63,6 +63,9 @@ def test_navigation_stops_when_armia_button_is_not_confident(monkeypatch, tmp_pa
     )
 
     assert result["status"] == "BLOCKED_ARMY_BUTTON_UNCONFIRMED"
+    assert result["armia_match_confidence"] < result["armia_match_threshold"]
+    assert result["armia_match_threshold"] == 94.6
+    assert result["armia_match_candidate_point"] == (939, 941)
     assert events == ["key"]
 
 

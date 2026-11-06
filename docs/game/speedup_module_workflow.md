@@ -1,6 +1,6 @@
 # Speedup Module Workflow
 
-**Status:** Reader contract documented; implementation has not been approved or started. The live polling cadence needed to detect timer milestones remains undecided.
+**Status:** Read-only parsing primitives implemented in `speedup_readings.py`. Image-level OCR scanning is blocked pending annotated speedup-dialog regions/templates. Live scrolling, recommendation, and item use remain unimplemented and outside this implementation step. The live polling cadence needed to detect timer milestones remains undecided.
 
 ## Goal and scope
 
@@ -48,6 +48,12 @@ The screen card is [docs/screens/speedup.md](../screens/speedup.md). The scanner
 - Scan completeness status and reason if blocked/uncertain, including any unrecognized row.
 
 An unrecognized or unreadable owned row means the inventory scan is incomplete. Do not silently omit it or report a complete inventory. The Buy offer is never owned inventory. Do not click any Use, Buy, Help, or task control.
+
+### Implemented parsing foundation
+
+`speedup_readings.py` provides geometry-independent, confidence-gated parsers for remaining day/hour text, duration labels, and integer quantities. It accepts the Polish hour abbreviation `g` seen in the supplied screenshots as well as `h`, and preserves raw OCR text and an explicit status. Low-confidence, malformed, and out-of-range values return `value=None`; quantities never default to zero. This module does not perform OCR, classify inventory ownership, scan images, or claim scan completeness.
+
+Fixture-backed image reading is still pending. Before implementing it, annotate and verify the dialog anchor, army-task context, timer, inventory viewport/rows, purchase offer, and any required row controls with `tools/annotate.py`; do not infer coordinates from screenshots or reuse desktop regions for browser assets.
 
 ### Offline fixture scan
 
@@ -121,7 +127,8 @@ flowchart TD
 ## Current implementation status
 
 - The task queue records remaining time and speedup lifecycle state, but it does not read screenshots or inventory.
-- The speedup screen card and reader contract are documented; no speedup regions/templates, OCR reader, planner, or tests exist yet.
+- `speedup_readings.py` implements pure timer/duration/quantity parsing with confidence gates; `tests/test_speedup_readings.py` covers supplied Polish formats, grouping separators, malformed input, and low confidence.
+- The speedup screen card and reader contract are documented; speedup dialog regions/templates and image OCR reader do not exist yet. Planner and tests for inventory ownership/completeness are also pending.
 - Existing queue policy and mechanics documentation describe future `quick_finish` behavior. This screen-reader change does not implement that behavior; any planner or execution phase needs its own approved contract.
 
 ## Expected tests before implementation is considered complete

@@ -1,6 +1,6 @@
 # Ekran: speedup
 
-Status: karta ekranu do zatwierdzenia przed implementacją. Obecnie brak regionów i zweryfikowanych szablonów speedup.
+Status: parsery OCR czasu, nominałów i ilości są zaimplementowane w `speedup_readings.py`, ale brak regionów dialogu i obrazu OCR readera. Skanowanie fixture'ów wymaga najpierw adnotacji regionów narzędziem `tools/annotate.py`.
 
 Autorytatywny kontrakt odczytu, zakres, diagram i ograniczenia są w [docs/game/speedup_module_workflow.md](../game/speedup_module_workflow.md).
 
@@ -28,7 +28,7 @@ Autorytatywny kontrakt odczytu, zakres, diagram i ograniczenia są w [docs/game/
 8. `speedup_scroll_track` i `speedup_scroll_thumb` – pionowy tor oraz uchwyt po prawej stronie listy. Położenie uchwytu jest sygnałem pomocniczym postępu; nie rozpoznano jeszcze wszystkich stanów ani progu pewności.
 9. `speedup_use_button` – przycisk „Użyj” przy wierszu. Tylko do rozpoznania/wykluczenia z OCR; nie klikać w ramach skanera.
 
-Współrzędne regionów należy oznaczyć narzędziem `tools/annotate.py` na wybranych fixture'ach. Nie wyznaczaj ich przez szacowanie na podstawie podglądu obrazu. Kadr i regiony mają być określone względem okna gry; obecny mechanizm przechwytywania wybiera pierwszy monitor, a nie konkretne okno gry.
+Współrzędne regionów należy oznaczyć narzędziem `tools/annotate.py` na wybranych fixture'ach. Nie wyznaczaj ich przez szacowanie na podstawie podglądu obrazu. Kadr i regiony mają być określone względem okna gry; obecny mechanizm przechwytywania wybiera pierwszy monitor, a nie konkretne okno gry. Pure parsers preserve the raw OCR string and return explicit low-confidence or unrecognized statuses; they do not imply that any image has been scanned.
 
 ## Przejścia
 

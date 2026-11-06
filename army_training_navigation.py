@@ -40,12 +40,11 @@ def _match_army_button(frame, region, template, threshold):
     scores = cv2.matchTemplate(search_area, template, cv2.TM_SQDIFF_NORMED)
     error, _, location, _ = cv2.minMaxLoc(scores)
     confidence = max(0.0, min(100.0, (1.0 - float(error)) * 100.0))
-    if confidence < threshold:
-        return None
     return (
         x + int(location[0]) + template_width // 2,
         y + int(location[1]) + template_height // 2,
         confidence,
+        float(threshold),
     )
 
 
@@ -109,27 +108,52 @@ def open_army_training_screen(
         threshold = get_threshold(config, "world_map", "armia")
         match = _match_army_button(frame, army_region, template, threshold)
         if match is None:
-            return {**result, "status": "BLOCKED_ARMY_BUTTON_UNCONFIRMED", "blockers": ["world_map.armia"]}
+            return {
+                **result,
+                "status": "BLOCKED_ARMY_BUTTON_OUTSIDE_FRAME",
+                "armia_match_threshold": float(threshold),
+                "search_region": {
+                    "x": int(army_region["x"]),
+                    "y": int(army_region["y"]) + WORLD_MAP_FRAME_OFFSET_Y,
+                    "w": int(army_region["w"]),
+                    "h": int(army_region["h"]),
+                },
+                "blockers": ["world_map.armia search region is outside the captured frame"],
+            }
+        match_x, match_y, match_confidence, match_threshold = match
+        result.update(
+            armia_match_confidence=match_confidence,
+            armia_match_threshold=match_threshold,
+            armia_match_candidate_point=(match_x, match_y),
+        )
+        if match_confidence < match_threshold:
+            return {
+                **result,
+                "status": "BLOCKED_ARMY_BUTTON_UNCONFIRMED",
+                "blockers": [
+                    f"world_map.armia confidence {match_confidence:.2f}% is below {match_threshold:.2f}%"
+                ],
+            }
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
         return {**result, "status": "BLOCKED_BEFORE_ARMY_CLICK", "blockers": [str(error)]}
 
     try:
         _check_emergency_stop()
         _enable_live_failsafe(click_fn)
-        click_fn((match[0], match[1]), origin)
+        click_fn((match_x, match_y), origin)
     except Exception as error:
         return {
             **result,
             "status": "UNKNOWN_AFTER_ARMY_CLICK_ATTEMPT",
             "actions_executed": True,
-            "armia_match_confidence": match[2],
+            "armia_match_confidence": match_confidence,
             "blockers": [f"armia_click_result_uncertain_no_retry:{error}"],
         }
 
     result.update(
         actions_executed=True,
-        armia_match_confidence=match[2],
-        armia_click_point=(match[0], match[1]),
+        armia_match_confidence=match_confidence,
+        armia_click_point=(match_x, match_y),
     )
     sleep_fn(TRANSITION_WAIT_SECONDS)
     try:

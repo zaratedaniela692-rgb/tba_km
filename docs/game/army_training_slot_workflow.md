@@ -92,7 +92,7 @@ Each army-training task starts from a predictable screen state and opens its own
 
 1. Require explicit live-execution opt-in and the existing confirmation phrase before sending game input. The game must already be the foreground application; window activation is not implemented.
 2. Invoke the shared `clear_game_screen` helper to send exactly three rapid Escape presses. Do not capture or analyze the screen between presses.
-3. Capture a fresh primary-monitor frame. Locate the existing `world_map.armia` template inside its annotated region; click only when the match reaches the configured confidence threshold. Do not use a guessed coordinate or click if the control is not confidently found.
+3. Capture a fresh primary-monitor frame. Locate the existing `world_map.armia` template inside its annotated region; click only when the match reaches the configured confidence threshold. If it does not, report the measured confidence, configured threshold, and searched region; do not use a guessed coordinate or click if the control is not confidently found.
 4. Wait for the navigation transition, capture a fresh frame, and require `locate_slots` to identify a valid Barracks layout before goal evaluation or any training action.
 5. If the button or Barracks layout is missing, ambiguous, or outside the supported desktop geometry, stop the task without continuing to goal execution. Do not retry clicks automatically.
 6. This startup is mandatory for each army-training task execution, including a manager cycle that then reports no executable goal. Other task types can reuse the reset helper and define their own navigation after reset.
