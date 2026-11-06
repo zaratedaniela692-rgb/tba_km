@@ -1,0 +1,223 @@
+{
+  "started_at": "2026-11-06T19:57:06.537501+00:00",
+  "status": "STEP_LIMIT",
+  "region": "speedup_inventory_viewport",
+  "viewport": {
+    "x": 678,
+    "y": 376,
+    "w": 562,
+    "h": 418
+  },
+  "pointer_frame_point": {
+    "x": 959,
+    "y": 585
+  },
+  "expected_frame_size": [
+    1920,
+    1080
+  ],
+  "captures": [
+    {
+      "step": 0,
+      "action": "initial",
+      "timestamp": "2026-11-06T19:57:06.875912+00:00",
+      "file": "step_000_initial.png"
+    },
+    {
+      "step": 1,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:07.908681+00:00",
+      "file": "step_001_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6413781947589777
+    },
+    {
+      "step": 2,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:08.712921+00:00",
+      "file": "step_002_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6412675168996578
+    },
+    {
+      "step": 3,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:09.508309+00:00",
+      "file": "step_003_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6447240715830339
+    },
+    {
+      "step": 4,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:10.302778+00:00",
+      "file": "step_004_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.645183810383286
+    },
+    {
+      "step": 5,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:11.134304+00:00",
+      "file": "step_005_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6388964566057654
+    },
+    {
+      "step": 6,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:11.932102+00:00",
+      "file": "step_006_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6412717737404008
+    },
+    {
+      "step": 7,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:12.744155+00:00",
+      "file": "step_007_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6344650853922253
+    },
+    {
+      "step": 8,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:13.544808+00:00",
+      "file": "step_008_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6366914131008531
+    },
+    {
+      "step": 9,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:14.343310+00:00",
+      "file": "step_009_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6341330518142655
+    },
+    {
+      "step": 10,
+      "action": "after_scroll",
+      "timestamp": "2026-11-06T19:57:15.118354+00:00",
+      "file": "step_010_after_scroll.png",
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6339500076623134
+    }
+  ],
+  "scrolls": [
+    {
+      "step": 1,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:07.311002+00:00"
+    },
+    {
+      "step": 2,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:08.133032+00:00"
+    },
+    {
+      "step": 3,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:08.945294+00:00"
+    },
+    {
+      "step": 4,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:09.730112+00:00"
+    },
+    {
+      "step": 5,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:10.523258+00:00"
+    },
+    {
+      "step": 6,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:11.356631+00:00"
+    },
+    {
+      "step": 7,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:12.154576+00:00"
+    },
+    {
+      "step": 8,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:12.970905+00:00"
+    },
+    {
+      "step": 9,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:13.766288+00:00"
+    },
+    {
+      "step": 10,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-06T19:57:14.563950+00:00"
+    }
+  ],
+  "reason": "maximum_scroll_steps_reached",
+  "frame_size": [
+    1920,
+    1080
+  ],
+  "monitor_origin": [
+    0,
+    0
+  ],
+  "display_size": [
+    1920,
+    1080
+  ],
+  "finished_at": "2026-11-06T19:57:15.135307+00:00"
+}
