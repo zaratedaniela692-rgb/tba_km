@@ -9,7 +9,7 @@
 ## Elementy (numery jak na opisany.png)
 Regiony pochodzą z `regions.json`; współrzędne odnoszą się do obszaru gry z danego wariantu screena. Nazwy i funkcje poza wcześniej potwierdzonymi są wstępne.
 
-1. `armia` – button; dolny pasek nawigacyjny, szablon `templates/world_map/armia.png`, region `x=913, y=879, w=53, h=46`. Szablon dopasowuje się do dwóch fixture'ów kont z wynikiem 100%. Start zadania szkolenia po `3x Escape` lokalizuje ten przycisk w jego regionie, klika środek dopasowanego szablonu i potwierdza otwarcie Koszar przez wykrycie slotów. Reakcja kliknięcia wymaga jeszcze nadzorowanego potwierdzenia na żywo.
+1. `armia` – button; dolny pasek nawigacyjny, szablon `templates/world_map/armia.png`, region `x=913, y=879, w=53, h=46`. Szablon dopasowuje się do dwóch fixture'ów kont z wynikiem 100%. Start zadania szkolenia po `3x Escape` wyszukuje ten przycisk w regionie rozszerzonym o 2 px z każdej strony, klika środek dopasowanego szablonu tylko przy wyniku co najmniej 94.6% i potwierdza otwarcie Koszar przez wykrycie slotów. Reakcja kliknięcia wymaga jeszcze nadzorowanego potwierdzenia na żywo.
 2. `watchtower_locked` – przycisk Watchtower w stanie braku dostępu; czerwone tło, szablon `templates/world_map/watchtower_locked.png`, region `x=672, y=876, w=36, h=26`.
 3. `watchtower_unlocked` – ten sam przycisk w stanie wykupionej usługi; niebieskie tło, szablon `templates/world_map/watchtower_unlocked.png`, ten sam region `x=672, y=876, w=36, h=26`.
 4. `okno_wiadomości` – button otwierający panel komunikacji z innymi graczami i klanami; region `x=1220, y=951, w=31, h=33`. Szablon: `templates/world_map/okno_wiadomosci.png`. Etykieta zachowuje polskie znaki, a nazwa pliku jest ASCII dla zgodności z OpenCV na Windows.
@@ -77,3 +77,4 @@ Pozostałe rozpoznane wzrokowo części ekranu, które nie są jeszcze regionami
 - 2026-11-02 – szkolenie armii nie wymaga przejścia do trybu miasta; zasoby odczytujemy z bieżącego ekranu mapy.
 - 2026-11-02 – rekrutacja dozwolona tylko przy białym tekście `food_count` i wartości większej od zera; czerwony, zero lub niepewny odczyt oznaczają komunikat i przerwanie. Akcja naprawiająca czerwony stan będzie osobnym, późniejszym flow.
 - 2026-11-03 – Numeric resource regions are excluded from template matching because their displayed values vary between accounts; OCR remains the validation path.
+- 2026-11-06 – The supplied 1920x1080 desktop screenshot contains an exact 53x46 px Armia template match at `(912, 919)`, 1 px left and 1 px below the annotated full-frame region. The fixed-size comparison scored 85.02% because it could not translate the template. A 2 px local search margin addresses this measured offset without lowering the threshold.

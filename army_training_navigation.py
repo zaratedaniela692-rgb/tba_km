@@ -13,6 +13,7 @@ from ui_variants import resolve_asset_path, resolve_variant
 ROOT_DIR = Path(__file__).resolve().parent
 EXPECTED_SIZE = (1920, 1080)
 WORLD_MAP_FRAME_OFFSET_Y = 39
+ARMY_BUTTON_SEARCH_MARGIN = 2
 TRANSITION_WAIT_SECONDS = 1.0
 
 
@@ -23,7 +24,7 @@ def _read_regions(path):
         raise ValueError(f"Cannot load screen regions: {error}") from error
 
 
-def _match_army_button(frame, region, template, threshold):
+def _army_search_region(frame, region):
     x = int(region["x"])
     y = int(region["y"]) + WORLD_MAP_FRAME_OFFSET_Y
     width = int(region["w"])
@@ -32,7 +33,27 @@ def _match_army_button(frame, region, template, threshold):
     if x < 0 or y < 0 or x + width > frame_width or y + height > frame_height:
         return None
 
-    search_area = frame[y:y + height, x:x + width]
+    margin = ARMY_BUTTON_SEARCH_MARGIN
+    search_x = max(0, x - margin)
+    search_y = max(0, y - margin)
+    search_right = min(frame_width, x + width + margin)
+    search_bottom = min(frame_height, y + height + margin)
+    return {
+        "x": search_x,
+        "y": search_y,
+        "w": search_right - search_x,
+        "h": search_bottom - search_y,
+    }
+
+
+def _match_army_button(frame, region, template, threshold):
+    search_region = _army_search_region(frame, region)
+    if search_region is None:
+        return None
+
+    x = search_region["x"]
+    y = search_region["y"]
+    search_area = frame[y:y + search_region["h"], x:x + search_region["w"]]
     template_height, template_width = template.shape[:2]
     if template_height > search_area.shape[0] or template_width > search_area.shape[1]:
         return None
@@ -45,6 +66,7 @@ def _match_army_button(frame, region, template, threshold):
         y + int(location[1]) + template_height // 2,
         confidence,
         float(threshold),
+        search_region,
     )
 
 
@@ -106,25 +128,22 @@ def open_army_training_screen(
             return {**result, "status": "BLOCKED_ARMY_BUTTON_TEMPLATE_MISSING", "blockers": [str(template_path)]}
         config = json.loads((ROOT_DIR / "config.json").read_text(encoding="utf-8"))
         threshold = get_threshold(config, "world_map", "armia")
+        search_region = _army_search_region(frame, army_region)
         match = _match_army_button(frame, army_region, template, threshold)
         if match is None:
             return {
                 **result,
                 "status": "BLOCKED_ARMY_BUTTON_OUTSIDE_FRAME",
                 "armia_match_threshold": float(threshold),
-                "search_region": {
-                    "x": int(army_region["x"]),
-                    "y": int(army_region["y"]) + WORLD_MAP_FRAME_OFFSET_Y,
-                    "w": int(army_region["w"]),
-                    "h": int(army_region["h"]),
-                },
+                "search_region": search_region,
                 "blockers": ["world_map.armia search region is outside the captured frame"],
             }
-        match_x, match_y, match_confidence, match_threshold = match
+        match_x, match_y, match_confidence, match_threshold, search_region = match
         result.update(
             armia_match_confidence=match_confidence,
             armia_match_threshold=match_threshold,
             armia_match_candidate_point=(match_x, match_y),
+            search_region=search_region,
         )
         if match_confidence < match_threshold:
             return {

@@ -13,6 +13,24 @@ def _live_map_fixture():
     return cv2.copyMakeBorder(image, 39, 52, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
 
+def test_armia_match_finds_template_shifted_one_pixel_within_search_margin():
+    variant = navigation.resolve_variant("desktop")
+    regions = navigation._read_regions(variant["regions"])
+    region = regions["world_map"]["armia"]
+    template = cv2.imread(str(navigation.resolve_asset_path(variant, region["template"])))
+    frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    shifted_x = region["x"] - 1
+    shifted_y = region["y"] + navigation.WORLD_MAP_FRAME_OFFSET_Y + 1
+    frame[shifted_y:shifted_y + template.shape[0], shifted_x:shifted_x + template.shape[1]] = template
+
+    match = navigation._match_army_button(frame, region, template, 94.6)
+
+    assert match is not None
+    assert match[:2] == (shifted_x + template.shape[1] // 2, shifted_y + template.shape[0] // 2)
+    assert match[2] >= 94.6
+    assert match[4] == {"x": 911, "y": 916, "w": 57, "h": 50}
+
+
 def test_navigation_dry_run_does_not_press_capture_or_click():
     calls = []
 
@@ -65,7 +83,10 @@ def test_navigation_stops_when_armia_button_is_not_confident(monkeypatch, tmp_pa
     assert result["status"] == "BLOCKED_ARMY_BUTTON_UNCONFIRMED"
     assert result["armia_match_confidence"] < result["armia_match_threshold"]
     assert result["armia_match_threshold"] == 94.6
-    assert result["armia_match_candidate_point"] == (939, 941)
+    candidate_x, candidate_y = result["armia_match_candidate_point"]
+    assert 937 <= candidate_x <= 941
+    assert 939 <= candidate_y <= 943
+    assert result["search_region"] == {"x": 911, "y": 916, "w": 57, "h": 50}
     assert events == ["key"]
 
 
