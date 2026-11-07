@@ -1,0 +1,4 @@
+2026-11-07T15:04:07 [preflight] prepare: Game visible on the primary monitor.
+2026-11-07T15:04:07 [preflight] starting in 20 s
+2026-11-07T15:04:29 step 1 environment: C:\Users\Konrad\AppData\Local\Programs\Python\Python311\python.exe tools/live_probes.py preflight --out C:\Users\Konrad\tba\device_runs\DESKTOP-LFGLEFV\preflight\20261107_150407
+2026-11-07T15:04:30 step 1 environment: OK (rc=0, 1.14 s)
