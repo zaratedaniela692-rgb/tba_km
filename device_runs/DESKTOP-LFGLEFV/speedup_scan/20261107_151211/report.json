@@ -1,0 +1,33 @@
+{
+  "scenario": "speedup_scan",
+  "device": "DESKTOP-LFGLEFV",
+  "status": "FAILED",
+  "run_dir": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\speedup_scan\\20261107_151211",
+  "execute": false,
+  "commit": "b577d78",
+  "code_commit": "e9a1d4dd18c30fe7200572d440f8c13952ffdf2d",
+  "started_at": "2026-11-07T15:12:11",
+  "finished_at": "2026-11-07T15:12:20",
+  "python": "3.11.7",
+  "steps": [
+    {
+      "index": 1,
+      "name": "scan",
+      "command": [
+        "C:\\Users\\Konrad\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "speedup.py",
+        "--confirm",
+        "SCAN SPEEDUP LIST FROM TOP"
+      ],
+      "screenshot_before_error": null,
+      "duration_seconds": 3.56,
+      "returncode": 2,
+      "output_tail": "{\n  \"timestamp\": \"2026-11-07T14:12:16.812018+00:00\",\n  \"mode\": \"dry_run\",\n  \"status\": \"BLOCKED\",\n  \"reason\": \"timer_unreadable:digit_unverified\",\n  \"remaining_seconds\": null,\n  \"inventory\": [],\n  \"inventory_evidence\": [],\n  \"plan\": null,\n  \"used\": [],\n  \"shortfall_seconds\": 0,\n  \"replan\": null,\n  \"checkpoint_steps\": [],\n  \"evidence_frames\": [\n    \"frame_000.png\"\n  ],\n  \"debug_capture\": \"uncertain.png\"\n}\nreport_path=C:\\Users\\Konrad\\tba\\debug\\speedup\\run_20261107_151216_812018\\report.json\n",
+      "screenshot_after_error": null,
+      "status": "FAILED"
+    }
+  ],
+  "module_debug": [
+    "debug/speedup/run_20261107_151216_812018"
+  ]
+}
