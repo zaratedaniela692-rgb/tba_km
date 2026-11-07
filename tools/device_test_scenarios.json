@@ -59,7 +59,7 @@
       "name": "speedup_scan",
       "description": "Scan the Speed Up inventory through checkpoints 3/11/16 and plan, no item use",
       "prepare": "Speed Up dialog of an active training open, inventory list scrolled to the top.",
-      "prepare_seconds": 20,
+      "prepare_seconds": 5,
       "debug_dirs": ["debug/speedup"],
       "steps": [
         {"name": "scan", "argv": ["{python}", "speedup.py", "--confirm", "SCAN SPEEDUP LIST FROM TOP"]}
@@ -69,7 +69,7 @@
       "name": "speedup_use",
       "description": "Use owned speedups to finish the open training (clicks Use)",
       "prepare": "Speed Up dialog of an active training open, inventory list scrolled to the top.",
-      "prepare_seconds": 20,
+      "prepare_seconds": 5,
       "debug_dirs": ["debug/speedup"],
       "steps": [
         {

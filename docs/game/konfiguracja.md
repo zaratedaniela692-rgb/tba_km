@@ -41,18 +41,19 @@
 ## Testy live na drugim PC (`tools/device_test.py`)
 Zatwierdzone 2026-11-07. Narzędzie uruchamia nadzorowane scenariusze na komputerze z grą; nie zastępuje pytest.
 
-**Zwykłe uruchomienie:** po pobraniu zmian wykonaj jedną komendę z katalogu repozytorium:
+**Zwykłe uruchomienie:** z katalogu repozytorium wykonaj jedną komendę:
 
 ```powershell
-git pull --ff-only
 python .\tools\device_test.py
 ```
 
-Ustawienia są w `tools/device_test_settings.json`: lista domyślnych scenariuszy, czas na przygotowanie ekranu, profil/urządzenie oraz publikacja. Domyślne `publish`, `push` i `rerun_same_code` są włączone. Zmień ten plik i commituj ustawienia, jeśli chcesz inny standardowy przebieg; polecenia nadal pozostają takie same.
+Launcher próbuje `git pull --ff-only` nieinteraktywnie, maksymalnie 10 sekund. Jeśli są lokalne zmiany albo pull się nie powiedzie, wypisuje ostrzeżenie i uruchamia test na aktualnym checkoutie; nie wykonuje automatycznego rebase. Git push po teście także ma limit czasu. Jeśli push się nie powiedzie, commit diagnostyczny zostaje lokalnie.
+
+Ustawienia są w `tools/device_test_settings.json`: lista domyślnych scenariuszy, czas na przygotowanie ekranu (maksymalnie 5 sekund), profil/urządzenie oraz publikacja. Domyślne `publish`, `push` i `rerun_same_code` są włączone. Zmień ten plik i commituj ustawienia, jeśli chcesz inny standardowy przebieg; polecenia nadal pozostają takie same.
 
 Domyślnie uruchamiane są `preflight` i `speedup_scan`. Skan Speed Up przewija listę i tworzy plan, ale **nie klika „Użyj”**. Po starcie przygotuj wskazany ekran w czasie odliczania. `speedup_use` zużywa przedmioty, dlatego nie jest domyślny; aby dodać go do planu, zmień wpis w `device_test_settings.json` na `{"name": "speedup_use", "execute": true}`. Wtedy każde zwykłe uruchomienie będzie próbowało użyć zaplanowanych przyspieszeń na przygotowanym ekranie.
 
-Narzędzie zapisuje raport, log, zrzuty przed/po i debug modułu w `device_runs/<urządzenie>/<scenariusz>/<czas>/`. Po wyniku `OK` i `FAILED` commitowane są pliki diagnostyczne, a następnie pushowane. Wyniki `BLOCKED` przed uruchomieniem kroku (np. lokalne zmiany śledzonych plików blokujące synchronizację Git) nie mają diagnostyki z gry do opublikowania. Domyślne `rerun_same_code` zapobiega cichemu `UNCHANGED`; ustaw `false`, jeśli chcesz przywrócić pomijanie kodu już wcześniej testowanego.
+Narzędzie zapisuje raport, log, zrzuty przed/po i debug modułu w `device_runs/<urządzenie>/<scenariusz>/<czas>/`. Po wyniku `OK` i `FAILED` commitowane są pliki diagnostyczne, a następnie pushowane. Błąd synchronizacji Git nie blokuje już scenariusza; `BLOCKED` oznacza problem przed uruchomieniem kroku, np. emergency stop. Domyślne `rerun_same_code` zapobiega cichemu `UNCHANGED`; ustaw `false`, jeśli chcesz przywrócić pomijanie kodu już wcześniej testowanego.
 
 Opcje `--delay`, `--no-git`, `--no-push`, `--force` i `--execute` są nadpisaniami jednorazowymi; nie trzeba ich podawać przy standardowym uruchomieniu. `--no-git` wyłącza zarówno commit, jak i push. `--list` pokazuje scenariusze i aktywne ustawienia.
 

@@ -140,14 +140,55 @@ def test_retention_keeps_the_current_run_and_three_earlier_ones(repo):
     assert {line.split("/")[3] for line in tracked} == set(on_disk)
 
 
-def test_tracked_changes_block_the_run_before_any_step(repo):
+def test_tracked_changes_skip_pull_but_still_run_on_current_checkout(repo):
     calls = []
     (repo.work / "README.md").write_text("changed\n", encoding="utf-8")
 
     code, results = dt.run_scenarios(["demo"], _context(repo, calls), {"demo": SCENARIO})
 
-    assert code == 2 and results[0]["status"] == dt.BLOCKED
-    assert calls == []
+    assert code == 0 and results[0]["status"] == dt.OK
+    assert len(calls) == 1
+    assert _git(repo.work, "diff", "--", "README.md")
+    assert _git(repo.remote, "log", "-1", "--format=%s", "main") == "device_runs: demo on pc1 - OK"
+
+
+def test_pull_failure_warns_but_does_not_block_scenario(repo, monkeypatch):
+    calls = []
+    messages = []
+    context = _context(repo, calls)
+    context.out = messages.append
+    monkeypatch.setattr(dt, "sync_repository", lambda _git: (False, "pull_failed; using_current_checkout: network down"))
+
+    code, results = dt.run_scenarios(["demo"], context, {"demo": SCENARIO})
+
+    assert code == 0 and results[0]["status"] == dt.OK
+    assert len(calls) == 1
+    assert any("WARNING: git sync skipped" in message for message in messages)
+
+
+def test_git_commands_are_noninteractive_and_time_bounded(tmp_path):
+    observed = {}
+
+    def runner(args, **kwargs):
+        observed.update(kwargs)
+        return SimpleNamespace(returncode=0, stdout="ok", stderr="")
+
+    code, output = dt.Git(tmp_path, runner=runner).run("status")
+
+    assert (code, output) == (0, "ok")
+    assert observed["timeout"] == dt.GIT_TIMEOUT_SECONDS
+    assert observed["stdin"] is subprocess.DEVNULL
+    assert observed["env"]["GIT_TERMINAL_PROMPT"] == "0"
+
+
+def test_git_timeout_returns_instead_of_waiting(tmp_path):
+    def runner(*_args, **_kwargs):
+        raise subprocess.TimeoutExpired("git pull", dt.GIT_TIMEOUT_SECONDS)
+
+    code, output = dt.Git(tmp_path, runner=runner).run("pull", "--ff-only")
+
+    assert code == 124
+    assert "timed out" in output
 
 
 def test_failed_step_stops_the_sequence_and_is_still_published(repo):
@@ -294,6 +335,10 @@ def test_settings_reject_invalid_values(tmp_path):
     path = tmp_path / "settings.json"
     path.write_text('{"scenarios":["demo"],"delay_seconds":-1}', encoding="utf-8")
 
+    with pytest.raises(dt.DeviceTestError, match="delay_seconds"):
+        dt.load_settings(path)
+
+    path.write_text('{"scenarios":["demo"],"delay_seconds":6}', encoding="utf-8")
     with pytest.raises(dt.DeviceTestError, match="delay_seconds"):
         dt.load_settings(path)
 

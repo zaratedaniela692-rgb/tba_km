@@ -24,6 +24,8 @@ KEEP_RUNS = 4  # the current run plus three earlier ones
 MAX_SCENARIOS = 2  # every scenario adds many screenshots to the repository
 STOP_FILE = Path.home() / ".tba_stop"
 STEP_TIMEOUT_SECONDS = 600
+GIT_TIMEOUT_SECONDS = 10
+MAX_PREPARE_DELAY_SECONDS = 5
 OUTPUT_LIMIT = 20000
 PLACEHOLDERS = ("python", "run_dir", "profile")
 
@@ -40,9 +42,16 @@ class Git:
         self.runner = runner
 
     def run(self, *args):
-        done = self.runner(
-            ["git", *args], cwd=self.root, capture_output=True, text=True, encoding="utf-8", errors="replace",
-        )
+        env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "Never"}
+        try:
+            done = self.runner(
+                ["git", *args], cwd=self.root, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                timeout=GIT_TIMEOUT_SECONDS, stdin=subprocess.DEVNULL, env=env,
+            )
+        except subprocess.TimeoutExpired:
+            return 124, f"git {' '.join(args)} timed out after {GIT_TIMEOUT_SECONDS}s"
+        except OSError as error:
+            return 127, f"git {' '.join(args)} failed to start: {error}"
         return done.returncode, ((done.stdout or "") + (done.stderr or "")).strip()
 
 
@@ -170,9 +179,9 @@ def load_settings(path=SETTINGS_PATH):
     scenarios = settings.get("scenarios")
     if not isinstance(scenarios, list) or not scenarios:
         raise DeviceTestError("Device-test settings need a non-empty scenarios list.")
-    delay = settings.get("delay_seconds", 20)
-    if type(delay) is not int or delay < 0:
-        raise DeviceTestError("delay_seconds must be a non-negative integer.")
+    delay = settings.get("delay_seconds", MAX_PREPARE_DELAY_SECONDS)
+    if type(delay) is not int or not 0 <= delay <= MAX_PREPARE_DELAY_SECONDS:
+        raise DeviceTestError(f"delay_seconds must be between 0 and {MAX_PREPARE_DELAY_SECONDS}.")
     for key in ("publish", "push", "rerun_same_code"):
         if type(settings.get(key, True)) is not bool:
             raise DeviceTestError(f"{key} must be a boolean.")
@@ -228,18 +237,14 @@ def previous_code_commit(scenario_dir):
 
 
 def sync_repository(git):
-    """Fast-forward pull; a local-only device_runs commit may be rebased. Returns (ok, detail)."""
+    """Try a fast-forward pull without risking local changes; failures are non-blocking."""
     _, dirty = git.run("status", "--porcelain", "--untracked-files=no")
     if dirty:
-        return False, "tracked_changes_present"
+        return False, "tracked_changes_present; using_current_checkout"
     code, output = git.run("pull", "--ff-only")
     if code == 0:
         return True, output
-    code, output = git.run("pull", "--rebase")
-    if code == 0:
-        return True, output
-    git.run("rebase", "--abort")
-    return False, f"pull_failed: {output}"
+    return False, f"pull_failed; using_current_checkout: {output}"
 
 
 def prune_old_runs(scenario_dir, keep=KEEP_RUNS):
@@ -387,12 +392,7 @@ def push_changes(git):
     code, output = git.run("push")
     if code == 0:
         return True, output
-    code, output = git.run("pull", "--rebase")
-    if code != 0:
-        git.run("rebase", "--abort")
-        return False, f"push_failed_pull_rebase_failed: {output}"
-    code, output = git.run("push")
-    return code == 0, output
+    return False, f"push_failed; diagnostic commit retained locally: {output}"
 
 
 def run_scenarios(selection, ctx, scenarios):
@@ -400,8 +400,7 @@ def run_scenarios(selection, ctx, scenarios):
     if ctx.git is not None:
         ok, detail = sync_repository(ctx.git)
         if not ok:
-            ctx.out(f"BLOCKED: git sync failed: {detail}")
-            return 2, [{"scenario": "git", "status": BLOCKED, "detail": detail}]
+            ctx.out(f"WARNING: git sync skipped: {detail}")
         ctx.commit_id = ctx.git.run("rev-parse", "--short", "HEAD")[1]
         ctx.code_commit = code_commit(ctx.git)
 
@@ -446,6 +445,8 @@ def main(argv=None):
     parser.add_argument("--no-git", action="store_true", help="skip pull, commit and push")
     parser.add_argument("--no-push", action="store_true", help="commit but do not push")
     args = parser.parse_args(argv)
+    if args.delay is not None and not 0 <= args.delay <= MAX_PREPARE_DELAY_SECONDS:
+        parser.error(f"--delay must be between 0 and {MAX_PREPARE_DELAY_SECONDS} seconds")
 
     try:
         scenarios = load_scenarios()
