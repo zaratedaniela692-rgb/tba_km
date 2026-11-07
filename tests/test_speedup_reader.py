@@ -31,13 +31,31 @@ def test_timer_is_read_from_each_fixture(name, seconds):
     assert reading.value == seconds
 
 
-def test_unverified_digit_is_rejected_not_guessed(monkeypatch):
+def test_live_run_timer_with_previously_unverified_digits_is_read():
+    image = cv2.imread(str(Path(__file__).resolve().parents[1] / "tests" / "data" / "speedup" / "timer_5d20h.png"))
+
+    reading = read_remaining_time(image)
+
+    assert reading.status == "ok"
+    assert reading.raw == "5d.:20g."
+    assert reading.value == 5 * DAY + 20 * HOUR
+    assert reading.confidence == 100.0
+
+
+def test_unverified_digit_is_accepted_when_both_scales_agree(monkeypatch):
     monkeypatch.setattr(speedup_reader, "_read_digit", lambda *args: "8")
 
-    reading = _read("speedup_view")
+    number = speedup_reader._read_number(np.zeros((4, 4), dtype=np.uint8), [(0, 0, 1, 1)])
 
-    assert reading.value is None
-    assert reading.status == "digit_unverified"
+    assert number == "8"
+    assert speedup_reader.VERIFIED_DIGITS == frozenset("13467")
+
+
+def test_disagreement_for_an_unverified_digit_is_still_rejected(monkeypatch):
+    answers = iter(("8", "3"))
+    monkeypatch.setattr(speedup_reader, "_read_digit", lambda *args: next(answers))
+
+    assert speedup_reader._read_number(np.zeros((4, 4), dtype=np.uint8), [(0, 0, 1, 1)]) is None
 
 
 def test_disagreeing_scales_are_rejected(monkeypatch):
