@@ -1,0 +1,368 @@
+{
+  "started_at": "2026-11-07T00:01:55.372893+00:00",
+  "status": "CHECKPOINTS_CAPTURED",
+  "region": "speedup_inventory_viewport",
+  "viewport": {
+    "x": 678,
+    "y": 376,
+    "w": 562,
+    "h": 418
+  },
+  "pointer_frame_point": {
+    "x": 959,
+    "y": 585
+  },
+  "expected_frame_size": [
+    1920,
+    1080
+  ],
+  "mode": "checkpoint",
+  "captures": [
+    {
+      "step": 3,
+      "action": "checkpoint",
+      "timestamp": "2026-11-07T00:01:57.651428+00:00",
+      "file": "checkpoint_003_after_scroll.png",
+      "reported_visible_durations": [
+        "15m",
+        "1h",
+        "3h",
+        "8h"
+      ]
+    },
+    {
+      "step": 11,
+      "action": "checkpoint",
+      "timestamp": "2026-11-07T00:02:02.794962+00:00",
+      "file": "checkpoint_011_after_scroll.png",
+      "reported_visible_durations": [
+        "15h",
+        "1d",
+        "3d",
+        "7d"
+      ]
+    },
+    {
+      "step": 16,
+      "action": "checkpoint",
+      "timestamp": "2026-11-07T00:02:06.042845+00:00",
+      "file": "checkpoint_016_after_scroll.png",
+      "reported_visible_durations": [
+        "3d",
+        "7d",
+        "30d"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "step": 1,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6434597898823409,
+      "timestamp": "2026-11-07T00:01:56.360390+00:00"
+    },
+    {
+      "step": 2,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6443707538013588,
+      "timestamp": "2026-11-07T00:01:57.006613+00:00"
+    },
+    {
+      "step": 3,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6468950603620017,
+      "timestamp": "2026-11-07T00:01:57.651428+00:00"
+    },
+    {
+      "step": 4,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6467843825026818,
+      "timestamp": "2026-11-07T00:01:58.441565+00:00"
+    },
+    {
+      "step": 5,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.643698172963953,
+      "timestamp": "2026-11-07T00:01:59.064905+00:00"
+    },
+    {
+      "step": 6,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6458265933354901,
+      "timestamp": "2026-11-07T00:01:59.686221+00:00"
+    },
+    {
+      "step": 7,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6356399734373137,
+      "timestamp": "2026-11-07T00:02:00.312072+00:00"
+    },
+    {
+      "step": 8,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6386793577278687,
+      "timestamp": "2026-11-07T00:02:00.945799+00:00"
+    },
+    {
+      "step": 9,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6376108907013571,
+      "timestamp": "2026-11-07T00:02:01.572535+00:00"
+    },
+    {
+      "step": 10,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.63663181733045,
+      "timestamp": "2026-11-07T00:02:02.188971+00:00"
+    },
+    {
+      "step": 11,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6432682320489026,
+      "timestamp": "2026-11-07T00:02:02.794962+00:00"
+    },
+    {
+      "step": 12,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6438216213455022,
+      "timestamp": "2026-11-07T00:02:03.607894+00:00"
+    },
+    {
+      "step": 13,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6445240000681095,
+      "timestamp": "2026-11-07T00:02:04.213433+00:00"
+    },
+    {
+      "step": 14,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6068254184474451,
+      "timestamp": "2026-11-07T00:02:04.836660+00:00"
+    },
+    {
+      "step": 15,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6732023361541998,
+      "timestamp": "2026-11-07T00:02:05.437852+00:00"
+    },
+    {
+      "step": 16,
+      "dialog_recognized": true,
+      "viewport_changed_fraction": 0.6960488004222786,
+      "timestamp": "2026-11-07T00:02:06.042845+00:00"
+    }
+  ],
+  "scrolls": [
+    {
+      "step": 1,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:01:55.932769+00:00"
+    },
+    {
+      "step": 2,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:01:56.563969+00:00"
+    },
+    {
+      "step": 3,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:01:57.211731+00:00"
+    },
+    {
+      "step": 4,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:01:58.012770+00:00"
+    },
+    {
+      "step": 5,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:01:58.646201+00:00"
+    },
+    {
+      "step": 6,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:01:59.268374+00:00"
+    },
+    {
+      "step": 7,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:01:59.889103+00:00"
+    },
+    {
+      "step": 8,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:02:00.515046+00:00"
+    },
+    {
+      "step": 9,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:02:01.150865+00:00"
+    },
+    {
+      "step": 10,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:02:01.776051+00:00"
+    },
+    {
+      "step": 11,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:02:02.392088+00:00"
+    },
+    {
+      "step": 12,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:02:03.193500+00:00"
+    },
+    {
+      "step": 13,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:02:03.811828+00:00"
+    },
+    {
+      "step": 14,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:02:04.418010+00:00"
+    },
+    {
+      "step": 15,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:02:05.041103+00:00"
+    },
+    {
+      "step": 16,
+      "direction": "down",
+      "wheel_notches": 1,
+      "pointer_desktop_point": {
+        "x": 959,
+        "y": 585
+      },
+      "timestamp": "2026-11-07T00:02:05.641911+00:00"
+    }
+  ],
+  "reason": "all_checkpoints_reached",
+  "frame_size": [
+    1920,
+    1080
+  ],
+  "monitor_origin": [
+    0,
+    0
+  ],
+  "display_size": [
+    1920,
+    1080
+  ],
+  "checkpoints": [
+    {
+      "step": 3,
+      "action": "checkpoint",
+      "timestamp": "2026-11-07T00:01:57.651428+00:00",
+      "file": "checkpoint_003_after_scroll.png",
+      "reported_visible_durations": [
+        "15m",
+        "1h",
+        "3h",
+        "8h"
+      ]
+    },
+    {
+      "step": 11,
+      "action": "checkpoint",
+      "timestamp": "2026-11-07T00:02:02.794962+00:00",
+      "file": "checkpoint_011_after_scroll.png",
+      "reported_visible_durations": [
+        "15h",
+        "1d",
+        "3d",
+        "7d"
+      ]
+    },
+    {
+      "step": 16,
+      "action": "checkpoint",
+      "timestamp": "2026-11-07T00:02:06.042845+00:00",
+      "file": "checkpoint_016_after_scroll.png",
+      "reported_visible_durations": [
+        "3d",
+        "7d",
+        "30d"
+      ]
+    }
+  ],
+  "finished_at": "2026-11-07T00:02:06.161553+00:00"
+}
