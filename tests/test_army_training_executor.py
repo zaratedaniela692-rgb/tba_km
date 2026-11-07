@@ -78,8 +78,32 @@ def test_execute_selects_target_level_then_train_once_and_marks_started(monkeypa
     assert result["selection_confirmed"] is False
     assert len(clicks) == 3
     assert [delay for delay in sleeps if delay in (2, 0.2)] == [2.0, 0.2]
-    assert queue["tasks"][0]["status"] == "waiting_completion"
+    assert queue["tasks"][0]["status"] == "waiting_help_delay"
     assert queue["tasks"][0]["initial_remaining_seconds"] == 3600
+
+
+def test_specialist_test_stops_after_confirmed_train_without_clicking_help(monkeypatch, tmp_path):
+    queue, task, clicks, click, capture = _setup(monkeypatch, level=5)
+    states = iter((
+        {"status": "idle"},
+        {"status": "idle"},
+        {"status": "active"},
+    ))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
+    state_path = tmp_path / "army_state.json"
+
+    result = executor.execute_training_goal(
+        queue, task["task_id"], NOW, execute=True,
+        confirmation=executor.CONFIRMATION_PHRASE,
+        capture_fn=capture, click_fn=click, sleep_fn=lambda _: None, state_path=state_path,
+        stop_after_train_confirmed=True,
+    )
+
+    assert result["status"] == "TEST_TRAINING_STARTED_CONFIRMED"
+    assert result["help_action"] == "not_attempted_by_test_mode"
+    assert result["post_click_training_state"] == "active"
+    assert len(clicks) == 2
+    assert queue["tasks"][0]["status"] == "waiting_help_delay"
 
 
 def test_unconfirmed_help_button_pauses_without_clicking_help(monkeypatch):

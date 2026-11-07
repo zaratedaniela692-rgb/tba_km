@@ -259,8 +259,7 @@ class _CheckpointRunner:
         item = next((item for item in reading.items if item.duration_seconds == duration), None)
         if item is None or item.quantity.value != self.stock[duration]:
             self.abort("inventory_changed_before_use")
-        button = self._mapped_button(duration, step)
-        center = button["center"]
+        center = item.button_center
         viewport = self.regions["speedup_inventory_viewport"]
         point = (
             self.origin[0] + int(viewport["x"]) + int(center["x"]),

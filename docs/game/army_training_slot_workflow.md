@@ -632,3 +632,46 @@ browser capture + desktop templates as search references
 ### Current Code Status
 
 Implemented in `army_unit_types.py`, `army_training_category.py`, `army_training_manager.py`, `army_training_executor.py`, `army_training_resolver.py`, `army_campaign.py`, `army_training_process.py`, `army_training_plan.py` and `army_training_scanner.py`. Covered by `tests/test_army_training_category.py` (fixtures, one click, no retry, blocked cases) and updated manager, executor, campaign and process tests.
+
+## One-Command Specialists Live Test (Implemented 2026-11-07; Supervised Live Run Pending)
+
+### Goal and Command
+
+Provide one supervised command for a single Specialists goal, defaulting to global level 5, match 1. It must use the existing manager navigation, category selection, resolver, preflight, and executor rather than a parallel click path.
+
+```powershell
+python .\tools\device_test.py army_specialist_train --profile auto --execute
+```
+
+The device-test scenario requires `--execute`; its manager command also requires the exact phrase `TRAIN ONE SPECIALIST`. A direct manager invocation can preview with `--profile auto test-specialist --level 5 --match 1`, or execute with `--execute --confirm "TRAIN ONE SPECIALIST"`.
+
+### Contract
+
+1. Resolve `--profile auto` from the currently visible player name. The game must be open on the primary 1920x1080 monitor. Existing-name collisions use the local profile registry prompt; do not silently select another account's queue.
+2. The test is limited to Specialists and one visible slot. No campaign expansion or scrolling. Default goal is `(specialists, level 5, match 1)`; level and match may be overridden for a separately reviewed visible target.
+3. Before any game action, refuse if the profile queue is paused, has an active lifecycle task, or has another pending army stock goal. Do not clear, overwrite, or reprioritize unrelated tasks. Create or reuse only the exact requested goal; rearm an existing completed goal through the existing rearm transition.
+4. Preview is read-only and sends no keys/clicks, persists no goal, and reports the requested target and required live confirmation.
+5. Live execution requires both `--execute` and exact `TRAIN ONE SPECIALIST`. Use the existing three-Escape/map/Barracks startup, verified category click, visible-slot resolver, target-level selection, fresh same-slot check, resource/food/silver/time preflight, one Train click, and post-click active-state confirmation. Every existing emergency-stop and PyAutoGUI fail-safe gate remains in force.
+6. This is a one-order training test, not a finish/Speed Up test. After active training is visually confirmed, persist the normal queue task and open-training marker and return `TEST_TRAINING_STARTED_CONFIRMED` before the unverified Help button step. Do not click Help or Speed Up as part of this test.
+7. Any uncertain category, slot, OCR/resource, or post-click result stops without retrying Train. If Train may have been clicked, preserve the normal blocked/uncertain lifecycle state and report that the operator must inspect the game before retrying.
+
+### Queue and Outcome
+
+- The helper refuses if a different pending army stock goal could be selected; it does not delete or reorder that goal.
+- A matching queued goal is reused; a completed goal is rearmed and audited; an active matching goal is refused.
+- On confirmed start, the task remains in its ordinary `waiting_help_delay` lifecycle, with the usual profile state marker. This test does not click Help; later manager runs may continue the normal lifecycle.
+- The device-test report captures the before/after screenshots, manager JSON, and module debug artifacts; the existing device-test retention and publication rules apply.
+
+### Expected Tests
+
+- Preview reports the one target without queue/file mutation or live input.
+- Live command rejects missing/wrong confirmation before capture or actions.
+- Paused queue, active tasks, another pending army goal, unsupported Specialist slot, and wrong profile/category all block without Train.
+- Matching queued goal reuse and completed-goal rearm preserve task identity/history rules.
+- Successful mocked executor flow clicks Train once, confirms active, records the marker, and returns before Help. Manager/queue tests cover the test goal guards and routing; a single composed full-flow unit test remains a gap.
+- Uncertain post-Train results never retry and remain visible for operator recovery.
+- Device-test scenario defaults to no live actions and routes `--execute` only through the exact confirmation-gated manager command.
+
+### Current Status
+
+Implemented in `army_training_manager.py` (`test-specialist`), `army_training_executor.py` (`stop_after_train_confirmed`), and `tools/device_test_scenarios.json` (`army_specialist_train`). A real game run remains an operator-supervised action and has not been executed during coding validation.

@@ -15,7 +15,8 @@ OCR_SCALES = (4, 6)
 OCR_PSMS = (8,)
 CROP_LEFT_INSET = 5
 CROP_RIGHT_INSET = 3
-BUTTON_POSITION_TOLERANCE = 2
+BUTTON_POSITION_TOLERANCE = 6
+BUTTON_OFFSET_CONSISTENCY_TOLERANCE = 1
 
 
 class InventoryReadError(ValueError):
@@ -107,18 +108,41 @@ def read_checkpoint_viewport(
 
     if len(found_buttons) != len(expected_buttons):
         return CheckpointInventoryReading("incomplete", (), "use_button_count_mismatch")
+    effective_buttons = []
+    offsets = []
     for found, expected in zip(found_buttons, expected_buttons):
         rectangle = expected.get("rectangle", {})
-        if (
-            abs(found["x"] - int(rectangle.get("x", -10000))) > BUTTON_POSITION_TOLERANCE
-            or abs(found["y"] - int(rectangle.get("y", -10000))) > BUTTON_POSITION_TOLERANCE
-        ):
+        delta_x = found["x"] - int(rectangle.get("x", -10000))
+        delta_y = found["y"] - int(rectangle.get("y", -10000))
+        if abs(delta_x) > BUTTON_POSITION_TOLERANCE or abs(delta_y) > BUTTON_POSITION_TOLERANCE:
             return CheckpointInventoryReading("incomplete", (), "use_button_position_mismatch")
+        offsets.append((delta_x, delta_y))
+        effective = dict(expected)
+        effective["rectangle"] = {
+            "x": found["x"],
+            "y": found["y"],
+            "width": found["width"],
+            "height": found["height"],
+        }
+        effective["center"] = {
+            "x": found["x"] + found["width"] // 2,
+            "y": found["y"] + found["height"] // 2,
+        }
+        effective_buttons.append(effective)
+
+    if offsets:
+        base_offset = offsets[0]
+        if any(
+            abs(delta_x - base_offset[0]) > BUTTON_OFFSET_CONSISTENCY_TOLERANCE
+            or abs(delta_y - base_offset[1]) > BUTTON_OFFSET_CONSISTENCY_TOLERANCE
+            for delta_x, delta_y in offsets[1:]
+        ):
+            return CheckpointInventoryReading("incomplete", (), "use_button_offsets_inconsistent")
 
     configure_tesseract()
     ocr_fn = ocr_fn or _ocr_digits
     items = []
-    for button in expected_buttons:
+    for button in effective_buttons:
         duration = parse_duration(button.get("duration_label", ""), 100.0)
         if duration.value is None:
             return CheckpointInventoryReading("incomplete", tuple(items), "mapped_duration_invalid")

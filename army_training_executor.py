@@ -84,6 +84,7 @@ def execute_training_goal(
     sleep_fn=time.sleep,
     state_path=None,
     speedup_fn=None,
+    stop_after_train_confirmed=False,
 ):
     """Execute at most one stock goal. Callers must persist the mutated queue afterward."""
     if not execute:
@@ -254,6 +255,14 @@ def execute_training_goal(
             state_path, f"{task_id}@{started_at.isoformat()}", task_id, asdict(goal_slot), started_at,
             _parse_time(task["expires_at"]),
         )
+    if stop_after_train_confirmed:
+        result.update(
+            status="TEST_TRAINING_STARTED_CONFIRMED",
+            post_click_training_state=after_state["status"],
+            queue_modified=True,
+            help_action="not_attempted_by_test_mode",
+        )
+        return result
     post_order_delay = queue["settings"]["post_order_delay_seconds"]
     sleep_fn(post_order_delay)
     help_requested_at = started_at + timedelta(seconds=post_order_delay)

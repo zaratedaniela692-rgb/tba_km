@@ -4,6 +4,7 @@
 import argparse
 import json
 import sys
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -16,7 +17,7 @@ from army_campaign import (
     load_campaign,
     save_campaign,
 )
-from army_state import ArmyStateError, army_state_path, load_army_state, resolve_max_level, save_max_level
+from army_state import ArmyStateError, army_state_path, load_army_state, open_training, resolve_max_level, save_max_level
 from army_training_observation import build_slot_observation
 from army_training_process import (
     Slot,
@@ -24,6 +25,7 @@ from army_training_process import (
     TrainingProcessError,
     enqueue_training_goal,
     migrate_legacy_training_goals,
+    rearm_training_goal,
     reconcile_training_goal,
 )
 from army_training_resolver import STATUS_OK, resolve_goal_slot
@@ -46,6 +48,7 @@ from profile_identity import ProfileIdentityError, resolve_profile_from_game
 
 SOURCE = "army_training_manager"
 CLEAR_QUEUE_CONFIRMATION = "CLEAR ARMY QUEUE"
+SPECIALIST_TEST_CONFIRMATION = "TRAIN ONE SPECIALIST"
 
 
 @dataclass
@@ -172,6 +175,153 @@ def _command_enqueue(args, profiles_dir, now):
     task = enqueue_training_goal(queue, TrainingGoal(args.profile, slot), now, args.priority)
     save_task_queue(queue, path)
     return {"status": "ok", "task_id": task["task_id"], "unit_type": args.unit_type, "queue": str(path)}
+
+
+def _command_test_specialist(args, profiles_dir, now):
+    slot = Slot("specialists", args.level, args.match)
+    expected_slot = {
+        "unit_type": slot.unit_type,
+        "global_level": slot.global_level,
+        "match_number": slot.match_number,
+    }
+    if not args.execute:
+        return {
+            "status": "PREVIEW_ONLY",
+            "goal": expected_slot,
+            "actions_executed": False,
+            "queue_modified": False,
+            "live_confirmation_required": SPECIALIST_TEST_CONFIRMATION,
+            "note": "Live test can consume silver/food and starts one in-game training order.",
+        }
+    if args.confirm != SPECIALIST_TEST_CONFIRMATION:
+        return {
+            "status": "BLOCKED_CONFIRMATION",
+            "goal": expected_slot,
+            "actions_executed": False,
+            "queue_modified": False,
+            "confirmation_required": SPECIALIST_TEST_CONFIRMATION,
+        }
+
+    queue, path = _load_or_create_queue(args.profile, profiles_dir)
+    if queue["paused"]:
+        return {
+            "status": "BLOCKED_QUEUE_PAUSED", "pause_reason": queue["pause_reason"],
+            "goal": expected_slot, "actions_executed": False, "queue_modified": False,
+        }
+    state_path = army_state_path(args.profile, profiles_dir)
+    marker = open_training(load_army_state(state_path))
+    if marker is not None:
+        return {
+            "status": "BLOCKED_OPEN_TRAINING_MARKER", "order_id": marker.get("order_id"),
+            "goal": expected_slot, "actions_executed": False, "queue_modified": False,
+        }
+    active_tasks = [task for task in queue["tasks"] if task["status"] in ACTIVE_STATUSES]
+    if active_tasks:
+        return {
+            "status": "BLOCKED_ACTIVE_TASKS", "active_task_ids": [task["task_id"] for task in active_tasks],
+            "goal": expected_slot, "actions_executed": False, "queue_modified": False,
+        }
+    pending_finish = [
+        task for task in queue["tasks"]
+        if task["payload"].get("goal_kind") == FALLBACK_GOAL_KIND
+        and task["status"] in {"queued", "waiting_resources"}
+    ]
+    if pending_finish:
+        return {
+            "status": "BLOCKED_PENDING_FINISH_TASKS",
+            "task_ids": [task["task_id"] for task in pending_finish],
+            "goal": expected_slot, "actions_executed": False, "queue_modified": False,
+        }
+
+    matching = next((
+        task for task in queue["tasks"]
+        if task["task_type"] == "army_training"
+        and task["payload"].get("goal_kind") == "slot_stock_v1"
+        and task["payload"].get("slot") == expected_slot
+    ), None)
+    other_pending = [
+        task for task in queue["tasks"]
+        if task["task_type"] == "army_training"
+        and task["payload"].get("goal_kind") == "slot_stock_v1"
+        and task["status"] in {"queued", "waiting_resources"}
+        and task is not matching
+    ]
+    if other_pending:
+        return {
+            "status": "BLOCKED_OTHER_PENDING_ARMY_GOALS",
+            "task_ids": [task["task_id"] for task in other_pending],
+            "goal": expected_slot, "actions_executed": False, "queue_modified": False,
+        }
+    if matching is not None and matching["status"] not in {"queued", "waiting_resources", "completed"}:
+        return {
+            "status": "BLOCKED_GOAL_NOT_REUSABLE", "task_id": matching["task_id"],
+            "task_status": matching["status"], "goal": expected_slot,
+            "actions_executed": False, "queue_modified": False,
+        }
+
+    created_for_test = matching is None
+    original_matching = deepcopy(matching) if matching is not None and matching["status"] == "completed" else None
+    if created_for_test:
+        matching = enqueue_training_goal(queue, TrainingGoal(args.profile, slot), now)
+        queue_modified = True
+        setup_action = "created"
+    elif matching["status"] == "completed":
+        matching = rearm_training_goal(queue, matching["task_id"], now)
+        queue_modified = True
+        setup_action = "rearmed"
+    else:
+        queue_modified = False
+        setup_action = "reused"
+    task_id = matching["task_id"]
+    if queue_modified:
+        save_task_queue(queue, path)
+
+    execution_args = argparse.Namespace(
+        profile=args.profile,
+        execute=True,
+        confirm=CONFIRMATION_PHRASE,
+        navigate_only=False,
+        stop_after_train_confirmed=True,
+    )
+    try:
+        result = _command_execute(execution_args, profiles_dir, now)
+    except Exception as error:
+        return {
+            "status": "TEST_RESULT_UNKNOWN_QUEUE_PRESERVED",
+            "reason": str(error),
+            "test_goal": expected_slot,
+            "test_task_id": task_id,
+            "test_goal_action": setup_action,
+            "actions_executed": "unknown",
+            "queue_modified": queue_modified,
+            "operator_action": "Inspect the game before retrying; no automatic cleanup or retry was done.",
+        }
+    result["test_goal"] = expected_slot
+    result["test_task_id"] = task_id
+    result["test_goal_action"] = setup_action
+    if result.get("train_click_attempted") or result.get("status") == "TEST_TRAINING_STARTED_CONFIRMED":
+        return result
+
+    if created_for_test:
+        current_queue = load_task_queue(path, expected_profile_id=args.profile)
+        test_task = next((task for task in current_queue["tasks"] if task["task_id"] == task_id), None)
+        if test_task is not None and test_task["status"] in {"queued", "waiting_resources"}:
+            current_queue["tasks"].remove(test_task)
+            save_task_queue(current_queue, path)
+            result["test_goal_removed_after_block"] = True
+            result["queue_modified"] = True
+    elif original_matching is not None:
+        current_queue = load_task_queue(path, expected_profile_id=args.profile)
+        for index, task in enumerate(current_queue["tasks"]):
+            if task["task_id"] == task_id:
+                current_queue["tasks"][index] = original_matching
+                save_task_queue(current_queue, path)
+                result["completed_test_goal_restored"] = True
+                result["queue_modified"] = True
+                break
+    result["status"] = "TEST_BLOCKED_BEFORE_TRAIN"
+    result["queue_modified"] = result.get("queue_modified", False) or queue_modified
+    return result
 
 
 def _command_list(args, profiles_dir, now):
@@ -445,6 +595,7 @@ def _command_execute(args, profiles_dir, now):
         confirmation=args.confirm,
         state_path=state_path,
         speedup_fn=finish_active_training_with_speedups,
+        stop_after_train_confirmed=getattr(args, "stop_after_train_confirmed", False),
     )
     if args.execute:
         save_task_queue(queue, path)
@@ -474,6 +625,15 @@ def build_parser():
     enqueue.add_argument("--match", type=int, required=True)
     enqueue.add_argument("--priority", type=int)
     enqueue.set_defaults(handler=_command_enqueue)
+
+    specialist_test = commands.add_parser(
+        "test-specialist", help="run one supervised Specialists order and stop after active training is confirmed",
+    )
+    specialist_test.add_argument("--level", type=int, default=5)
+    specialist_test.add_argument("--match", type=int, default=1)
+    specialist_test.add_argument("--execute", action="store_true", help="allow one verified Train click")
+    specialist_test.add_argument("--confirm", default="", help=f"type exactly: {SPECIALIST_TEST_CONFIRMATION}")
+    specialist_test.set_defaults(handler=_command_test_specialist)
 
     remove = commands.add_parser("remove", help="remove one inactive goal by unit type, level, and match")
     remove.add_argument("--unit-type", choices=UNIT_TYPES, required=True)
@@ -542,6 +702,10 @@ def main(argv=None, now=None):
         print(f"Manager error: {error}", file=sys.stderr)
         return 2
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    if args.command == "test-specialist" and report.get("status") not in {
+        "PREVIEW_ONLY", "TEST_TRAINING_STARTED_CONFIRMED",
+    }:
+        return 2
     return 0
 
 

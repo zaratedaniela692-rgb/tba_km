@@ -68,9 +68,14 @@ CLICKING = {
 def test_registry_is_valid_and_clicking_steps_have_a_safe_default():
     scenarios = dt.load_scenarios()
 
-    assert {"preflight", "army_slots", "army_scroll", "speedup_scan", "speedup_use"} <= set(scenarios)
+    assert {"preflight", "army_slots", "army_scroll", "army_specialist_train", "speedup_scan", "speedup_use"} <= set(scenarios)
     assert set(scenarios["speedup_use"]["steps"][0]) == {"name", "execute_argv"}
     assert "argv" in scenarios["army_navigate"]["steps"][0]
+    specialist_step = scenarios["army_specialist_train"]["steps"][0]
+    assert specialist_step["argv"][-4:] == ["--level", "5", "--match", "1"]
+    assert specialist_step["execute_argv"][-2:] == ["--confirm", "TRAIN ONE SPECIALIST"]
+    assert "--execute" in specialist_step["execute_argv"]
+    assert "--execute" not in specialist_step["argv"]
 
 
 def test_bad_placeholder_is_rejected(tmp_path):

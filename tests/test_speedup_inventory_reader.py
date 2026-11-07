@@ -37,6 +37,28 @@ def test_reads_all_owned_quantities_at_each_checkpoint(step):
     assert all(item.quantity.confidence == 100.0 for item in reading.items)
 
 
+def test_small_uniform_viewport_shift_uses_live_button_positions_for_ocr_and_clicks():
+    checkpoint = next(entry for entry in MAP["checkpoints"] if entry["scroll_count"] == 3)
+    image = cv2.imread(str(FIXTURES / "checkpoint_003.png"))
+    shifted = cv2.warpAffine(
+        image,
+        np.float32(((1, 0, 2), (0, 1, 4))),
+        (image.shape[1], image.shape[0]),
+        borderMode=cv2.BORDER_REPLICATE,
+    )
+
+    reading = read_checkpoint_viewport(
+        shifted, checkpoint, TEMPLATE, QUANTITY_REGION, USE_REGION,
+    )
+
+    assert reading.status == "complete"
+    assert {item.duration_label: item.quantity.value for item in reading.items} == EXPECTED[3]
+    assert reading.items[0].button_rectangle["x"] == checkpoint["buttons"][0]["rectangle"]["x"] + 2
+    assert reading.items[0].button_rectangle["y"] == checkpoint["buttons"][0]["rectangle"]["y"] + 4
+    assert reading.items[0].button_center["x"] == checkpoint["buttons"][0]["center"]["x"] + 2
+    assert reading.items[0].button_center["y"] == checkpoint["buttons"][0]["center"]["y"] + 4
+
+
 def test_combines_checkpoints_and_deduplicates_repeated_three_day_item():
     combined = combine_checkpoint_readings(tuple(_read(step) for step in (3, 11, 16)))
 
@@ -90,7 +112,7 @@ def test_missing_or_misplaced_button_blocks_checkpoint_read():
     reading = read_checkpoint_viewport(image, checkpoint, TEMPLATE, QUANTITY_REGION, USE_REGION, ocr_fn=lambda *_: "492")
 
     assert reading.status == "incomplete"
-    assert reading.reason == "use_button_position_mismatch"
+    assert reading.reason == "use_button_offsets_inconsistent"
 
 
 def test_blank_frame_is_incomplete_not_empty_inventory():
