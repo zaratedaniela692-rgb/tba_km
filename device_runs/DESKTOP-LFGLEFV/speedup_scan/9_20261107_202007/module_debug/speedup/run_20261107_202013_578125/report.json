@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-11-07T14:28:37.467264+00:00",
+  "timestamp": "2026-11-07T19:20:13.578125+00:00",
   "mode": "dry_run",
   "status": "BLOCKED",
-  "reason": "inventory_incomplete:3:use_button_position_mismatch",
+  "reason": "inventory_incomplete:3:use_button_count_mismatch",
   "remaining_seconds": null,
   "inventory": [],
   "inventory_evidence": [],
