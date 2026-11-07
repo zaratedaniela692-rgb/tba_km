@@ -363,6 +363,7 @@ def run_scenario(scenario, ctx, execute=None):
         "scenario": scenario["name"],
         "device": ctx.device,
         "status": status,
+        "run_dir": str(run_dir.resolve()),
         "execute": execute,
         "commit": ctx.commit_id,
         "code_commit": ctx.code_commit,
@@ -414,6 +415,7 @@ def run_scenarios(selection, ctx, scenarios):
         if report["status"] == UNCHANGED:
             results.append(report)
             continue
+        ctx.out(f"[{name}] diagnostics saved: {report['run_dir']}")
         if ctx.git is not None:
             report["publish"] = publish_run(ctx.git, ctx.root, report.pop("scenario_dir"), report)
             ctx.out(f"[{name}] {report['status']}: {report['publish']['detail']}")

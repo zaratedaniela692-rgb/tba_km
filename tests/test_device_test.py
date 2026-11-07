@@ -104,12 +104,14 @@ def test_execute_selects_the_clicking_command(repo):
 
 def test_run_writes_evidence_commits_only_its_directory_and_pushes(repo):
     calls = []
+    messages = []
 
     def stage_unrelated_file():
         (repo.work / "other.txt").write_text("staged\n", encoding="utf-8")
         _git(repo.work, "add", "other.txt")
 
     context = _context(repo, calls, effect=stage_unrelated_file)
+    context.out = messages.append
 
     code, results = dt.run_scenarios(["demo"], context, {"demo": SCENARIO})
 
@@ -117,6 +119,9 @@ def test_run_writes_evidence_commits_only_its_directory_and_pushes(repo):
     run_dirs = list((repo.work / "device_runs" / "pc1" / "demo").iterdir())
     assert len(run_dirs) == 1
     assert (run_dirs[0] / "report.json").exists() and (run_dirs[0] / "log.txt").exists()
+    report = __import__("json").loads((run_dirs[0] / "report.json").read_text(encoding="utf-8"))
+    assert report["run_dir"] == str(run_dirs[0].resolve())
+    assert any(report["run_dir"] in message for message in messages)
     assert calls[0][-1] == "device_test" and str(run_dirs[0]) in calls[0]
     assert _git(repo.work, "log", "-1", "--format=%s") == "device_runs: demo on pc1 - OK"
     assert "other.txt" not in _git(repo.work, "show", "--name-only", "--format=", "HEAD")
