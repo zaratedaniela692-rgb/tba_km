@@ -16,6 +16,22 @@
       "screenshots": null,
       "tests": null,
       "verification_output": null
+    },
+    "browser": {
+      "status": "planned",
+      "regions": "ui/browser/regions.json",
+      "templates": "ui/browser/templates",
+      "screenshots": "ui/browser/tests",
+      "tests": "ui/browser/tests",
+      "verification_output": "debug/verify/browser"
+    },
+    "browser": {
+      "status": "planned",
+      "regions": "ui/browser/regions.json",
+      "templates": "ui/browser/templates",
+      "screenshots": "ui/browser/tests",
+      "tests": "ui/browser/tests",
+      "verification_output": "debug/verify/browser"
     }
   }
 }

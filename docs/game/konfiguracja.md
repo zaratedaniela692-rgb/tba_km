@@ -1,3 +1,8 @@
+## Obserwacja aktywnego klienta i profilu
+
+`python .\client_router.py --once` wykonuje pojedynczy, read-only odczyt aktywnego okna i profilu. `python .\client_router.py` obserwuje zmiany okna na pierwszym planie i wypisuje tylko zmianę klienta/profilu; zakończ `Ctrl+C`. Obserwator nie czyta kolejki, nie klika i nie uruchamia zadań.
+
+Klient natywny jest routowany przez profil tylko wtedy, gdy cztery odczyty nicku zgadzają się i dokładnie jeden istniejący wpis profilu pasuje. Chrome z tytułem Total Battle jest rozpoznawany jako browser, ale pozostaje `browser_identity_unconfigured`, dopóki browser nie otrzyma własnego zweryfikowanego regionu nicku. Nieznane okno, nick lub niejednoznaczny profil nie dostaje ścieżki kolejki.
 # Konfiguracja środowiska gry
 
 ## Potwierdzone
@@ -20,6 +25,15 @@
 
 ## Aktualny stan kodu
 `Automator.update()` przechwytuje pierwszy monitor przez `mss.monitors[1]`, a nie konkretne okno gry. Obecne współrzędne nie są definiowane względem obszaru klienta.
+
+## Profile identyfikowane nazwą gracza
+- Automatyczny profil (`--profile auto`) odczytuje widoczną nazwę z regionu `world_map.player_name`; pełny zrzut monitora przesuwa region o 39 px w dół względem adnotacji klienta.
+- Id profilu ma postać `<slug-nazwy>_<5 losowych znaków alfanumerycznych>` i jest zapisywane raz w lokalnym `profiles/profile_registry.json`. Ponowne uruchomienia używają zapisanego ID, a nie losują nowego. Profile nadal nie zawierają haseł.
+- OCR musi dać zgodną nazwę w kilku niezależnych odczytach. Niepewny wynik przerywa automatyczne przypisanie.
+- Jeśli nazwa istnieje w rejestrze, manager zawsze prosi o wybór istniejącego profilu lub utworzenie nowego; `--new-profile` tworzy nowe konto bez pytania.
+- Sama nazwa wyświetlana nie rozróżnia kont o identycznych nickach. Pytanie jest wymagane nawet przy jednym dopasowaniu, by nie przypisać drugiego konta do pierwszego profilu.
+- Jawne `--profile <id>` pozostaje bez zmian i nie wykonuje OCR. Istniejące profile nie są automatycznie migrowane do rejestru.
+- Przykłady: `python .\army_training_manager.py --profile auto list` wykrywa nick i używa/zakłada jego profil; `python .\army_training_manager.py --profile auto --new-profile enqueue --unit-type guardsmen --level 5 --match 1` jawnie zakłada osobny profil dla kolejnego konta o takim samym nicku. Gra musi być widoczna na głównym monitorze w 1920x1080.
 
 ## Progi dopasowania szablonów
 - `config.json` przechowuje `default_min_confidence` (0-100) oraz opcjonalne nadpisania `screens.<ekran>.<element>`.

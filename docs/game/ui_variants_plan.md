@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Prepare the project for two client surfaces: keep the current desktop application UI unchanged, and support the updated browser UI as a separate target after it is available and stable. The updated UI replaces the browser game's current UI; it does not replace the UI used by the desktop application. Keep game behavior and task planning independent from visual layout, coordinates, templates, and screen-specific recognition.
+Keep the desktop application unchanged and develop browser recognition as a separate client target. The current implementation includes an observe-only foreground client/profile router; browser visual identity and queue execution remain unavailable until their own assets and flows are verified. Keep game behavior and task planning independent from visual layout, coordinates, templates, and screen-specific recognition.
 
 This document is a plan only. It does not declare browser UI support implemented or verified.
 
@@ -14,6 +14,8 @@ This document is a plan only. It does not declare browser UI support implemented
 - Reuse logical screen and element identifiers where the underlying game behavior is the same.
 - Keep screenshots, regions, templates, and verification fixtures associated with their client.
 - Eventually select the client per game profile/window, independently of other profiles.
+- Select the foreground client independently from the account profile and report the unique profile/queue route without mixing per-profile state.
+The exact file layout is to be confirmed during implementation. Existing files remain usable during migration. The registry maps each client ID to its region, template, screenshot, and verification roots, plus an explicit readiness state. `legacy` is the current ready desktop asset set; `browser` is registered but planned/unavailable until its independent identity and screen assets are verified.
 
 ## Non-goals
 
@@ -43,7 +45,7 @@ ui/
 
 The exact file layout is to be confirmed during implementation. Existing files must remain usable during migration; moving them is not required for the first step. A client registry should map each client ID to its region, template, screenshot, and verification roots, plus an explicit readiness state. The intended targets are `desktop` (current assets, ready) and `browser` (planned, no usable regions until captured and verified).
 
-Current implementation status: the first technical iteration still uses IDs `legacy` and `modern`: `legacy` points at the current desktop assets and `modern` is planned and unavailable. `ui_variants.py` validates selection and constrains resolved paths; the verifier, annotator, army-training scanner, and resource OCR tool accept an optional variant and default to `legacy`. This is transitional naming from the earlier version-based assumption. Before browser support is implemented, migrate the registry and CLI terminology to client-based IDs `desktop` and `browser`, keeping `desktop` mapped to the current assets. No browser assets or flows have been added. The annotator refuses unavailable targets. Profile-level selection remains unimplemented.
+Current implementation uses transitional IDs `legacy` (ready desktop assets), `modern` (planned), and `browser` (planned/unavailable). `ui_variants.py` validates selection and constrains resolved paths. `client_router.py` classifies the foreground window and resolves a desktop player name only when it maps uniquely to an existing profile. It reports Chrome as browser but blocks profile routing because no browser-specific player-name region is verified. It is read-only and does not access or execute queues. The manager's one-shot `--profile auto` flow remains separate. Profile/window selection for task execution and browser screen flows are not implemented.
 
 ## Selection and Isolation Rules
 
@@ -54,6 +56,47 @@ Current implementation status: the first technical iteration still uses IDs `leg
 - Resolve every screen's regions and templates through the selected client registry.
 - If a client or required screen is missing or not ready, fail with a clear error. Never fall back from browser to desktop assets implicitly.
 - Keep profile state isolated: the active client, captures, OCR, caches, and recognition results must not leak between windows/accounts.
+
+## Foreground Client and Account Queue Routing (Approved 2026-11-07)
+
+### Goal and scope
+
+When the operator manually switches the foreground game between the desktop client and Chrome, route work only to the queue belonging to the visibly identified player account. Client identity selects the visual asset set; player identity selects the local profile and queue. These are separate values. This first implementation is an observe-only router and must not click, scroll, start tasks, or mutate queues.
+
+### Contract and algorithm
+
+1. Observe the foreground top-level window on the primary monitor. Classify it as the supported desktop client, Chrome with the Total Battle tab active, or `not_game`. Do not infer the browser client merely because Chrome is open in the background. Unknown titles/processes are `unknown`.
+2. Resolve a ready client-specific asset set. Desktop remains `legacy` during this migration. Browser recognition is not ready until its independent player-name and army-training regions/templates are registered and verified; never fall back to desktop assets.
+3. Capture a fresh 1920x1080 primary-monitor frame and OCR the visible player name using that client's explicitly annotated region. Require the configured independent reads to agree. Preserve the client ID, window evidence, raw OCR candidates, normalized player name, timestamp, and confidence/status.
+4. Map the exact normalized player name to one pre-registered profile ID. Do not generate a new profile during the polling loop and do not prompt repeatedly. Zero or multiple mappings return `profile_unresolved`; the router performs no queue read or action. Existing one-shot `--profile auto` creation/selection remains a setup operation, not a continuous dispatcher.
+5. Before each future task/action dispatch, recheck foreground client and player identity. A client/profile change suspends dispatch for the previous profile and resolves the newly visible profile before reading its queue. A change during an action blocks subsequent actions; an uncertain result is reconciled only against the profile that owned that action.
+6. This phase reports the resolved `{client_id, player_name, profile_id}` and queue path only. Queue execution, click adapters, browser training actions, multi-window parallelism, and automatic recovery are deferred until the observe-only router passes its fixtures and a separately approved supervised test.
+
+### Confirmed evidence and assumptions
+
+- Confirmed: both supplied desktop and browser examples show the player name in the upper HUD; the desktop fixture identifies `xirrus` and `snoweye`, and the browser fixture shows a different name. The browser test fixtures are 1920x1080.
+- Confirmed from current code: `profile_identity.py` captures the primary monitor and OCRs the `legacy` `world_map.player_name` region; it does not identify foreground-window client type or run a polling loop. The manager's `--profile auto` resolves a profile once per command. `ui_variants.json` currently has `legacy` ready and `modern` planned, but no `browser` entry. The current profile registry is name-to-profile and can require interactive choice for duplicate names.
+- Confirmed from current code: `profile_identity.py` captures the primary monitor and OCRs the `legacy` `world_map.player_name` region. `client_router.py` separately classifies the Windows foreground process/title and polls for changes without prompting. The profile registry can contain duplicate names; the router blocks these because it requires exactly one match. `ui_variants.json` includes `legacy` ready and `browser` planned/unavailable.
+- Assumption to verify: foreground executable/window-title detection distinguishes the game client from Chrome with the Total Battle tab active on the target Windows installation. If not, the router stays `unknown` and does not infer a client from screenshot similarity alone.
+- Deferred: browser player-name region/template annotation; browser variant readiness; stable mapping for duplicate player names; selected-window capture and coordinate conversion; continuous queue dispatch; any clicks, scrolling, or simultaneous per-window execution.
+- Deferred: browser player-name region/template annotation and browser readiness; a manual account binding for duplicate player names; selected-window capture and coordinate conversion; continuous queue dispatch; any clicks, scrolling, or simultaneous per-window execution.
+
+### Implementation status
+
+The first read-only slice is implemented in `client_router.py`. It polls the Windows foreground window, classifies a Total Battle-titled native process as `desktop`, Chrome/Edge/Firefox with a Total Battle title as `browser`, and reports other or incomplete metadata without selecting a queue. Desktop name OCR uses the explicit `legacy` asset set and only routes when one exact registered player-name match exists. Unknown names, duplicate matches, and OCR uncertainty do not return a queue path. The observer never loads or mutates a task queue and never sends game input.
+
+Browser is registered in `ui_variants.json` with status `planned`. Chrome is recognized as the browser client, but browser profile resolution deliberately returns `browser_identity_unconfigured`: `ui/browser/regions.json` does not yet include a verified `world_map.player_name` region. No browser-to-desktop fallback occurs. The existing user-authored `--profile auto` manager changes are preserved; the new router uses a separate non-interactive unique-match lookup so a polling loop cannot prompt or create profiles repeatedly.
+
+Run one observation with `python .\\client_router.py --once`; observe foreground changes with `python .\\client_router.py` (Ctrl+C to stop). These commands report route identity only. Continuous task execution and cross-client queue switching are not implemented until browser identity is annotated and the observer is validated on representative browser and desktop captures.
+
+### Expected tests
+
+- Foreground native Total Battle window maps to `desktop`; Chrome/Edge/Firefox with a Total Battle title maps to `browser`; unrelated foreground window maps to `not_game`; unknown/missing window metadata maps to `unknown`.
+- Client/profile routing never silently falls back to another client or profile.
+- OCR disagreement, missing client-specific name region, unknown player, and duplicate profile mappings do not return an executable queue target.
+- Switching client or player between observations changes the resolved target and leaves each profile's queue path isolated.
+- Observe-only mode performs no game input and no queue mutation; tests use injected window, capture, and OCR providers.
+- The existing desktop workflow and default `legacy` behavior remain unchanged.
 
 ## Documentation Model
 

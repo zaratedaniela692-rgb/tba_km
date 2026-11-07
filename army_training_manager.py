@@ -42,6 +42,7 @@ from task_controller import (
     save_task_queue,
     task_queue_path,
 )
+from profile_identity import ProfileIdentityError, resolve_profile_from_game
 
 SOURCE = "army_training_manager"
 CLEAR_QUEUE_CONFIRMATION = "CLEAR ARMY QUEUE"
@@ -458,7 +459,8 @@ def _command_execute(args, profiles_dir, now):
 
 def build_parser():
     parser = argparse.ArgumentParser(description="Army stock-goal manager; execution is opt-in and limited to one order.")
-    parser.add_argument("--profile", required=True)
+    parser.add_argument("--profile", required=True, help="profile ID or 'auto' to read the visible in-game player name")
+    parser.add_argument("--new-profile", action="store_true", help="with --profile auto, create a new ID even when this player name already exists")
     parser.add_argument("--profiles-dir", default=str(PROFILES_DIR))
     parser.add_argument("--tesseract", help="path to tesseract.exe")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -518,8 +520,25 @@ def main(argv=None, now=None):
 
         pytesseract.pytesseract.tesseract_cmd = args.tesseract
     try:
+        profile_resolution = None
+        if args.profile == "auto":
+            profile_resolution, reading = resolve_profile_from_game(
+                profiles_dir=Path(args.profiles_dir),
+                new_profile=args.new_profile,
+                tesseract_cmd=args.tesseract,
+            )
+            args.profile = profile_resolution.profile_id
+        elif args.new_profile:
+            raise ProfileIdentityError("--new-profile requires --profile auto.")
         report = args.handler(args, Path(args.profiles_dir), now or datetime.now(timezone.utc))
-    except (CampaignError, ArmyStateError, TaskQueueError, TrainingProcessError, OSError, ValueError) as error:
+        if profile_resolution is not None:
+            report["profile_identity"] = {
+                "player_name": profile_resolution.player_name,
+                "profile_id": profile_resolution.profile_id,
+                "action": profile_resolution.action,
+                "ocr_passes": list(reading.candidates),
+            }
+    except (CampaignError, ArmyStateError, TaskQueueError, TrainingProcessError, ProfileIdentityError, OSError, ValueError) as error:
         print(f"Manager error: {error}", file=sys.stderr)
         return 2
     print(json.dumps(report, ensure_ascii=False, indent=2))
