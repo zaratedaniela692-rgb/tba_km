@@ -222,9 +222,6 @@ def test_checkpoint_cli_uses_approved_steps_without_live_input(tmp_path, monkeyp
 @pytest.mark.parametrize(
     "relative_path, expected",
     [
-        ("debug/speedup/calibration_20261106_195223_110853/step_000_initial.png", True),
-        ("debug/speedup/calibration_20261106_195249_832058/step_000_initial.png", True),
-        ("debug/speedup/calibration_20261106_195330_491310/step_000_initial.png", True),
         ("screenshots/speedup_module/after_click_7days_speedup.png", True),
         ("screenshots/speedup_module/speedup_view.png", True),
         ("screenshots/speedup_module/speedup_view2.png", True),

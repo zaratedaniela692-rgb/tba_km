@@ -1,24 +1,13 @@
 {
-  "default_variant": "desktop",
-  "aliases": {
-    "legacy": "desktop"
-  },
+  "default_variant": "legacy",
   "variants": {
-    "desktop": {
+    "legacy": {
       "status": "ready",
       "regions": "regions.json",
       "templates": "templates",
       "screenshots": "screenshots",
       "tests": "tests",
       "verification_output": "debug/verify"
-    },
-    "browser": {
-      "status": "ready",
-      "regions": "ui/browser/regions.json",
-      "templates": "ui/browser/templates",
-      "screenshots": "ui/browser/screenshots",
-      "tests": "ui/browser/tests",
-      "verification_output": "debug/verify/browser"
     },
     "modern": {
       "status": "planned",

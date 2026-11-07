@@ -186,7 +186,7 @@ def build_dry_run_report(image_path=DEFAULT_SCREENSHOT, variant_id=None):
 def main():
     parser = argparse.ArgumentParser(description="Utwórz raport dry-run szkolenia armii bez klikania.")
     parser.add_argument("--input", default=str(DEFAULT_SCREENSHOT), help="PNG screena Koszar")
-    parser.add_argument("--variant", help="wariant interfejsu; domyślnie desktop")
+    parser.add_argument("--variant", help="wariant interfejsu; domyślnie legacy")
     parser.add_argument("--tesseract", help="jawna ścieżka do tesseract.exe")
     args = parser.parse_args()
 

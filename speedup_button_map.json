@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "coordinate_space": "speedup_inventory_viewport",
+  "viewport_size": {
+    "width": 562,
+    "height": 418
+  },
+  "button_template": "templates/speedup/speedup_use_button.png",
+  "minimum_match_score": 0.95,
+  "duration_labels_source": "visually_reviewed_checkpoint_screenshots",
+  "checkpoints": [
+    {
+      "scroll_count": 3,
+      "buttons": [
+        {
+          "duration_label": "15m",
+          "duration_seconds": 900,
+          "rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 43
+          },
+          "match_confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "duration_seconds": 3600,
+          "rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 153
+          },
+          "match_confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "duration_seconds": 10800,
+          "rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 263
+          },
+          "match_confidence": 1.0
+        },
+        {
+          "duration_label": "8h",
+          "duration_seconds": 28800,
+          "rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 373
+          },
+          "match_confidence": 1.0
+        }
+      ]
+    },
+    {
+      "scroll_count": 11,
+      "buttons": [
+        {
+          "duration_label": "15h",
+          "duration_seconds": 54000,
+          "rectangle": {
+            "x": 372,
+            "y": 70,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 83
+          },
+          "match_confidence": 1.0
+        },
+        {
+          "duration_label": "1d",
+          "duration_seconds": 86400,
+          "rectangle": {
+            "x": 372,
+            "y": 180,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 193
+          },
+          "match_confidence": 1.0
+        },
+        {
+          "duration_label": "3d",
+          "duration_seconds": 259200,
+          "rectangle": {
+            "x": 372,
+            "y": 290,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 303
+          },
+          "match_confidence": 1.0
+        }
+      ]
+    },
+    {
+      "scroll_count": 16,
+      "buttons": [
+        {
+          "duration_label": "3d",
+          "duration_seconds": 259200,
+          "rectangle": {
+            "x": 372,
+            "y": 50,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 63
+          },
+          "match_confidence": 1.0
+        },
+        {
+          "duration_label": "7d",
+          "duration_seconds": 604800,
+          "rectangle": {
+            "x": 372,
+            "y": 160,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 173
+          },
+          "match_confidence": 1.0
+        },
+        {
+          "duration_label": "30d",
+          "duration_seconds": 2592000,
+          "rectangle": {
+            "x": 372,
+            "y": 270,
+            "width": 145,
+            "height": 27
+          },
+          "center": {
+            "x": 444,
+            "y": 283
+          },
+          "match_confidence": 1.0
+        }
+      ]
+    }
+  ],
+  "preferred_scroll_count_by_duration": {
+    "15m": 3,
+    "1h": 3,
+    "3h": 3,
+    "8h": 3,
+    "15h": 11,
+    "1d": 11,
+    "3d": 11,
+    "7d": 16,
+    "30d": 16
+  },
+  "source_run": "calibration_20261107_010155_371887",
+  "source_started_at": "2026-11-07T00:01:55.372893+00:00"
+}

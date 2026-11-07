@@ -9,8 +9,6 @@ import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from army_unit_types import DEFAULT_UNIT_TYPE, validate_unit_type
-
 
 ROOT_DIR = Path(__file__).resolve().parent
 PROFILES_DIR = ROOT_DIR / "profiles"
@@ -39,16 +37,8 @@ def evaluate_slot_replenishment(
     queue_limits_by_level,
     training_level,
     min_count_confidence=MIN_TROOP_COUNT_OCR_CONFIDENCE,
-    *,
-    unit_type,
 ):
     """Evaluate one unit slot using its observed limits, without identifying its name."""
-    try:
-        validate_unit_type(unit_type)
-    except ValueError as error:
-        raise TrainingPlanError(str(error)) from error
-    if unit_type != DEFAULT_UNIT_TYPE:
-        raise TrainingPlanError("Stock replenishment rules are not verified for this unit type.")
     if isinstance(global_level, bool) or not isinstance(global_level, int) or global_level not in MATCH_COUNTS_BY_LEVEL:
         raise TrainingPlanError("global_level musi wskazywać poprawny poziom globalny.")
     if (
@@ -121,7 +111,7 @@ def evaluate_slot_replenishment(
 
     return {
         "status": "uncertain" if not count_reliable else "satisfied" if satisfied else "replenish",
-        "slot": {"unit_type": unit_type, "global_level": global_level, "match_number": match_number},
+        "slot": {"global_level": global_level, "match_number": match_number},
         "highest_unlocked_level": highest_unlocked_level,
         "reference_level": reference_level,
         "training_level": training_level,

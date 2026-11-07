@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
-import cv2
 
 from army_training_plan import (
     TrainingPlanError,
@@ -16,7 +15,7 @@ from army_training_plan import (
     save_plan,
     start_next_order,
 )
-from army_training_scanner import read_army_training_snapshot, read_training_button_state_from_image
+from army_training_scanner import read_army_training_snapshot
 
 
 BASE_TIME = datetime(2026, 11, 2, 12, 0, tzinfo=timezone.utc)
@@ -31,12 +30,11 @@ def test_slot_replenishment_uses_eighty_percent_of_its_own_reference_limit():
         current_count_confidence=96,
         queue_limits_by_level={4: 1000, 5: 700},
         training_level=5,
-        unit_type="guardsmen",
     )
 
     assert result == {
         "status": "satisfied",
-        "slot": {"unit_type": "guardsmen", "global_level": 5, "match_number": 1},
+        "slot": {"global_level": 5, "match_number": 1},
         "highest_unlocked_level": 5,
         "reference_level": 4,
         "training_level": 5,
@@ -54,9 +52,9 @@ def test_slot_replenishment_uses_eighty_percent_of_its_own_reference_limit():
 
 
 def test_slot_replenishment_caps_order_by_gap_and_slot_specific_queue_limit():
-    near_goal = evaluate_slot_replenishment(5, 1, 5, 1599, 96, {4: 1000, 5: 700}, 5, unit_type="guardsmen")
-    large_gap = evaluate_slot_replenishment(5, 1, 5, 0, 96, {4: 1000, 5: 700}, 5, unit_type="guardsmen")
-    other_slot = evaluate_slot_replenishment(5, 2, 5, 0, 96, {4: 500, 5: 300}, 5, unit_type="guardsmen")
+    near_goal = evaluate_slot_replenishment(5, 1, 5, 1599, 96, {4: 1000, 5: 700}, 5)
+    large_gap = evaluate_slot_replenishment(5, 1, 5, 0, 96, {4: 1000, 5: 700}, 5)
+    other_slot = evaluate_slot_replenishment(5, 2, 5, 0, 96, {4: 500, 5: 300}, 5)
 
     assert near_goal["status"] == "replenish"
     assert near_goal["recommended_training_count"] == 401
@@ -77,11 +75,11 @@ def test_slot_replenishment_caps_order_by_gap_and_slot_specific_queue_limit():
 )
 def test_slot_replenishment_rejects_invalid_counts_and_limits(arguments):
     with pytest.raises(TrainingPlanError):
-        evaluate_slot_replenishment(*arguments, unit_type="guardsmen")
+        evaluate_slot_replenishment(*arguments)
 
 
 def test_slot_replenishment_does_not_decide_from_uncertain_ocr():
-    result = evaluate_slot_replenishment(5, 1, 5, 1600, 69, {4: 1000, 5: 700}, 5, unit_type="guardsmen")
+    result = evaluate_slot_replenishment(5, 1, 5, 1600, 69, {4: 1000, 5: 700}, 5)
 
     assert result["status"] == "uncertain"
     assert result["count_confidence_ok"] is False
@@ -174,24 +172,6 @@ def test_army_training_snapshot_detects_empty_queue_from_unit_image():
     assert snapshot["has_active_training"] is False
     assert snapshot["status"] == "idle"
     assert snapshot["training_unit_image_detail"] < 8
-
-
-def test_training_panel_button_state_matches_help_and_speedup_fixtures():
-    screenshot_dir = Path(__file__).resolve().parents[1] / "screenshots" / "army_training"
-    fixtures = (
-        ("after_succesfully_added_armyunit_to_train.png", "help"),
-        ("after_click_help_button.png", "speedup"),
-    )
-
-    for filename, expected_state in fixtures:
-        image_path = screenshot_dir / filename
-        image = cv2.imread(str(image_path), cv2.IMREAD_COLOR)
-        result = read_training_button_state_from_image(image)
-
-        assert result["button_state"] == expected_state
-        assert result["button_region"] == {"x": 1080, "y": 288, "w": 129, "h": 33}
-        score_key = "help_score" if expected_state == "help" else "speedup_score"
-        assert result[score_key] >= 0.85
 
 
 @pytest.mark.parametrize("image_name", ("army_training1.png", "army_training3.png", "army_training4.png"))

@@ -11,32 +11,15 @@ from tools.verify import load_templates, run
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
 
-def test_default_variant_resolves_to_existing_desktop_assets():
+def test_default_variant_resolves_to_existing_legacy_assets():
     variant = resolve_variant()
 
-    assert variant["id"] == "desktop"
+    assert variant["id"] == "legacy"
     assert variant["status"] == "ready"
     assert variant["regions"] == ROOT_DIR / "regions.json"
     assert variant["templates"] == ROOT_DIR / "templates"
     assert variant["verification_output"] == ROOT_DIR / "debug" / "verify"
     assert resolve_asset_path(variant, "templates/army_training/current_training_unit.png").is_file()
-
-
-def test_legacy_variant_alias_preserves_existing_commands():
-    assert resolve_variant("legacy")["id"] == "desktop"
-
-
-def test_browser_variant_resolves_to_isolated_asset_roots():
-    desktop = resolve_variant("desktop")
-    browser = resolve_variant("browser")
-
-    assert browser["id"] == "browser"
-    assert browser["regions"] == ROOT_DIR / "ui" / "browser" / "regions.json"
-    assert browser["templates"] == ROOT_DIR / "ui" / "browser" / "templates"
-    assert browser["screenshots"] == ROOT_DIR / "ui" / "browser" / "screenshots"
-    assert browser["tests"] == ROOT_DIR / "ui" / "browser" / "tests"
-    assert browser["regions"] != desktop["regions"]
-    assert browser["templates"] != desktop["templates"]
 
 
 def test_explicit_modern_variant_is_rejected_without_falling_back():
@@ -49,7 +32,7 @@ def test_unknown_variant_is_rejected():
         resolve_variant("future")
 
 
-def test_variant_asset_path_cannot_escape_desktop_template_root():
+def test_variant_asset_path_cannot_escape_legacy_template_root():
     variant = resolve_variant("legacy")
 
     with pytest.raises(UIVariantError, match="outside"):
@@ -66,11 +49,11 @@ def test_template_reference_resolves_from_selected_variant_root(tmp_path):
     )
 
 
-def test_desktop_scanner_default_matches_explicit_variant():
+def test_legacy_scanner_default_matches_explicit_variant():
     image_path = ROOT_DIR / "screenshots" / "army_training" / "pelny.png"
 
     assert read_army_training_snapshot(image_path) == read_army_training_snapshot(
-        image_path, variant_id="desktop"
+        image_path, variant_id="legacy"
     )
 
 

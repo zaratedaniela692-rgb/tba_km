@@ -209,3 +209,14 @@ def finish_with_speedups(
         return run.execute(dry_run)
     except _Abort as stop:
         return SpeedupResult(stop.status, stop.reason, used=tuple(run.used.items()))
+
+
+def main(argv=None):
+    """Run the supervised desktop checkpoint scanner and optional item-use flow."""
+    from speedup_run import main as run_main
+
+    return run_main(argv)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

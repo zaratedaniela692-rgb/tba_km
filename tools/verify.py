@@ -180,7 +180,7 @@ def verify_image(image_path, screen, templates, output_dir=None):
         })
 
     output = add_legend(output, results)
-    output_path = (output_dir or ROOT_DIR / "debug" / "verify") / screen / image_path.name
+    output_path = (output_dir or ROOT_DIR / "debug" / "verify" / "legacy") / screen / image_path.name
     write_image(output_path, output)
     return results, output_path
 
@@ -217,7 +217,7 @@ def main():
     parser = argparse.ArgumentParser(description="Weryfikuj szablony ekranu na zrzutach PNG.")
     parser.add_argument("--screen", required=True, help="nazwa ekranu z regions.json")
     parser.add_argument("--input", required=True, help="folder zawierający wejściowe pliki PNG")
-    parser.add_argument("--variant", help="wariant interfejsu; domyślnie desktop")
+    parser.add_argument("--variant", help="wariant interfejsu; domyślnie legacy")
     parser.add_argument("--regions", help="nadpisz ścieżkę do regions.json dla wybranego wariantu")
     parser.add_argument("--config", default=str(CONFIG_PATH), help="ścieżka do config.json z progami")
     args = parser.parse_args()

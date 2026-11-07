@@ -428,7 +428,7 @@ def main():
     parser = argparse.ArgumentParser(description="Zaznaczaj elementy ekranu i zapisuj ich szablony.")
     parser.add_argument("--image", help="ścieżka do wejściowego screena PNG; bez opcji otworzy się wybór pliku")
     parser.add_argument("--screen", default="", help="nazwa ekranu do wstępnego wpisania w oknie")
-    parser.add_argument("--variant", help="wariant interfejsu; domyślnie desktop")
+    parser.add_argument("--variant", help="wariant interfejsu; domyślnie legacy")
     args = parser.parse_args()
 
     root = tk.Tk()

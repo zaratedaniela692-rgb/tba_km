@@ -37,3 +37,13 @@
 - Zalecana kolejność: najpierw wybór i przechwytywanie jednego okna oraz poprawne przeliczanie współrzędnych; następnie izolacja profili i przełączanie między oknami; później praca równoległa dla co najmniej czterech okien; na końcu GUI korzystające z tych samych sesji.
 - Flow takie jak kopalnie, krypta czy Watchtower będą kolejnymi funkcjami korzystającymi ze wspólnej obsługi okien i profili. Kontrola dostępu premium Watchtower jest ważnym przykładem walidacji stanu przed akcją, ale nie jest jedynym celem projektu.
 - Wybór okna, profile wielookienne i GUI są kierunkami rozwoju, nie zaimplementowanymi funkcjami.
+
+## Testy live na drugim PC (`tools/device_test.py`)
+Zatwierdzone 2026-11-07. Narzędzie służy do nadzorowanych testów okna gry na PC z grą, Tesseractem, `mss` i `pyautogui`; nie zastępuje pytest.
+- `python .\tools\device_test.py list` pokazuje scenariusze z `tools/device_test_scenarios.json`; `run <scenariusz|all>` uruchamia je. Nowy moduł dodaje się wpisem w tym pliku.
+- Start: `git pull --ff-only` (przy rozbieżności `pull --rebase`); zmiany w śledzonych plikach przerywają run bez testów. Operator przygotowuje ekran wskazany w `prepare`, po czym narzędzie odlicza `prepare_seconds` (`--delay` nadpisuje).
+- Scenariusze klikające mają tylko `execute_argv`: bez `--execute` są pomijane albo uruchamiają bezpieczny `argv` (np. podgląd). Po pierwszym błędzie kroku sekwencja się zatrzymuje, bez ponowień. Działają `~/.tba_stop` i PyAutoGUI fail-safe.
+- Wynik: `device_runs/<urządzenie>/<scenariusz>/<czas>/` z `report.json`, `log.txt`, zrzutami monitora przed i po kroku oraz katalogami debug utworzonymi przez moduł (przenoszonymi z `debug_dirs`). Zostaje bieżący run i 3 wcześniejsze dla pary urządzenie + scenariusz; starsze są usuwane i commitowane.
+- Commit obejmuje tylko katalog scenariusza (`device_runs: <scenariusz> on <urządzenie> - <STATUS>`), także po niepowodzeniu. Push jest domyślny (`--no-push` go wyłącza, `--no-git` pomija cały git).
+- `tools/live_probes.py`: `preflight` (biblioteki, Tesseract, 1920x1080, zrzut), `army_slots` (odczyt slotów, poziomów i stanu), `army_scroll` (porcje po 8 kroków w dół i w górę, zrzut po każdej, bez kliknięć). Nie klikają.
+- Status: zaimplementowane; testy narzędzia przechodzą na tymczasowych repozytoriach git. Żaden scenariusz nie został uruchomiony na grze. `army_navigate` zależy od managera armii, który ma obecnie błędy importu. Wykrywanie końca listy w `army_scroll` porównuje całe klatki, więc animowane elementy mogą je opóźnić; probe zapisuje dowody do kalibracji.

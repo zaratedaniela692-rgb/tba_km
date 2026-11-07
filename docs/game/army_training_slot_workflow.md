@@ -4,7 +4,61 @@
 
 ## Purpose
 
-The queue manager schedules stock goals. The visual reader identifies the visible unit training slots and gathers measurements from each slot independently. It does not identify troop names and does not click or scroll the game.
+The queue manager schedules stock goals. The visual reader identifies unit training slots and gathers measurements from each slot independently. Slot-level OCR does not identify troop names. The current manager executor only resolves the visible frame; the approved scrolling extension below is being implemented for desktop Gwardzists.
+
+## Desktop Gwardzist List Scrolling (Approved 2026-11-07; Implementation In Progress)
+
+### Goal and Scope
+
+Search for a queued Gwardzist stock goal when its unit card is outside the current Barracks view. The first implementation is desktop-only. Browser UI, other unit categories, and live execution remain out of scope until separately verified.
+
+### Confirmed Contract
+
+1. A scroll action targets the unit-card list, not the per-slot quantity slider. Before scrolling, move the cursor to the center of the captured training screen; derive the point from the current frame dimensions rather than hard-coding a screen coordinate.
+2. One scroll batch consists of eight individual wheel steps. Use eight downward steps when searching toward later/newer units and eight upward steps when searching toward earlier units. Capture and inspect a fresh frame after every batch.
+3. If the requested level is absent from the current visible slot ranges and is earlier/lower than the visible progression (for example, target level 5 while the visible maximum is 6), search upward. Otherwise search downward for a subsequent unit not currently visible.
+4. Continue by observed list movement, not a fixed number of batches. Detect an endpoint only when the image does not change after a scroll batch. A blank/uncertain slot detection alone is not evidence of an endpoint.
+5. Never click a level selector or Train unless the target slot has been resolved unambiguously from the scan. A missing target at a confirmed endpoint remains blocked/unsupported; it does not mark a stock goal completed.
+6. Scrolling is a game action. Dry-run must not move the cursor or scroll. Live actions retain explicit execution confirmation, PyAutoGUI fail-safe, emergency stop checks, and no automatic retry after uncertain results.
+
+### Algorithm and Open Uncertainties
+
+```mermaid
+flowchart TD
+    A[Fresh Barracks frame] --> B{Target range visible?}
+    B -->|Yes| C[Resolve target using verified list order]
+    B -->|No| D{Target is earlier/lower than visible progression?}
+    D -->|Yes| E[Move cursor to frame center; scroll up 8 wheel steps]
+    D -->|No| F[Move cursor to frame center; scroll down 8 wheel steps]
+    E --> G[Capture fresh frame]
+    F --> G
+    G --> H{Image changed and layout/levels reliable?}
+    H -->|No change| I[Confirm endpoint; report target absent]
+    H -->|Uncertain| J[Stop blocked; do not click]
+    H -->|Changed| K[Accumulate/deduplicate observed slots]
+    K --> B
+    C --> L{Exactly one target match?}
+    L -->|No| J
+    L -->|Yes| M[Continue existing preflight and execution gates]
+```
+
+The eight-step batch size and center-of-frame pointer placement are user-confirmed. The assumption that a batch preserves enough continuity to identify every card is not yet verified. The current detector provides frame-local slot indexes and level-range candidates, but no stable unit name or cross-frame identity. Before connecting accumulated observations to `match_number`, verify with representative screenshots that cards can be matched/deduplicated across batches and that eight steps cannot skip an unobserved target. If this cannot be established, stop blocked rather than infer identity from a frame-local index. The scroll-up path uses the same eight-step batch size by agreement; its actual UI behavior still requires fixture/supervised verification.
+
+### Current Code Status
+
+The injectable primitives in `army_training_scroll.py` now calculate the current frame center, move the cursor there, issue eight individual wheel steps, choose direction using the target level and requested ordinal match, capture after each batch, and distinguish an unchanged-image endpoint from uncertain observations and a safety-limit stop. Unit tests cover these behaviors without sending real input. These primitives are not yet wired into the manager/executor or a live PyAutoGUI adapter. `resolve_goal_slot` still handles one frame and returns `match_not_visible_without_scrolling` when the requested match is beyond its visible candidates. Cross-frame slot identity and match-number accumulation remain unimplemented; do not use a frame-local result as a verified full-list match.
+
+### Expected Tests
+
+- Correct cursor center is derived from each frame size; eight separate wheel calls use the requested direction.
+- Dry-run performs no pointer movement or wheel calls.
+- A fresh observation follows every batch; a changed frame continues searching, an unchanged frame confirms an endpoint, and an uncertain frame blocks.
+- Overlapping views do not count a card twice; matching order remains stable across view transitions.
+- Downward search finds a later unseen target, and upward search finds an earlier target such as level 5 when level 6 is visible.
+- A skipped/ambiguous target or unreliable slot layout prevents selector and Train clicks and never marks the goal complete.
+- Existing visible-target resolution and manager/executor safety gates remain unchanged.
+- `tests/test_army_training_scroll.py` covers the current pure traversal primitives; mocked live-action adapter and end-to-end resolver tests remain pending.
+- Run focused tests for slots, levels, manager, and executor; run the full suite if the shared resolver or execution flow changes. Live validation is a separate supervised step and is not authorized by this contract alone.
 
 ## Running the Read-Only Dry-Run
 

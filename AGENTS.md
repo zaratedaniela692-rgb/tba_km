@@ -10,7 +10,7 @@
 7. Każdy flow modeluj jako maszynę stanów: stan, warunek rozpoznania, akcja, oczekiwany następny stan, limit czasu i obsługa błędu.
 8. Każdy flow powinien mieć tryb dry-run (loguje planowane kliknięcia bez ich wykonywania) i awaryjne zatrzymanie klawiszem.
 9. Loguj datę i godzinę. Przy pewności poniżej progu zapisz screen w `debug/` z opisem.
-10. Po zmianie uruchom testy dotkniętego modułu (np. `pytest -q tests/test_speedup*.py`); `verify.py` uruchamiaj, gdy zmieniają się rozpoznawanie ekranu, regiony lub szablony. Pełne `pytest` uruchamiaj po zmianach przekrojowych (wiele modułów, wspólny kod, `regions.json`) oraz przed commitem kończącym większy etap. Pokaż wynik. Jeśli test lub narzędzie nie jest dostępne, zgłoś to.
+10. Po zmianie uruchom testy i `verify.py`; pokaż wynik. Jeśli test lub narzędzie nie jest dostępne, zgłoś to.
 11. Wiedzę z poprawek użytkowniczki dopisz do karty ekranu w sekcji „Wiedza z poprawek” lub do `docs/game/mechaniki.md`.
 12. Nie czytaj całych folderów `debug/` ani `screenshots/`. Poproś o konkretne pliki.
 13. Po zakończonym kroku zaproponuj commit z opisem. Nie rób push bez zgody.
@@ -58,7 +58,6 @@ python .\mines.py --help
 python .\watchtower_mines.py --help
 python .\tools\verify.py --screen world_map --input .\tests\data\world_map
 python .\tools\resource_ocr.py --screen world_map --input .\tests\data\world_map
-python -m pytest -q .\tests\test_speedup_calibration.py
 python -m pytest
 python .\login.py .\credentials.json
 python .\troops.py .\troops.json

@@ -384,9 +384,12 @@ def _command_execute(args, profiles_dir, now):
         and (_parse_next_check(task) is None or _parse_next_check(task) <= now)
     ), None)
     if due_finish is not None:
+        from army_training_speedup import finish_active_training_with_speedups
+
         result = execute_finish_task(
             queue, due_finish["task_id"], state_path, now,
             execute=args.execute, confirmation=args.confirm,
+            speedup_fn=finish_active_training_with_speedups,
         )
         if args.execute:
             save_task_queue(queue, path)
@@ -429,6 +432,8 @@ def _command_execute(args, profiles_dir, now):
             **({"category_selection": category} if category is not None else {}),
         }
     task_id = eligible[0]["task_id"]
+    from army_training_speedup import finish_active_training_with_speedups
+
     result = execute_training_goal(
         queue,
         task_id,
@@ -436,6 +441,7 @@ def _command_execute(args, profiles_dir, now):
         execute=args.execute,
         confirmation=args.confirm,
         state_path=state_path,
+        speedup_fn=finish_active_training_with_speedups,
     )
     if args.execute:
         save_task_queue(queue, path)

@@ -4,6 +4,10 @@ Light digits on a dark bar. Glyphs are segmented first so a merged or lost glyph
 change a number, then each digit is read alone at two scales and accepted only if both agree.
 """
 
+import os
+import shutil
+from pathlib import Path
+
 import cv2
 import numpy as np
 import pytesseract
@@ -25,6 +29,25 @@ DIGIT_PAD = 2
 DIGIT_BORDER = 30
 # Digits confirmed by two independent reads on the supplied fixtures.
 VERIFIED_DIGITS = frozenset("13467")
+
+
+def configure_tesseract(executable=None):
+    """Use an explicit executable, PATH lookup, or the standard Windows install path."""
+    candidates = [executable, os.environ.get("TESSERACT_CMD"), shutil.which("tesseract")]
+    if os.name == "nt":
+        candidates.extend((
+            str(Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Tesseract-OCR" / "tesseract.exe"),
+            str(Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Tesseract-OCR" / "tesseract.exe"),
+        ))
+
+    for candidate in candidates:
+        if not candidate:
+            continue
+        resolved = shutil.which(candidate) or (candidate if Path(candidate).is_file() else None)
+        if resolved:
+            pytesseract.pytesseract.tesseract_cmd = resolved
+            return resolved
+    return None
 
 
 def _components(gray):
@@ -71,8 +94,9 @@ def _read_number(gray, digits):
     return reads[0]
 
 
-def read_remaining_time(image, variant=None):
+def read_remaining_time(image, variant=None, tesseract_cmd=None):
     """Remaining task time in seconds (day/hour resolution); `value` is None unless unambiguous."""
+    configure_tesseract(tesseract_cmd)
     variant = variant or resolve_variant()
     region = _load_regions(variant["regions"])[REGION_SCREEN][REGION_NAME]
     gray = cv2.cvtColor(_region_crop(image, region), cv2.COLOR_BGR2GRAY)
