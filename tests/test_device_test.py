@@ -284,7 +284,7 @@ def test_committed_plan_is_valid_and_within_the_limit():
 def test_settings_default_to_publish_push_rerun_and_preparation_delay():
     settings = dt.load_settings()
 
-    assert settings["delay_seconds"] == 20
+    assert settings["delay_seconds"] == 5
     assert settings["publish"] is True
     assert settings["push"] is True
     assert settings["rerun_same_code"] is True

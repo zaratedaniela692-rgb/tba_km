@@ -3,7 +3,7 @@
     "preflight",
     "speedup_scan"
   ],
-  "delay_seconds": 20,
+  "delay_seconds": 5,
   "publish": true,
   "push": true,
   "rerun_same_code": true,
