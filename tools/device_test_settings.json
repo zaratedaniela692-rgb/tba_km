@@ -1,0 +1,12 @@
+{
+  "scenarios": [
+    "preflight",
+    "speedup_scan"
+  ],
+  "delay_seconds": 20,
+  "publish": true,
+  "push": true,
+  "rerun_same_code": true,
+  "profile": "device_test",
+  "device": null
+}

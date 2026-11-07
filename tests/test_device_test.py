@@ -167,6 +167,19 @@ def test_failed_step_stops_the_sequence_and_is_still_published(repo):
     assert _git(repo.work, "log", "-1", "--format=%s") == "device_runs: demo on pc1 - FAILED"
 
 
+def test_failed_run_is_pushed_by_default(repo):
+    calls = []
+    code, results = dt.run_scenarios(
+        ["demo"], _context(repo, calls, returncode=4), {"demo": SCENARIO},
+    )
+
+    assert code == 1
+    assert results[0]["status"] == dt.FAILED
+    assert results[-1]["scenario"] == "git_push"
+    assert results[-1]["status"] == dt.OK
+    assert _git(repo.remote, "log", "-1", "--format=%s", "main") == "device_runs: demo on pc1 - FAILED"
+
+
 def test_module_debug_created_during_the_run_is_moved_into_it(repo):
     base = repo.work / "debug" / "mod"
     (base / "old").mkdir(parents=True)
@@ -262,9 +275,27 @@ def test_more_than_two_scenarios_need_an_explicit_override(tmp_path):
 
 
 def test_committed_plan_is_valid_and_within_the_limit():
-    items = dt.resolve_selection([], dt.load_scenarios())
+    items = dt.resolve_selection([], dt.load_scenarios(), dt.SETTINGS_PATH)
 
     assert 1 <= len(items) <= dt.MAX_SCENARIOS
+    assert items == [("preflight", False), ("speedup_scan", False)]
+
+
+def test_settings_default_to_publish_push_rerun_and_preparation_delay():
+    settings = dt.load_settings()
+
+    assert settings["delay_seconds"] == 20
+    assert settings["publish"] is True
+    assert settings["push"] is True
+    assert settings["rerun_same_code"] is True
+
+
+def test_settings_reject_invalid_values(tmp_path):
+    path = tmp_path / "settings.json"
+    path.write_text('{"scenarios":["demo"],"delay_seconds":-1}', encoding="utf-8")
+
+    with pytest.raises(dt.DeviceTestError, match="delay_seconds"):
+        dt.load_settings(path)
 
 
 def test_speedup_scenarios_use_the_confirmation_phrases_of_speedup_run():

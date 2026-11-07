@@ -18,6 +18,7 @@ from typing import Callable
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SCENARIOS_PATH = Path(__file__).with_name("device_test_scenarios.json")
 PLAN_PATH = Path(__file__).with_name("device_test_plan.json")
+SETTINGS_PATH = Path(__file__).with_name("device_test_settings.json")
 RUNS_DIR_NAME = "device_runs"
 KEEP_RUNS = 4  # the current run plus three earlier ones
 MAX_SCENARIOS = 2  # every scenario adds many screenshots to the repository
@@ -156,6 +157,37 @@ def load_plan(path, scenarios, default_execute=False):
     if not items:
         raise DeviceTestError("The plan is empty.")
     return items
+
+
+def load_settings(path=SETTINGS_PATH):
+    """Load committed one-command defaults for supervised device tests."""
+    try:
+        settings = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise DeviceTestError(f"Cannot read device-test settings: {error}") from error
+    if not isinstance(settings, dict):
+        raise DeviceTestError("Device-test settings must be a JSON object.")
+    scenarios = settings.get("scenarios")
+    if not isinstance(scenarios, list) or not scenarios:
+        raise DeviceTestError("Device-test settings need a non-empty scenarios list.")
+    delay = settings.get("delay_seconds", 20)
+    if type(delay) is not int or delay < 0:
+        raise DeviceTestError("delay_seconds must be a non-negative integer.")
+    for key in ("publish", "push", "rerun_same_code"):
+        if type(settings.get(key, True)) is not bool:
+            raise DeviceTestError(f"{key} must be a boolean.")
+    profile = settings.get("profile", "device_test")
+    device = settings.get("device")
+    if not isinstance(profile, str) or not profile.strip():
+        raise DeviceTestError("profile must be a non-empty string.")
+    if device is not None and (not isinstance(device, str) or not device.strip()):
+        raise DeviceTestError("device must be null or a non-empty string.")
+    settings["delay_seconds"] = delay
+    settings["publish"] = settings.get("publish", True)
+    settings["push"] = settings.get("push", True)
+    settings["rerun_same_code"] = settings.get("rerun_same_code", True)
+    settings["profile"] = profile
+    return settings
 
 
 def resolve_selection(names, scenarios, plan_path=PLAN_PATH, execute=False, allow_many=False):
@@ -408,7 +440,7 @@ def main(argv=None):
     parser.add_argument("--execute", action="store_true", help="also run steps that click in the game")
     parser.add_argument("--force", action="store_true", help="run and publish even if this code was already tested")
     parser.add_argument("--allow-many", action="store_true", help=f"allow more than {MAX_SCENARIOS} scenarios")
-    parser.add_argument("--profile", default="device_test")
+    parser.add_argument("--profile")
     parser.add_argument("--device", help="device label; default is the computer name")
     parser.add_argument("--delay", type=int, help="seconds to switch to the game before each scenario")
     parser.add_argument("--no-git", action="store_true", help="skip pull, commit and push")
@@ -417,21 +449,33 @@ def main(argv=None):
 
     try:
         scenarios = load_scenarios()
+        settings = load_settings()
         if args.list:
             for name, item in scenarios.items():
                 kind = "clicks with --execute" if is_clicking(item) else "no clicks"
                 print(f"{name:16} {kind:22} {item['description']}")
-            plan = load_plan(PLAN_PATH, scenarios)
+            plan = load_plan(SETTINGS_PATH, scenarios)
             print("plan: " + ", ".join(f"{name}{' (execute)' if execute else ''}" for name, execute in plan))
+            print(
+                "settings: "
+                f"delay={settings['delay_seconds']}s, publish={settings['publish']}, "
+                f"push={settings['push']}, rerun_same_code={settings['rerun_same_code']}"
+            )
             return 0
-        selection = resolve_selection(args.scenarios, scenarios, PLAN_PATH, args.execute, args.allow_many)
+        selection = resolve_selection(args.scenarios, scenarios, SETTINGS_PATH, args.execute, args.allow_many)
     except DeviceTestError as error:
         print(f"Error: {error}", file=sys.stderr)
         return 2
 
     ctx = Context(
-        root=ROOT_DIR, device=device_name(args.device), execute=args.execute, profile=args.profile,
-        delay=args.delay, git=None if args.no_git else Git(ROOT_DIR), push=not args.no_push, force=args.force,
+        root=ROOT_DIR,
+        device=device_name(args.device or settings.get("device")),
+        execute=args.execute,
+        profile=args.profile or settings["profile"],
+        delay=args.delay if args.delay is not None else settings["delay_seconds"],
+        git=None if args.no_git or not settings["publish"] else Git(ROOT_DIR),
+        push=not args.no_push and settings["push"],
+        force=args.force or settings["rerun_same_code"],
     )
     code, _ = run_scenarios(selection, ctx, scenarios)
     return code

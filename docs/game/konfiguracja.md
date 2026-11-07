@@ -39,13 +39,23 @@
 - Wybór okna, profile wielookienne i GUI są kierunkami rozwoju, nie zaimplementowanymi funkcjami.
 
 ## Testy live na drugim PC (`tools/device_test.py`)
-Zatwierdzone 2026-11-07. Narzędzie służy do nadzorowanych testów okna gry na PC z grą, Tesseractem, `mss` i `pyautogui`; nie zastępuje pytest.
-- Stałe polecenie na drugim PC: `python .\tools\device_test.py`. Bez argumentów uruchamia scenariusze z `tools/device_test_plan.json`, który zmieniamy i commitujemy na głównym PC. Wpis planu to nazwa albo `{"name": "...", "execute": true}` dla scenariusza klikającego. `--list` pokazuje scenariusze i bieżący plan; nazwy podane w poleceniu zastępują plan; nowy moduł dodaje się wpisem w `tools/device_test_scenarios.json`.
-- Limit: najwyżej 2 scenariusze na uruchomienie (screeny i diagnostyka szybko rosną); więcej (także `all`) wymaga `--allow-many`.
-- Start: `git pull --ff-only` (przy rozbieżności `pull --rebase`); zmiany w śledzonych plikach przerywają run bez testów. Operator przygotowuje ekran wskazany w `prepare`, po czym narzędzie odlicza `prepare_seconds` (`--delay` nadpisuje).
-- Blokada tego samego kodu: raport zapisuje `code_commit` (ostatni commit spoza `device_runs`). Jeśli poprzedni run tego scenariusza na tym urządzeniu miał ten sam `code_commit`, scenariusz kończy się `UNCHANGED` (kod wyjścia 3) bez gry, zrzutów i commita. `--force` pomija blokadę.
-- Scenariusze klikające mają tylko `execute_argv`: bez `--execute` (lub `execute` w planie) są pomijane albo uruchamiają bezpieczny `argv` (np. podgląd). Po pierwszym błędzie kroku sekwencja się zatrzymuje, bez ponowień. Działają `~/.tba_stop` i PyAutoGUI fail-safe.
-- Wynik: `device_runs/<urządzenie>/<scenariusz>/<czas>/` z `report.json`, `log.txt`, zrzutami monitora przed i po kroku oraz katalogami debug utworzonymi przez moduł (przenoszonymi z `debug_dirs`). Zostaje bieżący run i 3 wcześniejsze dla pary urządzenie + scenariusz; starsze są usuwane i commitowane (pliki zostają w historii gita).
-- Commit obejmuje tylko katalog scenariusza (`device_runs: <scenariusz> on <urządzenie> - <STATUS>`), także po niepowodzeniu. Push jest domyślny (`--no-push` go wyłącza, `--no-git` pomija cały git i blokadę).
-- `tools/live_probes.py`: `preflight` (biblioteki, Tesseract, 1920x1080, zrzut), `army_slots` (odczyt slotów, poziomów i stanu), `army_scroll` (porcje po 8 kroków w dół i w górę, zrzut po każdej, bez kliknięć). Nie klikają.
-- Status: zaimplementowane; testy narzędzia przechodzą na tymczasowych repozytoriach git. Żaden scenariusz nie został uruchomiony na grze. `army_navigate` zależy od managera armii, który ma obecnie błędy importu. Wykrywanie końca listy w `army_scroll` porównuje całe klatki, więc animowane elementy mogą je opóźnić; probe zapisuje dowody do kalibracji.
+Zatwierdzone 2026-11-07. Narzędzie uruchamia nadzorowane scenariusze na komputerze z grą; nie zastępuje pytest.
+
+**Zwykłe uruchomienie:** po pobraniu zmian wykonaj jedną komendę z katalogu repozytorium:
+
+```powershell
+git pull --ff-only
+python .\tools\device_test.py
+```
+
+Ustawienia są w `tools/device_test_settings.json`: lista domyślnych scenariuszy, czas na przygotowanie ekranu, profil/urządzenie oraz publikacja. Domyślne `publish`, `push` i `rerun_same_code` są włączone. Zmień ten plik i commituj ustawienia, jeśli chcesz inny standardowy przebieg; polecenia nadal pozostają takie same.
+
+Domyślnie uruchamiane są `preflight` i `speedup_scan`. Skan Speed Up przewija listę i tworzy plan, ale **nie klika „Użyj”**. Po starcie przygotuj wskazany ekran w czasie odliczania. `speedup_use` zużywa przedmioty, dlatego nie jest domyślny; aby dodać go do planu, zmień wpis w `device_test_settings.json` na `{"name": "speedup_use", "execute": true}`. Wtedy każde zwykłe uruchomienie będzie próbowało użyć zaplanowanych przyspieszeń na przygotowanym ekranie.
+
+Narzędzie zapisuje raport, log, zrzuty przed/po i debug modułu w `device_runs/<urządzenie>/<scenariusz>/<czas>/`. Po wyniku `OK` i `FAILED` commitowane są pliki diagnostyczne, a następnie pushowane. Wyniki `BLOCKED` przed uruchomieniem kroku (np. lokalne zmiany śledzonych plików blokujące synchronizację Git) nie mają diagnostyki z gry do opublikowania. Domyślne `rerun_same_code` zapobiega cichemu `UNCHANGED`; ustaw `false`, jeśli chcesz przywrócić pomijanie kodu już wcześniej testowanego.
+
+Opcje `--delay`, `--no-git`, `--no-push`, `--force` i `--execute` są nadpisaniami jednorazowymi; nie trzeba ich podawać przy standardowym uruchomieniu. `--no-git` wyłącza zarówno commit, jak i push. `--list` pokazuje scenariusze i aktywne ustawienia.
+
+Po pierwszym błędzie kroków scenariusza dalsze kroki są zatrzymane, bez ponowień. Działają `~/.tba_stop` i PyAutoGUI fail-safe. `tools/live_probes.py` udostępnia też read-only preflight, odczyt slotów armii i kalibrację przewijania.
+
+Status: launcher i testy publikacji wyniku `FAILED` są sprawdzone na tymczasowych repozytoriach Git. Scenariusze Speed Up nie zostały uruchomione na żywej grze.
