@@ -34,6 +34,7 @@ def _setup(monkeypatch, level=6, click_error_at=None, post_state="active"):
     monkeypatch.setattr(executor, "resolve_variant", lambda: variant)
     monkeypatch.setattr(executor, "_load_regions", lambda _: {"army_training": {}})
     monkeypatch.setattr(executor, "locate_slots", lambda *args: layout)
+    monkeypatch.setattr(executor, "read_selected_category", lambda *args: {"unit_type": "guardsmen"})
     monkeypatch.setattr(executor, "read_slot_selector_levels", lambda *args: selector_reading)
     monkeypatch.setattr(executor, "_build_selected_slot_plan", lambda *args: {"blockers": [], "planned_quantity": 100})
     monkeypatch.setattr(executor, "read_slot_training_time", lambda *args: NumericReading(3600, 100, "1d.0g."))
@@ -235,3 +236,16 @@ def test_execute_requires_exact_confirmation_before_capture(monkeypatch):
             capture_fn=lambda: captured.append(True), click_fn=click,
         )
     assert captured == []
+
+
+def test_highlighted_category_mismatch_blocks_before_any_click(monkeypatch):
+    queue, task, clicks, click, capture = _setup(monkeypatch)
+    monkeypatch.setattr(executor, "read_selected_category", lambda *args: {"unit_type": "specialists"})
+
+    with pytest.raises(executor.LiveTrainingError, match="Highlighted category"):
+        executor.execute_training_goal(
+            queue, task["task_id"], NOW, execute=True, confirmation=executor.CONFIRMATION_PHRASE,
+            capture_fn=capture, click_fn=click, sleep_fn=lambda _: None,
+        )
+
+    assert clicks == []

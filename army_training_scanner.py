@@ -21,6 +21,7 @@ from ui_variants import UIVariantError, resolve_asset_path, resolve_variant
 
 ROOT_DIR = Path(__file__).resolve().parent
 REGIONS_PATH = ROOT_DIR / "regions.json"
+EMPTY_UNIT_SEARCH_MARGIN = 2  # px; fixtures differ by 1 px between captures
 
 
 class ArmyTrainingScannerError(ValueError):
@@ -131,7 +132,9 @@ def read_army_training_snapshot(image_path, screen="army_training", regions_path
     return read_army_training_snapshot_from_image(image, screen, regions_path, variant)
 
 
-def read_army_training_snapshot_from_image(image, screen="army_training", regions_path=None, variant=None):
+def read_army_training_snapshot_from_image(
+    image, screen="army_training", regions_path=None, variant=None, include_numeric=True,
+):
     """Classify training state from an existing BGR frame without writing it to disk."""
     if variant is None:
         variant = resolve_variant()
@@ -186,8 +189,13 @@ def read_army_training_snapshot_from_image(image, screen="army_training", region
             queue_state = "unknown"
     else:
         unit_crop = _region_crop(image, training_unit_region)
+        margin = EMPTY_UNIT_SEARCH_MARGIN
+        left, top = max(0, unit_x - margin), max(0, unit_y - margin)
+        search_area = image[top:unit_y + unit_h + margin, left:unit_x + unit_w + margin]
+        if search_area.shape[0] < empty_unit_template.shape[0] or search_area.shape[1] < empty_unit_template.shape[1]:
+            search_area = unit_crop
         empty_unit_score = float(
-            cv2.matchTemplate(unit_crop, empty_unit_template, cv2.TM_CCOEFF_NORMED)[0, 0]
+            cv2.matchTemplate(search_area, empty_unit_template, cv2.TM_CCOEFF_NORMED).max()
         )
         detail_score = float(cv2.cvtColor(unit_crop, cv2.COLOR_BGR2GRAY).std())
         queue_state = "idle" if empty_unit_score >= 0.90 else "unknown"
@@ -197,13 +205,17 @@ def read_army_training_snapshot_from_image(image, screen="army_training", region
 
     speedup_button_detected = _template_match_score(speedup_crop, speedup_template) >= 0.85
     trained_unit_count_error = None
-    try:
-        trained_unit_count_reading = _ocr_numeric_crop(trained_unit_count_crop)
-    except ArmyTrainingScannerError as error:
-        if "Tesseract OCR" not in str(error):
-            raise
+    if not include_numeric:
         trained_unit_count_reading = {"raw": "", "value": None, "confidence": None}
-        trained_unit_count_error = "tesseract_unavailable"
+        trained_unit_count_error = "numeric_not_requested"
+    else:
+        try:
+            trained_unit_count_reading = _ocr_numeric_crop(trained_unit_count_crop)
+        except ArmyTrainingScannerError as error:
+            if "Tesseract OCR" not in str(error):
+                raise
+            trained_unit_count_reading = {"raw": "", "value": None, "confidence": None}
+            trained_unit_count_error = "tesseract_unavailable"
 
     return {
         "screen": screen,

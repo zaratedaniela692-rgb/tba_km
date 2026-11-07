@@ -9,13 +9,14 @@ import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from army_unit_types import MATCH_COUNTS_BY_LEVEL, SUPPORTED_TRAINING_UNIT_TYPES, validate_unit_type
+
 
 ROOT_DIR = Path(__file__).resolve().parent
 PROFILES_DIR = ROOT_DIR / "profiles"
 PLAN_SCHEMA_VERSION = 2
 DEFAULT_CHECK_INTERVAL_SECONDS = 45 * 60
 RESET_DELAY_SECONDS = 5
-MATCH_COUNTS_BY_LEVEL = {**{level: 3 for level in range(1, 5)}, **{level: 4 for level in range(5, 10)}}
 DEFAULT_GUARD_LEVELS = ((5, 1), (4, 2))
 DEFAULT_GUARD_MATCH_COUNT = 3
 TARGET_QUEUE_LIMIT_MULTIPLIER = 2
@@ -37,8 +38,16 @@ def evaluate_slot_replenishment(
     queue_limits_by_level,
     training_level,
     min_count_confidence=MIN_TROOP_COUNT_OCR_CONFIDENCE,
+    *,
+    unit_type,
 ):
     """Evaluate one unit slot using its observed limits, without identifying its name."""
+    try:
+        validate_unit_type(unit_type)
+    except ValueError as error:
+        raise TrainingPlanError(str(error)) from error
+    if unit_type not in SUPPORTED_TRAINING_UNIT_TYPES:
+        raise TrainingPlanError("Stock replenishment rules are not verified for this unit type.")
     if isinstance(global_level, bool) or not isinstance(global_level, int) or global_level not in MATCH_COUNTS_BY_LEVEL:
         raise TrainingPlanError("global_level musi wskazywać poprawny poziom globalny.")
     if (
@@ -111,7 +120,7 @@ def evaluate_slot_replenishment(
 
     return {
         "status": "uncertain" if not count_reliable else "satisfied" if satisfied else "replenish",
-        "slot": {"global_level": global_level, "match_number": match_number},
+        "slot": {"unit_type": unit_type, "global_level": global_level, "match_number": match_number},
         "highest_unlocked_level": highest_unlocked_level,
         "reference_level": reference_level,
         "training_level": training_level,

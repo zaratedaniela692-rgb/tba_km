@@ -338,6 +338,22 @@
       "type": "list",
       "template": "templates/army_training/troops_types.png"
     },
+    "troops_type_guardsmen_selected": {
+      "x": 484,
+      "y": 265,
+      "w": 128,
+      "h": 61,
+      "type": "button",
+      "template": "templates/army_training/troops_type_guardsmen_selected.png"
+    },
+    "troops_type_specialists_selected": {
+      "x": 484,
+      "y": 317,
+      "w": 128,
+      "h": 61,
+      "type": "button",
+      "template": "templates/army_training/troops_type_specialists_selected.png"
+    },
     "unit_troop_level": {
       "x": 646,
       "y": 363,

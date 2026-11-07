@@ -607,3 +607,28 @@ browser capture + desktop templates as search references
 **Implementation status:** Implemented after approval. The browser-only scanner classifies the active and non-active fixtures and returns `unknown` for low-detail, non-matching evidence. It leaves speedup detection as `None` and reports the trained-count field as unsupported for browser rather than reusing desktop regions. Tests cover both screenshots, an ambiguous ROI, browser slot/OCR behavior, and asset isolation. No game actions are implemented.
 
 **Contract tests:** `tests/test_browser_army_training.py::test_browser_scanner_classifies_active_and_idle_training_from_fixture_roi`, `test_browser_scanner_keeps_ambiguous_training_roi_unknown`, and existing browser slot/OCR and UI-variant isolation tests. Existing desktop scanner tests continue to validate desktop output.
+
+## Category Registry and Specialists (Implemented 2026-11-07)
+
+**Goal:** Train Specialists through the same goal, campaign, resolver and executor path as Gwardzists, selecting the Barracks category explicitly instead of assuming it.
+
+### Contract
+
+1. `army_unit_types.CATEGORY_PROFILES` is the single registry: label, the `regions.json` entry that shows the category highlighted, and `slot_map` (`verified`, `assumed_like_guardsmen`, `unverified`). `SUPPORTED_TRAINING_UNIT_TYPES` is derived from it; every former `!= guardsmen` gate (campaign expansion, resolver, executor, stock decision, replenishment math) now uses it. Currently `guardsmen` is `verified`, `specialists` is `assumed_like_guardsmen`, the other five are `unverified` and stay blocked.
+2. `army_training_category.read_selected_category` finds the highlighted list entry by matching the per-category selected-state templates (`templates/army_training/troops_type_<category>_selected.png`, 128x61) inside the `troops_types` region. A category counts as highlighted only at score >= 0.95 within 3 px of its annotated position and when exactly one category matches; otherwise the result is unknown.
+3. `select_army_type(unit_type, execute)`: requires a 1920x1080 frame and recognized Barracks slots; returns `CATEGORY_CONFIRMED` without input when the target is already highlighted; without `execute` returns `CATEGORY_WOULD_SELECT` and sends nothing; with `execute` it checks the emergency stop, clicks the center of the target entry once, waits 0.6 s, recaptures (same origin and size) and returns `CATEGORY_SELECTED` only if the highlight is on the target. Any other result (`BLOCKED_*`) is never retried.
+4. The manager continues to goal evaluation only on `CATEGORY_CONFIRMED` or `CATEGORY_SELECTED`; every other status is reported with `actions_executed` and the queue untouched. `observe_image` labels the frame with the highlighted category when it is readable, so a frame of another category is blocked as `frame_unit_type_mismatch`. The executor re-reads the highlighted category on every fresh frame and refuses to continue (before any click) when it differs from the goal's category.
+5. `python .\army_training_category.py --unit-type specialists` previews; `--execute --confirm "SELECT ARMY CATEGORY"` clicks. Device scenario: `army_category`.
+
+### Confirmed, Assumed, Deferred
+
+- Confirmed on `screenshots/army_training/specialist_view.png` (1920x1080): same slot geometry (pitch 261 px), Train/slider/readout positions, level badge column and current-training panel as Gwardzists; the highlight is a red 61 px band over the full list width (band y: Gwardzists 265, Specialists 317 in the reference frames). Measured from pixels, not by eye. Offline reading: three slots with selector ranges I-V, I-V and V-VII; goals (5,1), (5,2) and (7,1) resolve to slots 0, 1 and 2; (6,3) is `match_not_visible_without_scrolling`.
+- Confirmed: a 1 px vertical frame shift exists between captures (Specialists screenshot vs. empty-queue Gwardzist reference). The empty-training template is now searched within a 2 px margin; before this the Specialists screenshot read as `unknown` instead of `idle`.
+- Assumed (user statement, not yet verified): Specialists have the same slot counts per level as Gwardzists (3 for levels 1-4, 4 for 5-9) and the same list order and scrolling behavior. Verify with a supervised run (`army_slots`, `army_scroll`) before relying on campaigns.
+- Assumed: the list scroll position resets or stays at the top after a category change; the resolver still assumes the first frame starts at the top.
+- Deferred: the other five categories (need their own selected-state templates and verified slot maps), local I/II vs. global VIII/IX levels, scrolling to off-screen slots, and a live run of category selection. No live click has been performed.
+- Template and region entries `troops_type_guardsmen_selected` and `troops_type_specialists_selected` were derived from `pelny.png` and `specialist_view.png`; adding another category means measuring its band in a fixture and adding its template and region the same way.
+
+### Current Code Status
+
+Implemented in `army_unit_types.py`, `army_training_category.py`, `army_training_manager.py`, `army_training_executor.py`, `army_training_resolver.py`, `army_campaign.py`, `army_training_process.py`, `army_training_plan.py` and `army_training_scanner.py`. Covered by `tests/test_army_training_category.py` (fixtures, one click, no retry, blocked cases) and updated manager, executor, campaign and process tests.

@@ -177,6 +177,7 @@ def _executor_setup(monkeypatch, states):
     monkeypatch.setattr(executor, "resolve_variant", lambda: {"regions": "x"})
     monkeypatch.setattr(executor, "_load_regions", lambda _: {"army_training": {}})
     monkeypatch.setattr(executor, "locate_slots", lambda *args: SimpleNamespace(status="ok", slots=(slot,)))
+    monkeypatch.setattr(executor, "read_selected_category", lambda *args: {"unit_type": "guardsmen"})
     monkeypatch.setattr(executor, "read_slot_selector_levels", lambda *args: reading)
     def read_state(*args, **kwargs):
         value = next(iterator)

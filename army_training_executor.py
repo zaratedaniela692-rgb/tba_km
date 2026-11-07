@@ -8,6 +8,7 @@ from army_state import open_training_marker
 from army_training_lifecycle import advance_training_lifecycle, confirm_help_action
 from army_training_finish import CONFIRMATION_PHRASE, VIEW_RESET_SECONDS, finish_open_training
 from army_training_levels import read_slot_selector_levels
+from army_training_category import read_selected_category
 from army_training_live_e2e import (
     EXPECTED_SIZE,
     LiveTrainingError,
@@ -21,7 +22,7 @@ from army_training_live_e2e import (
 )
 from army_training_process import Slot, _transition, ProcessState
 from army_training_resolver import STATUS_OK, resolve_goal_slot
-from army_unit_types import DEFAULT_UNIT_TYPE
+from army_unit_types import SUPPORTED_TRAINING_UNIT_TYPES
 from army_training_slot_time import read_slot_training_time
 from army_training_slots import STATUS_OK as LAYOUT_OK, locate_slots, slot_crop
 from task_controller import ACTIVE_STATUSES, DEFAULT_SPEEDUP_RETRY_SECONDS, _parse_time, mark_task_started
@@ -111,7 +112,7 @@ def execute_training_goal(
     variant = resolve_variant()
     regions = _load_regions(variant["regions"])
     goal_slot = Slot(**task["payload"]["slot"])
-    if goal_slot.unit_type != DEFAULT_UNIT_TYPE:
+    if goal_slot.unit_type not in SUPPORTED_TRAINING_UNIT_TYPES:
         raise LiveTrainingError("Training execution is not verified for this unit type.")
 
     def observe():
@@ -121,6 +122,11 @@ def execute_training_goal(
         layout = locate_slots(frame, regions.get("army_training", {}), variant)
         if layout.status != LAYOUT_OK:
             raise LiveTrainingError("Visible slot geometry is not confirmed.")
+        category = read_selected_category(frame, regions.get("army_training", {}), variant)
+        if category["unit_type"] != goal_slot.unit_type:
+            raise LiveTrainingError(
+                f"Highlighted category is {category['unit_type']}, not {goal_slot.unit_type}."
+            )
         level_readings = tuple(read_slot_selector_levels(frame, slot) for slot in layout.slots)
         resolution = resolve_goal_slot(
             level_readings, goal_slot.unit_type, goal_slot.global_level, goal_slot.match_number,

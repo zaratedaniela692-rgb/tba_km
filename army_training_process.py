@@ -7,6 +7,7 @@ from enum import StrEnum
 from math import isfinite
 
 from army_training_plan import MATCH_COUNTS_BY_LEVEL, evaluate_slot_replenishment
+from army_unit_types import DEFAULT_UNIT_TYPE, SUPPORTED_TRAINING_UNIT_TYPES, validate_unit_type
 from task_controller import ACTIVE_STATUSES, enqueue_task, validate_task_queue
 
 
@@ -25,14 +26,24 @@ class ProcessState(StrEnum):
 
 @dataclass(frozen=True)
 class Slot:
+    unit_type: str
     global_level: int
     match_number: int
 
     def __post_init__(self) -> None:
-        if type(self.global_level) is not int or self.global_level not in MATCH_COUNTS_BY_LEVEL:
+        try:
+            validate_unit_type(self.unit_type)
+        except ValueError as error:
+            raise TrainingProcessError(str(error)) from error
+        if type(self.global_level) is not int or self.global_level < 1:
             raise TrainingProcessError("Invalid global level.")
-        if type(self.match_number) is not int or not 1 <= self.match_number <= MATCH_COUNTS_BY_LEVEL[self.global_level]:
+        if type(self.match_number) is not int or self.match_number < 1:
             raise TrainingProcessError("Invalid matching slot number.")
+        if self.unit_type in SUPPORTED_TRAINING_UNIT_TYPES and (
+            self.global_level not in MATCH_COUNTS_BY_LEVEL
+            or self.match_number > MATCH_COUNTS_BY_LEVEL[self.global_level]
+        ):
+            raise TrainingProcessError("Invalid level or matching slot number for this category.")
 
 
 @dataclass(frozen=True)
@@ -103,6 +114,8 @@ def decide_training_goal(
         raise TrainingProcessError("Confidence threshold must be between 0 and 100.")
     current_time = _utc(now)
     captured_at = _utc(observation.observed_at)
+    if goal.slot.unit_type not in SUPPORTED_TRAINING_UNIT_TYPES:
+        return TrainingDecision(ProcessState.BLOCKED, "unit_type_not_supported_for_training")
     if goal.profile_id != observation.profile_id:
         return TrainingDecision(ProcessState.BLOCKED, "profile_mismatch")
     if goal.slot != observation.slot:
@@ -145,6 +158,7 @@ def decide_training_goal(
         {highest.value - 1: reference.value, goal.slot.global_level: selected.value},
         goal.slot.global_level,
         minimum_confidence,
+        unit_type=goal.slot.unit_type,
     )
     satisfied = result["status"] == "satisfied"
     return TrainingDecision(
@@ -156,19 +170,52 @@ def decide_training_goal(
     )
 
 
-def enqueue_training_goal(queue: dict, goal: TrainingGoal, now: datetime) -> dict:
+def goal_task_id(slot: Slot) -> str:
+    return f"army_stock:unit_{slot.unit_type}:level_{slot.global_level}:match_{slot.match_number}"
+
+
+def migrate_legacy_training_goals(queue: dict) -> bool:
+    """Assign untyped persisted stock goals to the only previously supported category."""
+    validate_task_queue(queue)
+    changed = False
+    for task in queue["tasks"]:
+        payload = task.get("payload", {})
+        if payload.get("goal_kind") != "slot_stock_v1":
+            continue
+        slot = payload.get("slot")
+        if not isinstance(slot, dict) or "unit_type" in slot:
+            continue
+        slot["unit_type"] = DEFAULT_UNIT_TYPE
+        process = payload.get("process", {})
+        observation = process.get("observation")
+        if isinstance(observation, dict) and isinstance(observation.get("slot"), dict):
+            observation["slot"].setdefault("unit_type", DEFAULT_UNIT_TYPE)
+        decision = process.get("decision")
+        if isinstance(decision, dict) and isinstance(decision.get("slot"), dict):
+            decision["slot"].setdefault("unit_type", DEFAULT_UNIT_TYPE)
+        changed = True
+    return changed
+
+
+def enqueue_training_goal(queue: dict, goal: TrainingGoal, now: datetime, priority: int | None = None) -> dict:
     """Materialize one stock goal, not a preselected number of training runs."""
     validate_task_queue(queue, expected_profile_id=goal.profile_id)
+    migrate_legacy_training_goals(queue)
     timestamp = _utc(now).isoformat()
-    task_id = f"army_stock:level_{goal.slot.global_level}:match_{goal.slot.match_number}"
-    existing = next((task for task in queue["tasks"] if task["task_id"] == task_id), None)
+    task_id = goal_task_id(goal.slot)
+    existing = next((
+        task for task in queue["tasks"]
+        if task["task_type"] == "army_training"
+        and task["payload"].get("goal_kind") == "slot_stock_v1"
+        and task["payload"].get("slot") == asdict(goal.slot)
+    ), None)
     if existing is not None:
-        _goal_task(queue, task_id)
+        _goal_task(queue, existing["task_id"])
         return deepcopy(existing)
     if queue["paused"]:
         raise TrainingProcessError("Cannot enqueue a goal while the profile is paused.")
     task = enqueue_task(
-        queue, "army_training", task_id=task_id, now=now,
+        queue, "army_training", task_id=task_id, now=now, priority=priority,
         payload={
             "goal_kind": "slot_stock_v1",
             "slot": asdict(goal.slot),
@@ -194,14 +241,12 @@ def _goal_task(queue: dict, task_id: str) -> dict:
     if task["payload"].get("goal_kind") != "slot_stock_v1":
         raise TrainingProcessError("This task uses the legacy run-based plan, not a stock goal.")
     process = task["payload"].get("process")
-    if (
-        not isinstance(process, dict)
-        or process.get("state") not in set(ProcessState)
-        or not isinstance(process.get("history"), list)
-    ):
+    if not isinstance(process, dict) or process.get("state") not in set(ProcessState) or not isinstance(process.get("history"), list):
         raise TrainingProcessError("Invalid persisted training process.")
     slot = task["payload"].get("slot")
-    if not isinstance(slot, dict) or set(slot) != {"global_level", "match_number"}:
+    if isinstance(slot, dict) and set(slot) == {"global_level", "match_number"}:
+        slot["unit_type"] = DEFAULT_UNIT_TYPE
+    if not isinstance(slot, dict) or set(slot) != {"unit_type", "global_level", "match_number"}:
         raise TrainingProcessError("Invalid persisted slot identity.")
     Slot(**slot)
     return task
@@ -250,6 +295,21 @@ def reconcile_training_goal(
     task["next_check_at"] = None
     validate_task_queue(queue)
     return decision
+
+
+def rearm_training_goal(queue: dict, task_id: str, now: datetime) -> dict:
+    """Reopen a completed goal for a new campaign run; history is kept."""
+    task = _goal_task(queue, task_id)
+    if task["status"] != "completed":
+        raise TrainingProcessError("Only a completed goal can be re-armed.")
+    if queue["paused"]:
+        raise TrainingProcessError("Profile queue is paused.")
+    process = task["payload"]["process"]
+    _transition(task, ProcessState.NEEDS_OBSERVATION, "rearmed", now)
+    process.update({"decision": None, "decision_valid_until": None, "observation": None})
+    task.update({"status": "queued", "completed_at": None, "next_check_at": None})
+    validate_task_queue(queue)
+    return deepcopy(task)
 
 
 def resume_training_goal(queue: dict, task_id: str, now: datetime) -> dict:

@@ -30,11 +30,12 @@ def test_slot_replenishment_uses_eighty_percent_of_its_own_reference_limit():
         current_count_confidence=96,
         queue_limits_by_level={4: 1000, 5: 700},
         training_level=5,
+        unit_type="guardsmen",
     )
 
     assert result == {
         "status": "satisfied",
-        "slot": {"global_level": 5, "match_number": 1},
+        "slot": {"unit_type": "guardsmen", "global_level": 5, "match_number": 1},
         "highest_unlocked_level": 5,
         "reference_level": 4,
         "training_level": 5,
@@ -52,9 +53,9 @@ def test_slot_replenishment_uses_eighty_percent_of_its_own_reference_limit():
 
 
 def test_slot_replenishment_caps_order_by_gap_and_slot_specific_queue_limit():
-    near_goal = evaluate_slot_replenishment(5, 1, 5, 1599, 96, {4: 1000, 5: 700}, 5)
-    large_gap = evaluate_slot_replenishment(5, 1, 5, 0, 96, {4: 1000, 5: 700}, 5)
-    other_slot = evaluate_slot_replenishment(5, 2, 5, 0, 96, {4: 500, 5: 300}, 5)
+    near_goal = evaluate_slot_replenishment(5, 1, 5, 1599, 96, {4: 1000, 5: 700}, 5, unit_type="guardsmen")
+    large_gap = evaluate_slot_replenishment(5, 1, 5, 0, 96, {4: 1000, 5: 700}, 5, unit_type="guardsmen")
+    other_slot = evaluate_slot_replenishment(5, 2, 5, 0, 96, {4: 500, 5: 300}, 5, unit_type="guardsmen")
 
     assert near_goal["status"] == "replenish"
     assert near_goal["recommended_training_count"] == 401
@@ -75,11 +76,11 @@ def test_slot_replenishment_caps_order_by_gap_and_slot_specific_queue_limit():
 )
 def test_slot_replenishment_rejects_invalid_counts_and_limits(arguments):
     with pytest.raises(TrainingPlanError):
-        evaluate_slot_replenishment(*arguments)
+        evaluate_slot_replenishment(*arguments, unit_type="guardsmen")
 
 
 def test_slot_replenishment_does_not_decide_from_uncertain_ocr():
-    result = evaluate_slot_replenishment(5, 1, 5, 1600, 69, {4: 1000, 5: 700}, 5)
+    result = evaluate_slot_replenishment(5, 1, 5, 1600, 69, {4: 1000, 5: 700}, 5, unit_type="guardsmen")
 
     assert result["status"] == "uncertain"
     assert result["count_confidence_ok"] is False

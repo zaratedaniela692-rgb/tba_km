@@ -25,6 +25,21 @@
       ]
     },
     {
+      "name": "army_category",
+      "description": "Select the Specialists category in Barracks and confirm it by the highlight",
+      "prepare": "Barracks (army training) screen open, any category selected.",
+      "steps": [
+        {
+          "name": "select_specialists",
+          "argv": ["{python}", "army_training_category.py", "--unit-type", "specialists"],
+          "execute_argv": [
+            "{python}", "army_training_category.py", "--unit-type", "specialists",
+            "--execute", "--confirm", "SELECT ARMY CATEGORY"
+          ]
+        }
+      ]
+    },
+    {
       "name": "army_slots",
       "description": "Read-only live reading of Barracks slots, levels and training state",
       "prepare": "Barracks (army training) screen open, Gwardzisci category.",

@@ -27,7 +27,7 @@ from army_training_process import (
     reconcile_training_goal,
 )
 from army_training_resolver import STATUS_OK, resolve_goal_slot
-from army_training_category import select_army_type
+from army_training_category import CONFIRMED_STATUSES, read_selected_category, select_army_type
 from army_unit_types import DEFAULT_UNIT_TYPE, UNIT_TYPES
 from army_training_executor import execute_training_goal
 from army_training_finish import CONFIRMATION_PHRASE, FALLBACK_GOAL_KIND, execute_finish_task, process_expirations
@@ -71,6 +71,8 @@ def observe_image(image, now=None, variant=None, unit_type=DEFAULT_UNIT_TYPE):
     regions = json.loads(variant["regions"].read_text(encoding="utf-8")).get("army_training", {})
     layout = locate_slots(image, regions, variant)
     levels = read_layout_selector_levels(image, layout.slots) if layout.status == LAYOUT_OK else None
+    # An unreadable highlight keeps the requested type; a different readable one is blocked by evaluate_goals.
+    unit_type = read_selected_category(image, regions, variant)["unit_type"] or unit_type
     snapshot = read_army_training_snapshot_from_image(image, variant=variant)
     cache = {}
 
@@ -400,11 +402,11 @@ def _command_execute(args, profiles_dir, now):
         return result
     unit_type = _next_pending_goal_unit_type(queue)
     if unit_type is not None:
-        category = select_army_type(unit_type)
-        if category["status"] != "DEFAULT_CATEGORY_ASSUMED":
+        category = select_army_type(unit_type, execute=args.execute)
+        if category["status"] not in CONFIRMED_STATUSES:
             return {
                 "status": category["status"], "category_selection": category,
-                "actions_executed": False, "queue_modified": False,
+                "actions_executed": category.get("actions_executed", False), "queue_modified": False,
                 "navigation": navigation, "housekeeping": housekeeping,
                 "queue_path": str(path),
             }
