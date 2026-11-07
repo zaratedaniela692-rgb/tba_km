@@ -17,14 +17,16 @@ from typing import Callable
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SCENARIOS_PATH = Path(__file__).with_name("device_test_scenarios.json")
+PLAN_PATH = Path(__file__).with_name("device_test_plan.json")
 RUNS_DIR_NAME = "device_runs"
 KEEP_RUNS = 4  # the current run plus three earlier ones
+MAX_SCENARIOS = 2  # every scenario adds many screenshots to the repository
 STOP_FILE = Path.home() / ".tba_stop"
 STEP_TIMEOUT_SECONDS = 600
 OUTPUT_LIMIT = 20000
 PLACEHOLDERS = ("python", "run_dir", "profile")
 
-OK, FAILED, BLOCKED, SKIPPED = "OK", "FAILED", "BLOCKED", "SKIPPED"
+OK, FAILED, BLOCKED, SKIPPED, UNCHANGED = "OK", "FAILED", "BLOCKED", "SKIPPED", "UNCHANGED"
 
 
 class DeviceTestError(ValueError):
@@ -52,6 +54,7 @@ class Context:
     delay: int | None = None
     git: Git | None = None
     push: bool = True
+    force: bool = False
     sleep_fn: Callable = time.sleep
     now_fn: Callable = datetime.now
     run_fn: Callable = subprocess.run
@@ -59,6 +62,7 @@ class Context:
     stop_fn: Callable = None
     out: Callable = print
     commit_id: str = ""
+    code_commit: str = ""
 
     def __post_init__(self):
         self.screenshot_fn = self.screenshot_fn or capture_screenshot
@@ -136,6 +140,61 @@ def _runnable_argv(step, execute):
     return step.get("argv")
 
 
+def load_plan(path, scenarios, default_execute=False):
+    """Scenarios to run when none are named: [(name, execute)]."""
+    try:
+        entries = json.loads(Path(path).read_text(encoding="utf-8")).get("scenarios", [])
+    except (OSError, json.JSONDecodeError) as error:
+        raise DeviceTestError(f"Cannot read plan: {error}") from error
+    items = []
+    for entry in entries:
+        name = entry if isinstance(entry, str) else entry.get("name")
+        execute = default_execute or (isinstance(entry, dict) and entry.get("execute") is True)
+        if name not in scenarios:
+            raise DeviceTestError(f"Plan names unknown scenario: {name!r}")
+        items.append((name, execute))
+    if not items:
+        raise DeviceTestError("The plan is empty.")
+    return items
+
+
+def resolve_selection(names, scenarios, plan_path=PLAN_PATH, execute=False, allow_many=False):
+    if names:
+        items = []
+        for name in names:
+            if name == "all":
+                items += [(key, execute) for key, item in scenarios.items() if item.get("in_all", True)]
+            elif name in scenarios:
+                items.append((name, execute))
+            else:
+                raise DeviceTestError(f"Unknown scenario '{name}'. Available: {', '.join(scenarios)}, all")
+    else:
+        items = load_plan(plan_path, scenarios, execute)
+    if len(items) > MAX_SCENARIOS and not allow_many:
+        raise DeviceTestError(
+            f"{len(items)} scenarios requested; the limit is {MAX_SCENARIOS} (screenshots and diagnostics add up). "
+            "Use --allow-many to override."
+        )
+    return items
+
+
+def code_commit(git):
+    """Latest commit that changed anything except device_runs."""
+    code, output = git.run("log", "-1", "--format=%H", "--", ".", f":(exclude){RUNS_DIR_NAME}")
+    return output if code == 0 else ""
+
+
+def previous_code_commit(scenario_dir):
+    scenario_dir = Path(scenario_dir)
+    runs = sorted(path for path in scenario_dir.iterdir() if path.is_dir()) if scenario_dir.is_dir() else []
+    for run in reversed(runs):
+        try:
+            return json.loads((run / "report.json").read_text(encoding="utf-8")).get("code_commit", "")
+        except (OSError, json.JSONDecodeError):
+            continue
+    return ""
+
+
 def sync_repository(git):
     """Fast-forward pull; a local-only device_runs commit may be rebased. Returns (ok, detail)."""
     _, dirty = git.run("status", "--porcelain", "--untracked-files=no")
@@ -186,15 +245,20 @@ def _tail(text):
     return text if len(text) <= OUTPUT_LIMIT else text[-OUTPUT_LIMIT:]
 
 
-def run_scenario(scenario, ctx):
-    """Run one scenario; returns its report, or None when no step may run without --execute."""
-    steps = [(step, _runnable_argv(step, ctx.execute)) for step in scenario["steps"]]
+def run_scenario(scenario, ctx, execute=None):
+    """Run one scenario; None when no step may run without --execute, UNCHANGED when the code was already tested."""
+    execute = ctx.execute if execute is None else execute
+    steps = [(step, _runnable_argv(step, execute)) for step in scenario["steps"]]
     if all(argv is None for _, argv in steps):
         ctx.out(f"[{scenario['name']}] SKIPPED: requires --execute")
         return None
 
-    started = ctx.now_fn()
     scenario_dir = ctx.root / RUNS_DIR_NAME / ctx.device / scenario["name"]
+    if ctx.git is not None and not ctx.force and ctx.code_commit and previous_code_commit(scenario_dir) == ctx.code_commit:
+        ctx.out(f"[{scenario['name']}] UNCHANGED: already tested on code {ctx.code_commit[:8]}; use --force to run again")
+        return {"scenario": scenario["name"], "status": UNCHANGED, "detail": ctx.code_commit}
+
+    started = ctx.now_fn()
     run_dir = scenario_dir / started.strftime("%Y%m%d_%H%M%S")
     run_dir.mkdir(parents=True, exist_ok=False)
     log_lines = []
@@ -262,8 +326,9 @@ def run_scenario(scenario, ctx):
         "scenario": scenario["name"],
         "device": ctx.device,
         "status": status,
-        "execute": ctx.execute,
+        "execute": execute,
         "commit": ctx.commit_id,
+        "code_commit": ctx.code_commit,
         "started_at": started.isoformat(timespec="seconds"),
         "finished_at": ctx.now_fn().isoformat(timespec="seconds"),
         "python": sys.version.split()[0],
@@ -298,20 +363,25 @@ def push_changes(git):
     return code == 0, output
 
 
-def run_scenarios(names, ctx, scenarios):
-    """Run scenarios in order; returns (exit_code, results)."""
+def run_scenarios(selection, ctx, scenarios):
+    """Run scenarios in order; items are names or (name, execute). Returns (exit_code, results)."""
     if ctx.git is not None:
         ok, detail = sync_repository(ctx.git)
         if not ok:
             ctx.out(f"BLOCKED: git sync failed: {detail}")
             return 2, [{"scenario": "git", "status": BLOCKED, "detail": detail}]
         ctx.commit_id = ctx.git.run("rev-parse", "--short", "HEAD")[1]
+        ctx.code_commit = code_commit(ctx.git)
 
     results = []
-    for name in names:
-        report = run_scenario(scenarios[name], ctx)
+    for item in selection:
+        name, execute = item if isinstance(item, tuple) else (item, ctx.execute)
+        report = run_scenario(scenarios[name], ctx, execute)
         if report is None:
             results.append({"scenario": name, "status": SKIPPED})
+            continue
+        if report["status"] == UNCHANGED:
+            results.append(report)
             continue
         if ctx.git is not None:
             report["publish"] = publish_run(ctx.git, ctx.root, report.pop("scenario_dir"), report)
@@ -323,49 +393,47 @@ def run_scenarios(names, ctx, scenarios):
         ctx.out("pushed" if pushed else f"PUSH FAILED: {detail}")
         results.append({"scenario": "git_push", "status": OK if pushed else FAILED, "detail": detail})
 
-    failed = any(r["status"] in {FAILED, BLOCKED} for r in results)
-    return (1 if failed else 0), results
-
-
-def _scenario_names(selection, scenarios):
-    if selection == "all":
-        return [name for name, item in scenarios.items() if item.get("in_all", True)]
-    if selection not in scenarios:
-        raise DeviceTestError(f"Unknown scenario '{selection}'. Available: {', '.join(scenarios)}, all")
-    return [selection]
+    if any(r["status"] in {FAILED, BLOCKED} for r in results):
+        return 1, results
+    ran = [r for r in results if r["status"] not in {SKIPPED, UNCHANGED}]
+    return (3 if not ran and any(r["status"] == UNCHANGED for r in results) else 0), results
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Supervised live game-window tests for a test PC.")
-    commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("list", help="show scenarios")
-    run = commands.add_parser("run", help="run a scenario or 'all'")
-    run.add_argument("scenario")
-    run.add_argument("--execute", action="store_true", help="also run steps that click in the game")
-    run.add_argument("--profile", default="device_test")
-    run.add_argument("--device", help="device label; default is the computer name")
-    run.add_argument("--delay", type=int, help="seconds to switch to the game before each scenario")
-    run.add_argument("--no-git", action="store_true", help="skip pull, commit and push")
-    run.add_argument("--no-push", action="store_true", help="commit but do not push")
+    parser = argparse.ArgumentParser(
+        description="Supervised live game-window tests. Without scenario names it runs tools/device_test_plan.json.",
+    )
+    parser.add_argument("scenarios", nargs="*", help="scenario names or 'all'; default is the plan file")
+    parser.add_argument("--list", action="store_true", help="show scenarios and the current plan")
+    parser.add_argument("--execute", action="store_true", help="also run steps that click in the game")
+    parser.add_argument("--force", action="store_true", help="run and publish even if this code was already tested")
+    parser.add_argument("--allow-many", action="store_true", help=f"allow more than {MAX_SCENARIOS} scenarios")
+    parser.add_argument("--profile", default="device_test")
+    parser.add_argument("--device", help="device label; default is the computer name")
+    parser.add_argument("--delay", type=int, help="seconds to switch to the game before each scenario")
+    parser.add_argument("--no-git", action="store_true", help="skip pull, commit and push")
+    parser.add_argument("--no-push", action="store_true", help="commit but do not push")
     args = parser.parse_args(argv)
 
     try:
         scenarios = load_scenarios()
-        if args.command == "list":
+        if args.list:
             for name, item in scenarios.items():
                 kind = "clicks with --execute" if is_clicking(item) else "no clicks"
                 print(f"{name:16} {kind:22} {item['description']}")
+            plan = load_plan(PLAN_PATH, scenarios)
+            print("plan: " + ", ".join(f"{name}{' (execute)' if execute else ''}" for name, execute in plan))
             return 0
-        names = _scenario_names(args.scenario, scenarios)
+        selection = resolve_selection(args.scenarios, scenarios, PLAN_PATH, args.execute, args.allow_many)
     except DeviceTestError as error:
         print(f"Error: {error}", file=sys.stderr)
         return 2
 
     ctx = Context(
         root=ROOT_DIR, device=device_name(args.device), execute=args.execute, profile=args.profile,
-        delay=args.delay, git=None if args.no_git else Git(ROOT_DIR), push=not args.no_push,
+        delay=args.delay, git=None if args.no_git else Git(ROOT_DIR), push=not args.no_push, force=args.force,
     )
-    code, _ = run_scenarios(names, ctx, scenarios)
+    code, _ = run_scenarios(selection, ctx, scenarios)
     return code
 
 

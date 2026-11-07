@@ -17,6 +17,29 @@ ROOT_DIR = Path(__file__).resolve().parent
 BUTTON_MAP_PATH = ROOT_DIR / "speedup_button_map.json"
 SCAN_CONFIRMATION = "SCAN SPEEDUP LIST FROM TOP"
 USE_CONFIRMATION = "USE OWNED SPEEDUPS FROM TOP"
+EVIDENCE_CAPTURE_INDEXES = (0, 3, 11, 16)  # initial frame and the three checkpoints
+
+
+class EvidenceCapture:
+    """Wraps a capture function: keeps the latest frame and saves the checkpoint frames."""
+
+    def __init__(self, capture_fn, run_dir, indexes=EVIDENCE_CAPTURE_INDEXES):
+        self.capture_fn = capture_fn
+        self.run_dir = Path(run_dir)
+        self.indexes = indexes
+        self.latest = None
+        self.count = 0
+        self.saved = []
+        self.errors = []
+
+    def __call__(self):
+        captured = self.capture_fn()
+        self.latest = captured[0]
+        if self.count in self.indexes:
+            path = self.run_dir / f"frame_{self.count:03d}.png"
+            (self.saved if cv2.imwrite(str(path), self.latest) else self.errors).append(path.name)
+        self.count += 1
+        return captured
 
 
 def _create_live_adapters():
@@ -100,16 +123,10 @@ def main(argv=None):
 
         regions = load_speedup_regions()
         run_dir.mkdir(parents=True, exist_ok=False)
-        latest_frame = None
-
-        def capture_with_evidence():
-            nonlocal latest_frame
-            captured = capture_fn()
-            latest_frame = captured[0]
-            return captured
+        evidence = EvidenceCapture(capture_fn, run_dir)
 
         result = run_checkpoint_speedups(
-            capture_with_evidence,
+            evidence,
             move_fn,
             scroll_fn,
             click_fn,
@@ -132,10 +149,13 @@ def main(argv=None):
             "shortfall_seconds": result.shortfall_seconds,
             "replan": _serialize_plan(result.replan),
             "checkpoint_steps": list(result.checkpoint_steps),
+            "evidence_frames": evidence.saved,
         }
-        if result.status in {"BLOCKED", "UNCERTAIN"} and latest_frame is not None:
+        if evidence.errors:
+            report["evidence_frame_errors"] = evidence.errors
+        if result.status in {"BLOCKED", "UNCERTAIN"} and evidence.latest is not None:
             debug_path = run_dir / "uncertain.png"
-            if not cv2.imwrite(str(debug_path), latest_frame):
+            if not cv2.imwrite(str(debug_path), evidence.latest):
                 report["debug_capture_error"] = "could_not_save_uncertain_frame"
             else:
                 report["debug_capture"] = debug_path.name
