@@ -118,6 +118,7 @@ def test_run_writes_evidence_commits_only_its_directory_and_pushes(repo):
     assert code == 0
     run_dirs = list((repo.work / "device_runs" / "pc1" / "demo").iterdir())
     assert len(run_dirs) == 1
+    assert run_dirs[0].name.startswith("1_")
     assert (run_dirs[0] / "report.json").exists() and (run_dirs[0] / "log.txt").exists()
     report = __import__("json").loads((run_dirs[0] / "report.json").read_text(encoding="utf-8"))
     assert report["run_dir"] == str(run_dirs[0].resolve())
@@ -143,6 +144,48 @@ def test_retention_keeps_the_current_run_and_three_earlier_ones(repo):
 
     assert len(on_disk) == dt.KEEP_RUNS
     assert {line.split("/")[3] for line in tracked} == set(on_disk)
+    assert {path.name.split("_", 1)[0] for path in scenario_dir.iterdir()} == {"3", "4", "5", "6"}
+
+
+def test_run_counter_continues_after_legacy_timestamp_folders(tmp_path):
+    scenario_dir = tmp_path / "device_runs" / "pc1" / "speedup_scan"
+    scenario_dir.mkdir(parents=True)
+    (scenario_dir / "20261106_120000").mkdir()
+    (scenario_dir / "20261107_120000").mkdir()
+
+    first_number, first_path = dt._create_run_directory(scenario_dir, START)
+    second_number, second_path = dt._create_run_directory(scenario_dir, START)
+
+    assert first_number == 3
+    assert first_path.name == "3_20261107_120000"
+    assert second_number == 4
+    assert second_path.name == "4_20261107_120000"
+
+
+def test_retention_uses_timestamp_not_lexical_run_number(tmp_path):
+    scenario_dir = tmp_path / "runs"
+    scenario_dir.mkdir()
+    for run_number in range(1, 13):
+        (scenario_dir / f"{run_number}_20261107_{run_number:06d}").mkdir()
+
+    removed = dt.prune_old_runs(scenario_dir)
+
+    assert len(removed) == 8
+    assert {path.name for path in scenario_dir.iterdir()} == {
+        f"{run_number}_20261107_{run_number:06d}" for run_number in range(9, 13)
+    }
+
+
+def test_previous_code_commit_uses_latest_numbered_run(tmp_path):
+    scenario_dir = tmp_path / "runs"
+    earlier = scenario_dir / "9_20261107_000009"
+    latest = scenario_dir / "10_20261107_000010"
+    earlier.mkdir(parents=True)
+    latest.mkdir()
+    (earlier / "report.json").write_text('{"code_commit":"old"}', encoding="utf-8")
+    (latest / "report.json").write_text('{"code_commit":"new"}', encoding="utf-8")
+
+    assert dt.previous_code_commit(scenario_dir) == "new"
 
 
 def test_tracked_changes_skip_pull_but_still_run_on_current_checkout(repo):

@@ -227,13 +227,51 @@ def code_commit(git):
 
 def previous_code_commit(scenario_dir):
     scenario_dir = Path(scenario_dir)
-    runs = sorted(path for path in scenario_dir.iterdir() if path.is_dir()) if scenario_dir.is_dir() else []
+    runs = sorted(
+        (path for path in scenario_dir.iterdir() if path.is_dir()), key=_run_sort_key,
+    ) if scenario_dir.is_dir() else []
     for run in reversed(runs):
         try:
             return json.loads((run / "report.json").read_text(encoding="utf-8")).get("code_commit", "")
         except (OSError, json.JSONDecodeError):
             continue
     return ""
+
+
+def _run_sort_key(path):
+    match = re.fullmatch(r"(?:(\d+)_)?(\d{8}_\d{6})", path.name)
+    if match:
+        timestamp = datetime.strptime(match.group(2), "%Y%m%d_%H%M%S")
+        return timestamp, int(match.group(1) or 0)
+    return datetime.fromtimestamp(path.stat().st_mtime), 0
+
+
+def _next_run_number(scenario_dir):
+    numbered = []
+    legacy_count = 0
+    for path in Path(scenario_dir).iterdir():
+        if not path.is_dir():
+            continue
+        match = re.fullmatch(r"(\d+)_\d{8}_\d{6}", path.name)
+        if match:
+            numbered.append(int(match.group(1)))
+        elif re.fullmatch(r"\d{8}_\d{6}", path.name):
+            legacy_count += 1
+    return max(max(numbered, default=0), legacy_count) + 1
+
+
+def _create_run_directory(scenario_dir, started):
+    scenario_dir = Path(scenario_dir)
+    scenario_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = started.strftime("%Y%m%d_%H%M%S")
+    run_number = _next_run_number(scenario_dir)
+    while True:
+        run_dir = scenario_dir / f"{run_number}_{timestamp}"
+        try:
+            run_dir.mkdir()
+            return run_number, run_dir
+        except FileExistsError:
+            run_number += 1
 
 
 def sync_repository(git):
@@ -248,7 +286,7 @@ def sync_repository(git):
 
 
 def prune_old_runs(scenario_dir, keep=KEEP_RUNS):
-    runs = sorted(path for path in Path(scenario_dir).iterdir() if path.is_dir())
+    runs = sorted((path for path in Path(scenario_dir).iterdir() if path.is_dir()), key=_run_sort_key)
     removed = runs[:-keep] if len(runs) > keep else []
     for path in removed:
         shutil.rmtree(path)
@@ -296,8 +334,7 @@ def run_scenario(scenario, ctx, execute=None):
         return {"scenario": scenario["name"], "status": UNCHANGED, "detail": ctx.code_commit}
 
     started = ctx.now_fn()
-    run_dir = scenario_dir / started.strftime("%Y%m%d_%H%M%S")
-    run_dir.mkdir(parents=True, exist_ok=False)
+    run_number, run_dir = _create_run_directory(scenario_dir, started)
     log_lines = []
 
     def log(message):
@@ -363,6 +400,7 @@ def run_scenario(scenario, ctx, execute=None):
         "scenario": scenario["name"],
         "device": ctx.device,
         "status": status,
+        "run_number": run_number,
         "run_dir": str(run_dir.resolve()),
         "execute": execute,
         "commit": ctx.commit_id,

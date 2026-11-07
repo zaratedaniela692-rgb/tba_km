@@ -27,7 +27,7 @@ MAX_HOUR_DIGITS = 2
 DIGIT_SCALES = (6, 10)
 DIGIT_PAD = 2
 DIGIT_BORDER = 30
-# Digits confirmed by two independent reads on the supplied fixtures.
+# Digits confirmed on fixtures; informational only, not an acceptance whitelist.
 VERIFIED_DIGITS = frozenset("13467")
 
 
@@ -87,9 +87,9 @@ def _read_digit(gray, component, scale):
 
 
 def _read_number(gray, digits):
-    """Digits of one number, or None unless every scale reads every glyph identically."""
+    """Read digits when both scales agree; VERIFIED_DIGITS only records fixture coverage."""
     reads = ["".join(_read_digit(gray, digit, scale) or "?" for digit in digits) for scale in DIGIT_SCALES]
-    if len(set(reads)) != 1 or "?" in reads[0] or not set(reads[0]) <= VERIFIED_DIGITS:
+    if len(set(reads)) != 1 or "?" in reads[0]:
         return None
     return reads[0]
 

@@ -322,6 +322,7 @@ flowchart TD
 
 - The task queue remains independent and does not read screenshots or inventory.
 - `speedup_readings.py` provides pure timer/duration/quantity parsing; `speedup_reader.py` reads the timer and resolves Tesseract from `PATH` or its standard Windows install path.
+- Timer digit verification ledger: `1, 3, 4, 6, 7` are confirmed by the original supplied fixtures. Other digits are no longer blocked by this list; a digit is accepted only when both OCR scales agree. The live-run timer `5 d. 20 g.` is now a regression fixture and reads as 504000 seconds. The ledger is informational, not an OCR acceptance whitelist.
 - `speedup_button_map.py` maps verified `Use` button positions for the reviewed checkpoints and excludes `Buy`.
 - `speedup_inventory_reader.py` reads nine supported counts with two-scale OCR consensus and rejects disagreement; `tests/test_speedup_inventory_reader.py` covers the real checkpoint fixtures.
 - `speedup_checkpoint_runner.py` scans checkpoints, applies `speedup_planner.py`, and verifies each use; `tests/test_speedup_checkpoint_runner.py` uses injected fake-game adapters. `speedup_run.py` provides the supervised CLI behind `python speedup.py` and enforces separate scan/use confirmation phrases.
