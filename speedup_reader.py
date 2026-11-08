@@ -5,6 +5,7 @@ change a number, then each digit is read alone at two scales and accepted only i
 """
 
 import os
+import re
 import shutil
 from pathlib import Path
 
@@ -151,13 +152,14 @@ def _read_minute_timer(gray):
                 ).strip()
             except pytesseract.TesseractNotFoundError as error:
                 raise ArmyTrainingScannerError("Tesseract OCR was not found.") from error
-            reading = parse_remaining_time(text, 100.0)
+            normalized = re.sub(r"^\s*[hH]\s*(?=\d)", "", text, count=1)
+            reading = parse_remaining_time(normalized, 100.0)
             reads.append((text, reading.value, reading.status))
 
     values = {value for _, value, _ in reads}
     raw = " / ".join(text for text, _, _ in reads)
     if len(values) == 1 and None not in values:
-        return parse_remaining_time(reads[0][0], 100.0)
+        return ParsedReading(reads[0][0], next(iter(values)), 100.0, "ok")
     agreement = max((sum(value == candidate for _, value, _ in reads) for candidate in values), default=0)
     return ParsedReading(raw, None, agreement * 100 / len(reads), "minute_ocr_disagreement")
 

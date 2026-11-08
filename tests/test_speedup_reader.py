@@ -55,6 +55,19 @@ def test_minute_only_timer_uses_consensus_ocr_fallback(monkeypatch):
     assert reading.raw == "42m"
 
 
+def test_minute_timer_consensus_ignores_leading_hourglass_ocr_artifact(monkeypatch):
+    image = cv2.imread(str(SHOTS / "speedup_view.png"))
+    monkeypatch.setattr(speedup_reader, "_split_label", lambda _components: None)
+    answers = iter(("H12m18s", "12m18s", "H12m18s", "12m18s"))
+    monkeypatch.setattr(speedup_reader.pytesseract, "image_to_string", lambda *_args, **_kwargs: next(answers))
+
+    reading = read_remaining_time(image)
+
+    assert reading.status == "ok"
+    assert reading.value == 12 * 60 + 18
+    assert reading.raw == "H12m18s"
+
+
 def test_minute_only_timer_ocr_disagreement_remains_unknown(monkeypatch):
     image = cv2.imread(str(SHOTS / "speedup_view.png"))
     monkeypatch.setattr(speedup_reader, "_split_label", lambda _components: None)
