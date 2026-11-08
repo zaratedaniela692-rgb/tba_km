@@ -75,6 +75,44 @@ def _locate_template(image, template_path):
     return float(best_score), location
 
 
+def locate_finish_training_button(image, variant=None, threshold=0.95, search_margin=2):
+    """Return the matched finish-button center only when its annotated button is visible."""
+    variant = variant or resolve_variant()
+    regions = _load_regions(variant["regions"]).get("army_training", {})
+    button = regions.get("finish_training_button")
+    if not isinstance(button, dict) or button.get("type") != "button":
+        return None, None
+
+    template_path = button.get("template")
+    if not template_path:
+        return None, None
+    template = cv2.imread(str(resolve_asset_path(variant, template_path)), cv2.IMREAD_COLOR)
+    if template is None:
+        raise ArmyTrainingScannerError(f"Nie można odczytać wzorca: {template_path}")
+
+    x, y, width, height = (int(button[key]) for key in ("x", "y", "w", "h"))
+    frame_height, frame_width = image.shape[:2]
+    left = max(0, x - search_margin)
+    top = max(0, y - search_margin)
+    right = min(frame_width, x + width + search_margin)
+    bottom = min(frame_height, y + height + search_margin)
+    search_area = image[top:bottom, left:right]
+    template_height, template_width = template.shape[:2]
+    if search_area.shape[0] < template_height or search_area.shape[1] < template_width:
+        return None, None
+
+    result = cv2.matchTemplate(search_area, template, cv2.TM_CCOEFF_NORMED)
+    _, score, _, location = cv2.minMaxLoc(result)
+    score = float(score)
+    if score < threshold:
+        return score, None
+    center = (
+        left + location[0] + template_width // 2,
+        top + location[1] + template_height // 2,
+    )
+    return score, center
+
+
 def _classify_training_unit_image(crop):
     """Classify the unobstructed unit portrait, leaving borderline crops unknown."""
     gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)

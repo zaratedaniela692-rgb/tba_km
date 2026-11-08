@@ -449,6 +449,14 @@
       "h": 58,
       "type": "icon",
       "template": "templates/army_training/current_training_unit.png"
+    },
+    "finish_training_button": {
+      "x": 1014,
+      "y": 290,
+      "w": 147,
+      "h": 26,
+      "type": "button",
+      "template": "templates/army_training/finish_training_button.png"
     }
   },
   "speedup": {

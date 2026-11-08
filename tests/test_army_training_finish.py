@@ -6,7 +6,13 @@ import pytest
 
 import army_training_executor as executor
 import army_training_finish as finish
-from army_state import army_state_path, load_army_state, open_training, open_training_marker
+from army_state import (
+    army_state_path,
+    load_army_state,
+    open_training,
+    open_training_marker,
+    record_finish_button_attempt,
+)
 from army_training_process import NumericReading, Slot, TrainingGoal, enqueue_training_goal
 from task_controller import (
     create_task_queue,
@@ -97,6 +103,69 @@ def test_speedup_confirmed_idle_clears_marker_and_unconfirmed_counts_attempt(tmp
     assert unconfirmed["needs_attention"] is True and unconfirmed["attempts"] == 1
     assert done["status"] == "finished"
     assert open_training(load_army_state(path)) is None
+
+
+def test_unconfirmed_finish_button_click_is_persisted_and_never_retried(tmp_path):
+    path = marker(tmp_path)
+
+    def click_finish(on_finish_button_click):
+        on_finish_button_click()
+        return "unknown"
+
+    first = finish.finish_open_training(
+        path, "active", click_finish, NOW,
+        before_finish_button_click=lambda: record_finish_button_attempt(path, NOW),
+    )
+    second = finish.finish_open_training(
+        path, "active", lambda: pytest.fail("must not retry after an uncertain finish click"),
+        NOW + timedelta(hours=2),
+    )
+
+    assert first["status"] == "failed"
+    assert second["reason"] == "finish_button_already_attempted"
+    assert second["actions_attempted"] is False
+    assert second["needs_attention"] is True
+    assert open_training(load_army_state(path))["finish_button_attempted_at"] == NOW.isoformat()
+
+
+def test_execute_finish_task_passes_one_shot_recorder_to_speedup_adapter(tmp_path, monkeypatch):
+    queue = create_task_queue("p")
+    task = enqueue_task(
+        queue, "army_training", task_id="army_finish:order-1", now=NOW,
+        payload={"goal_kind": finish.FALLBACK_GOAL_KIND, "order_id": "order-1"},
+    )
+    path = marker(tmp_path)
+    image = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    adapter_calls = []
+    states = iter(("active", "unknown"))
+    monkeypatch.setattr(finish, "resolve_variant", lambda: {"regions": "regions.json"})
+    monkeypatch.setattr(finish, "_read_current_training_state", lambda *_: {"status": next(states)})
+    monkeypatch.setattr(finish, "_check_emergency_stop", lambda: None)
+
+    def speedup_adapter(**kwargs):
+        adapter_calls.append(kwargs)
+        kwargs["on_finish_button_click"]()
+        return "unknown"
+
+    first = finish.execute_finish_task(
+        queue, task["task_id"], path, NOW, execute=True,
+        confirmation=finish.CONFIRMATION_PHRASE,
+        capture_fn=lambda: (image, (0, 0)), speedup_fn=speedup_adapter, sleep_fn=lambda _: None,
+    )
+    second = finish.execute_finish_task(
+        queue, task["task_id"], path, NOW + timedelta(hours=2), execute=True,
+        confirmation=finish.CONFIRMATION_PHRASE,
+        capture_fn=lambda: (image, (0, 0)),
+        speedup_fn=lambda **_: pytest.fail("must not invoke the adapter after an uncertain finish click"),
+        sleep_fn=lambda _: None,
+    )
+
+    assert first["status"] == "FAILED"
+    assert first["actions_executed"] is True
+    assert len(adapter_calls) == 1
+    assert set(adapter_calls[0]) == {"on_finish_button_click"}
+    assert callable(adapter_calls[0]["on_finish_button_click"])
+    assert second["finish"]["reason"] == "finish_button_already_attempted"
 
 
 def test_speedup_exception_is_a_failed_attempt_not_a_crash(tmp_path):

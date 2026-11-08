@@ -8,6 +8,7 @@ from army_state import (
     load_army_state,
     open_training,
     parse_marker_time,
+    record_finish_button_attempt,
     record_speedup_attempt,
 )
 from army_training_live_e2e import (
@@ -43,7 +44,7 @@ def _setting(queue, key, default):
 
 def finish_open_training(
     state_path, training_status, speedup_fn, now, retry_seconds=DEFAULT_SPEEDUP_RETRY_SECONDS,
-    attention_after=NEEDS_ATTENTION_AFTER_ATTEMPTS,
+    attention_after=NEEDS_ATTENTION_AFTER_ATTEMPTS, before_finish_button_click=None,
 ):
     """Decide the finish step from the observed state; `speedup_fn()` must return the observed state afterwards.
 
@@ -52,6 +53,14 @@ def finish_open_training(
     marker = open_training(load_army_state(state_path))
     if training_status == "idle":
         return {"status": "idle", "marker_cleared": clear_open_training(state_path) if marker else False}
+    if marker is not None and marker.get("finish_button_attempted_at") is not None:
+        return {
+            "status": "failed",
+            "reason": "finish_button_already_attempted",
+            "actions_attempted": False,
+            "attempts": marker.get("speedup_attempts", 0),
+            "needs_attention": True,
+        }
     if training_status != "active":
         return {"status": "unknown", "reason": "training_state_unknown"}
     if marker is None:
@@ -64,7 +73,10 @@ def finish_open_training(
     reason = "speedup_module_unavailable"
     if attempted:
         try:
-            outcome = speedup_fn()
+            if before_finish_button_click is None:
+                outcome = speedup_fn()
+            else:
+                outcome = speedup_fn(on_finish_button_click=before_finish_button_click)
         except Exception as error:
             outcome, reason = "unknown", f"speedup_error:{error}"
         else:
@@ -135,15 +147,19 @@ def execute_finish_task(
         raise LiveTrainingError(f"Expected primary-monitor frame {EXPECTED_SIZE}, got {(frame.shape[1], frame.shape[0])}.")
     state = _read_current_training_state(frame, resolve_variant())["status"]
 
-    def guarded_speedup():
+    def guarded_speedup(on_finish_button_click=None):
         _check_emergency_stop()
-        outcome = speedup_fn()
+        if on_finish_button_click is None:
+            outcome = speedup_fn()
+        else:
+            outcome = speedup_fn(on_finish_button_click=on_finish_button_click)
         sleep_fn(VIEW_RESET_SECONDS)
         return outcome
 
     retry = _setting(queue, "speedup_retry_seconds", DEFAULT_SPEEDUP_RETRY_SECONDS)
     outcome = finish_open_training(
         state_path, state, guarded_speedup if speedup_fn else None, now, retry,
+        before_finish_button_click=lambda: record_finish_button_attempt(state_path, now),
     )
     result = {"status": outcome["status"].upper(), "finish": outcome, "actions_executed": bool(outcome.get("actions_attempted")), "queue_modified": False}
     if outcome["status"] in {"idle", "finished"}:

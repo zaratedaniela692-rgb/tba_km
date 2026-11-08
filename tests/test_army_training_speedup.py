@@ -18,6 +18,7 @@ def test_army_adapter_reconciles_actual_state_after_every_runner_result(monkeypa
     speedup_calls = []
     monkeypatch.setattr(army_speedup, "resolve_variant", lambda: {"regions": "regions.json"})
     monkeypatch.setattr(army_speedup, "_read_current_training_state", lambda *_args, **_kwargs: next(states))
+    monkeypatch.setattr(army_speedup, "locate_finish_training_button", lambda *_args, **_kwargs: (None, None))
     monkeypatch.setattr(army_speedup, "_load_regions", lambda _: {"army_training": {
         "speedup_panel": {"x": 10, "y": 20, "w": 30, "h": 40},
     }})
@@ -114,3 +115,70 @@ def test_army_adapter_uses_open_dialog_checkpoint_runner_by_default(monkeypatch)
 
     assert result == "idle"
     assert calls == [{"execute": True}]
+
+
+def test_army_adapter_clicks_only_matched_finish_button_and_requires_idle(monkeypatch):
+    image = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    states = iter((
+        {"status": "active", "speedup_button_detected": True},
+        {"status": "unknown", "speedup_button_detected": False},
+        {"status": "idle", "speedup_button_detected": False},
+    ))
+    actions = []
+    monkeypatch.setattr(army_speedup, "resolve_variant", lambda: {"regions": "regions.json"})
+    monkeypatch.setattr(army_speedup, "_read_current_training_state", lambda *_args, **_kwargs: next(states))
+    monkeypatch.setattr(army_speedup, "_load_regions", lambda _: {"army_training": {
+        "speedup_panel": {"x": 10, "y": 20, "w": 30, "h": 40},
+        "finish_training_button": {"x": 1014, "y": 290, "w": 147, "h": 26, "type": "button"},
+    }})
+    monkeypatch.setattr(army_speedup, "locate_finish_training_button", lambda *_: (1.0, (1087, 303)))
+    monkeypatch.setattr(army_speedup, "_check_emergency_stop", lambda: None)
+    monkeypatch.setattr(army_speedup, "_enable_live_failsafe", lambda _: None)
+
+    result = army_speedup.finish_active_training_with_speedups(
+        capture_fn=lambda: (image, (100, 200)),
+        click_fn=lambda point, origin: actions.append(("click", point, origin)),
+        move_fn=lambda point, origin: actions.append(("move", point, origin)),
+        on_finish_button_click=lambda: actions.append(("record", None, None)),
+        sleep_fn=lambda _: None,
+        speedup_runner=lambda **_: SimpleNamespace(status="FINISHED", reason="dialog_closed_after_last_use"),
+    )
+
+    assert result == "idle"
+    assert actions == [
+        ("click", (25, 40), (100, 200)),
+        ("move", (960, 540), (100, 200)),
+        ("record", None, None),
+        ("click", (1087, 303), (100, 200)),
+    ]
+
+
+def test_army_adapter_blocks_matched_finish_button_without_attempt_recorder(monkeypatch):
+    image = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    states = iter((
+        {"status": "active", "speedup_button_detected": True},
+        {"status": "unknown", "speedup_button_detected": False},
+    ))
+    clicks = []
+    moves = []
+    monkeypatch.setattr(army_speedup, "resolve_variant", lambda: {"regions": "regions.json"})
+    monkeypatch.setattr(army_speedup, "_read_current_training_state", lambda *_args, **_kwargs: next(states))
+    monkeypatch.setattr(army_speedup, "_load_regions", lambda _: {"army_training": {
+        "speedup_panel": {"x": 10, "y": 20, "w": 30, "h": 40},
+        "finish_training_button": {"x": 1014, "y": 290, "w": 147, "h": 26, "type": "button"},
+    }})
+    monkeypatch.setattr(army_speedup, "locate_finish_training_button", lambda *_: (1.0, (1087, 303)))
+    monkeypatch.setattr(army_speedup, "_check_emergency_stop", lambda: None)
+    monkeypatch.setattr(army_speedup, "_enable_live_failsafe", lambda _: None)
+
+    result = army_speedup.finish_active_training_with_speedups(
+        capture_fn=lambda: (image, (0, 0)),
+        click_fn=lambda point, origin: clicks.append((point, origin)),
+        move_fn=lambda point, origin: moves.append((point, origin)),
+        sleep_fn=lambda _: None,
+        speedup_runner=lambda **_: SimpleNamespace(status="FINISHED", reason="dialog_closed_after_last_use"),
+    )
+
+    assert result == "unknown"
+    assert clicks == [((25, 40), (0, 0))]
+    assert moves == []

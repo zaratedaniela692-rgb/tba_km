@@ -132,6 +132,17 @@ def record_speedup_attempt(path, now, retry_seconds):
     return marker
 
 
+def record_finish_button_attempt(path, now):
+    """Persist the one-shot finish-button attempt before sending its click."""
+    state = load_army_state(path)
+    marker = open_training(state)
+    if marker is None:
+        raise ArmyStateError("No open training to record a finish-button attempt for.")
+    marker.setdefault("finish_button_attempted_at", _iso(now))
+    _write_state(path, state)
+    return marker
+
+
 def parse_marker_time(marker, key):
     value = marker.get(key)
     if value is None:
