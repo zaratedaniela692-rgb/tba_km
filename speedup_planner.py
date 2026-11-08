@@ -31,6 +31,7 @@ class SpeedupPlan:
     uses: tuple  # ((duration_seconds, count), ...) in order of first use
     breached_floors: tuple  # durations used that end below their floor
     shortfall_seconds: int
+    decisions: tuple = ()
 
 
 def _is_count(value):
@@ -47,21 +48,47 @@ def _preferred(remaining):
             return durations
 
 
-def _pick(stock, remaining):
+def _pick_with_decision(stock, remaining):
     preferred = _preferred(remaining)
     above = [d for d, count in stock.items() if count > _floor(d)]
     steps = (
-        (max, [d for d in above if d in preferred and d <= remaining]),
-        (max, [d for d in above if d <= remaining]),
-        (min, [d for d in above if d in preferred and d > remaining]),
-        (min, [d for d in above if d > remaining]),
+        ("preferred_fit", max, [d for d in above if d in preferred and d <= remaining]),
+        ("any_fit", max, [d for d in above if d <= remaining]),
+        ("preferred_overshoot", min, [d for d in above if d in preferred and d > remaining]),
+        ("any_overshoot", min, [d for d in above if d > remaining]),
     )
-    for choose, candidates in steps:
+    context = {
+        "remaining_before_seconds": remaining,
+        "preferred_durations_seconds": tuple(preferred),
+        "stock_before": tuple(sorted(stock.items())),
+        "available_above_floors_seconds": tuple(sorted(above)),
+    }
+    for strategy, choose, candidates in steps:
         if candidates:
-            return choose(candidates)
-    # Only floor-breaking items are left.
+            duration = choose(candidates)
+            return duration, {
+                **context,
+                "strategy": strategy,
+                "candidates_seconds": tuple(sorted(candidates)),
+                "selected_duration_seconds": duration,
+                "floor_seconds": _floor(duration),
+                "breaks_floor": False,
+            }
     fitting = [d for d in stock if d <= remaining]
-    return max(fitting) if fitting else min(stock)
+    candidates = fitting or list(stock)
+    duration = max(fitting) if fitting else min(stock)
+    return duration, {
+        **context,
+        "strategy": "floor_breaking_fit" if fitting else "floor_breaking_overshoot",
+        "candidates_seconds": tuple(sorted(candidates)),
+        "selected_duration_seconds": duration,
+        "floor_seconds": _floor(duration),
+        "breaks_floor": stock[duration] <= _floor(duration),
+    }
+
+
+def _pick(stock, remaining):
+    return _pick_with_decision(stock, remaining)[0]
 
 
 def plan_speedups(remaining_seconds, inventory):
@@ -82,14 +109,21 @@ def plan_speedups(remaining_seconds, inventory):
         return SpeedupPlan(STATUS_SHORTFALL, (), (), remaining_seconds - owned_seconds)
 
     used = {}
+    decisions = []
     remaining = remaining_seconds
     while remaining > 0:
-        duration = _pick(stock, remaining)
+        duration, decision = _pick_with_decision(stock, remaining)
+        decision["step"] = len(decisions) + 1
+        decision["quantity_before"] = stock[duration]
         used[duration] = used.get(duration, 0) + 1
         stock[duration] -= 1
         if stock[duration] == 0:
             del stock[duration]
         remaining -= duration
+        decision["quantity_after"] = stock.get(duration, 0)
+        decision["remaining_after_seconds"] = remaining
+        decision["floor_breached_after_selection"] = stock.get(duration, 0) < _floor(duration)
+        decisions.append(decision)
 
     breached = tuple(sorted(d for d in used if stock.get(d, 0) < _floor(d)))
-    return SpeedupPlan(STATUS_OK, tuple(used.items()), breached, 0)
+    return SpeedupPlan(STATUS_OK, tuple(used.items()), breached, 0, tuple(decisions))

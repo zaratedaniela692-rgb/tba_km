@@ -98,6 +98,20 @@ def test_target_duration_read_ocr_processes_only_one_quantity():
     assert [call[1] for call in ocr_calls] == [4, 6]
 
 
+def test_verify_only_matches_buttons_without_running_quantity_ocr():
+    checkpoint = next(entry for entry in MAP["checkpoints"] if entry["scroll_count"] == 3)
+    image = cv2.imread(str(FIXTURES / "checkpoint_003.png"))
+
+    reading = read_checkpoint_viewport(
+        image, checkpoint, TEMPLATE, QUANTITY_REGION, USE_REGION,
+        ocr_fn=lambda *_: pytest.fail("verify_only must not call OCR"), verify_only=True,
+    )
+
+    assert reading.status == "complete"
+    assert reading.items == ()
+    assert len(reading.match_diagnostics) == len(checkpoint["buttons"])
+
+
 def test_combines_checkpoints_and_deduplicates_repeated_three_day_item():
     combined = combine_checkpoint_readings(tuple(_read(step) for step in (3, 11, 16)))
 

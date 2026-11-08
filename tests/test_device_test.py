@@ -136,6 +136,36 @@ def test_run_writes_evidence_commits_only_its_directory_and_pushes(repo):
     assert results[-1]["scenario"] == "git_push" and results[-1]["status"] == dt.OK
 
 
+def test_run_log_includes_module_event_trace(repo):
+    def create_module_trace():
+        module_run = repo.work / "debug" / "speedup" / "run_fixture"
+        module_run.mkdir(parents=True)
+        (module_run / "report.json").write_text(
+            '{"timestamp":"2026-11-07T12:00:03+00:00"}', encoding="utf-8",
+        )
+        (module_run / "event_trace.jsonl").write_text(
+            '{"elapsed_ms":125.0,"event":"plan_choice","step":16,"data":{"selected_duration_seconds":3600}}\n'
+            '{"elapsed_ms":250.0,"event":"use_click","step":3,"data":{"use_number":1,"screen_point":[1122,529]}}\n',
+            encoding="utf-8",
+        )
+
+    context = _context(repo, [], effect=create_module_trace)
+    scenario = {**SCENARIO, "debug_dirs": ["debug/speedup"]}
+
+    code, results = dt.run_scenarios(["demo"], context, {"demo": scenario})
+
+    run_dir = next((repo.work / "device_runs" / "pc1" / "demo").iterdir())
+    log = (run_dir / "log.txt").read_text(encoding="utf-8")
+    report = __import__("json").loads((run_dir / "report.json").read_text(encoding="utf-8"))
+    assert code == 0
+    assert results[0]["status"] == dt.OK
+    assert "plan_choice" in log and '"selected_duration_seconds":3600' in log
+    assert "use_click" in log and '"screen_point":[1122,529]' in log
+    assert log.index("use_click") < log.index("step 1 probe: OK")
+    assert report["module_trace_events"] == 2
+    assert (run_dir / "module_debug" / "speedup" / "run_fixture" / "event_trace.jsonl").exists()
+
+
 def test_retention_keeps_the_current_run_and_three_earlier_ones(repo):
     context = _context(repo, [])
     context.push = False

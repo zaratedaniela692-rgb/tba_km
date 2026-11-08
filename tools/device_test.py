@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Callable
 
@@ -316,6 +316,40 @@ def _collect_module_debug(root, before, run_dir):
     return moved
 
 
+def _append_module_event_traces(log_lines, run_dir, seen_traces=None):
+    seen_traces = seen_traces if seen_traces is not None else set()
+    trace_files = sorted((Path(run_dir) / "module_debug").rglob("event_trace.jsonl"))
+    event_count = 0
+    for trace_path in trace_files:
+        if trace_path in seen_traces:
+            continue
+        seen_traces.add(trace_path)
+        report_path = trace_path.with_name("report.json")
+        try:
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            trace_started = datetime.fromisoformat(report["timestamp"])
+        except (OSError, KeyError, ValueError, json.JSONDecodeError):
+            trace_started = None
+        for line_number, raw_line in enumerate(trace_path.read_text(encoding="utf-8").splitlines(), 1):
+            try:
+                event = json.loads(raw_line)
+            except json.JSONDecodeError as error:
+                log_lines.append(f"[module trace] invalid JSON at {trace_path.name}:{line_number}: {error}")
+                continue
+            elapsed_ms = float(event.get("elapsed_ms", 0))
+            timestamp = (
+                (trace_started + timedelta(milliseconds=elapsed_ms)).isoformat(timespec="milliseconds")
+                if trace_started is not None else f"+{elapsed_ms:.1f}ms"
+            )
+            data = json.dumps(event.get("data", {}), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+            log_lines.append(
+                f"{timestamp} [module +{elapsed_ms:.1f}ms step={event.get('step', '?')}] "
+                f"{event.get('event', 'unknown_event')}: {data}"
+            )
+            event_count += 1
+    return event_count
+
+
 def _tail(text):
     return text if len(text) <= OUTPUT_LIMIT else text[-OUTPUT_LIMIT:]
 
@@ -346,6 +380,9 @@ def run_scenario(scenario, ctx, execute=None):
     before = _snapshot(ctx.root, scenario.get("debug_dirs", ()))
     env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
     records, status = [], OK
+    moved = []
+    module_trace_events = 0
+    seen_module_traces = set()
 
     log(f"[{scenario['name']}] prepare: {scenario['prepare']}")
     delay = ctx.delay if ctx.delay is not None else scenario.get("prepare_seconds", 10)
@@ -389,13 +426,18 @@ def run_scenario(scenario, ctx, execute=None):
         record["returncode"] = returncode
         record["output_tail"] = _tail(output)
         record["screenshot_after_error"] = ctx.screenshot_fn(run_dir / f"{prefix}_after.png")
+        new_module_files = _collect_module_debug(ctx.root, before, run_dir)
+        moved.extend(new_module_files)
+        new_trace_events = _append_module_event_traces(log_lines, run_dir, seen_module_traces)
+        module_trace_events += new_trace_events
+        if new_trace_events:
+            log(f"module trace: appended {new_trace_events} events from event_trace.jsonl")
         record["status"] = OK if returncode == 0 else FAILED
         log(f"step {index} {step['name']}: {record['status']} (rc={returncode}, {record['duration_seconds']} s)")
         if returncode != 0:
             status = FAILED
             break  # never continue a live sequence after a failure
 
-    moved = _collect_module_debug(ctx.root, before, run_dir)
     report = {
         "scenario": scenario["name"],
         "device": ctx.device,
@@ -410,6 +452,7 @@ def run_scenario(scenario, ctx, execute=None):
         "python": sys.version.split()[0],
         "steps": records,
         "module_debug": moved,
+        "module_trace_events": module_trace_events,
     }
     (run_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (run_dir / "log.txt").write_text("\n".join(log_lines) + "\n", encoding="utf-8")

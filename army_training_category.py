@@ -6,6 +6,7 @@ import cv2
 
 from army_unit_types import CATEGORY_PROFILES, SUPPORTED_TRAINING_UNIT_TYPES, validate_unit_type
 from ui_variants import resolve_asset_path, resolve_variant
+from workflow_trace import WorkflowTrace
 
 LIST_REGION = "troops_types"
 SELECTED_THRESHOLD = 0.95
@@ -47,13 +48,21 @@ def select_army_type(
     unit_type, execute=False, capture_fn=None, click_fn=None, sleep_fn=time.sleep, stop_fn=None, variant=None,
 ):
     """Make `unit_type` the highlighted Barracks category; without `execute` nothing is sent to the game."""
+    trace = WorkflowTrace("army_training_category")
+
+    def finish(result):
+        result["event_trace"] = trace.events
+        return result
+
     result = {"unit_type": unit_type, "actions_executed": False, "selection_confirmed": False}
     try:
         validate_unit_type(unit_type)
     except ValueError:
-        return {**result, "status": "BLOCKED_UNKNOWN_UNIT_TYPE"}
+        trace.record("validate_target", target=unit_type, decision="block", reason="unknown_unit_type")
+        return finish({**result, "status": "BLOCKED_UNKNOWN_UNIT_TYPE"})
     if unit_type not in SUPPORTED_TRAINING_UNIT_TYPES:
-        return {**result, "status": "BLOCKED_CATEGORY_SELECTION_UNIMPLEMENTED"}
+        trace.record("validate_target", target=unit_type, decision="block", reason="selection_not_implemented")
+        return finish({**result, "status": "BLOCKED_CATEGORY_SELECTION_UNIMPLEMENTED"})
 
     from army_training_live_e2e import (
         EXPECTED_SIZE,
@@ -72,43 +81,66 @@ def select_army_type(
     regions = _load_regions(variant["regions"]).get("army_training", {})
     target = regions.get(CATEGORY_PROFILES[unit_type].selected_region or "")
     if target is None or LIST_REGION not in regions:
-        return {**result, "status": "BLOCKED_CATEGORY_REGION_MISSING"}
+        trace.record(
+            "load_regions", target=unit_type, observation={"target_region_found": target is not None,
+            "list_region_found": LIST_REGION in regions}, decision="block", reason="category_region_missing",
+        )
+        return finish({**result, "status": "BLOCKED_CATEGORY_REGION_MISSING"})
 
     frame, origin = capture_fn()
     if (frame.shape[1], frame.shape[0]) != EXPECTED_SIZE:
-        return {**result, "status": "BLOCKED_UNSUPPORTED_FRAME_SIZE"}
-    if locate_slots(frame, regions, variant).status != STATUS_OK:
-        return {**result, "status": "BLOCKED_BARRACKS_NOT_CONFIRMED"}
+        trace.record("capture_barracks", observation={"frame_size": (frame.shape[1], frame.shape[0]),
+                     "expected_size": EXPECTED_SIZE}, decision="block", reason="unsupported_frame_size")
+        return finish({**result, "status": "BLOCKED_UNSUPPORTED_FRAME_SIZE"})
+    layout = locate_slots(frame, regions, variant)
+    if layout.status != STATUS_OK:
+        trace.record("confirm_barracks", observation={"layout_status": layout.status,
+                     "layout_reason": layout.reason}, decision="block", reason="barracks_not_confirmed")
+        return finish({**result, "status": "BLOCKED_BARRACKS_NOT_CONFIRMED"})
     current = read_selected_category(frame, regions, variant)
     result.update(current_category=current["unit_type"], scores=current["scores"])
+    trace.record("read_selected_category", target=unit_type, observation=current)
     if current["unit_type"] == unit_type:
-        return {**result, "status": "CATEGORY_CONFIRMED", "selection_confirmed": True}
+        trace.record("category_decision", target=unit_type, decision="already_selected", verification="confirmed")
+        return finish({**result, "status": "CATEGORY_CONFIRMED", "selection_confirmed": True})
     if not execute:
-        return {**result, "status": "CATEGORY_WOULD_SELECT"}
+        trace.record("category_decision", target=unit_type, decision="would_select", reason="preview_only")
+        return finish({**result, "status": "CATEGORY_WOULD_SELECT"})
 
     try:
         stop_fn()
     except Exception as error:
-        return {**result, "status": "BLOCKED_EMERGENCY_STOP", "reason": str(error)}
+        trace.record("emergency_stop_check", decision="block", reason=str(error))
+        return finish({**result, "status": "BLOCKED_EMERGENCY_STOP", "reason": str(error)})
     _enable_live_failsafe(click_fn)
     point = (int(target["x"]) + int(target["w"]) // 2, int(target["y"]) + int(target["h"]) // 2)
     result["actions_executed"] = True
+    trace.record("category_click", target=unit_type, action={"point": point, "origin": origin}, decision="click")
     try:
         click_fn(point, origin)
     except Exception as error:
-        return {**result, "status": "BLOCKED_CATEGORY_CLICK_FAILED", "reason": str(error)}
+        trace.record("category_click_result", action="click", verification="unknown", reason=str(error))
+        return finish({**result, "status": "BLOCKED_CATEGORY_CLICK_FAILED", "reason": str(error)})
     sleep_fn(SETTLE_SECONDS)
     try:
         after, after_origin = capture_fn()
         if (after.shape[1], after.shape[0]) != EXPECTED_SIZE or tuple(after_origin) != tuple(origin):
-            return {**result, "status": "BLOCKED_CATEGORY_NOT_CONFIRMED", "reason": "capture_geometry_changed"}
+            trace.record("verify_category", observation={"frame_size": (after.shape[1], after.shape[0]),
+                         "origin": after_origin}, decision="block", verification="failed",
+                         reason="capture_geometry_changed")
+            return finish({**result, "status": "BLOCKED_CATEGORY_NOT_CONFIRMED", "reason": "capture_geometry_changed"})
         confirmed = read_selected_category(after, regions, variant)
     except Exception as error:
-        return {**result, "status": "BLOCKED_CATEGORY_NOT_CONFIRMED", "reason": str(error)}
+        trace.record("verify_category", decision="block", verification="unknown", reason=str(error))
+        return finish({**result, "status": "BLOCKED_CATEGORY_NOT_CONFIRMED", "reason": str(error)})
     result["scores_after_click"] = confirmed["scores"]
     if confirmed["unit_type"] != unit_type:
-        return {**result, "status": "BLOCKED_CATEGORY_NOT_CONFIRMED", "reason": "highlight_not_on_target"}
-    return {**result, "status": "CATEGORY_SELECTED", "selection_confirmed": True}
+        trace.record("verify_category", target=unit_type, observation=confirmed, decision="block",
+                     verification="failed", reason="highlight_not_on_target")
+        return finish({**result, "status": "BLOCKED_CATEGORY_NOT_CONFIRMED", "reason": "highlight_not_on_target"})
+    trace.record("verify_category", target=unit_type, observation=confirmed, decision="continue",
+                 verification="confirmed")
+    return finish({**result, "status": "CATEGORY_SELECTED", "selection_confirmed": True})
 
 
 def main(argv=None):

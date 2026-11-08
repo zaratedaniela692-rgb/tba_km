@@ -87,8 +87,24 @@ def execute_training_goal(
     stop_after_train_confirmed=False,
 ):
     """Execute at most one stock goal. Callers must persist the mutated queue afterward."""
+    trace = WorkflowTrace("army_training_executor", profile_id=queue.get("profile_id"))
+
+    def finish(result):
+        trace.record(
+            "workflow_result", target=result.get("goal"),
+            observation={key: result.get(key) for key in (
+                "status", "frame_index", "post_click_training_state", "help_button_state_before_click",
+                "help_button_state_after_click",
+            ) if result.get(key) is not None},
+            decision="continue" if result.get("status") in {"START_CONFIRMED", "TEST_TRAINING_STARTED_CONFIRMED"} else "stop",
+            verification=result.get("status"), reason=result.get("blockers"),
+        )
+        result["event_trace"] = trace.events
+        return result
+
     if not execute:
-        return {"status": "PREVIEW_ONLY", "actions_executed": False, "queue_modified": False, "task_id": task_id}
+        trace.record("execution_gate", target=task_id, decision="preview_only", reason="execute_flag_not_set")
+        return finish({"status": "PREVIEW_ONLY", "actions_executed": False, "queue_modified": False, "task_id": task_id})
     if confirmation != CONFIRMATION_PHRASE:
         raise LiveTrainingError(f"Live execution requires confirmation phrase: {CONFIRMATION_PHRASE}")
 
@@ -119,12 +135,20 @@ def execute_training_goal(
     def observe():
         frame, origin = capture_fn()
         if (frame.shape[1], frame.shape[0]) != EXPECTED_SIZE:
+            trace.record("observe_training_screen", observation={
+                "frame_size": (frame.shape[1], frame.shape[0]), "expected_size": EXPECTED_SIZE,
+            }, decision="block", reason="unsupported_frame_size")
             raise LiveTrainingError(f"Expected primary-monitor frame {EXPECTED_SIZE}, got {(frame.shape[1], frame.shape[0])}.")
         layout = locate_slots(frame, regions.get("army_training", {}), variant)
         if layout.status != LAYOUT_OK:
+            trace.record("detect_slots", observation={
+                "layout_status": layout.status, "layout_reason": layout.reason,
+            }, decision="block", reason="slot_geometry_unconfirmed")
             raise LiveTrainingError("Visible slot geometry is not confirmed.")
         category = read_selected_category(frame, regions.get("army_training", {}), variant)
         if category["unit_type"] != goal_slot.unit_type:
+            trace.record("verify_category", target=goal_slot.unit_type, observation=category,
+                         decision="block", reason="highlighted_category_mismatch")
             raise LiveTrainingError(
                 f"Highlighted category is {category['unit_type']}, not {goal_slot.unit_type}."
             )
@@ -132,9 +156,20 @@ def execute_training_goal(
         resolution = resolve_goal_slot(
             level_readings, goal_slot.unit_type, goal_slot.global_level, goal_slot.match_number,
         )
+        trace.record("resolve_goal_slot", target={
+            "unit_type": goal_slot.unit_type, "global_level": goal_slot.global_level,
+            "match_number": goal_slot.match_number,
+        }, observation={
+            "status": resolution.status, "reason": resolution.reason, "candidates": resolution.candidates,
+            "level_readings": [asdict(item) for item in level_readings],
+        }, decision="continue" if resolution.status == STATUS_OK else "block",
+                     reason=None if resolution.status == STATUS_OK else resolution.reason)
         if resolution.status != STATUS_OK:
             raise LiveTrainingError(f"Goal slot resolution failed: {resolution.reason}")
-        return frame, origin, layout.slots[resolution.frame_index], _read_current_training_state(frame, variant)
+        training_state = _read_current_training_state(frame, variant)
+        trace.record("read_training_state", observation=training_state,
+                     decision="continue" if training_state.get("status") == "idle" else "finish_or_block")
+        return frame, origin, layout.slots[resolution.frame_index], training_state
 
     frame, origin, selected_slot, before_state = observe()
     result = {
@@ -151,22 +186,22 @@ def execute_training_goal(
     if before_state["status"] != "idle":
         if state_path is None:
             raise LiveTrainingError(f"Training is not confirmed idle ({before_state['status']}).")
-        finish = finish_open_training(
+        finish_report = finish_open_training(
             state_path, before_state["status"], speedup_fn, now,
             queue["settings"].get("speedup_retry_seconds") or DEFAULT_SPEEDUP_RETRY_SECONDS,
         )
-        result["finish"] = finish
-        if finish["status"] not in {"idle", "finished"}:
+        result["finish"] = finish_report
+        if finish_report["status"] not in {"idle", "finished"}:
             result.update(
                 status="BLOCKED_PENDING_FINISH",
-                blockers=[finish.get("reason", "previous_training_not_finished")],
-                actions_executed=bool(finish.get("actions_attempted")),
+                blockers=[finish_report.get("reason", "previous_training_not_finished")],
+                actions_executed=bool(finish_report.get("actions_attempted")),
             )
-            if finish.get("next_attempt_at"):
-                task["next_check_at"] = finish["next_attempt_at"]
+            if finish_report.get("next_attempt_at"):
+                task["next_check_at"] = finish_report["next_attempt_at"]
                 result["queue_modified"] = True
-            return result
-        result["actions_executed"] = bool(finish.get("actions_attempted"))
+            return finish(result)
+        result["actions_executed"] = bool(finish_report.get("actions_attempted"))
         sleep_fn(VIEW_RESET_SECONDS)
         frame, origin, selected_slot, before_state = observe()
         if before_state["status"] != "idle":
@@ -174,6 +209,7 @@ def execute_training_goal(
         result["frame_index"] = selected_slot.index
     click_point, selection_error = _level_click_point(frame, selected_slot, goal_slot.global_level)
     if selection_error:
+        trace.record("resolve_level_selector", target=goal_slot.global_level, decision="block", reason=selection_error)
         raise LiveTrainingError(selection_error)
     level_reading = read_slot_selector_levels(frame, selected_slot)
     if goal_slot.global_level != level_reading.highest_visible_level:
@@ -181,13 +217,17 @@ def execute_training_goal(
         _enable_live_failsafe(click_fn)
         result["actions_executed"] = True
         result["level_click_attempted"] = True
+        trace.record("select_level", target=goal_slot.global_level,
+                     observation=asdict(level_reading), action={"point": click_point, "origin": origin},
+                     decision="click")
         try:
             click_fn(click_point, origin)
             result["level_click_issued"] = True
         except Exception as error:
             result.update(status="UNKNOWN_AFTER_LEVEL_CLICK_ATTEMPT", blockers=[f"level_click_result_uncertain:{error}"])
             _record_uncertain(task, result["status"], now)
-            return result
+            trace.record("select_level_result", action="click", verification="unknown", reason=str(error))
+            return finish(result)
         sleep_fn(0.25)
         try:
             frame, new_origin = capture_fn()
@@ -199,7 +239,10 @@ def execute_training_goal(
         except Exception as error:
             result.update(status="UNKNOWN_AFTER_LEVEL_CLICK", blockers=[f"post_selection_check_failed_stop_without_retry:{error}"])
             _record_uncertain(task, result["status"], now)
-            return result
+            trace.record("verify_selected_slot", decision="stop", verification="failed", reason=str(error))
+            return finish(result)
+        trace.record("verify_selected_slot", observation={"frame_index": selected_slot.index},
+                     decision="continue", verification="same_slot_confirmed")
 
     try:
         _check_emergency_stop()
@@ -208,15 +251,24 @@ def execute_training_goal(
             raise LiveTrainingError(f"Training changed before Train ({current_state['status']}).")
         plan = _build_selected_slot_plan(frame, variant, selected_slot)
         result["preflight"] = plan
+        trace.record("train_preflight", target=result["goal"], observation=plan,
+                     decision="block" if plan["blockers"] else "continue",
+                     reason=plan["blockers"] or None)
         if plan["blockers"]:
             result.update(status="BLOCKED_BEFORE_TRAIN", blockers=plan["blockers"])
-            return result
+            return finish(result)
         time_reading = read_slot_training_time(frame, selected_slot)
+        trace.record("read_training_time", observation=asdict(time_reading),
+                     decision="continue" if time_reading.value is not None and time_reading.confidence is not None
+                     and time_reading.confidence >= MIN_CONFIDENCE else "block",
+                     reason=None if time_reading.value is not None and time_reading.confidence is not None
+                     and time_reading.confidence >= MIN_CONFIDENCE else "training_time_uncertain")
         if time_reading.value is None or time_reading.confidence is None or time_reading.confidence < MIN_CONFIDENCE:
             raise LiveTrainingError(f"Training time is uncertain ({time_reading.raw}); refusing Train click.")
     except Exception as error:
         result.update(status="BLOCKED_BEFORE_TRAIN", blockers=[str(error)])
-        return result
+        trace.record("train_preflight", decision="block", verification="failed", reason=str(error))
+        return finish(result)
 
     train_region = selected_slot.regions["unit_troop_train_button"]
     train_point = (train_region["x"] + train_region["w"] // 2, train_region["y"] + train_region["h"] // 2)
@@ -224,13 +276,16 @@ def execute_training_goal(
     result["train_click_attempted"] = True
     result["actions_executed"] = True
     result["queue_modified"] = "unknown"
+    trace.record("train_click", target=result["goal"], action={"point": train_point, "origin": origin},
+                 decision="click")
     try:
         click_fn(train_point, origin)
         result["train_click_issued"] = True
     except Exception as error:
         result.update(status="UNKNOWN_AFTER_TRAIN_CLICK_ATTEMPT", blockers=[f"train_click_result_uncertain_do_not_retry:{error}"])
         _record_uncertain(task, result["status"], now, pause=True, queue=queue)
-        return result
+        trace.record("train_click_result", action="click", verification="unknown", reason=str(error))
+        return finish(result)
     result["actions_executed"] = True
     sleep_fn(0.5)
     try:
@@ -241,12 +296,16 @@ def execute_training_goal(
     except Exception as error:
         result.update(status="UNKNOWN_AFTER_CLICK", blockers=[f"post_click_confirmation_failed_do_not_retry:{error}"])
         _record_uncertain(task, result["status"], now, pause=True, queue=queue)
-        return result
+        trace.record("verify_training_start", decision="stop", verification="unknown", reason=str(error))
+        return finish(result)
     result["post_click_training_state"] = after_state["status"]
+    trace.record("verify_training_start", observation=after_state,
+                 decision="continue" if after_state["status"] == "active" else "stop",
+                 verification="confirmed" if after_state["status"] == "active" else "not_confirmed")
     if after_state["status"] != "active":
         result.update(status="UNKNOWN_AFTER_CLICK", blockers=["train_click_not_visually_confirmed_do_not_retry"])
         _record_uncertain(task, result["status"], now, pause=True, queue=queue)
-        return result
+        return finish(result)
 
     started_at = datetime.now(timezone.utc)
     mark_task_started(queue, task_id, time_reading.value, now=started_at)
@@ -262,7 +321,7 @@ def execute_training_goal(
             queue_modified=True,
             help_action="not_attempted_by_test_mode",
         )
-        return result
+        return finish(result)
     post_order_delay = queue["settings"]["post_order_delay_seconds"]
     sleep_fn(post_order_delay)
     help_requested_at = started_at + timedelta(seconds=post_order_delay)
@@ -278,7 +337,7 @@ def execute_training_goal(
             blockers=[f"help_state_read_failed_do_not_click:{error}"],
             queue_modified=True,
         )
-        return result
+        return finish(result)
     result["help_button_state_before_click"] = help_state.get("button_state", "unknown")
     button_region = help_state.get("training_button_region")
     if help_state["status"] != "active" or help_state.get("button_state") != "help" or not button_region:
@@ -288,7 +347,9 @@ def execute_training_goal(
             blockers=["active_training_and_panel_help_button_not_confirmed_do_not_click"],
             queue_modified=True,
         )
-        return result
+        trace.record("verify_help_state", observation=help_state, decision="block", verification="not_confirmed")
+        return finish(result)
+    trace.record("verify_help_state", observation=help_state, decision="continue", verification="help_button_confirmed")
 
     help_point = (
         button_region["x"] + button_region["w"] // 2,
@@ -302,8 +363,11 @@ def execute_training_goal(
             blockers=[f"emergency_stop_before_help_click:{error}"],
             queue_modified=True,
         )
-        return result
+        trace.record("help_emergency_stop_check", decision="block", reason=str(error))
+        return finish(result)
     result["help_click_attempted"] = True
+    trace.record("help_click", target="help_button", action={"point": help_point, "origin": origin},
+                 decision="click")
     try:
         click_fn(help_point, origin)
         result["help_click_issued"] = True
@@ -314,7 +378,8 @@ def execute_training_goal(
             blockers=[f"help_click_result_uncertain_do_not_retry:{error}"],
             queue_modified=True,
         )
-        return result
+        trace.record("help_click_result", action="click", verification="unknown", reason=str(error))
+        return finish(result)
 
     settle_delay = queue["settings"]["help_to_speedup_delay_seconds"]
     sleep_fn(settle_delay)
@@ -332,7 +397,8 @@ def execute_training_goal(
             blockers=[f"help_confirmation_failed_do_not_retry:{error}"],
             queue_modified=True,
         )
-        return result
+        trace.record("verify_speedup_state", decision="block", verification="unknown", reason=str(error))
+        return finish(result)
     result["help_button_state_after_click"] = confirmed_state.get("button_state", "unknown")
     if confirmed_state["status"] != "active" or confirmed_state.get("button_state") != "speedup":
         _pause_uncertain_help(queue, task_id)
@@ -341,7 +407,9 @@ def execute_training_goal(
             blockers=["speedup_button_not_confirmed_after_help_do_not_retry"],
             queue_modified=True,
         )
-        return result
+        trace.record("verify_speedup_state", observation=confirmed_state, decision="block",
+                     verification="not_confirmed", reason="speedup_button_not_confirmed")
+        return finish(result)
     confirm_help_action(
         queue, task_id,
         help_requested_at,
@@ -360,4 +428,6 @@ def execute_training_goal(
         initial_time_reading=asdict(time_reading),
         blockers=[],
     )
-    return result
+        trace.record("verify_speedup_state", observation=confirmed_state, decision="continue",
+                     verification="speedup_button_confirmed")
+        return finish(result)

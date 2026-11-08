@@ -34,6 +34,10 @@ def test_short_task_uses_preferred_hours_largest_first():
 
     assert dict(plan.uses) == {8 * HOUR: 1, 3 * HOUR: 1, HOUR: 1}
     assert plan.breached_floors == ()
+    assert [decision["selected_duration_seconds"] for decision in plan.decisions] == [8 * HOUR, 3 * HOUR, HOUR]
+    assert [decision["strategy"] for decision in plan.decisions] == ["preferred_fit"] * 3
+    assert [decision["remaining_before_seconds"] for decision in plan.decisions] == [12 * HOUR, 4 * HOUR, HOUR]
+    assert plan.decisions[0]["candidates_seconds"] == (HOUR, 3 * HOUR, 8 * HOUR)
 
 
 def test_mid_task_prefers_8h_and_15h():

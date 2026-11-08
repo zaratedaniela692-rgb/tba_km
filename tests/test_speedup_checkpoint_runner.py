@@ -38,6 +38,7 @@ class FakeGame:
         self.moves = []
         self.clicks = []
         self.quantity_read_requests = []
+        self.timer_read_requests = []
         self.last_frame = None
 
     def capture(self):
@@ -73,6 +74,20 @@ class FakeGame:
                 "incomplete", (), "fixture_unreadable",
                 match_diagnostics=({"detected_rectangle": {"x": 384, "y": 62}},),
             )
+        diagnostics = tuple({
+            "duration_label": button["duration_label"],
+            "expected_rectangle": button["rectangle"],
+            "detected_rectangle": {
+                "x": button["rectangle"]["x"], "y": button["rectangle"]["y"],
+                "width": button["rectangle"]["width"], "height": button["rectangle"]["height"],
+            },
+            "offset": {"x": 0, "y": 0}, "confidence": 1.0,
+        } for button in checkpoint["buttons"])
+        if kwargs.get("verify_only"):
+            return CheckpointInventoryReading(
+                "complete", (), checkpoint_steps=(checkpoint["scroll_count"],),
+                match_diagnostics=diagnostics,
+            )
         target_duration = kwargs.get("duration_seconds")
         self.quantity_read_requests.append((checkpoint["scroll_count"], target_duration))
         items = []
@@ -86,9 +101,12 @@ class FakeGame:
                 ParsedReading(str(quantity), quantity, 100.0, "ok"),
                 checkpoint["scroll_count"], button["rectangle"], button["center"],
             ))
-        return CheckpointInventoryReading("complete", tuple(items), checkpoint_steps=(checkpoint["scroll_count"],))
+        return CheckpointInventoryReading(
+            "complete", tuple(items), checkpoint_steps=(checkpoint["scroll_count"],),
+            match_diagnostics=diagnostics,
+        )
 
-    def run(self, dry_run=True, stop_fn=lambda: None):
+    def run(self, dry_run=True, stop_fn=lambda: None, timer_reader_fn=None):
         return run_checkpoint_speedups(
             self.capture,
             self.move,
@@ -101,13 +119,21 @@ class FakeGame:
             sleep_fn=lambda _: None,
             dry_run=dry_run,
             anchor_fn=lambda _: True,
-            timer_reader_fn=lambda frame: ParsedReading(str(frame.timer), frame.timer, 100.0, "ok"),
+            timer_reader_fn=lambda frame: self._read_timer(
+                frame, timer_reader_fn or (
+                    lambda current: ParsedReading(str(current.timer), current.timer, 100.0, "ok")
+                ),
+            ),
             inventory_reader_fn=self.read_checkpoint,
             frame_size_fn=lambda _: FRAME_SIZE,
             viewport_crop_fn=lambda frame, _: frame,
             viewport_change_fn=lambda before, after: float(before.step != after.step),
             expected_frame_size=FRAME_SIZE,
         )
+
+    def _read_timer(self, frame, reader):
+        self.timer_read_requests.append(frame.step)
+        return reader(frame)
 
 def test_dry_run_scans_exact_checkpoints_and_never_clicks():
     game = FakeGame(inventory={HOUR: 11})
@@ -125,11 +151,13 @@ def test_dry_run_scans_exact_checkpoints_and_never_clicks():
     assert events.count("viewport_check") == 16
     assert events.count("checkpoint_read") == 3
     assert "plan_built" in events
+    assert "planning_started" in events
+    assert [event["data"]["selected_duration_seconds"] for event in result.event_trace if event["event"] == "plan_choice"] == [HOUR]
     assert events[-1] == "run_finished"
     assert result.event_trace[-1]["data"]["reason"] == "dry_run"
 
 
-def test_short_initial_timer_keeps_original_plan_after_twenty_percent_drop():
+def test_execution_uses_the_single_initial_plan_after_timer_changes():
     inventory = {duration: 100 for duration in (
         900, HOUR, 3 * HOUR, 8 * HOUR, 15 * HOUR, 86400,
         3 * 86400, 7 * 86400, 30 * 86400,
@@ -140,10 +168,11 @@ def test_short_initial_timer_keeps_original_plan_after_twenty_percent_drop():
 
     assert result.status == FINISHED
     assert result.replan is None
-    assert len(game.clicks) == 2
+    assert len(game.clicks) == 6
+    assert len([event for event in result.event_trace if event["event"] == "plan_built"]) == 1
 
 
-def test_live_run_clicks_once_and_requires_the_quantity_to_drop():
+def test_live_run_uses_initial_quantity_and_reads_timer_only_after_the_plan():
     game = FakeGame(inventory={HOUR: 11})
 
     result = game.run(dry_run=False)
@@ -154,22 +183,43 @@ def test_live_run_clicks_once_and_requires_the_quantity_to_drop():
     assert game.clicks == [(1122, 529)]
     assert game.inventory[HOUR] == 10
     click_event = next(event for event in result.event_trace if event["event"] == "use_click")
-    assert click_event["data"] == {"status": "sent", "duration_seconds": HOUR, "screen_point": (1122, 529)}
+    assert click_event["data"] == {
+        "status": "sent", "duration_seconds": HOUR, "screen_point": (1122, 529),
+        "use_number": 1, "plan_generation": 1, "plan_step": 1, "plan_total": 1,
+    }
     verification = next(event for event in result.event_trace if event["event"] == "use_verification")
-    assert verification["data"]["observed_quantity"] == 10
-    assert [request for request in game.quantity_read_requests if request[1] is not None] == [
-        (3, HOUR), (3, HOUR),
-    ]
+    assert verification["data"]["quantity_checked"] is False
+    assert verification["data"]["status"] == "deferred_to_final_timer"
+    assert [request for request in game.quantity_read_requests if request[1] is not None] == []
+    assert len(game.timer_read_requests) == 3  # initial, post-scan, final; never after each click
     timing = result.click_timings[0]
     assert timing["duration_seconds"] == HOUR
     assert timing["checkpoint"] == 3
     assert all(timing[key] >= 0 for key in (
-        "navigation_ms", "pre_quantity_ocr_ms", "click_settle_capture_ms",
-        "post_quantity_ocr_ms", "timer_ocr_ms",
+        "navigation_ms", "button_match_ms", "click_settle_capture_ms",
     ))
 
 
-def test_short_initial_timer_does_not_replan_at_twenty_percent(monkeypatch):
+def test_repeated_same_item_uses_are_indexed_and_explain_each_choice():
+    game = FakeGame(remaining=3 * HOUR, inventory={HOUR: 13})
+
+    result = game.run(dry_run=False)
+
+    assert result.status == FINISHED
+    use_steps = [event for event in result.event_trace if event["event"] == "use_step_started"]
+    assert [
+        (event["data"]["use_number"], event["data"]["plan_step"], event["data"]["duration_label"])
+        for event in use_steps
+    ] == [(1, 1, "1h"), (2, 2, "1h"), (3, 3, "1h")]
+    assert all(event["data"]["decision"]["strategy"] == "preferred_fit" for event in use_steps)
+    confirmed = [event for event in result.event_trace if event["event"] == "use_verification"]
+    assert len(confirmed) == 3
+    assert all(event["data"]["quantity_checked"] is False for event in confirmed)
+    assert all(request[1] is None for request in game.quantity_read_requests)
+    assert len(game.timer_read_requests) == 3
+
+
+def test_executor_calls_planner_once_and_never_replans(monkeypatch):
     inventory = {duration: 100 for duration in (900, HOUR, 3 * HOUR, 8 * HOUR, 15 * HOUR,
                                                   86400, 3 * 86400, 7 * 86400, 30 * 86400)}
     game = FakeGame(remaining=2 * 86400, inventory=inventory, clan_help=35 * HOUR)
@@ -204,8 +254,8 @@ def test_unreadable_checkpoint_blocks_before_any_click():
 
     assert result.status == BLOCKED
     assert "inventory_incomplete:11" in result.reason
-    assert result.checkpoint_diagnostics[0]["scroll_count"] == 11
-    assert result.checkpoint_diagnostics[0]["matches"][0]["detected_rectangle"] == {"x": 384, "y": 62}
+    failed_diagnostic = next(item for item in result.checkpoint_diagnostics if item["scroll_count"] == 11)
+    assert failed_diagnostic["matches"][0]["detected_rectangle"] == {"x": 384, "y": 62}
     assert result.event_trace[-2]["event"] == "run_aborted"
     assert result.event_trace[-2]["data"]["reason"] == result.reason
     checkpoint_event = next(
@@ -222,7 +272,7 @@ def test_uncertain_click_is_not_retried():
     result = game.run(dry_run=False)
 
     assert result.status == UNCERTAIN
-    assert result.reason == "use_not_confirmed"
+    assert result.reason == "timer_not_zero_after_plan"
     assert len(game.clicks) == 1
 
 

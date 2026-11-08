@@ -14,15 +14,12 @@ from speedup_inventory_reader import (
     read_checkpoint_viewport,
 )
 from speedup_planner import STATUS_NOTHING_TO_DO, STATUS_SHORTFALL, plan_speedups
-from speedup_readings import SECONDS_PER_DAY
 from speedup_reader import read_remaining_time
 
 BLOCKED = "BLOCKED"
 CHECKPOINT_ORDER = (3, 11, 16)
 EXPECTED_FRAME_SIZE = (1920, 1080)
 SETTLE_SECONDS = 0.35
-REPLAN_BELOW_FRACTION = 0.2
-REPLAN_MIN_INITIAL_SECONDS = 3 * SECONDS_PER_DAY
 
 
 @dataclass(frozen=True)
@@ -36,10 +33,12 @@ class CheckpointRunResult:
     replan: object = None
     checkpoint_steps: tuple = ()
     remaining_seconds: int | None = None
+    final_remaining_seconds: int | None = None
     inventory_evidence: tuple = ()
     click_timings: tuple = ()
     checkpoint_diagnostics: tuple = ()
     event_trace: tuple = ()
+    final_timer_read_ms: float | None = None
 
 
 class _Abort(Exception):
@@ -68,6 +67,21 @@ def _changed(previous, current):
 
 def _expanded_uses(plan):
     return [duration for duration, count in plan.uses for _ in range(count)]
+
+
+def _expanded_plan(plan):
+    decisions = iter(getattr(plan, "decisions", ()))
+    return [
+        (duration, next(decisions, {}))
+        for duration, count in plan.uses
+        for _ in range(count)
+    ]
+
+
+def _timed_call(function, *args, **kwargs):
+    started = time.perf_counter()
+    result = function(*args, **kwargs)
+    return result, round((time.perf_counter() - started) * 1000, 1)
 
 
 class _CheckpointRunner:
@@ -120,9 +134,11 @@ class _CheckpointRunner:
         self.inventory = None
         self.inventory_items = ()
         self.remaining_seconds = None
+        self.last_observed_timer = None
         self.checkpoint_steps = ()
         self.click_timings = []
         self.checkpoint_diagnostics = []
+        self.final_timer_read_ms = None
         self.started_at = time.perf_counter()
         self.event_trace = []
 
@@ -236,7 +252,7 @@ class _CheckpointRunner:
         self.frame_before_scroll = self.frame
         return self._scroll_once(direction)
 
-    def read_checkpoint(self, frame, step, duration_seconds=None):
+    def read_checkpoint(self, frame, step, duration_seconds=None, verify_only=False):
         checkpoint = next((item for item in self.button_map["checkpoints"] if item["scroll_count"] == step), None)
         if checkpoint is None:
             self.abort(f"checkpoint_not_mapped:{step}")
@@ -253,6 +269,7 @@ class _CheckpointRunner:
                     int(self.button_map["viewport_size"]["height"]),
                 ),
                 duration_seconds=duration_seconds,
+                verify_only=verify_only,
             )
         except Exception as error:
             self.record("checkpoint_read", status="error", reason=str(error), requested_duration=duration_seconds)
@@ -306,13 +323,42 @@ class _CheckpointRunner:
         self.inventory_items = combined.items
         self.stock = dict(self.inventory)
         self.checkpoint_steps = combined.checkpoint_steps
-        self.plan = plan_speedups(latest_timer.value, self.inventory)
         self.remaining_seconds = latest_timer.value
+        self.last_observed_timer = latest_timer.value
+        owned_seconds = sum(duration * quantity for duration, quantity in self.inventory.items())
+        self.record(
+            "planning_started", remaining_seconds=latest_timer.value,
+            inventory=tuple(sorted(self.inventory.items())),
+            owned_seconds=owned_seconds,
+            coverage_surplus_seconds=owned_seconds - latest_timer.value,
+        )
+        self.plan = plan_speedups(latest_timer.value, self.inventory)
+        for decision in self.plan.decisions:
+            duration_label = next((
+                button["duration_label"]
+                for checkpoint in self.button_map["checkpoints"]
+                for button in checkpoint["buttons"]
+                if int(button["duration_seconds"]) == decision["selected_duration_seconds"]
+            ), None)
+            self.record("plan_choice", duration_label=duration_label, **decision)
         self.record(
             "plan_built", status=self.plan.status,
             remaining_seconds=latest_timer.value,
             inventory=tuple(sorted(self.inventory.items())),
-            uses=self.plan.uses, breached_floors=self.plan.breached_floors,
+            owned_seconds=owned_seconds,
+            coverage_surplus_seconds=owned_seconds - latest_timer.value,
+            uses=tuple({
+                "duration_seconds": duration,
+                "duration_label": next((
+                    button["duration_label"]
+                    for checkpoint in self.button_map["checkpoints"]
+                    for button in checkpoint["buttons"]
+                    if int(button["duration_seconds"]) == duration
+                ), None),
+                "quantity": quantity,
+                "total_seconds": duration * quantity,
+            } for duration, quantity in self.plan.uses),
+            breached_floors=self.plan.breached_floors,
             shortfall_seconds=self.plan.shortfall_seconds,
         )
         return latest_timer
@@ -341,37 +387,66 @@ class _CheckpointRunner:
             self.scroll(direction)
         return self.frame
 
-    def _click_item(self, duration, step, last_use):
+    def _click_item(self, duration, step, last_use, use_number, plan_generation, plan_step, plan_total):
         timing = {
             "duration_seconds": duration,
             "checkpoint": step,
+            "use_number": use_number,
+            "plan_generation": plan_generation,
+            "plan_step": plan_step,
+            "plan_total": plan_total,
+        }
+        use_context = {
+            "use_number": use_number,
+            "plan_generation": plan_generation,
+            "plan_step": plan_step,
+            "plan_total": plan_total,
         }
         started = time.perf_counter()
         frame = self._navigate_to(step)
         timing["navigation_ms"] = round((time.perf_counter() - started) * 1000, 1)
 
         started = time.perf_counter()
-        reading = self.read_checkpoint(frame, step, duration_seconds=duration)
-        item = next((item for item in reading.items if item.duration_seconds == duration), None)
-        if item is None or item.quantity.value != self.stock[duration]:
+        reading, button_match_ms = _timed_call(
+            self.read_checkpoint, frame, step, duration_seconds=duration, verify_only=True,
+        )
+        if reading.status != "complete":
             self.record(
-                "use_precheck", status="failed", duration_seconds=duration,
-                expected_quantity=self.stock[duration],
-                observed_quantity=None if item is None else item.quantity.value,
+                "use_button_check", status="failed", duration_seconds=duration,
+                reason=reading.reason, matches=reading.match_diagnostics,
+                **use_context,
             )
-            self.abort("inventory_changed_before_use")
-        timing["pre_quantity_ocr_ms"] = round((time.perf_counter() - started) * 1000, 1)
-        center = item.button_center
+            self.abort(f"use_button_layout_unconfirmed:{reading.reason}")
+        duration_label = next((
+            button["duration_label"]
+            for checkpoint in self.button_map["checkpoints"]
+            for button in checkpoint["buttons"]
+            if int(button["duration_seconds"]) == duration
+        ), None)
+        matched_button = next((
+            match for match in reading.match_diagnostics
+            if match.get("duration_label") == duration_label
+        ), None)
+        if matched_button is None:
+            self.record(
+                "use_button_check", status="failed", duration_seconds=duration,
+                duration_label=duration_label, matches=reading.match_diagnostics, **use_context,
+            )
+            self.abort("target_use_button_not_matched")
+        timing["button_match_ms"] = button_match_ms
+        rectangle = matched_button["detected_rectangle"]
+        center = {"x": rectangle["x"] + rectangle["width"] // 2,
+                  "y": rectangle["y"] + rectangle["height"] // 2}
         viewport = self.regions["speedup_inventory_viewport"]
         point = (
             self.origin[0] + int(viewport["x"]) + int(center["x"]),
             self.origin[1] + int(viewport["y"]) + int(center["y"]),
         )
         self.record(
-            "use_precheck", status="ok", duration_seconds=duration,
-            duration_label=item.duration_label, quantity=item.quantity.value,
-            button_rectangle=item.button_rectangle, button_center=item.button_center,
-            screen_point=point,
+            "use_button_check", status="matched", duration_seconds=duration,
+            duration_label=duration_label, button_rectangle=rectangle, button_center=center,
+            screen_point=point, initial_quantity=self.stock[duration],
+            matches=reading.match_diagnostics, **use_context,
         )
         self.check_stop()
         self.clicks_issued += 1
@@ -381,115 +456,112 @@ class _CheckpointRunner:
         except Exception as error:
             self.record(
                 "use_click", status="failed", duration_seconds=duration,
-                screen_point=point, reason=str(error),
+                screen_point=point, reason=str(error), **use_context,
             )
             self.abort(f"click_failed:{error}", after_click=True)
-        self.record("use_click", status="sent", duration_seconds=duration, screen_point=point)
+        self.record("use_click", status="sent", duration_seconds=duration, screen_point=point, **use_context)
         self.sleep_fn(SETTLE_SECONDS)
         after = self.capture(require_dialog=False)
         timing["click_settle_capture_ms"] = round((time.perf_counter() - started) * 1000, 1)
         dialog_recognized = self.anchor_fn(after)
         self.record(
             "dialog_check", status="recognized" if dialog_recognized else "not_recognized",
-            phase="post_use", duration_seconds=duration,
+            phase="post_use", duration_seconds=duration, **use_context,
         )
         if not dialog_recognized:
-            self.record("use_verification", status="dialog_closed", duration_seconds=duration)
+            self.stock[duration] -= 1
+            self.used[duration] = self.used.get(duration, 0) + 1
+            self.record(
+                "use_verification", status="dialog_closed", quantity_checked=False,
+                duration_seconds=duration, **use_context,
+            )
             if last_use:
-                self.used[duration] = self.used.get(duration, 0) + 1
-                self.stock[duration] -= 1
-                timing["post_quantity_ocr_ms"] = None
-                timing["timer_ocr_ms"] = None
                 self.click_timings.append(timing)
                 return None, None
             self.abort("dialog_closed_before_plan_end", after_click=True)
 
-        started = time.perf_counter()
-        after_reading = self.read_checkpoint(after, step, duration_seconds=duration)
-        after_item = next((item for item in after_reading.items if item.duration_seconds == duration), None)
         expected_quantity = self.stock[duration] - 1
-        if after_item is None or after_item.quantity.value != expected_quantity:
-            self.record(
-                "use_verification", status="failed", duration_seconds=duration,
-                expected_quantity=expected_quantity,
-                observed_quantity=None if after_item is None else after_item.quantity.value,
-            )
-            self.abort("use_not_confirmed", after_click=True)
-        self.record(
-            "use_verification", status="confirmed", duration_seconds=duration,
-            expected_quantity=expected_quantity, observed_quantity=after_item.quantity.value,
-        )
-        timing["post_quantity_ocr_ms"] = round((time.perf_counter() - started) * 1000, 1)
         self.stock[duration] = expected_quantity
         self.used[duration] = self.used.get(duration, 0) + 1
-        started = time.perf_counter()
-        try:
-            timer_reading = self.timer_reader_fn(after)
-        except Exception as error:
-            self.record("timer_read", phase="post_use", status="error", reason=str(error))
-            timer_reading = None
-        if timer_reading is not None:
-            self.record(
-                "timer_read", phase="post_use", status=timer_reading.status,
-                raw=timer_reading.raw, value_seconds=timer_reading.value,
-                confidence=timer_reading.confidence,
-            )
-        timing["timer_ocr_ms"] = round((time.perf_counter() - started) * 1000, 1)
+        self.record(
+            "use_verification", status="deferred_to_final_timer", quantity_checked=False,
+            expected_quantity=expected_quantity, observed_quantity=None,
+            reason="post_click_ocr_disabled", duration_seconds=duration, **use_context,
+        )
         self.click_timings.append(timing)
-        return after, timer_reading
+        return after, None
 
     def execute(self, dry_run):
         latest_timer = self.scan()
         plan = self.plan
         if plan.status == STATUS_NOTHING_TO_DO:
+            self.record("execution_decision", action="no_clicks_needed", reason="already_finished")
             return self.result(FINISHED, "already_finished", plan)
         if plan.status == STATUS_SHORTFALL:
+            self.record(
+                "execution_decision", action="stop_shortfall",
+                reason="owned_items_do_not_cover_remaining_time",
+                shortfall_seconds=plan.shortfall_seconds,
+            )
             return self.result(NOT_ENOUGH, "owned_items_do_not_cover_remaining_time", plan, plan.shortfall_seconds)
         if dry_run:
+            self.record("execution_decision", action="plan_only", reason="dry_run_no_clicks")
             return self.result(PLANNED, "dry_run", plan)
 
-        queue = _expanded_uses(plan)
-        initial_timer = latest_timer.value
+        queue = _expanded_plan(plan)
+        plan_generation = 1
+        plan_total = len(queue)
+        plan_step = 0
+        self.record(
+            "execution_started", plan_generation=plan_generation,
+            planned_uses=plan_total,
+            planned_seconds=sum(duration for duration, _ in queue),
+            initial_timer_seconds=latest_timer.value,
+        )
         while queue:
-            duration = queue.pop(0)
+            duration, decision = queue.pop(0)
+            plan_step += 1
             label = next((name for name, value in self._duration_by_label().items() if value == duration), None)
             step = int(self.button_map["preferred_scroll_count_by_duration"].get(label, 0))
             if step not in CHECKPOINT_ORDER:
                 self.abort(f"duration_checkpoint_missing:{duration}")
-            after, timer_reading = self._click_item(duration, step, last_use=not queue)
+            self.record(
+                "use_step_started", use_number=self.clicks_issued + 1,
+                plan_generation=plan_generation, plan_step=plan_step,
+                plan_total=plan_total, duration_seconds=duration,
+                duration_label=label, checkpoint=step,
+                remaining_queue=len(queue), decision=decision,
+            )
+            after, _ = self._click_item(
+                duration, step, last_use=not queue,
+                use_number=self.clicks_issued + 1, plan_generation=plan_generation,
+                plan_step=plan_step, plan_total=plan_total,
+            )
             if after is None:
+                self.record("execution_decision", action="finish_dialog_closed", reason="last_planned_use_closed_dialog")
                 return self.result(FINISHED, "dialog_closed_after_last_use", plan)
-            if timer_reading is not None and timer_reading.value == 0:
-                return self.result(FINISHED, "timer_reached_zero", plan)
-            if (
-                self.replan is None
-                and self.initial_timer >= REPLAN_MIN_INITIAL_SECONDS
-                and timer_reading is not None
-                and timer_reading.value is not None
-                and timer_reading.value < initial_timer * REPLAN_BELOW_FRACTION
-            ):
-                self.replan = plan_speedups(timer_reading.value, self.stock)
-                self.record(
-                    "plan_rebuilt", status=self.replan.status,
-                    remaining_seconds=timer_reading.value,
-                    inventory=tuple(sorted(self.stock.items())), uses=self.replan.uses,
-                    breached_floors=self.replan.breached_floors,
-                    shortfall_seconds=self.replan.shortfall_seconds,
-                )
-                if self.replan.status == STATUS_SHORTFALL:
-                    return self.result(
-                        NOT_ENOUGH,
-                        "owned_items_do_not_cover_remaining_time_after_replan",
-                        plan,
-                        self.replan.shortfall_seconds,
-                    )
-                queue = _expanded_uses(self.replan)
+        final_timer, self.final_timer_read_ms = _timed_call(self.timer, self.frame, "final")
+        self.last_observed_timer = final_timer.value
+        if final_timer.value == 0:
+            self.record("execution_decision", action="finish_timer_zero", reason="final_timer_is_zero")
+            return self.result(FINISHED, "timer_reached_zero", plan)
+        self.record(
+            "execution_decision", action="plan_exhausted",
+            reason="planned_uses_consumed_but_timer_not_confirmed_zero",
+            final_observed_timer_seconds=final_timer.value,
+            initial_timer_seconds=latest_timer.value,
+            planned_seconds=sum(duration for duration, _ in _expanded_plan(plan)),
+            uses_submitted=tuple(sorted(self.used.items())),
+        )
         return self.result(UNCERTAIN, "timer_not_zero_after_plan", plan)
 
     def result(self, status, reason, plan=None, shortfall=0):
         self.record(
             "run_finished", status=status, reason=reason,
             clicks_issued=self.clicks_issued, shortfall_seconds=shortfall,
+            initial_timer_seconds=self.remaining_seconds,
+            final_observed_timer_seconds=self.last_observed_timer,
+            submitted_uses=tuple(sorted(self.used.items())),
         )
         return CheckpointRunResult(
             status=status,
@@ -501,6 +573,7 @@ class _CheckpointRunner:
             replan=self.replan,
             checkpoint_steps=self.checkpoint_steps,
             remaining_seconds=self.remaining_seconds,
+            final_remaining_seconds=self.last_observed_timer,
             inventory_evidence=tuple({
                 "duration_label": item.duration_label,
                 "duration_seconds": item.duration_seconds,
@@ -512,6 +585,7 @@ class _CheckpointRunner:
             click_timings=tuple(self.click_timings),
             checkpoint_diagnostics=tuple(self.checkpoint_diagnostics),
             event_trace=tuple(self.event_trace),
+            final_timer_read_ms=self.final_timer_read_ms,
         )
 
 

@@ -92,6 +92,7 @@ def read_checkpoint_viewport(
     expected_viewport_size=(562, 418),
     ocr_fn=None,
     duration_seconds=None,
+    verify_only=False,
 ):
     """Read mapped quantities, optionally limiting OCR to one requested duration."""
     if viewport_image is None or viewport_image.shape[:2] != (expected_viewport_size[1], expected_viewport_size[0]):
@@ -179,6 +180,11 @@ def read_checkpoint_viewport(
                 "incomplete", (), "use_button_offsets_inconsistent",
                 match_diagnostics=match_diagnostics,
             )
+
+    if verify_only:
+        return CheckpointInventoryReading(
+            "complete", (), checkpoint_steps=(int(step),), match_diagnostics=match_diagnostics,
+        )
 
     configure_tesseract()
     ocr_fn = ocr_fn or _ocr_digits
