@@ -78,7 +78,7 @@ def test_execute_selects_target_level_then_train_once_and_marks_started(monkeypa
     assert result["selection_confirmed"] is False
     assert len(clicks) == 3
     assert [delay for delay in sleeps if delay in (2, 0.2)] == [2.0, 0.2]
-    assert queue["tasks"][0]["status"] == "waiting_help_delay"
+    assert queue["tasks"][0]["status"] == "waiting_completion"
     assert queue["tasks"][0]["initial_remaining_seconds"] == 3600
 
 

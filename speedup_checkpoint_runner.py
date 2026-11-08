@@ -14,6 +14,7 @@ from speedup_inventory_reader import (
     read_checkpoint_viewport,
 )
 from speedup_planner import STATUS_NOTHING_TO_DO, STATUS_SHORTFALL, plan_speedups
+from speedup_readings import SECONDS_PER_DAY
 from speedup_reader import read_remaining_time
 
 BLOCKED = "BLOCKED"
@@ -21,6 +22,7 @@ CHECKPOINT_ORDER = (3, 11, 16)
 EXPECTED_FRAME_SIZE = (1920, 1080)
 SETTLE_SECONDS = 0.35
 REPLAN_BELOW_FRACTION = 0.2
+REPLAN_MIN_INITIAL_SECONDS = 3 * SECONDS_PER_DAY
 
 
 @dataclass(frozen=True)
@@ -35,6 +37,7 @@ class CheckpointRunResult:
     checkpoint_steps: tuple = ()
     remaining_seconds: int | None = None
     inventory_evidence: tuple = ()
+    click_timings: tuple = ()
 
 
 class _Abort(Exception):
@@ -116,6 +119,7 @@ class _CheckpointRunner:
         self.inventory_items = ()
         self.remaining_seconds = None
         self.checkpoint_steps = ()
+        self.click_timings = []
 
     def abort(self, reason, after_click=False):
         status = UNCERTAIN if after_click or self.clicks_issued else BLOCKED
@@ -183,7 +187,7 @@ class _CheckpointRunner:
         self.frame_before_scroll = self.frame
         return self._scroll_once(direction)
 
-    def read_checkpoint(self, frame, step):
+    def read_checkpoint(self, frame, step, duration_seconds=None):
         checkpoint = next((item for item in self.button_map["checkpoints"] if item["scroll_count"] == step), None)
         if checkpoint is None:
             self.abort(f"checkpoint_not_mapped:{step}")
@@ -199,6 +203,7 @@ class _CheckpointRunner:
                     int(self.button_map["viewport_size"]["width"]),
                     int(self.button_map["viewport_size"]["height"]),
                 ),
+                duration_seconds=duration_seconds,
             )
         except Exception as error:
             self.abort(f"inventory_read_failed:{error}")
@@ -252,13 +257,23 @@ class _CheckpointRunner:
         while self.current_step != step:
             direction = -1 if step > self.current_step else 1
             self.scroll(direction)
-        return self.read_checkpoint(self.frame, step)
+        return self.frame
 
     def _click_item(self, duration, step, last_use):
-        reading = self._navigate_to(step)
+        timing = {
+            "duration_seconds": duration,
+            "checkpoint": step,
+        }
+        started = time.perf_counter()
+        frame = self._navigate_to(step)
+        timing["navigation_ms"] = round((time.perf_counter() - started) * 1000, 1)
+
+        started = time.perf_counter()
+        reading = self.read_checkpoint(frame, step, duration_seconds=duration)
         item = next((item for item in reading.items if item.duration_seconds == duration), None)
         if item is None or item.quantity.value != self.stock[duration]:
             self.abort("inventory_changed_before_use")
+        timing["pre_quantity_ocr_ms"] = round((time.perf_counter() - started) * 1000, 1)
         center = item.button_center
         viewport = self.regions["speedup_inventory_viewport"]
         point = (
@@ -267,30 +282,40 @@ class _CheckpointRunner:
         )
         self.check_stop()
         self.clicks_issued += 1
+        started = time.perf_counter()
         try:
             self.click_fn(point)
         except Exception as error:
             self.abort(f"click_failed:{error}", after_click=True)
         self.sleep_fn(SETTLE_SECONDS)
         after = self.capture(require_dialog=False)
+        timing["click_settle_capture_ms"] = round((time.perf_counter() - started) * 1000, 1)
         if not self.anchor_fn(after):
             if last_use:
                 self.used[duration] = self.used.get(duration, 0) + 1
                 self.stock[duration] -= 1
+                timing["post_quantity_ocr_ms"] = None
+                timing["timer_ocr_ms"] = None
+                self.click_timings.append(timing)
                 return None, None
             self.abort("dialog_closed_before_plan_end", after_click=True)
 
-        after_reading = self.read_checkpoint(after, step)
+        started = time.perf_counter()
+        after_reading = self.read_checkpoint(after, step, duration_seconds=duration)
         after_item = next((item for item in after_reading.items if item.duration_seconds == duration), None)
         expected_quantity = self.stock[duration] - 1
         if after_item is None or after_item.quantity.value != expected_quantity:
             self.abort("use_not_confirmed", after_click=True)
+        timing["post_quantity_ocr_ms"] = round((time.perf_counter() - started) * 1000, 1)
         self.stock[duration] = expected_quantity
         self.used[duration] = self.used.get(duration, 0) + 1
+        started = time.perf_counter()
         try:
             timer_reading = self.timer_reader_fn(after)
         except Exception:
             timer_reading = None
+        timing["timer_ocr_ms"] = round((time.perf_counter() - started) * 1000, 1)
+        self.click_timings.append(timing)
         return after, timer_reading
 
     def execute(self, dry_run):
@@ -318,6 +343,7 @@ class _CheckpointRunner:
                 return self.result(FINISHED, "timer_reached_zero", plan)
             if (
                 self.replan is None
+                and self.initial_timer >= REPLAN_MIN_INITIAL_SECONDS
                 and timer_reading is not None
                 and timer_reading.value is not None
                 and timer_reading.value < initial_timer * REPLAN_BELOW_FRACTION
@@ -352,6 +378,7 @@ class _CheckpointRunner:
                 "status": item.quantity.status,
                 "scroll_count": item.scroll_count,
             } for item in self.inventory_items),
+            click_timings=tuple(self.click_timings),
         )
 
 

@@ -372,7 +372,7 @@ def test_committed_plan_is_valid_and_within_the_limit():
     items = dt.resolve_selection([], dt.load_scenarios(), dt.SETTINGS_PATH)
 
     assert 1 <= len(items) <= dt.MAX_SCENARIOS
-    assert items == [("preflight", False), ("speedup_scan", False)]
+    assert items == [("preflight", False), ("speedup_use", True)]
 
 
 def test_settings_default_to_publish_push_rerun_and_preparation_delay():

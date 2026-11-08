@@ -27,6 +27,8 @@ MAX_HOUR_DIGITS = 2
 DIGIT_SCALES = (6, 10)
 DIGIT_PAD = 2
 DIGIT_BORDER = 30
+MINUTE_OCR_SCALES = (4, 6)
+MINUTE_OCR_PSMS = (7, 8)
 # Digits confirmed on fixtures; informational only, not an acceptance whitelist.
 VERIFIED_DIGITS = frozenset("13467")
 
@@ -94,17 +96,43 @@ def _read_number(gray, digits):
     return reads[0]
 
 
+def _read_minute_timer(gray):
+    reads = []
+    for scale in MINUTE_OCR_SCALES:
+        enlarged = cv2.resize(gray, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+        for psm in MINUTE_OCR_PSMS:
+            try:
+                text = pytesseract.image_to_string(
+                    enlarged,
+                    config=f"--psm {psm} -c tessedit_char_whitelist=0123456789mMinIN",
+                ).strip()
+            except pytesseract.TesseractNotFoundError as error:
+                raise ArmyTrainingScannerError("Tesseract OCR was not found.") from error
+            reading = parse_remaining_time(text, 100.0)
+            reads.append((text, reading.value, reading.status))
+
+    values = {value for _, value, _ in reads}
+    raw = " / ".join(text for text, _, _ in reads)
+    if len(values) == 1 and None not in values:
+        return parse_remaining_time(reads[0][0], 100.0)
+    agreement = max((sum(value == candidate for _, value, _ in reads) for candidate in values), default=0)
+    return ParsedReading(raw, None, agreement * 100 / len(reads), "minute_ocr_disagreement")
+
+
 def read_remaining_time(image, variant=None, tesseract_cmd=None):
-    """Remaining task time in seconds (day/hour resolution); `value` is None unless unambiguous."""
+    """Read day/hour or minute-only remaining time; ambiguous values remain unset."""
     configure_tesseract(tesseract_cmd)
     variant = variant or resolve_variant()
     region = _load_regions(variant["regions"])[REGION_SCREEN][REGION_NAME]
     gray = cv2.cvtColor(_region_crop(image, region), cv2.COLOR_BGR2GRAY)
+    if gray.size == 0 or float(gray.std()) < 1.0:
+        return ParsedReading("", None, None, "layout_unrecognized")
     parts = _split_label(_components(gray))
     if parts is None:
-        return ParsedReading("", None, None, "layout_unrecognized")
+        return _read_minute_timer(gray)
     days, hours = (_read_number(gray, digits) for digits in parts)
     raw = f"{days or '?'}d.:{hours or '?'}g."
     if days is None or hours is None:
-        return ParsedReading(raw, None, None, "digit_unverified")
+        minute_reading = _read_minute_timer(gray)
+        return minute_reading if minute_reading.value is not None else ParsedReading(raw, None, None, "digit_unverified")
     return parse_remaining_time(raw, 100.0)

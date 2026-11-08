@@ -59,6 +59,23 @@ def test_small_uniform_viewport_shift_uses_live_button_positions_for_ocr_and_cli
     assert reading.items[0].button_center["y"] == checkpoint["buttons"][0]["center"]["y"] + 4
 
 
+def test_target_duration_read_ocr_processes_only_one_quantity():
+    checkpoint = next(entry for entry in MAP["checkpoints"] if entry["scroll_count"] == 3)
+    image = cv2.imread(str(FIXTURES / "checkpoint_003.png"))
+    ocr_calls = []
+
+    reading = read_checkpoint_viewport(
+        image, checkpoint, TEMPLATE, QUANTITY_REGION, USE_REGION,
+        ocr_fn=lambda crop, scale, psm: ocr_calls.append((crop.shape, scale, psm)) or "5285",
+        duration_seconds=3600,
+    )
+
+    assert reading.status == "complete"
+    assert [(item.duration_label, item.quantity.value) for item in reading.items] == [("1h", 5285)]
+    assert len(ocr_calls) == 2
+    assert [call[1] for call in ocr_calls] == [4, 6]
+
+
 def test_combines_checkpoints_and_deduplicates_repeated_three_day_item():
     combined = combine_checkpoint_readings(tuple(_read(step) for step in (3, 11, 16)))
 

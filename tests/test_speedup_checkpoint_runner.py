@@ -27,15 +27,17 @@ class Frame:
 
 
 class FakeGame:
-    def __init__(self, remaining=HOUR, inventory=None, click_effect=True, fail_checkpoint=None):
+    def __init__(self, remaining=HOUR, inventory=None, click_effect=True, fail_checkpoint=None, clan_help=0):
         self.step = 0
         self.remaining = remaining
+        self.clan_help = clan_help
         self.inventory = dict(inventory or {HOUR: 11})
         self.click_effect = click_effect
         self.fail_checkpoint = fail_checkpoint
         self.scrolls = []
         self.moves = []
         self.clicks = []
+        self.quantity_read_requests = []
         self.last_frame = None
 
     def capture(self):
@@ -62,13 +64,19 @@ class FakeGame:
         duration = button["duration_seconds"]
         self.inventory[duration] = self.inventory.get(duration, 0) - 1
         self.remaining = max(0, self.remaining - duration)
+        if len(self.clicks) == 1:
+            self.remaining = max(0, self.remaining - self.clan_help)
 
-    def read_checkpoint(self, _, checkpoint, *_args, **_kwargs):
+    def read_checkpoint(self, _, checkpoint, *_args, **kwargs):
         if checkpoint["scroll_count"] == self.fail_checkpoint:
             return CheckpointInventoryReading("incomplete", (), "fixture_unreadable")
+        target_duration = kwargs.get("duration_seconds")
+        self.quantity_read_requests.append((checkpoint["scroll_count"], target_duration))
         items = []
         for button in checkpoint["buttons"]:
             duration = button["duration_seconds"]
+            if target_duration is not None and duration != target_duration:
+                continue
             quantity = self.inventory.get(duration, 0)
             items.append(InventoryItemReading(
                 button["duration_label"], duration,
@@ -98,7 +106,6 @@ class FakeGame:
             expected_frame_size=FRAME_SIZE,
         )
 
-
 def test_dry_run_scans_exact_checkpoints_and_never_clicks():
     game = FakeGame(inventory={HOUR: 11})
 
@@ -112,6 +119,20 @@ def test_dry_run_scans_exact_checkpoints_and_never_clicks():
     assert game.clicks == []
 
 
+def test_short_initial_timer_keeps_original_plan_after_twenty_percent_drop():
+    inventory = {duration: 100 for duration in (
+        900, HOUR, 3 * HOUR, 8 * HOUR, 15 * HOUR, 86400,
+        3 * 86400, 7 * 86400, 30 * 86400,
+    )}
+    game = FakeGame(remaining=2 * 86400, inventory=inventory, clan_help=35 * HOUR)
+
+    result = game.run(dry_run=False)
+
+    assert result.status == FINISHED
+    assert result.replan is None
+    assert len(game.clicks) == 2
+
+
 def test_live_run_clicks_once_and_requires_the_quantity_to_drop():
     game = FakeGame(inventory={HOUR: 11})
 
@@ -122,6 +143,34 @@ def test_live_run_clicks_once_and_requires_the_quantity_to_drop():
     assert result.used == ((HOUR, 1),)
     assert game.clicks == [(1122, 529)]
     assert game.inventory[HOUR] == 10
+    assert [request for request in game.quantity_read_requests if request[1] is not None] == [
+        (3, HOUR), (3, HOUR),
+    ]
+    timing = result.click_timings[0]
+    assert timing["duration_seconds"] == HOUR
+    assert timing["checkpoint"] == 3
+    assert all(timing[key] >= 0 for key in (
+        "navigation_ms", "pre_quantity_ocr_ms", "click_settle_capture_ms",
+        "post_quantity_ocr_ms", "timer_ocr_ms",
+    ))
+
+
+def test_short_initial_timer_does_not_replan_at_twenty_percent(monkeypatch):
+    inventory = {duration: 100 for duration in (900, HOUR, 3 * HOUR, 8 * HOUR, 15 * HOUR,
+                                                  86400, 3 * 86400, 7 * 86400, 30 * 86400)}
+    game = FakeGame(remaining=2 * 86400, inventory=inventory, clan_help=35 * HOUR)
+    plans = []
+    real = __import__("speedup_checkpoint_runner").plan_speedups
+    monkeypatch.setattr(
+        "speedup_checkpoint_runner.plan_speedups",
+        lambda *args: plans.append(args[0]) or real(*args),
+    )
+
+    result = game.run(dry_run=False)
+
+    assert result.status == FINISHED
+    assert result.replan is None
+    assert plans == [2 * 86400]
 
 
 def test_insufficient_inventory_does_not_click():

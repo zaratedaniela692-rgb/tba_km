@@ -9,6 +9,7 @@ import time
 from dataclasses import dataclass
 
 from speedup_planner import STATUS_NOTHING_TO_DO, STATUS_SHORTFALL, plan_speedups
+from speedup_readings import SECONDS_PER_DAY
 
 FINISHED = "FINISHED"
 NOT_ENOUGH = "NOT_ENOUGH"
@@ -19,6 +20,7 @@ PLANNED = "PLANNED"
 MAX_SCROLLS = 12
 SETTLE_SECONDS = 0.3
 REPLAN_BELOW_FRACTION = 0.2
+REPLAN_MIN_INITIAL_SECONDS = 3 * SECONDS_PER_DAY
 
 
 @dataclass(frozen=True)
@@ -188,7 +190,12 @@ class _Run:
             if after is None or after.timer.value == 0:
                 return SpeedupResult(FINISHED, "task_finished", plan, tuple(self.used.items()), replan=replan)
             timer = after.timer.value
-            if replan is None and timer is not None and timer < initial * REPLAN_BELOW_FRACTION:
+            if (
+                replan is None
+                and initial >= REPLAN_MIN_INITIAL_SECONDS
+                and timer is not None
+                and timer < initial * REPLAN_BELOW_FRACTION
+            ):
                 replan = plan_speedups(timer, stock)
                 if replan.status == STATUS_SHORTFALL:
                     return SpeedupResult(

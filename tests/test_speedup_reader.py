@@ -42,6 +42,31 @@ def test_live_run_timer_with_previously_unverified_digits_is_read():
     assert reading.confidence == 100.0
 
 
+def test_minute_only_timer_uses_consensus_ocr_fallback(monkeypatch):
+    image = cv2.imread(str(SHOTS / "speedup_view.png"))
+    monkeypatch.setattr(speedup_reader, "_split_label", lambda _components: None)
+    answers = iter(("42m", "42m", "42m", "42m"))
+    monkeypatch.setattr(speedup_reader.pytesseract, "image_to_string", lambda *_args, **_kwargs: next(answers))
+
+    reading = read_remaining_time(image)
+
+    assert reading.status == "ok"
+    assert reading.value == 42 * 60
+    assert reading.raw == "42m"
+
+
+def test_minute_only_timer_ocr_disagreement_remains_unknown(monkeypatch):
+    image = cv2.imread(str(SHOTS / "speedup_view.png"))
+    monkeypatch.setattr(speedup_reader, "_split_label", lambda _components: None)
+    answers = iter(("42m", "42m", "41m", "42m"))
+    monkeypatch.setattr(speedup_reader.pytesseract, "image_to_string", lambda *_args, **_kwargs: next(answers))
+
+    reading = read_remaining_time(image)
+
+    assert reading.value is None
+    assert reading.status == "minute_ocr_disagreement"
+
+
 def test_unverified_digit_is_accepted_when_both_scales_agree(monkeypatch):
     monkeypatch.setattr(speedup_reader, "_read_digit", lambda *args: "8")
 

@@ -17,6 +17,11 @@ from speedup_readings import (
         ("13d:7g", 13 * SECONDS_PER_DAY + 7 * SECONDS_PER_HOUR),
         ("6 d. 1 g.", 6 * SECONDS_PER_DAY + SECONDS_PER_HOUR),
         ("7 g.", 7 * SECONDS_PER_HOUR),
+        ("57m", 57 * SECONDS_PER_MINUTE),
+        ("57 m.", 57 * SECONDS_PER_MINUTE),
+        ("42 min", 42 * SECONDS_PER_MINUTE),
+        ("1g. 42m.", SECONDS_PER_HOUR + 42 * SECONDS_PER_MINUTE),
+        ("1 d. : 2 g. : 5 m.", SECONDS_PER_DAY + 2 * SECONDS_PER_HOUR + 5 * SECONDS_PER_MINUTE),
         ("2 d.", 2 * SECONDS_PER_DAY),
     ],
 )
@@ -27,7 +32,7 @@ def test_parse_remaining_time(raw, expected):
     assert result.status == "ok"
 
 
-@pytest.mark.parametrize("raw", ["", "13 d. :", "13 d. : 24 g.", "13 days", "? d. : 7 g."])
+@pytest.mark.parametrize("raw", ["", "13 d. :", "13 d. : 24 g.", "1h 60m", "60m", "13 days", "? d. : 7 g."])
 def test_parse_remaining_time_fails_closed(raw):
     result = parse_remaining_time(raw, confidence=92)
 

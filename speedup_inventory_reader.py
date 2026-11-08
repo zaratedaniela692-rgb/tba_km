@@ -90,8 +90,9 @@ def read_checkpoint_viewport(
     use_region,
     expected_viewport_size=(562, 418),
     ocr_fn=None,
+    duration_seconds=None,
 ):
-    """Read all mapped quantities, requiring button and six-pass OCR agreement."""
+    """Read mapped quantities, optionally limiting OCR to one requested duration."""
     if viewport_image is None or viewport_image.shape[:2] != (expected_viewport_size[1], expected_viewport_size[0]):
         return CheckpointInventoryReading("incomplete", (), "unexpected_viewport_size")
 
@@ -141,6 +142,13 @@ def read_checkpoint_viewport(
 
     configure_tesseract()
     ocr_fn = ocr_fn or _ocr_digits
+    if duration_seconds is not None:
+        effective_buttons = [
+            button for button in effective_buttons
+            if parse_duration(button.get("duration_label", ""), 100.0).value == duration_seconds
+        ]
+        if len(effective_buttons) != 1:
+            return CheckpointInventoryReading("incomplete", (), "target_duration_not_unique")
     items = []
     for button in effective_buttons:
         duration = parse_duration(button.get("duration_label", ""), 100.0)

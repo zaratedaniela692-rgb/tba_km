@@ -131,6 +131,23 @@ def test_plan_is_not_rebuilt_while_the_timer_stays_above_twenty_percent():
     assert result.replan is None
 
 
+def test_short_initial_plan_does_not_rebuild_below_twenty_percent(monkeypatch):
+    game = FakeGame(
+        2 * D, stock(H, 3 * H, 8 * H, 15 * H, D, count=100),
+        clan_help=35 * H, close_on_finish=False,
+    )
+    plans = []
+    real = speedup.plan_speedups
+    monkeypatch.setattr(speedup, "plan_speedups", lambda *args: plans.append(args[0]) or real(*args))
+
+    result = run(game)
+
+    assert result.status == FINISHED
+    assert plans == [2 * D]
+    assert result.replan is None
+    assert len(game.clicks) == 2
+
+
 def test_clan_help_that_zeroes_an_open_timer_skips_the_rest_of_the_plan():
     game = FakeGame(100 * H, stock(H, 3 * H, 8 * H, count=100), clan_help=100 * H, close_on_finish=False)
 

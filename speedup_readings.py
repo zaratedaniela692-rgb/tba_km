@@ -10,8 +10,11 @@ SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR
 
 _TIME_PATTERN = re.compile(
     r"^\s*(?:(?P<days>\d+)\s*d\s*\.?(?:\s*:?\s*"
-    r"(?P<hours>\d+)\s*(?:g|h)\s*\.?)?|"
-    r"(?P<hours_only>\d+)\s*(?:g|h)\s*\.?)\s*$",
+    r"(?P<hours>\d+)\s*(?:g|h)\s*\.?)?(?:\s*:?\s*"
+    r"(?P<minutes>\d+)\s*(?:min|m)\s*\.?)?|"
+    r"(?P<hours_only>\d+)\s*(?:g|h)\s*\.?(?:\s*:?\s*"
+    r"(?P<hours_minutes>\d+)\s*(?:min|m)\s*\.?)?|"
+    r"(?P<minutes_only>\d+)\s*(?:min|m)\s*\.?)\s*$",
     re.IGNORECASE,
 )
 _DURATION_PATTERN = re.compile(r"^\s*(?P<amount>\d+)\s*(?P<unit>m|min|g|h|d)\s*\.?\s*$", re.IGNORECASE)
@@ -47,10 +50,13 @@ def parse_remaining_time(raw_text, confidence=None, minimum_confidence=MIN_CONFI
 
     days = int(match.group("days") or 0)
     hours = int(match.group("hours") or match.group("hours_only") or 0)
+    minutes = int(match.group("minutes") or match.group("hours_minutes") or match.group("minutes_only") or 0)
     if hours > 23:
         return ParsedReading(raw, None, confidence, "hours_out_of_range")
+    if minutes > 59:
+        return ParsedReading(raw, None, confidence, "minutes_out_of_range")
 
-    seconds = days * SECONDS_PER_DAY + hours * SECONDS_PER_HOUR
+    seconds = days * SECONDS_PER_DAY + hours * SECONDS_PER_HOUR + minutes * SECONDS_PER_MINUTE
     return ParsedReading(raw, seconds, float(confidence), "ok")
 
 

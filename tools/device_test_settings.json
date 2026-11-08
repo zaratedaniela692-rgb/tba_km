@@ -1,7 +1,10 @@
 {
   "scenarios": [
     "preflight",
-    "speedup_scan"
+    {
+      "name": "speedup_use",
+      "execute": true
+    }
   ],
   "delay_seconds": 5,
   "publish": true,
