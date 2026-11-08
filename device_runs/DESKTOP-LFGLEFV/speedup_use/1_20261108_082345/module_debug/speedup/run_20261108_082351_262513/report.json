@@ -1,0 +1,166 @@
+{
+  "timestamp": "2026-11-08T07:23:51.262513+00:00",
+  "mode": "execute",
+  "status": "UNCERTAIN",
+  "reason": "timer_not_zero_after_plan",
+  "remaining_seconds": 306000,
+  "inventory": [
+    {
+      "duration_seconds": 900,
+      "quantity": 4879
+    },
+    {
+      "duration_seconds": 3600,
+      "quantity": 5285
+    },
+    {
+      "duration_seconds": 10800,
+      "quantity": 3431
+    },
+    {
+      "duration_seconds": 28800,
+      "quantity": 533
+    },
+    {
+      "duration_seconds": 54000,
+      "quantity": 637
+    },
+    {
+      "duration_seconds": 86400,
+      "quantity": 467
+    },
+    {
+      "duration_seconds": 259200,
+      "quantity": 533
+    },
+    {
+      "duration_seconds": 604800,
+      "quantity": 245
+    },
+    {
+      "duration_seconds": 2592000,
+      "quantity": 1
+    }
+  ],
+  "inventory_evidence": [
+    {
+      "duration_label": "15m",
+      "duration_seconds": 900,
+      "raw_ocr": "4879 / 4879",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 3
+    },
+    {
+      "duration_label": "1h",
+      "duration_seconds": 3600,
+      "raw_ocr": "5285 / 5285",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 3
+    },
+    {
+      "duration_label": "3h",
+      "duration_seconds": 10800,
+      "raw_ocr": "3431 / 3431",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 3
+    },
+    {
+      "duration_label": "8h",
+      "duration_seconds": 28800,
+      "raw_ocr": "533 / 533",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 3
+    },
+    {
+      "duration_label": "15h",
+      "duration_seconds": 54000,
+      "raw_ocr": "637 / 637",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 11
+    },
+    {
+      "duration_label": "1d",
+      "duration_seconds": 86400,
+      "raw_ocr": "467 / 467",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 11
+    },
+    {
+      "duration_label": "3d",
+      "duration_seconds": 259200,
+      "raw_ocr": "533 / 533",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 11
+    },
+    {
+      "duration_label": "7d",
+      "duration_seconds": 604800,
+      "raw_ocr": "245 / 245",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 16
+    },
+    {
+      "duration_label": "30d",
+      "duration_seconds": 2592000,
+      "raw_ocr": "1 / 1",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 16
+    }
+  ],
+  "plan": {
+    "status": "ok",
+    "uses": [
+      [
+        28800,
+        10
+      ],
+      [
+        10800,
+        1
+      ],
+      [
+        3600,
+        2
+      ]
+    ],
+    "breached_floors": [],
+    "shortfall_seconds": 0
+  },
+  "used": [
+    {
+      "duration_seconds": 28800,
+      "quantity": 10
+    },
+    {
+      "duration_seconds": 10800,
+      "quantity": 1
+    },
+    {
+      "duration_seconds": 3600,
+      "quantity": 2
+    }
+  ],
+  "shortfall_seconds": 0,
+  "replan": null,
+  "checkpoint_steps": [
+    3,
+    11,
+    16
+  ],
+  "evidence_frames": [
+    "frame_000.png",
+    "frame_003.png",
+    "frame_011.png",
+    "frame_016.png"
+  ],
+  "debug_capture": "uncertain.png"
+}
