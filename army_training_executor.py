@@ -342,7 +342,8 @@ def execute_training_goal(
         return finish(result)
     result["help_button_state_before_click"] = help_state.get("button_state", "unknown")
     button_region = help_state.get("training_button_region")
-    if help_state["status"] != "active" or help_state.get("button_state") != "help" or not button_region:
+    button_state = help_state.get("button_state")
+    if help_state["status"] != "active" or button_state in {"speedup", "absent"}:
         _pause_uncertain_help(queue, task_id)
         result.update(
             status="START_CONFIRMED_HELP_UNCERTAIN",
@@ -351,7 +352,24 @@ def execute_training_goal(
         )
         trace.record("verify_help_state", observation=help_state, decision="block", verification="not_confirmed")
         return finish(result)
-    trace.record("verify_help_state", observation=help_state, decision="continue", verification="help_button_confirmed")
+    if not button_region:
+        button_region = regions.get("army_training", {}).get("speedup_panel")
+    if not button_region:
+        _pause_uncertain_help(queue, task_id)
+        result.update(
+            status="START_CONFIRMED_HELP_UNCERTAIN",
+            blockers=["configured_training_button_region_missing_do_not_click"],
+            queue_modified=True,
+        )
+        trace.record("verify_help_state", observation=help_state, decision="block",
+                     verification="region_missing", reason="configured_training_button_region_missing")
+        return finish(result)
+    trace.record(
+        "verify_help_state", observation=help_state,
+        decision="continue" if button_state == "help" else "use_configured_region",
+        verification="help_button_confirmed" if button_state == "help" else "button_template_not_visible",
+        reason=None if button_state == "help" else "help_expected_after_confirmed_train_start",
+    )
 
     help_point = (
         button_region["x"] + button_region["w"] // 2,
