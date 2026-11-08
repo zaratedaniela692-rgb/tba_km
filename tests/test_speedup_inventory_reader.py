@@ -59,6 +59,28 @@ def test_small_uniform_viewport_shift_uses_live_button_positions_for_ocr_and_cli
     assert reading.items[0].button_center["y"] == checkpoint["buttons"][0]["center"]["y"] + 4
 
 
+def test_large_uniform_checkpoint_16_shift_uses_live_button_positions():
+    checkpoint = next(entry for entry in MAP["checkpoints"] if entry["scroll_count"] == 16)
+    image = cv2.imread(str(FIXTURES / "checkpoint_016.png"))
+    shifted = cv2.warpAffine(
+        image,
+        np.float32(((1, 0, 12), (0, 1, 9))),
+        (image.shape[1], image.shape[0]),
+        borderMode=cv2.BORDER_REPLICATE,
+    )
+
+    reading = read_checkpoint_viewport(
+        shifted, checkpoint, TEMPLATE, QUANTITY_REGION, USE_REGION,
+    )
+
+    assert reading.status == "complete"
+    assert {item.duration_label: item.quantity.value for item in reading.items} == EXPECTED[16]
+    assert reading.items[0].button_center["x"] == checkpoint["buttons"][0]["center"]["x"] + 12
+    assert reading.items[0].button_center["y"] == checkpoint["buttons"][0]["center"]["y"] + 9
+    assert reading.match_diagnostics[0]["offset"] == {"x": 12, "y": 9}
+    assert reading.match_diagnostics[0]["confidence"] >= MAP["minimum_match_score"]
+
+
 def test_target_duration_read_ocr_processes_only_one_quantity():
     checkpoint = next(entry for entry in MAP["checkpoints"] if entry["scroll_count"] == 3)
     image = cv2.imread(str(FIXTURES / "checkpoint_003.png"))
@@ -130,6 +152,7 @@ def test_missing_or_misplaced_button_blocks_checkpoint_read():
 
     assert reading.status == "incomplete"
     assert reading.reason == "use_button_offsets_inconsistent"
+    assert reading.match_diagnostics[0]["offset"] == {"x": 0, "y": -5}
 
 
 def test_blank_frame_is_incomplete_not_empty_inventory():
@@ -140,3 +163,6 @@ def test_blank_frame_is_incomplete_not_empty_inventory():
 
     assert reading.status == "incomplete"
     assert reading.inventory is None
+    assert reading.reason == "use_button_count_mismatch"
+    assert reading.match_diagnostics[-1]["expected_count"] == 4
+    assert reading.match_diagnostics[-1]["detected_count"] == 0

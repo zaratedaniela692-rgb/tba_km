@@ -69,7 +69,10 @@ class FakeGame:
 
     def read_checkpoint(self, _, checkpoint, *_args, **kwargs):
         if checkpoint["scroll_count"] == self.fail_checkpoint:
-            return CheckpointInventoryReading("incomplete", (), "fixture_unreadable")
+            return CheckpointInventoryReading(
+                "incomplete", (), "fixture_unreadable",
+                match_diagnostics=({"detected_rectangle": {"x": 384, "y": 62}},),
+            )
         target_duration = kwargs.get("duration_seconds")
         self.quantity_read_requests.append((checkpoint["scroll_count"], target_duration))
         items = []
@@ -190,6 +193,8 @@ def test_unreadable_checkpoint_blocks_before_any_click():
 
     assert result.status == BLOCKED
     assert "inventory_incomplete:11" in result.reason
+    assert result.checkpoint_diagnostics[0]["scroll_count"] == 11
+    assert result.checkpoint_diagnostics[0]["matches"][0]["detected_rectangle"] == {"x": 384, "y": 62}
     assert game.clicks == []
 
 

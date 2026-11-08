@@ -15,7 +15,6 @@ OCR_SCALES = (4, 6)
 OCR_PSMS = (8,)
 CROP_LEFT_INSET = 5
 CROP_RIGHT_INSET = 3
-BUTTON_POSITION_TOLERANCE = 6
 BUTTON_OFFSET_CONSISTENCY_TOLERANCE = 1
 
 
@@ -39,6 +38,7 @@ class CheckpointInventoryReading:
     items: tuple
     reason: str = ""
     checkpoint_steps: tuple = ()
+    match_diagnostics: tuple = ()
 
     @property
     def inventory(self):
@@ -98,6 +98,7 @@ def read_checkpoint_viewport(
 
     step = checkpoint.get("scroll_count")
     expected_buttons = checkpoint.get("buttons", ())
+    expected_size = (int(expected_viewport_size[0]), int(expected_viewport_size[1]))
     try:
         found_buttons = locate_use_buttons(
             viewport_image,
@@ -105,18 +106,53 @@ def read_checkpoint_viewport(
             button_template,
         )
     except (ValueError, cv2.error) as error:
-        return CheckpointInventoryReading("incomplete", (), f"button_match_failed:{error}")
+        return CheckpointInventoryReading(
+            "incomplete", (), f"button_match_failed:{error}",
+            match_diagnostics=({"error": str(error)},),
+        )
+
+    match_diagnostics = tuple({
+        "duration_label": expected.get("duration_label"),
+        "expected_rectangle": dict(expected.get("rectangle", {})),
+        "detected_rectangle": {
+            "x": found["x"], "y": found["y"],
+            "width": found["width"], "height": found["height"],
+        },
+        "offset": {
+            "x": found["x"] - int(expected.get("rectangle", {}).get("x", -10000)),
+            "y": found["y"] - int(expected.get("rectangle", {}).get("y", -10000)),
+        },
+        "confidence": found["confidence"],
+    } for found, expected in zip(found_buttons, expected_buttons))
 
     if len(found_buttons) != len(expected_buttons):
-        return CheckpointInventoryReading("incomplete", (), "use_button_count_mismatch")
+        return CheckpointInventoryReading(
+            "incomplete", (), "use_button_count_mismatch",
+            match_diagnostics=match_diagnostics + ({
+                "expected_count": len(expected_buttons),
+                "detected_count": len(found_buttons),
+                "detected_rectangles": tuple({
+                    "x": found["x"], "y": found["y"],
+                    "width": found["width"], "height": found["height"],
+                    "confidence": found["confidence"],
+                } for found in found_buttons),
+            },),
+        )
     effective_buttons = []
     offsets = []
     for found, expected in zip(found_buttons, expected_buttons):
         rectangle = expected.get("rectangle", {})
         delta_x = found["x"] - int(rectangle.get("x", -10000))
         delta_y = found["y"] - int(rectangle.get("y", -10000))
-        if abs(delta_x) > BUTTON_POSITION_TOLERANCE or abs(delta_y) > BUTTON_POSITION_TOLERANCE:
-            return CheckpointInventoryReading("incomplete", (), "use_button_position_mismatch")
+        if (
+            found["x"] < 0 or found["y"] < 0
+            or found["x"] + found["width"] > expected_size[0]
+            or found["y"] + found["height"] > expected_size[1]
+        ):
+            return CheckpointInventoryReading(
+                "incomplete", (), "use_button_outside_viewport",
+                match_diagnostics=match_diagnostics,
+            )
         offsets.append((delta_x, delta_y))
         effective = dict(expected)
         effective["rectangle"] = {
@@ -138,7 +174,10 @@ def read_checkpoint_viewport(
             or abs(delta_y - base_offset[1]) > BUTTON_OFFSET_CONSISTENCY_TOLERANCE
             for delta_x, delta_y in offsets[1:]
         ):
-            return CheckpointInventoryReading("incomplete", (), "use_button_offsets_inconsistent")
+            return CheckpointInventoryReading(
+                "incomplete", (), "use_button_offsets_inconsistent",
+                match_diagnostics=match_diagnostics,
+            )
 
     configure_tesseract()
     ocr_fn = ocr_fn or _ocr_digits
@@ -148,19 +187,31 @@ def read_checkpoint_viewport(
             if parse_duration(button.get("duration_label", ""), 100.0).value == duration_seconds
         ]
         if len(effective_buttons) != 1:
-            return CheckpointInventoryReading("incomplete", (), "target_duration_not_unique")
+            return CheckpointInventoryReading(
+                "incomplete", (), "target_duration_not_unique",
+                match_diagnostics=match_diagnostics,
+            )
     items = []
     for button in effective_buttons:
         duration = parse_duration(button.get("duration_label", ""), 100.0)
         if duration.value is None:
-            return CheckpointInventoryReading("incomplete", tuple(items), "mapped_duration_invalid")
+            return CheckpointInventoryReading(
+                "incomplete", tuple(items), "mapped_duration_invalid",
+                match_diagnostics=match_diagnostics,
+            )
         try:
             crop = _quantity_crop(viewport_image, button, quantity_region, use_region)
             quantity = _read_quantity(crop, ocr_fn)
         except (InventoryReadError, pytesseract.TesseractNotFoundError, OSError) as error:
-            return CheckpointInventoryReading("incomplete", tuple(items), f"quantity_ocr_failed:{error}")
+            return CheckpointInventoryReading(
+                "incomplete", tuple(items), f"quantity_ocr_failed:{error}",
+                match_diagnostics=match_diagnostics,
+            )
         if quantity.value is None:
-            return CheckpointInventoryReading("incomplete", tuple(items), f"quantity_unreadable:{button['duration_label']}:{quantity.status}")
+            return CheckpointInventoryReading(
+                "incomplete", tuple(items), f"quantity_unreadable:{button['duration_label']}:{quantity.status}",
+                match_diagnostics=match_diagnostics,
+            )
         items.append(InventoryItemReading(
             button["duration_label"],
             duration.value,
@@ -170,7 +221,10 @@ def read_checkpoint_viewport(
             dict(button["center"]),
         ))
 
-    return CheckpointInventoryReading("complete", tuple(items), checkpoint_steps=(int(step),))
+    return CheckpointInventoryReading(
+        "complete", tuple(items), checkpoint_steps=(int(step),),
+        match_diagnostics=match_diagnostics,
+    )
 
 
 def combine_checkpoint_readings(readings):

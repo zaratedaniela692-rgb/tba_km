@@ -38,6 +38,7 @@ class CheckpointRunResult:
     remaining_seconds: int | None = None
     inventory_evidence: tuple = ()
     click_timings: tuple = ()
+    checkpoint_diagnostics: tuple = ()
 
 
 class _Abort(Exception):
@@ -120,6 +121,7 @@ class _CheckpointRunner:
         self.remaining_seconds = None
         self.checkpoint_steps = ()
         self.click_timings = []
+        self.checkpoint_diagnostics = []
 
     def abort(self, reason, after_click=False):
         status = UNCERTAIN if after_click or self.clicks_issued else BLOCKED
@@ -207,6 +209,13 @@ class _CheckpointRunner:
             )
         except Exception as error:
             self.abort(f"inventory_read_failed:{error}")
+        if reading.match_diagnostics:
+            self.checkpoint_diagnostics.append({
+                "scroll_count": step,
+                "status": reading.status,
+                "reason": reading.reason,
+                "matches": reading.match_diagnostics,
+            })
         if reading.status != "complete":
             self.abort(f"inventory_incomplete:{step}:{reading.reason}")
         return reading
@@ -379,6 +388,7 @@ class _CheckpointRunner:
                 "scroll_count": item.scroll_count,
             } for item in self.inventory_items),
             click_timings=tuple(self.click_timings),
+            checkpoint_diagnostics=tuple(self.checkpoint_diagnostics),
         )
 
 

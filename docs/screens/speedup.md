@@ -16,7 +16,7 @@ Autorytatywny kontrakt odczytu, zakres, diagram i ograniczenia są w [docs/game/
 - Typ zadania nie jest automatycznie rozpoznawany. Przed live run użytkownik musi upewnić się, że otwarte jest właściwe szkolenie.
 - Zrzuty i mapa dotyczą klienta desktopowego 1920x1080 na monitorze głównym. Nie kopiuj regionów ani wzorców do wariantu browser.
 - Run `7_20261107_200245`: dialog/timer wejściowy rozpoznano poprawnie (`10d.:23g.`, confidence 100); lista startowała u góry. Skan zatrzymał się na checkpointcie 3, bo cztery pełne przyciski Use dopasowały się z confidence 1.0, ale ich jednolity offset od mapy wynosił `(+2,+4)` px i stary limit pozycji wynosił 2 px.
-- Korekta: checkpoint nadal mapuje rzędy top-to-bottom, ale pozycje OCR i klików pochodzą ze świeżych dopasowań. Dozwolony jest tylko wspólny offset do 6 px, spójny między rzędami do 1 px; większy lub nierówny offset blokuje skan. Powtórny odczyt tego `frame_003.png` przechodzi i odczytuje 15m=4853, 1h=5257, 3h=3383, 8h=475. Run 7 był dry-run; nie użyto przedmiotów.
+- Korekta: checkpoint nadal mapuje rzędy top-to-bottom, ale pozycje OCR i klików pochodzą ze świeżych dopasowań. Wymagana jest dokładna liczba trafień, prostokąty w granicach viewportu i wspólny offset z tolerancją 1 px między rzędami; jednolite przesunięcie całego widoku nie jest samo w sobie błędem. Raport zapisuje pozycje oczekiwane i wykryte, offsety oraz confidence także przy blokadzie. Powtórny odczyt `frame_003.png` przechodzi i odczytuje 15m=4853, 1h=5257, 3h=3383, 8h=475. Run 7 był dry-run; nie użyto przedmiotów.
 
 ## Elementy
 

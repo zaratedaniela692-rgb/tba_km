@@ -150,6 +150,7 @@ def main(argv=None):
             "replan": _serialize_plan(result.replan),
             "checkpoint_steps": list(result.checkpoint_steps),
             "click_timings": list(result.click_timings),
+            "checkpoint_diagnostics": list(result.checkpoint_diagnostics),
             "evidence_frames": evidence.saved,
         }
         if evidence.errors:
