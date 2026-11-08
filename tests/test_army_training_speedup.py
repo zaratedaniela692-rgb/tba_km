@@ -117,6 +117,71 @@ def test_army_adapter_uses_open_dialog_checkpoint_runner_by_default(monkeypatch)
     assert calls == [{"execute": True}]
 
 
+def _round_setup(monkeypatch, states):
+    image = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    iterator = iter(states)
+    monkeypatch.setattr(army_speedup, "resolve_variant", lambda: {"regions": "regions.json"})
+    monkeypatch.setattr(army_speedup, "_read_current_training_state", lambda *_a, **_k: {
+        "status": next(iterator), "speedup_button_detected": True,
+    })
+    monkeypatch.setattr(army_speedup, "locate_finish_training_button", lambda *_a, **_k: (None, None))
+    monkeypatch.setattr(army_speedup, "_load_regions", lambda _: {"army_training": {
+        "speedup_panel": {"x": 10, "y": 20, "w": 30, "h": 40},
+    }})
+    monkeypatch.setattr(army_speedup, "_check_emergency_stop", lambda: None)
+    monkeypatch.setattr(army_speedup, "_enable_live_failsafe", lambda _: None)
+    return lambda: (image, (0, 0))
+
+
+def test_army_adapter_starts_another_round_only_after_real_speedup_clicks(monkeypatch):
+    capture = _round_setup(monkeypatch, ["active", "active", "active", "idle"])
+    runs = []
+
+    def runner(**kwargs):
+        runs.append(kwargs)
+        return SimpleNamespace(status="UNCERTAIN", reason="timer_unreadable", used=((3600, 1),))
+
+    result = army_speedup.finish_active_training_with_speedups(
+        capture_fn=capture, click_fn=lambda *_: None, sleep_fn=lambda _: None, speedup_runner=runner,
+    )
+
+    assert result == "idle"
+    assert len(runs) == 2
+
+
+def test_army_adapter_does_not_repeat_when_no_speedup_was_clicked(monkeypatch):
+    capture = _round_setup(monkeypatch, ["active", "active"])
+    runs = []
+
+    def runner(**kwargs):
+        runs.append(kwargs)
+        return SimpleNamespace(status="BLOCKED", reason="speedup_dialog_not_recognized", used=())
+
+    result = army_speedup.finish_active_training_with_speedups(
+        capture_fn=capture, click_fn=lambda *_: None, sleep_fn=lambda _: None, speedup_runner=runner,
+    )
+
+    assert result == "active"
+    assert len(runs) == 1
+
+
+def test_army_adapter_round_count_is_bounded(monkeypatch):
+    capture = _round_setup(monkeypatch, ["active"] * 20)
+    runs = []
+
+    def runner(**kwargs):
+        runs.append(kwargs)
+        return SimpleNamespace(status="FINISHED", reason="dialog_closed_after_last_use", used=((3600, 1),))
+
+    result = army_speedup.finish_active_training_with_speedups(
+        capture_fn=capture, click_fn=lambda *_: None, sleep_fn=lambda _: None, speedup_runner=runner,
+        max_rounds=2,
+    )
+
+    assert result == "active"
+    assert len(runs) == 2
+
+
 def test_army_adapter_clicks_only_matched_finish_button_and_requires_idle(monkeypatch):
     image = np.zeros((1080, 1920, 3), dtype=np.uint8)
     states = iter((

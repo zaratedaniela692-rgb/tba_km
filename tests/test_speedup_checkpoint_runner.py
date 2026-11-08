@@ -366,12 +366,12 @@ def test_timer_progress_replans_from_conservative_submitted_use_estimate():
     assert len(game.quantity_read_requests) == 3
 
 
-def test_unreadable_final_timer_stops_without_a_residual_batch():
+def test_unreadable_final_timer_without_known_hidden_remainder_stops_after_retries():
     game = FakeGame(inventory={HOUR: 12})
     result = game.run(
         dry_run=False,
         timer_reader_fn=lambda frame: ParsedReading(
-            "?" if game.clicks else "1h", None if game.clicks else HOUR,
+            "?" if game.clicks else "3600", None if game.clicks else HOUR,
             None if game.clicks else 100.0, "unreadable" if game.clicks else "ok",
         ),
     )
@@ -380,6 +380,105 @@ def test_unreadable_final_timer_stops_without_a_residual_batch():
     assert result.reason.startswith("timer_unreadable")
     assert len(game.clicks) == 1
     assert result.replan is None
+    final_reads = [e for e in result.event_trace if e["event"] == "timer_read" and e["data"].get("phase") == "final"]
+    assert len(final_reads) == 6
+
+
+def test_transiently_unreadable_final_timer_is_retried_with_fresh_captures():
+    game = FakeGame(inventory={HOUR: 12})
+    reads_after_click = []
+
+    def read_timer(frame):
+        if not game.clicks:
+            return ParsedReading("3600", HOUR, 100.0, "ok")
+        reads_after_click.append(frame.timer)
+        if len(reads_after_click) == 1:
+            return ParsedReading("?", None, None, "minute_ocr_disagreement")
+        return ParsedReading("0", frame.timer, 100.0, "ok")
+
+    result = game.run(dry_run=False, timer_reader_fn=read_timer)
+
+    assert result.status == FINISHED
+    assert result.reason == "timer_reached_zero"
+    assert len(game.clicks) == 1
+    assert len(reads_after_click) == 2
+
+
+def test_stale_final_timer_is_reread_instead_of_aborting():
+    game = FakeGame(inventory={HOUR: 12})
+    reads_after_click = []
+
+    def read_timer(frame):
+        if not game.clicks:
+            return ParsedReading("3600", HOUR, 100.0, "ok")
+        reads_after_click.append(frame.timer)
+        value = HOUR if len(reads_after_click) == 1 else frame.timer
+        return ParsedReading(str(value), value, 100.0, "ok")
+
+    result = game.run(dry_run=False, timer_reader_fn=read_timer)
+
+    assert result.status == FINISHED
+    assert len(game.clicks) == 1
+    assert len(reads_after_click) == 2
+
+
+def _hidden_remainder_game():
+    # The dialog shows "3g." while 30 more minutes are hidden below the displayed unit.
+    game = FakeGame(remaining=3 * HOUR + 1800, inventory={HOUR: 12, 3 * HOUR: 12})
+
+    def read_timer(frame):
+        if not game.clicks:
+            return ParsedReading("3g.", 3 * HOUR, 100.0, "ok")
+        return ParsedReading("?", None, None, "minute_ocr_disagreement")
+
+    return game, read_timer
+
+
+def test_unreadable_final_timer_covers_the_hidden_remainder_once():
+    game, read_timer = _hidden_remainder_game()
+
+    result = game.run(dry_run=False, timer_reader_fn=read_timer, anchor_fn=lambda _: len(game.clicks) < 2)
+
+    assert result.status == FINISHED
+    assert result.reason == "dialog_closed_after_last_use"
+    assert len(game.clicks) == 2
+    assert game.remaining == 0
+    rebuilt = next(e for e in result.event_trace if e["event"] == "plan_rebuilt")
+    assert rebuilt["data"]["reason"] == "unreadable_final_timer_cover_hidden_remainder"
+    assert rebuilt["data"]["remaining_seconds"] == HOUR
+
+
+def test_hidden_remainder_cover_is_not_repeated_when_still_unreadable():
+    game, read_timer = _hidden_remainder_game()
+
+    result = game.run(dry_run=False, timer_reader_fn=read_timer)
+
+    assert result.status == UNCERTAIN
+    assert result.reason.startswith("timer_unreadable")
+    assert len(game.clicks) == 2
+
+
+def test_dialog_closing_during_final_timer_retries_finishes_the_run():
+    game = FakeGame(inventory={HOUR: 12})
+
+    def read_timer(frame):
+        if not game.clicks:
+            return ParsedReading("3600", HOUR, 100.0, "ok")
+        return ParsedReading("?", None, None, "minute_ocr_disagreement")
+
+    calls = []
+
+    def anchor(_frame):
+        if not game.clicks:
+            return True
+        calls.append(1)
+        return len(calls) < 3
+
+    result = game.run(dry_run=False, timer_reader_fn=read_timer, anchor_fn=anchor)
+
+    assert result.status == FINISHED
+    assert result.reason == "dialog_closed_before_final_timer"
+    assert len(game.clicks) == 1
 
 
 def test_unreadable_checkpoint_blocks_before_any_click():

@@ -16,6 +16,7 @@ from army_training_scanner import locate_finish_training_button
 from ui_variants import resolve_variant
 
 LOGGER = logging.getLogger(__name__)
+MAX_FINISH_ROUNDS = 3
 
 
 def finish_active_training_with_speedups(
@@ -25,6 +26,29 @@ def finish_active_training_with_speedups(
     speedup_runner=None,
     move_fn=None,
     on_finish_button_click=None,
+    max_rounds=MAX_FINISH_ROUNDS,
+):
+    """Repeat the finish round while real speedup clicks were made and training is still active."""
+    state = "unknown"
+    for round_number in range(1, max_rounds + 1):
+        progress = []
+        state = _finish_round(
+            capture_fn, click_fn, sleep_fn, speedup_runner, move_fn, on_finish_button_click, progress,
+        )
+        if state != "active" or not progress:
+            return state
+        LOGGER.info("Training still active after speedup round %d/%d; starting another", round_number, max_rounds)
+    return state
+
+
+def _finish_round(
+    capture_fn=None,
+    click_fn=None,
+    sleep_fn=time.sleep,
+    speedup_runner=None,
+    move_fn=None,
+    on_finish_button_click=None,
+    progress=None,
 ):
     """Use owned speedups only for an active, bot-managed training task."""
     from speedup_run import run_open_dialog
@@ -65,6 +89,8 @@ def finish_active_training_with_speedups(
     sleep_fn(0.35)
 
     result = speedup_runner(execute=True)
+    if progress is not None and getattr(result, "used", ()):
+        progress.append(True)
     if result.status != "FINISHED":
         LOGGER.warning(
             "Speedup stopped: status=%s reason=%s; checking fresh army state before deciding completion",

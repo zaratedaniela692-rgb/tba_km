@@ -1,5 +1,6 @@
 """Run the approved checkpoint-based speedup scan and optional item-use loop."""
 
+import re
 import time
 from dataclasses import dataclass
 
@@ -13,13 +14,23 @@ from speedup_inventory_reader import (
     combine_checkpoint_readings,
     read_checkpoint_viewport,
 )
-from speedup_planner import STATUS_NOTHING_TO_DO, STATUS_SHORTFALL, plan_speedups
+from speedup_planner import HOUR, STATUS_NOTHING_TO_DO, STATUS_SHORTFALL, plan_speedups
 from speedup_reader import read_remaining_time
 
 BLOCKED = "BLOCKED"
 CHECKPOINT_ORDER = (3, 11, 16)
 EXPECTED_FRAME_SIZE = (1920, 1080)
 SETTLE_SECONDS = 0.35
+FINAL_TIMER_ATTEMPTS = 6
+FINAL_TIMER_RETRY_SECONDS = 1.0
+MIN_BLIND_BOUND_SECONDS = 60
+# The dialog shows the two largest units, so time below the smaller unit is hidden.
+_HIDDEN_BOUND_BY_UNIT = {"d": 24 * HOUR, "g": HOUR, "h": HOUR, "m": 60, "s": 1}
+
+
+def _hidden_bound_seconds(raw):
+    units = re.findall(r"[dghms]", str(raw or "").lower())
+    return _HIDDEN_BOUND_BY_UNIT.get(units[-1]) if units else None
 
 
 @dataclass(frozen=True)
@@ -139,6 +150,8 @@ class _CheckpointRunner:
         self.click_timings = []
         self.checkpoint_diagnostics = []
         self.final_timer_read_ms = None
+        self.display_bound = None
+        self.blind_tail_used = False
         self.started_at = time.perf_counter()
         self.event_trace = []
 
@@ -225,6 +238,46 @@ class _CheckpointRunner:
             value_seconds=reading.value, confidence=reading.confidence,
         )
         return reading
+
+    def _read_timer_soft(self, frame, phase, attempt):
+        try:
+            reading = self.timer_reader_fn(frame)
+        except Exception as error:
+            self.record("timer_read", phase=phase, attempt=attempt, status="error", reason=str(error))
+            self.abort(f"timer_read_failed:{error}", after_click=True)
+        if reading is None or reading.value is None:
+            self.record(
+                "timer_read", phase=phase, attempt=attempt, status=getattr(reading, "status", "unreadable"),
+                raw=getattr(reading, "raw", ""), value=None,
+                confidence=getattr(reading, "confidence", None),
+            )
+            return None, getattr(reading, "status", "unreadable")
+        self.record(
+            "timer_read", phase=phase, attempt=attempt, status=reading.status, raw=reading.raw,
+            value_seconds=reading.value, confidence=reading.confidence,
+        )
+        return reading, "ok"
+
+    def settle_final_timer(self, batch_timer):
+        """Re-read with fresh captures until the timer is readable and has moved."""
+        frame = self.frame
+        outcome = "unreadable"
+        for attempt in range(1, FINAL_TIMER_ATTEMPTS + 1):
+            if attempt > 1:
+                self.sleep_fn(FINAL_TIMER_RETRY_SECONDS)
+                frame = self.capture(require_dialog=False)
+                match = self.dialog_match(frame)
+                if not match["recognized"]:
+                    self.record("dialog_check", status="not_recognized", phase="final_timer", attempt=attempt, dialog_match=match)
+                    return None, "dialog_closed"
+            (reading, status), self.final_timer_read_ms = _timed_call(self._read_timer_soft, frame, "final", attempt)
+            if reading is None:
+                outcome = f"timer_unreadable:{status}"
+            elif reading.value == 0 or reading.value < batch_timer:
+                return reading, "ok"
+            else:
+                outcome = "timer_not_decreased_after_batch"
+        return None, outcome
 
     def _pointer_point(self):
         viewport = self.regions["speedup_inventory_viewport"]
@@ -345,6 +398,7 @@ class _CheckpointRunner:
         self.checkpoint_steps = combined.checkpoint_steps
         self.remaining_seconds = latest_timer.value
         self.last_observed_timer = latest_timer.value
+        self.display_bound = _hidden_bound_seconds(latest_timer.raw)
         owned_seconds = sum(duration * quantity for duration, quantity in self.inventory.items())
         self.record(
             "planning_started", remaining_seconds=latest_timer.value,
@@ -542,13 +596,47 @@ class _CheckpointRunner:
         batch_timer = latest_timer.value
         while True:
             if not queue:
-                final_timer, self.final_timer_read_ms = _timed_call(self.timer, self.frame, "final")
+                final_timer, outcome = self.settle_final_timer(batch_timer)
+                if outcome == "dialog_closed":
+                    self.record("execution_decision", action="finish_dialog_closed", reason="dialog_closed_before_final_timer")
+                    return self.result(FINISHED, "dialog_closed_before_final_timer", plan)
+                if final_timer is None:
+                    bound = self.display_bound
+                    blind = (
+                        outcome.startswith("timer_unreadable") and not self.blind_tail_used
+                        and bound is not None and MIN_BLIND_BOUND_SECONDS <= bound <= HOUR
+                    )
+                    if not blind:
+                        self.abort(outcome, after_click=True)
+                    # The last plan covered the displayed time, so at most the hidden remainder is left.
+                    self.blind_tail_used = True
+                    self.replan = plan_speedups(bound, self.stock)
+                    plan_generation += 1
+                    self.record(
+                        "plan_rebuilt", plan_generation=plan_generation, status=self.replan.status,
+                        remaining_seconds=bound, inventory=tuple(sorted(self.stock.items())),
+                        uses=self.replan.uses, shortfall_seconds=self.replan.shortfall_seconds,
+                        breached_floors=self.replan.breached_floors,
+                        reason="unreadable_final_timer_cover_hidden_remainder",
+                        stock_source="initial_inventory_minus_submitted_clicks",
+                    )
+                    for residual_decision in self.replan.decisions:
+                        self.record("plan_choice", plan_generation=plan_generation, **residual_decision)
+                    if self.replan.status == STATUS_SHORTFALL:
+                        return self.result(
+                            NOT_ENOUGH, "owned_items_do_not_cover_remaining_time_after_replan",
+                            plan, self.replan.shortfall_seconds,
+                        )
+                    batch_timer = bound
+                    queue = _expanded_plan(self.replan)
+                    plan_total = len(queue)
+                    plan_step = 0
+                    continue
                 self.last_observed_timer = final_timer.value
+                self.display_bound = _hidden_bound_seconds(final_timer.raw)
                 if final_timer.value == 0:
                     self.record("execution_decision", action="finish_timer_zero", reason="final_timer_is_zero")
                     return self.result(FINISHED, "timer_reached_zero", plan)
-                if final_timer.value >= batch_timer:
-                    self.abort("timer_not_decreased_after_batch", after_click=True)
                 self.record(
                     "residual_plan_started", remaining_seconds=final_timer.value,
                     previous_remaining_seconds=batch_timer,
