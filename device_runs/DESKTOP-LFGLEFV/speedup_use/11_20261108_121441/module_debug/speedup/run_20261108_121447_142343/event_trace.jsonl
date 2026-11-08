@@ -1,0 +1,5 @@
+{"elapsed_ms": 0.0, "event": "scan_started", "step": 0, "data": {"checkpoints": [3, 11, 16], "mode": "execute"}}
+{"elapsed_ms": 236.0, "event": "capture", "step": 0, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 2817.6, "event": "timer_read", "step": 0, "data": {"phase": "initial", "status": "digit_unverified", "raw": "2d.:?g.", "value": null, "confidence": null}}
+{"elapsed_ms": 2817.6, "event": "run_aborted", "step": 0, "data": {"status": "BLOCKED", "reason": "timer_unreadable:digit_unverified", "clicks_issued": 0}}
+{"elapsed_ms": 2817.6, "event": "run_finished", "step": 0, "data": {"status": "BLOCKED", "reason": "timer_unreadable:digit_unverified", "clicks_issued": 0, "shortfall_seconds": 0}}
