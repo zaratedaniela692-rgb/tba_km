@@ -1,0 +1,8243 @@
+{
+  "timestamp": "2026-11-08T15:30:38.343076+00:00",
+  "mode": "execute",
+  "status": "FINISHED",
+  "reason": "dialog_closed_after_last_use",
+  "remaining_seconds": 154800,
+  "final_remaining_seconds": 69,
+  "inventory": [
+    {
+      "duration_seconds": 900,
+      "quantity": 4891
+    },
+    {
+      "duration_seconds": 3600,
+      "quantity": 5281
+    },
+    {
+      "duration_seconds": 10800,
+      "quantity": 3454
+    },
+    {
+      "duration_seconds": 28800,
+      "quantity": 458
+    },
+    {
+      "duration_seconds": 54000,
+      "quantity": 648
+    },
+    {
+      "duration_seconds": 86400,
+      "quantity": 484
+    },
+    {
+      "duration_seconds": 259200,
+      "quantity": 538
+    },
+    {
+      "duration_seconds": 604800,
+      "quantity": 252
+    },
+    {
+      "duration_seconds": 2592000,
+      "quantity": 1
+    }
+  ],
+  "inventory_evidence": [
+    {
+      "duration_label": "15m",
+      "duration_seconds": 900,
+      "raw_ocr": "4891 / 4891",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 3
+    },
+    {
+      "duration_label": "1h",
+      "duration_seconds": 3600,
+      "raw_ocr": "5281 / 5281",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 3
+    },
+    {
+      "duration_label": "3h",
+      "duration_seconds": 10800,
+      "raw_ocr": "3454 / 3454",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 3
+    },
+    {
+      "duration_label": "8h",
+      "duration_seconds": 28800,
+      "raw_ocr": "458 / 458",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 3
+    },
+    {
+      "duration_label": "15h",
+      "duration_seconds": 54000,
+      "raw_ocr": "648 / 648",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 11
+    },
+    {
+      "duration_label": "1d",
+      "duration_seconds": 86400,
+      "raw_ocr": "484 / 484",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 11
+    },
+    {
+      "duration_label": "3d",
+      "duration_seconds": 259200,
+      "raw_ocr": "538 / 538",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 11
+    },
+    {
+      "duration_label": "7d",
+      "duration_seconds": 604800,
+      "raw_ocr": "252 / 252",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 16
+    },
+    {
+      "duration_label": "30d",
+      "duration_seconds": 2592000,
+      "raw_ocr": "1 / 1",
+      "confidence": 100.0,
+      "status": "ok",
+      "scroll_count": 16
+    }
+  ],
+  "plan": {
+    "status": "ok",
+    "uses": [
+      [
+        28800,
+        5
+      ],
+      [
+        10800,
+        1
+      ]
+    ],
+    "breached_floors": [],
+    "shortfall_seconds": 0,
+    "decisions": [
+      {
+        "remaining_before_seconds": 154800,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            458
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 1,
+        "quantity_before": 458,
+        "quantity_after": 457,
+        "remaining_after_seconds": 126000,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 126000,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            457
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 2,
+        "quantity_before": 457,
+        "quantity_after": 456,
+        "remaining_after_seconds": 97200,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 97200,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            456
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 3,
+        "quantity_before": 456,
+        "quantity_after": 455,
+        "remaining_after_seconds": 68400,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 68400,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            455
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 4,
+        "quantity_before": 455,
+        "quantity_after": 454,
+        "remaining_after_seconds": 39600,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 39600,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            454
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 5,
+        "quantity_before": 454,
+        "quantity_after": 453,
+        "remaining_after_seconds": 10800,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 10800,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            453
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800
+        ],
+        "selected_duration_seconds": 10800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 6,
+        "quantity_before": 3454,
+        "quantity_after": 3453,
+        "remaining_after_seconds": 0,
+        "floor_breached_after_selection": false
+      }
+    ]
+  },
+  "used": [
+    {
+      "duration_seconds": 28800,
+      "quantity": 5
+    },
+    {
+      "duration_seconds": 10800,
+      "quantity": 1
+    },
+    {
+      "duration_seconds": 3600,
+      "quantity": 1
+    }
+  ],
+  "shortfall_seconds": 0,
+  "replan": {
+    "status": "ok",
+    "uses": [
+      [
+        3600,
+        1
+      ]
+    ],
+    "breached_floors": [],
+    "shortfall_seconds": 0,
+    "decisions": [
+      {
+        "remaining_before_seconds": 69,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3453
+          ],
+          [
+            28800,
+            453
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_overshoot",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 3600,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 1,
+        "quantity_before": 5281,
+        "quantity_after": 5280,
+        "remaining_after_seconds": -3531,
+        "floor_breached_after_selection": false
+      }
+    ]
+  },
+  "checkpoint_steps": [
+    3,
+    11,
+    16
+  ],
+  "click_timings": [
+    {
+      "duration_seconds": 28800,
+      "checkpoint": 3,
+      "use_number": 1,
+      "plan_generation": 1,
+      "plan_step": 1,
+      "plan_total": 6,
+      "navigation_ms": 8052.2,
+      "button_match_ms": 25.2,
+      "click_settle_capture_ms": 523.8
+    },
+    {
+      "duration_seconds": 28800,
+      "checkpoint": 3,
+      "use_number": 2,
+      "plan_generation": 1,
+      "plan_step": 2,
+      "plan_total": 6,
+      "navigation_ms": 0.0,
+      "button_match_ms": 30.3,
+      "click_settle_capture_ms": 500.2
+    },
+    {
+      "duration_seconds": 28800,
+      "checkpoint": 3,
+      "use_number": 3,
+      "plan_generation": 1,
+      "plan_step": 3,
+      "plan_total": 6,
+      "navigation_ms": 0.0,
+      "button_match_ms": 27.6,
+      "click_settle_capture_ms": 516.2
+    },
+    {
+      "duration_seconds": 28800,
+      "checkpoint": 3,
+      "use_number": 4,
+      "plan_generation": 1,
+      "plan_step": 4,
+      "plan_total": 6,
+      "navigation_ms": 0.0,
+      "button_match_ms": 29.6,
+      "click_settle_capture_ms": 498.1
+    },
+    {
+      "duration_seconds": 28800,
+      "checkpoint": 3,
+      "use_number": 5,
+      "plan_generation": 1,
+      "plan_step": 5,
+      "plan_total": 6,
+      "navigation_ms": 0.0,
+      "button_match_ms": 29.8,
+      "click_settle_capture_ms": 499.9
+    },
+    {
+      "duration_seconds": 10800,
+      "checkpoint": 3,
+      "use_number": 6,
+      "plan_generation": 1,
+      "plan_step": 6,
+      "plan_total": 6,
+      "navigation_ms": 0.0,
+      "button_match_ms": 25.8,
+      "click_settle_capture_ms": 508.6
+    },
+    {
+      "duration_seconds": 3600,
+      "checkpoint": 3,
+      "use_number": 7,
+      "plan_generation": 2,
+      "plan_step": 1,
+      "plan_total": 1,
+      "navigation_ms": 0.0,
+      "button_match_ms": 25.6,
+      "click_settle_capture_ms": 501.0
+    }
+  ],
+  "final_timer_read_ms": 1368.0,
+  "checkpoint_diagnostics": [
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 1.0
+        }
+      ],
+      "quantities": [
+        {
+          "duration_label": "15m",
+          "duration_seconds": 900,
+          "raw_ocr": "4891 / 4891",
+          "quantity": 4891,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          }
+        },
+        {
+          "duration_label": "1h",
+          "duration_seconds": 3600,
+          "raw_ocr": "5281 / 5281",
+          "quantity": 5281,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          }
+        },
+        {
+          "duration_label": "3h",
+          "duration_seconds": 10800,
+          "raw_ocr": "3454 / 3454",
+          "quantity": 3454,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          }
+        },
+        {
+          "duration_label": "8h",
+          "duration_seconds": 28800,
+          "raw_ocr": "458 / 458",
+          "quantity": 458,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          }
+        }
+      ]
+    },
+    {
+      "scroll_count": 11,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 70,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 70,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1d",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 180,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 180,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "3d",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 290,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 290,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 0.9999998211860657
+        }
+      ],
+      "quantities": [
+        {
+          "duration_label": "15h",
+          "duration_seconds": 54000,
+          "raw_ocr": "648 / 648",
+          "quantity": 648,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 70,
+            "width": 145,
+            "height": 27
+          }
+        },
+        {
+          "duration_label": "1d",
+          "duration_seconds": 86400,
+          "raw_ocr": "484 / 484",
+          "quantity": 484,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 180,
+            "width": 145,
+            "height": 27
+          }
+        },
+        {
+          "duration_label": "3d",
+          "duration_seconds": 259200,
+          "raw_ocr": "538 / 538",
+          "quantity": 538,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 290,
+            "width": 145,
+            "height": 27
+          }
+        }
+      ]
+    },
+    {
+      "scroll_count": 16,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "3d",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 50,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 50,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "7d",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 160,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 160,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "30d",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 270,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 270,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "confidence": 0.9999998211860657
+        }
+      ],
+      "quantities": [
+        {
+          "duration_label": "3d",
+          "duration_seconds": 259200,
+          "raw_ocr": "538 / 538",
+          "quantity": 538,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 50,
+            "width": 145,
+            "height": 27
+          }
+        },
+        {
+          "duration_label": "7d",
+          "duration_seconds": 604800,
+          "raw_ocr": "252 / 252",
+          "quantity": 252,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 160,
+            "width": 145,
+            "height": 27
+          }
+        },
+        {
+          "duration_label": "30d",
+          "duration_seconds": 2592000,
+          "raw_ocr": "1 / 1",
+          "quantity": 1,
+          "confidence": 100.0,
+          "status": "ok",
+          "button_rectangle": {
+            "x": 372,
+            "y": 270,
+            "width": 145,
+            "height": 27
+          }
+        }
+      ]
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678515195846558
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678511619567871
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.999999463558197
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678511619567871
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.999999463558197
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678515195846558
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678518772125244
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678515195846558
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9999998211860657
+        }
+      ],
+      "quantities": []
+    }
+  ],
+  "event_trace": [
+    {
+      "elapsed_ms": 0.0,
+      "event": "scan_started",
+      "step": 0,
+      "data": {
+        "checkpoints": [
+          3,
+          11,
+          16
+        ],
+        "mode": "execute"
+      }
+    },
+    {
+      "elapsed_ms": 338.5,
+      "event": "capture",
+      "step": 0,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.8910802006721497,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9863595366477966,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": true
+        }
+      }
+    },
+    {
+      "elapsed_ms": 3708.3,
+      "event": "timer_read",
+      "step": 0,
+      "data": {
+        "phase": "initial",
+        "status": "ok",
+        "raw": "1d.:20g.",
+        "value_seconds": 158400,
+        "confidence": 100.0
+      }
+    },
+    {
+      "elapsed_ms": 3708.6,
+      "event": "emergency_stop_check",
+      "step": 0,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 3809.6,
+      "event": "pointer_move",
+      "step": 0,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 3809.7,
+      "event": "emergency_stop_check",
+      "step": 0,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 3911.1,
+      "event": "scroll",
+      "step": 0,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 0
+      }
+    },
+    {
+      "elapsed_ms": 4322.3,
+      "event": "capture",
+      "step": 0,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 4338.6,
+      "event": "viewport_check",
+      "step": 1,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6434597898823409,
+        "threshold": 0.003,
+        "from_step": 0
+      }
+    },
+    {
+      "elapsed_ms": 4339.5,
+      "event": "emergency_stop_check",
+      "step": 1,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 4440.0,
+      "event": "pointer_move",
+      "step": 1,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 4440.2,
+      "event": "emergency_stop_check",
+      "step": 1,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 4541.2,
+      "event": "scroll",
+      "step": 1,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 1
+      }
+    },
+    {
+      "elapsed_ms": 4954.7,
+      "event": "capture",
+      "step": 1,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.8914523124694824,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9863560795783997,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": true
+        }
+      }
+    },
+    {
+      "elapsed_ms": 4973.4,
+      "event": "viewport_check",
+      "step": 2,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6443707538013588,
+        "threshold": 0.003,
+        "from_step": 1
+      }
+    },
+    {
+      "elapsed_ms": 4974.3,
+      "event": "emergency_stop_check",
+      "step": 2,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 5074.8,
+      "event": "pointer_move",
+      "step": 2,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 5075.0,
+      "event": "emergency_stop_check",
+      "step": 2,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 5175.7,
+      "event": "scroll",
+      "step": 2,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 2
+      }
+    },
+    {
+      "elapsed_ms": 5746.3,
+      "event": "capture",
+      "step": 2,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.8914523124694824,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9863560795783997,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": true
+        }
+      }
+    },
+    {
+      "elapsed_ms": 5760.9,
+      "event": "viewport_check",
+      "step": 3,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6468822898397725,
+        "threshold": 0.003,
+        "from_step": 2
+      }
+    },
+    {
+      "elapsed_ms": 9077.9,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": null,
+        "rows": [
+          {
+            "duration_label": "15m",
+            "duration_seconds": 900,
+            "raw_quantity": "4891 / 4891",
+            "quantity": 4891,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 43
+            }
+          },
+          {
+            "duration_label": "1h",
+            "duration_seconds": 3600,
+            "raw_quantity": "5281 / 5281",
+            "quantity": 5281,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 153
+            }
+          },
+          {
+            "duration_label": "3h",
+            "duration_seconds": 10800,
+            "raw_quantity": "3454 / 3454",
+            "quantity": 3454,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 263
+            }
+          },
+          {
+            "duration_label": "8h",
+            "duration_seconds": 28800,
+            "raw_quantity": "458 / 458",
+            "quantity": 458,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 373
+            }
+          }
+        ],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 1.0
+          }
+        ],
+        "quantities": [
+          {
+            "duration_label": "15m",
+            "duration_seconds": 900,
+            "raw_ocr": "4891 / 4891",
+            "quantity": 4891,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            }
+          },
+          {
+            "duration_label": "1h",
+            "duration_seconds": 3600,
+            "raw_ocr": "5281 / 5281",
+            "quantity": 5281,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            }
+          },
+          {
+            "duration_label": "3h",
+            "duration_seconds": 10800,
+            "raw_ocr": "3454 / 3454",
+            "quantity": 3454,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            }
+          },
+          {
+            "duration_label": "8h",
+            "duration_seconds": 28800,
+            "raw_ocr": "458 / 458",
+            "quantity": 458,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            }
+          }
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 9078.7,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 9179.8,
+      "event": "pointer_move",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 9180.0,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 9281.0,
+      "event": "scroll",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 3
+      }
+    },
+    {
+      "elapsed_ms": 9687.9,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 9708.4,
+      "event": "viewport_check",
+      "step": 4,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6467716119804526,
+        "threshold": 0.003,
+        "from_step": 3
+      }
+    },
+    {
+      "elapsed_ms": 9709.5,
+      "event": "emergency_stop_check",
+      "step": 4,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 9810.9,
+      "event": "pointer_move",
+      "step": 4,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 9811.1,
+      "event": "emergency_stop_check",
+      "step": 4,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 9911.8,
+      "event": "scroll",
+      "step": 4,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 4
+      }
+    },
+    {
+      "elapsed_ms": 10318.2,
+      "event": "capture",
+      "step": 4,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 10333.0,
+      "event": "viewport_check",
+      "step": 5,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.64369391612321,
+        "threshold": 0.003,
+        "from_step": 4
+      }
+    },
+    {
+      "elapsed_ms": 10334.0,
+      "event": "emergency_stop_check",
+      "step": 5,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 10434.2,
+      "event": "pointer_move",
+      "step": 5,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 10434.3,
+      "event": "emergency_stop_check",
+      "step": 5,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 10535.3,
+      "event": "scroll",
+      "step": 5,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 5
+      }
+    },
+    {
+      "elapsed_ms": 10953.6,
+      "event": "capture",
+      "step": 5,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 10973.7,
+      "event": "viewport_check",
+      "step": 6,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6458223364947471,
+        "threshold": 0.003,
+        "from_step": 5
+      }
+    },
+    {
+      "elapsed_ms": 10974.6,
+      "event": "emergency_stop_check",
+      "step": 6,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 11075.2,
+      "event": "pointer_move",
+      "step": 6,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 11075.4,
+      "event": "emergency_stop_check",
+      "step": 6,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 11176.8,
+      "event": "scroll",
+      "step": 6,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 6
+      }
+    },
+    {
+      "elapsed_ms": 11584.3,
+      "event": "capture",
+      "step": 6,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 11598.9,
+      "event": "viewport_check",
+      "step": 7,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6356357165965707,
+        "threshold": 0.003,
+        "from_step": 6
+      }
+    },
+    {
+      "elapsed_ms": 11599.7,
+      "event": "emergency_stop_check",
+      "step": 7,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 11700.8,
+      "event": "pointer_move",
+      "step": 7,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 11701.0,
+      "event": "emergency_stop_check",
+      "step": 7,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 11802.3,
+      "event": "scroll",
+      "step": 7,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 7
+      }
+    },
+    {
+      "elapsed_ms": 12219.0,
+      "event": "capture",
+      "step": 7,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 12236.2,
+      "event": "viewport_check",
+      "step": 8,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6386921282500979,
+        "threshold": 0.003,
+        "from_step": 7
+      }
+    },
+    {
+      "elapsed_ms": 12237.8,
+      "event": "emergency_stop_check",
+      "step": 8,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 12338.2,
+      "event": "pointer_move",
+      "step": 8,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 12338.4,
+      "event": "emergency_stop_check",
+      "step": 8,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 12439.1,
+      "event": "scroll",
+      "step": 8,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 8
+      }
+    },
+    {
+      "elapsed_ms": 12853.3,
+      "event": "capture",
+      "step": 8,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 12871.3,
+      "event": "viewport_check",
+      "step": 9,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6376108907013571,
+        "threshold": 0.003,
+        "from_step": 8
+      }
+    },
+    {
+      "elapsed_ms": 12872.9,
+      "event": "emergency_stop_check",
+      "step": 9,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 12973.4,
+      "event": "pointer_move",
+      "step": 9,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 12973.9,
+      "event": "emergency_stop_check",
+      "step": 9,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 13075.2,
+      "event": "scroll",
+      "step": 9,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 9
+      }
+    },
+    {
+      "elapsed_ms": 13481.8,
+      "event": "capture",
+      "step": 9,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 13501.4,
+      "event": "viewport_check",
+      "step": 10,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6366360741711931,
+        "threshold": 0.003,
+        "from_step": 9
+      }
+    },
+    {
+      "elapsed_ms": 13502.5,
+      "event": "emergency_stop_check",
+      "step": 10,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 13603.8,
+      "event": "pointer_move",
+      "step": 10,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 13604.0,
+      "event": "emergency_stop_check",
+      "step": 10,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 13705.4,
+      "event": "scroll",
+      "step": 10,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 10
+      }
+    },
+    {
+      "elapsed_ms": 14337.7,
+      "event": "capture",
+      "step": 10,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 14355.5,
+      "event": "viewport_check",
+      "step": 11,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6432639752081595,
+        "threshold": 0.003,
+        "from_step": 10
+      }
+    },
+    {
+      "elapsed_ms": 16778.9,
+      "event": "checkpoint_read",
+      "step": 11,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": null,
+        "rows": [
+          {
+            "duration_label": "15h",
+            "duration_seconds": 54000,
+            "raw_quantity": "648 / 648",
+            "quantity": 648,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 70,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 83
+            }
+          },
+          {
+            "duration_label": "1d",
+            "duration_seconds": 86400,
+            "raw_quantity": "484 / 484",
+            "quantity": 484,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 180,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 193
+            }
+          },
+          {
+            "duration_label": "3d",
+            "duration_seconds": 259200,
+            "raw_quantity": "538 / 538",
+            "quantity": 538,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 290,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 303
+            }
+          }
+        ],
+        "matches": [
+          {
+            "duration_label": "15h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 70,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 70,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1d",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 180,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 180,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "3d",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 290,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 290,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 0.9999998211860657
+          }
+        ],
+        "quantities": [
+          {
+            "duration_label": "15h",
+            "duration_seconds": 54000,
+            "raw_ocr": "648 / 648",
+            "quantity": 648,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 70,
+              "width": 145,
+              "height": 27
+            }
+          },
+          {
+            "duration_label": "1d",
+            "duration_seconds": 86400,
+            "raw_ocr": "484 / 484",
+            "quantity": 484,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 180,
+              "width": 145,
+              "height": 27
+            }
+          },
+          {
+            "duration_label": "3d",
+            "duration_seconds": 259200,
+            "raw_ocr": "538 / 538",
+            "quantity": 538,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 290,
+              "width": 145,
+              "height": 27
+            }
+          }
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 16780.4,
+      "event": "emergency_stop_check",
+      "step": 11,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 16881.3,
+      "event": "pointer_move",
+      "step": 11,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 16881.6,
+      "event": "emergency_stop_check",
+      "step": 11,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 16982.7,
+      "event": "scroll",
+      "step": 11,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 11
+      }
+    },
+    {
+      "elapsed_ms": 17400.0,
+      "event": "capture",
+      "step": 11,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.8910451531410217,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9863601326942444,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": true
+        }
+      }
+    },
+    {
+      "elapsed_ms": 17426.7,
+      "event": "viewport_check",
+      "step": 12,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6438131076640161,
+        "threshold": 0.003,
+        "from_step": 11
+      }
+    },
+    {
+      "elapsed_ms": 17427.5,
+      "event": "emergency_stop_check",
+      "step": 12,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 17528.1,
+      "event": "pointer_move",
+      "step": 12,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 17528.3,
+      "event": "emergency_stop_check",
+      "step": 12,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 17628.9,
+      "event": "scroll",
+      "step": 12,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 12
+      }
+    },
+    {
+      "elapsed_ms": 18028.3,
+      "event": "capture",
+      "step": 12,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.8910269737243652,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9863593578338623,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": true
+        }
+      }
+    },
+    {
+      "elapsed_ms": 18042.3,
+      "event": "viewport_check",
+      "step": 13,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6445154863866233,
+        "threshold": 0.003,
+        "from_step": 12
+      }
+    },
+    {
+      "elapsed_ms": 18043.1,
+      "event": "emergency_stop_check",
+      "step": 13,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 18143.4,
+      "event": "pointer_move",
+      "step": 13,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 18143.5,
+      "event": "emergency_stop_check",
+      "step": 13,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 18245.0,
+      "event": "scroll",
+      "step": 13,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 13
+      }
+    },
+    {
+      "elapsed_ms": 18643.6,
+      "event": "capture",
+      "step": 13,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.8910269737243652,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9863593578338623,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": true
+        }
+      }
+    },
+    {
+      "elapsed_ms": 18657.5,
+      "event": "viewport_check",
+      "step": 14,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.606821161606702,
+        "threshold": 0.003,
+        "from_step": 13
+      }
+    },
+    {
+      "elapsed_ms": 18658.3,
+      "event": "emergency_stop_check",
+      "step": 14,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 18758.8,
+      "event": "pointer_move",
+      "step": 14,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 18759.0,
+      "event": "emergency_stop_check",
+      "step": 14,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 18860.4,
+      "event": "scroll",
+      "step": 14,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 14
+      }
+    },
+    {
+      "elapsed_ms": 19264.4,
+      "event": "capture",
+      "step": 14,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.8910269737243652,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9863593578338623,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": true
+        }
+      }
+    },
+    {
+      "elapsed_ms": 19278.3,
+      "event": "viewport_check",
+      "step": 15,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6731980793134568,
+        "threshold": 0.003,
+        "from_step": 14
+      }
+    },
+    {
+      "elapsed_ms": 19279.0,
+      "event": "emergency_stop_check",
+      "step": 15,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 19379.8,
+      "event": "pointer_move",
+      "step": 15,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 19380.0,
+      "event": "emergency_stop_check",
+      "step": 15,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 19481.4,
+      "event": "scroll",
+      "step": 15,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 15
+      }
+    },
+    {
+      "elapsed_ms": 20080.2,
+      "event": "capture",
+      "step": 15,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.8910269737243652,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9863593578338623,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": true
+        }
+      }
+    },
+    {
+      "elapsed_ms": 20093.5,
+      "event": "viewport_check",
+      "step": 16,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6960488004222786,
+        "threshold": 0.003,
+        "from_step": 15
+      }
+    },
+    {
+      "elapsed_ms": 22567.6,
+      "event": "checkpoint_read",
+      "step": 16,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": null,
+        "rows": [
+          {
+            "duration_label": "3d",
+            "duration_seconds": 259200,
+            "raw_quantity": "538 / 538",
+            "quantity": 538,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 50,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 63
+            }
+          },
+          {
+            "duration_label": "7d",
+            "duration_seconds": 604800,
+            "raw_quantity": "252 / 252",
+            "quantity": 252,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 160,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 173
+            }
+          },
+          {
+            "duration_label": "30d",
+            "duration_seconds": 2592000,
+            "raw_quantity": "1 / 1",
+            "quantity": 1,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 270,
+              "width": 145,
+              "height": 27
+            },
+            "button_center": {
+              "x": 444,
+              "y": 283
+            }
+          }
+        ],
+        "matches": [
+          {
+            "duration_label": "3d",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 50,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 50,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "7d",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 160,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 160,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "30d",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 270,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 270,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 0
+            },
+            "confidence": 0.9999998211860657
+          }
+        ],
+        "quantities": [
+          {
+            "duration_label": "3d",
+            "duration_seconds": 259200,
+            "raw_ocr": "538 / 538",
+            "quantity": 538,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 50,
+              "width": 145,
+              "height": 27
+            }
+          },
+          {
+            "duration_label": "7d",
+            "duration_seconds": 604800,
+            "raw_ocr": "252 / 252",
+            "quantity": 252,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 160,
+              "width": 145,
+              "height": 27
+            }
+          },
+          {
+            "duration_label": "30d",
+            "duration_seconds": 2592000,
+            "raw_ocr": "1 / 1",
+            "quantity": 1,
+            "confidence": 100.0,
+            "status": "ok",
+            "button_rectangle": {
+              "x": 372,
+              "y": 270,
+              "width": 145,
+              "height": 27
+            }
+          }
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 25433.9,
+      "event": "timer_read",
+      "step": 16,
+      "data": {
+        "phase": "post_scan",
+        "status": "ok",
+        "raw": "1d.:19g.",
+        "value_seconds": 154800,
+        "confidence": 100.0
+      }
+    },
+    {
+      "elapsed_ms": 25433.9,
+      "event": "planning_started",
+      "step": 16,
+      "data": {
+        "remaining_seconds": 154800,
+        "inventory": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            458
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "owned_seconds": 445167900,
+        "coverage_surplus_seconds": 445013100
+      }
+    },
+    {
+      "elapsed_ms": 25434.1,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "8h",
+        "remaining_before_seconds": 154800,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            458
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 1,
+        "quantity_before": 458,
+        "quantity_after": 457,
+        "remaining_after_seconds": 126000,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 25434.2,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "8h",
+        "remaining_before_seconds": 126000,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            457
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 2,
+        "quantity_before": 457,
+        "quantity_after": 456,
+        "remaining_after_seconds": 97200,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 25434.2,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "8h",
+        "remaining_before_seconds": 97200,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            456
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 3,
+        "quantity_before": 456,
+        "quantity_after": 455,
+        "remaining_after_seconds": 68400,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 25434.2,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "8h",
+        "remaining_before_seconds": 68400,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            455
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 4,
+        "quantity_before": 455,
+        "quantity_after": 454,
+        "remaining_after_seconds": 39600,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 25434.2,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "8h",
+        "remaining_before_seconds": 39600,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            454
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 28800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 5,
+        "quantity_before": 454,
+        "quantity_after": 453,
+        "remaining_after_seconds": 10800,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 25434.2,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "3h",
+        "remaining_before_seconds": 10800,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            453
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800
+        ],
+        "selected_duration_seconds": 10800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 6,
+        "quantity_before": 3454,
+        "quantity_after": 3453,
+        "remaining_after_seconds": 0,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 25434.2,
+      "event": "plan_built",
+      "step": 16,
+      "data": {
+        "status": "ok",
+        "remaining_seconds": 154800,
+        "inventory": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            458
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "owned_seconds": 445167900,
+        "coverage_surplus_seconds": 445013100,
+        "uses": [
+          {
+            "duration_seconds": 28800,
+            "duration_label": "8h",
+            "quantity": 5,
+            "total_seconds": 144000
+          },
+          {
+            "duration_seconds": 10800,
+            "duration_label": "3h",
+            "quantity": 1,
+            "total_seconds": 10800
+          }
+        ],
+        "breached_floors": [],
+        "shortfall_seconds": 0
+      }
+    },
+    {
+      "elapsed_ms": 25434.3,
+      "event": "execution_started",
+      "step": 16,
+      "data": {
+        "plan_generation": 1,
+        "planned_uses": 6,
+        "planned_seconds": 154800,
+        "initial_timer_seconds": 154800
+      }
+    },
+    {
+      "elapsed_ms": 25434.3,
+      "event": "use_step_started",
+      "step": 16,
+      "data": {
+        "use_number": 1,
+        "plan_generation": 1,
+        "plan_step": 1,
+        "plan_total": 6,
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "checkpoint": 3,
+        "remaining_queue": 5,
+        "decision": {
+          "remaining_before_seconds": 154800,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5281
+            ],
+            [
+              10800,
+              3454
+            ],
+            [
+              28800,
+              458
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "selected_duration_seconds": 28800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 1,
+          "quantity_before": 458,
+          "quantity_after": 457,
+          "remaining_after_seconds": 126000,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 25435.3,
+      "event": "emergency_stop_check",
+      "step": 16,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 25535.8,
+      "event": "pointer_move",
+      "step": 16,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 25536.0,
+      "event": "emergency_stop_check",
+      "step": 16,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 25636.7,
+      "event": "scroll",
+      "step": 16,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 16
+      }
+    },
+    {
+      "elapsed_ms": 26039.8,
+      "event": "capture",
+      "step": 16,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 26052.5,
+      "event": "viewport_check",
+      "step": 15,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6960488004222786,
+        "threshold": 0.003,
+        "from_step": 16
+      }
+    },
+    {
+      "elapsed_ms": 26053.3,
+      "event": "emergency_stop_check",
+      "step": 15,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 26154.3,
+      "event": "pointer_move",
+      "step": 15,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 26154.4,
+      "event": "emergency_stop_check",
+      "step": 15,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 26255.7,
+      "event": "scroll",
+      "step": 15,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 15
+      }
+    },
+    {
+      "elapsed_ms": 26660.9,
+      "event": "capture",
+      "step": 15,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 26678.9,
+      "event": "viewport_check",
+      "step": 14,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6731980793134568,
+        "threshold": 0.003,
+        "from_step": 15
+      }
+    },
+    {
+      "elapsed_ms": 26679.6,
+      "event": "emergency_stop_check",
+      "step": 14,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 26779.9,
+      "event": "pointer_move",
+      "step": 14,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 26780.1,
+      "event": "emergency_stop_check",
+      "step": 14,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 26880.6,
+      "event": "scroll",
+      "step": 14,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 14
+      }
+    },
+    {
+      "elapsed_ms": 27291.9,
+      "event": "capture",
+      "step": 14,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 27305.3,
+      "event": "viewport_check",
+      "step": 13,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6425190280781216,
+        "threshold": 0.003,
+        "from_step": 14
+      }
+    },
+    {
+      "elapsed_ms": 27306.2,
+      "event": "emergency_stop_check",
+      "step": 13,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 27406.9,
+      "event": "pointer_move",
+      "step": 13,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 27407.0,
+      "event": "emergency_stop_check",
+      "step": 13,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 27507.8,
+      "event": "scroll",
+      "step": 13,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 13
+      }
+    },
+    {
+      "elapsed_ms": 27902.8,
+      "event": "capture",
+      "step": 13,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 27916.8,
+      "event": "viewport_check",
+      "step": 12,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.646282075294999,
+        "threshold": 0.003,
+        "from_step": 13
+      }
+    },
+    {
+      "elapsed_ms": 27917.6,
+      "event": "emergency_stop_check",
+      "step": 12,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 28017.8,
+      "event": "pointer_move",
+      "step": 12,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 28017.9,
+      "event": "emergency_stop_check",
+      "step": 12,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 28118.8,
+      "event": "scroll",
+      "step": 12,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 12
+      }
+    },
+    {
+      "elapsed_ms": 28521.9,
+      "event": "capture",
+      "step": 12,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 28536.0,
+      "event": "viewport_check",
+      "step": 11,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6464055236765482,
+        "threshold": 0.003,
+        "from_step": 12
+      }
+    },
+    {
+      "elapsed_ms": 28537.2,
+      "event": "emergency_stop_check",
+      "step": 11,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 28637.5,
+      "event": "pointer_move",
+      "step": 11,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 28637.6,
+      "event": "emergency_stop_check",
+      "step": 11,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 28738.5,
+      "event": "scroll",
+      "step": 11,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 11
+      }
+    },
+    {
+      "elapsed_ms": 29134.6,
+      "event": "capture",
+      "step": 11,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 29146.8,
+      "event": "viewport_check",
+      "step": 10,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.644149398082719,
+        "threshold": 0.003,
+        "from_step": 11
+      }
+    },
+    {
+      "elapsed_ms": 29147.8,
+      "event": "emergency_stop_check",
+      "step": 10,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 29248.9,
+      "event": "pointer_move",
+      "step": 10,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 29249.3,
+      "event": "emergency_stop_check",
+      "step": 10,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 29350.2,
+      "event": "scroll",
+      "step": 10,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 10
+      }
+    },
+    {
+      "elapsed_ms": 29753.8,
+      "event": "capture",
+      "step": 10,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 29770.4,
+      "event": "viewport_check",
+      "step": 9,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6433916804304517,
+        "threshold": 0.003,
+        "from_step": 10
+      }
+    },
+    {
+      "elapsed_ms": 29771.3,
+      "event": "emergency_stop_check",
+      "step": 9,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 29872.4,
+      "event": "pointer_move",
+      "step": 9,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 29872.8,
+      "event": "emergency_stop_check",
+      "step": 9,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 29973.9,
+      "event": "scroll",
+      "step": 9,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 9
+      }
+    },
+    {
+      "elapsed_ms": 30384.8,
+      "event": "capture",
+      "step": 9,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 30397.0,
+      "event": "viewport_check",
+      "step": 8,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6428468048153383,
+        "threshold": 0.003,
+        "from_step": 9
+      }
+    },
+    {
+      "elapsed_ms": 30397.8,
+      "event": "emergency_stop_check",
+      "step": 8,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 30498.8,
+      "event": "pointer_move",
+      "step": 8,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 30499.1,
+      "event": "emergency_stop_check",
+      "step": 8,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 30600.7,
+      "event": "scroll",
+      "step": 8,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 8
+      }
+    },
+    {
+      "elapsed_ms": 31001.0,
+      "event": "capture",
+      "step": 8,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 31013.1,
+      "event": "viewport_check",
+      "step": 7,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6363082974339764,
+        "threshold": 0.003,
+        "from_step": 8
+      }
+    },
+    {
+      "elapsed_ms": 31013.9,
+      "event": "emergency_stop_check",
+      "step": 7,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 31114.9,
+      "event": "pointer_move",
+      "step": 7,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 31115.1,
+      "event": "emergency_stop_check",
+      "step": 7,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 31215.8,
+      "event": "scroll",
+      "step": 7,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 7
+      }
+    },
+    {
+      "elapsed_ms": 31619.7,
+      "event": "capture",
+      "step": 7,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 31632.1,
+      "event": "viewport_check",
+      "step": 6,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6373256823715712,
+        "threshold": 0.003,
+        "from_step": 7
+      }
+    },
+    {
+      "elapsed_ms": 31632.8,
+      "event": "emergency_stop_check",
+      "step": 6,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 31733.6,
+      "event": "pointer_move",
+      "step": 6,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 31733.8,
+      "event": "emergency_stop_check",
+      "step": 6,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 31834.4,
+      "event": "scroll",
+      "step": 6,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 6
+      }
+    },
+    {
+      "elapsed_ms": 32235.3,
+      "event": "capture",
+      "step": 6,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 32249.5,
+      "event": "viewport_check",
+      "step": 5,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.638470772531458,
+        "threshold": 0.003,
+        "from_step": 6
+      }
+    },
+    {
+      "elapsed_ms": 32250.3,
+      "event": "emergency_stop_check",
+      "step": 5,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 32351.5,
+      "event": "pointer_move",
+      "step": 5,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 32351.7,
+      "event": "emergency_stop_check",
+      "step": 5,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 32452.6,
+      "event": "scroll",
+      "step": 5,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 5
+      }
+    },
+    {
+      "elapsed_ms": 32852.8,
+      "event": "capture",
+      "step": 5,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 32865.8,
+      "event": "viewport_check",
+      "step": 4,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6356612576410291,
+        "threshold": 0.003,
+        "from_step": 5
+      }
+    },
+    {
+      "elapsed_ms": 32866.7,
+      "event": "emergency_stop_check",
+      "step": 4,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 32966.9,
+      "event": "pointer_move",
+      "step": 4,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 32967.0,
+      "event": "emergency_stop_check",
+      "step": 4,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 33068.4,
+      "event": "scroll",
+      "step": 4,
+      "data": {
+        "status": "sent",
+        "direction": 1,
+        "from_step": 4
+      }
+    },
+    {
+      "elapsed_ms": 33470.3,
+      "event": "capture",
+      "step": 4,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 33486.5,
+      "event": "viewport_check",
+      "step": 3,
+      "data": {
+        "status": "changed",
+        "direction": 1,
+        "change_score": 0.6454945597575303,
+        "threshold": 0.003,
+        "from_step": 4
+      }
+    },
+    {
+      "elapsed_ms": 33511.7,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 28800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 33511.7,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 370,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 383
+        },
+        "screen_point": [
+          1122,
+          759
+        ],
+        "initial_quantity": 458,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "use_number": 1,
+        "plan_generation": 1,
+        "plan_step": 1,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 33511.9,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 33629.1,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 28800,
+        "screen_point": [
+          1122,
+          759
+        ],
+        "use_number": 1,
+        "plan_generation": 1,
+        "plan_step": 1,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 34035.7,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 34037.8,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 28800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 1,
+        "plan_generation": 1,
+        "plan_step": 1,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 34037.8,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 457,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 28800,
+        "use_number": 1,
+        "plan_generation": 1,
+        "plan_step": 1,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 34038.8,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 2,
+        "plan_generation": 1,
+        "plan_step": 2,
+        "plan_total": 6,
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "checkpoint": 3,
+        "remaining_queue": 4,
+        "decision": {
+          "remaining_before_seconds": 126000,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5281
+            ],
+            [
+              10800,
+              3454
+            ],
+            [
+              28800,
+              457
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "selected_duration_seconds": 28800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 2,
+          "quantity_before": 457,
+          "quantity_after": 456,
+          "remaining_after_seconds": 97200,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 34069.1,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 28800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 34069.1,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 370,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 383
+        },
+        "screen_point": [
+          1122,
+          759
+        ],
+        "initial_quantity": 457,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          }
+        ],
+        "use_number": 2,
+        "plan_generation": 1,
+        "plan_step": 2,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 34069.3,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 34170.2,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 28800,
+        "screen_point": [
+          1122,
+          759
+        ],
+        "use_number": 2,
+        "plan_generation": 1,
+        "plan_step": 2,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 34569.5,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 34571.2,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 28800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 2,
+        "plan_generation": 1,
+        "plan_step": 2,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 34571.2,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 456,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 28800,
+        "use_number": 2,
+        "plan_generation": 1,
+        "plan_step": 2,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 34572.4,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6,
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "checkpoint": 3,
+        "remaining_queue": 3,
+        "decision": {
+          "remaining_before_seconds": 97200,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5281
+            ],
+            [
+              10800,
+              3454
+            ],
+            [
+              28800,
+              456
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "selected_duration_seconds": 28800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 3,
+          "quantity_before": 456,
+          "quantity_after": 455,
+          "remaining_after_seconds": 68400,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 34600.0,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 28800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678511619567871
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 34600.1,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 370,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 383
+        },
+        "screen_point": [
+          1122,
+          759
+        ],
+        "initial_quantity": 456,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678511619567871
+          }
+        ],
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 34600.2,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 34701.0,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 28800,
+        "screen_point": [
+          1122,
+          759
+        ],
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 35116.4,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 35118.0,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 28800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 35118.0,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 455,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 28800,
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 35118.7,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 4,
+        "plan_generation": 1,
+        "plan_step": 4,
+        "plan_total": 6,
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "checkpoint": 3,
+        "remaining_queue": 2,
+        "decision": {
+          "remaining_before_seconds": 68400,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5281
+            ],
+            [
+              10800,
+              3454
+            ],
+            [
+              28800,
+              455
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "selected_duration_seconds": 28800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 4,
+          "quantity_before": 455,
+          "quantity_after": 454,
+          "remaining_after_seconds": 39600,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 35148.3,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 28800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.999999463558197
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678511619567871
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 35148.3,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 370,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 383
+        },
+        "screen_point": [
+          1122,
+          759
+        ],
+        "initial_quantity": 455,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.999999463558197
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678511619567871
+          }
+        ],
+        "use_number": 4,
+        "plan_generation": 1,
+        "plan_step": 4,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 35148.4,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 35249.4,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 28800,
+        "screen_point": [
+          1122,
+          759
+        ],
+        "use_number": 4,
+        "plan_generation": 1,
+        "plan_step": 4,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 35646.5,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 35649.7,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 28800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 4,
+        "plan_generation": 1,
+        "plan_step": 4,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 35649.7,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 454,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 28800,
+        "use_number": 4,
+        "plan_generation": 1,
+        "plan_step": 4,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 35650.6,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 6,
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "checkpoint": 3,
+        "remaining_queue": 1,
+        "decision": {
+          "remaining_before_seconds": 39600,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5281
+            ],
+            [
+              10800,
+              3454
+            ],
+            [
+              28800,
+              454
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "selected_duration_seconds": 28800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 5,
+          "quantity_before": 454,
+          "quantity_after": 453,
+          "remaining_after_seconds": 10800,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 35680.4,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 28800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.999999463558197
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 35680.4,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 370,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 383
+        },
+        "screen_point": [
+          1122,
+          759
+        ],
+        "initial_quantity": 454,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.999999463558197
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          }
+        ],
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 35680.6,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 35781.9,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 28800,
+        "screen_point": [
+          1122,
+          759
+        ],
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 36180.5,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 36182.1,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 28800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 36182.1,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 453,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 28800,
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 36183.0,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 6,
+        "plan_generation": 1,
+        "plan_step": 6,
+        "plan_total": 6,
+        "duration_seconds": 10800,
+        "duration_label": "3h",
+        "checkpoint": 3,
+        "remaining_queue": 0,
+        "decision": {
+          "remaining_before_seconds": 10800,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5281
+            ],
+            [
+              10800,
+              3454
+            ],
+            [
+              28800,
+              453
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800
+          ],
+          "selected_duration_seconds": 10800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 6,
+          "quantity_before": 3454,
+          "quantity_after": 3453,
+          "remaining_after_seconds": 0,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 36208.8,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 10800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678518772125244
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 36208.9,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 10800,
+        "duration_label": "3h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 260,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 273
+        },
+        "screen_point": [
+          1122,
+          649
+        ],
+        "initial_quantity": 3454,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678518772125244
+          }
+        ],
+        "use_number": 6,
+        "plan_generation": 1,
+        "plan_step": 6,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 36209.0,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 36310.8,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 10800,
+        "screen_point": [
+          1122,
+          649
+        ],
+        "use_number": 6,
+        "plan_generation": 1,
+        "plan_step": 6,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 36717.6,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 36719.8,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 10800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 6,
+        "plan_generation": 1,
+        "plan_step": 6,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 36719.8,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 3453,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 10800,
+        "use_number": 6,
+        "plan_generation": 1,
+        "plan_step": 6,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 38088.8,
+      "event": "timer_read",
+      "step": 3,
+      "data": {
+        "phase": "final",
+        "status": "ok",
+        "raw": "1m09s",
+        "value_seconds": 69,
+        "confidence": 100.0
+      }
+    },
+    {
+      "elapsed_ms": 38088.8,
+      "event": "residual_plan_started",
+      "step": 3,
+      "data": {
+        "remaining_seconds": 69,
+        "previous_remaining_seconds": 154800,
+        "estimated_stock": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3453
+          ],
+          [
+            28800,
+            453
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "stock_source": "initial_inventory_minus_submitted_clicks"
+      }
+    },
+    {
+      "elapsed_ms": 38088.9,
+      "event": "plan_rebuilt",
+      "step": 3,
+      "data": {
+        "plan_generation": 2,
+        "status": "ok",
+        "remaining_seconds": 69,
+        "inventory": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3453
+          ],
+          [
+            28800,
+            453
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "uses": [
+          [
+            3600,
+            1
+          ]
+        ],
+        "shortfall_seconds": 0,
+        "breached_floors": [],
+        "reason": "positive_remaining_time_after_batch",
+        "stock_source": "initial_inventory_minus_submitted_clicks"
+      }
+    },
+    {
+      "elapsed_ms": 38088.9,
+      "event": "plan_choice",
+      "step": 3,
+      "data": {
+        "plan_generation": 2,
+        "remaining_before_seconds": 69,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5281
+          ],
+          [
+            10800,
+            3453
+          ],
+          [
+            28800,
+            453
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_overshoot",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 3600,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 1,
+        "quantity_before": 5281,
+        "quantity_after": 5280,
+        "remaining_after_seconds": -3531,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 38088.9,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 7,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1,
+        "duration_seconds": 3600,
+        "duration_label": "1h",
+        "checkpoint": 3,
+        "remaining_queue": 0,
+        "decision": {
+          "remaining_before_seconds": 69,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5281
+            ],
+            [
+              10800,
+              3453
+            ],
+            [
+              28800,
+              453
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_overshoot",
+          "candidates_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "selected_duration_seconds": 3600,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 1,
+          "quantity_before": 5281,
+          "quantity_after": 5280,
+          "remaining_after_seconds": -3531,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 38114.5,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 3600,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 38114.5,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 3600,
+        "duration_label": "1h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 150,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 163
+        },
+        "screen_point": [
+          1122,
+          539
+        ],
+        "initial_quantity": 5281,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          }
+        ],
+        "use_number": 7,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1
+      }
+    },
+    {
+      "elapsed_ms": 38114.6,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 38215.9,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 3600,
+        "screen_point": [
+          1122,
+          539
+        ],
+        "use_number": 7,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1
+      }
+    },
+    {
+      "elapsed_ms": 38615.6,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 38617.8,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "not_recognized",
+        "phase": "post_use",
+        "duration_seconds": 3600,
+        "dialog_match": {
+          "recognized": false,
+          "score": 0.26851794123649597,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 252
+          },
+          "partial_score": 0.255475252866745,
+          "partial_location": {
+            "x": 900,
+            "y": 252
+          },
+          "fallback_used": false
+        },
+        "use_number": 7,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1
+      }
+    },
+    {
+      "elapsed_ms": 38617.9,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "dialog_closed",
+        "quantity_checked": false,
+        "duration_seconds": 3600,
+        "use_number": 7,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1
+      }
+    },
+    {
+      "elapsed_ms": 38618.9,
+      "event": "execution_decision",
+      "step": 3,
+      "data": {
+        "action": "finish_dialog_closed",
+        "reason": "last_planned_use_closed_dialog"
+      }
+    },
+    {
+      "elapsed_ms": 38618.9,
+      "event": "run_finished",
+      "step": 3,
+      "data": {
+        "status": "FINISHED",
+        "reason": "dialog_closed_after_last_use",
+        "clicks_issued": 7,
+        "shortfall_seconds": 0,
+        "initial_timer_seconds": 154800,
+        "final_observed_timer_seconds": 69,
+        "submitted_uses": [
+          [
+            3600,
+            1
+          ],
+          [
+            10800,
+            1
+          ],
+          [
+            28800,
+            5
+          ]
+        ]
+      }
+    }
+  ],
+  "evidence_frames": [
+    "frame_000.png",
+    "frame_003.png",
+    "frame_011.png",
+    "frame_016.png"
+  ],
+  "event_trace_file": "event_trace.jsonl"
+}
