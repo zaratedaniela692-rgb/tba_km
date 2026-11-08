@@ -1,0 +1,107 @@
+{
+  "timestamp": "2026-11-08T13:47:15.552212+00:00",
+  "mode": "execute",
+  "status": "BLOCKED",
+  "reason": "timer_unreadable:hours_out_of_range",
+  "remaining_seconds": null,
+  "final_remaining_seconds": null,
+  "inventory": [],
+  "inventory_evidence": [],
+  "plan": null,
+  "used": [],
+  "shortfall_seconds": 0,
+  "replan": null,
+  "checkpoint_steps": [],
+  "click_timings": [],
+  "final_timer_read_ms": null,
+  "checkpoint_diagnostics": [],
+  "event_trace": [
+    {
+      "elapsed_ms": 0.0,
+      "event": "scan_started",
+      "step": 0,
+      "data": {
+        "checkpoints": [
+          3,
+          11,
+          16
+        ],
+        "mode": "execute"
+      }
+    },
+    {
+      "elapsed_ms": 209.3,
+      "event": "capture",
+      "step": 0,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 2400.2,
+      "event": "timer_read",
+      "step": 0,
+      "data": {
+        "phase": "initial",
+        "status": "hours_out_of_range",
+        "raw": "14d.:56g.",
+        "value": null,
+        "confidence": 100.0
+      }
+    },
+    {
+      "elapsed_ms": 2400.2,
+      "event": "run_aborted",
+      "step": 0,
+      "data": {
+        "status": "BLOCKED",
+        "reason": "timer_unreadable:hours_out_of_range",
+        "clicks_issued": 0
+      }
+    },
+    {
+      "elapsed_ms": 2400.2,
+      "event": "run_finished",
+      "step": 0,
+      "data": {
+        "status": "BLOCKED",
+        "reason": "timer_unreadable:hours_out_of_range",
+        "clicks_issued": 0,
+        "shortfall_seconds": 0,
+        "initial_timer_seconds": null,
+        "final_observed_timer_seconds": null,
+        "submitted_uses": []
+      }
+    }
+  ],
+  "evidence_frames": [
+    "frame_000.png"
+  ],
+  "debug_capture": "uncertain.png",
+  "event_trace_file": "event_trace.jsonl"
+}
