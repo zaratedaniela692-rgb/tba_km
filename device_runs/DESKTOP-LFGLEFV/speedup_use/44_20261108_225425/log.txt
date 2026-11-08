@@ -1,0 +1,9 @@
+2026-11-08T22:54:25 [speedup_use] prepare: Speed Up dialog of an active training open, inventory list scrolled to the top.
+2026-11-08T22:54:25 [speedup_use] starting in 5 s
+2026-11-08T22:54:31 step 1 use_items: C:\Users\Konrad\AppData\Local\Programs\Python\Python311\python.exe speedup.py --execute --confirm USE OWNED SPEEDUPS FROM TOP
+2026-11-08T21:54:32.407+00:00 [module +0.0ms step=0] scan_started: {"checkpoints":[3,11,16],"mode":"execute"}
+2026-11-08T21:54:32.838+00:00 [module +430.4ms step=0] capture: {"dialog_match":{"fallback_used":false,"location":{"x":907,"y":258},"partial_location":{"x":908,"y":250},"partial_score":0.13059037923812866,"recognized":false,"score":0.27258169651031494,"threshold":0.95},"dialog_recognized":false,"dialog_required":true,"frame_size":[1920,1080],"origin":[0,0],"status":"ok"}
+2026-11-08T21:54:32.838+00:00 [module +430.4ms step=0] run_aborted: {"clicks_issued":0,"reason":"speedup_dialog_not_recognized","status":"BLOCKED"}
+2026-11-08T21:54:32.838+00:00 [module +430.5ms step=0] run_finished: {"clicks_issued":0,"final_observed_timer_seconds":null,"initial_timer_seconds":null,"reason":"speedup_dialog_not_recognized","shortfall_seconds":0,"status":"BLOCKED","submitted_uses":[]}
+2026-11-08T22:54:34 module trace: appended 4 events from event_trace.jsonl
+2026-11-08T22:54:34 step 1 use_items: FAILED (rc=2, 2.5 s)

@@ -1,0 +1,95 @@
+{
+  "timestamp": "2026-11-08T21:54:32.407813+00:00",
+  "mode": "execute",
+  "status": "BLOCKED",
+  "reason": "speedup_dialog_not_recognized",
+  "remaining_seconds": null,
+  "final_remaining_seconds": null,
+  "inventory": [],
+  "inventory_evidence": [],
+  "plan": null,
+  "used": [],
+  "shortfall_seconds": 0,
+  "replan": null,
+  "checkpoint_steps": [],
+  "click_timings": [],
+  "final_timer_read_ms": null,
+  "checkpoint_diagnostics": [],
+  "event_trace": [
+    {
+      "elapsed_ms": 0.0,
+      "event": "scan_started",
+      "step": 0,
+      "data": {
+        "checkpoints": [
+          3,
+          11,
+          16
+        ],
+        "mode": "execute"
+      }
+    },
+    {
+      "elapsed_ms": 430.4,
+      "event": "capture",
+      "step": 0,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": false,
+        "dialog_match": {
+          "recognized": false,
+          "score": 0.27258169651031494,
+          "threshold": 0.95,
+          "location": {
+            "x": 907,
+            "y": 258
+          },
+          "partial_score": 0.13059037923812866,
+          "partial_location": {
+            "x": 908,
+            "y": 250
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 430.4,
+      "event": "run_aborted",
+      "step": 0,
+      "data": {
+        "status": "BLOCKED",
+        "reason": "speedup_dialog_not_recognized",
+        "clicks_issued": 0
+      }
+    },
+    {
+      "elapsed_ms": 430.5,
+      "event": "run_finished",
+      "step": 0,
+      "data": {
+        "status": "BLOCKED",
+        "reason": "speedup_dialog_not_recognized",
+        "clicks_issued": 0,
+        "shortfall_seconds": 0,
+        "initial_timer_seconds": null,
+        "final_observed_timer_seconds": null,
+        "submitted_uses": []
+      }
+    }
+  ],
+  "evidence_frames": [
+    "frame_000.png"
+  ],
+  "debug_capture": "uncertain.png",
+  "event_trace_file": "event_trace.jsonl"
+}
