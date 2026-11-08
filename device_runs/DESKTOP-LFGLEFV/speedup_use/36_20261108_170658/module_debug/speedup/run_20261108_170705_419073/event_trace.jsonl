@@ -1,4 +1,0 @@
-{"elapsed_ms": 0.0, "event": "scan_started", "step": 0, "data": {"checkpoints": [3, 11, 16], "mode": "execute"}}
-{"elapsed_ms": 431.4, "event": "capture", "step": 0, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": false, "dialog_match": {"recognized": false, "score": 0.04750281944870949, "threshold": 0.95, "location": {"x": 904, "y": 258}, "partial_score": 0.11181110143661499, "partial_location": {"x": 905, "y": 250}, "fallback_used": false}}}
-{"elapsed_ms": 431.4, "event": "run_aborted", "step": 0, "data": {"status": "BLOCKED", "reason": "speedup_dialog_not_recognized", "clicks_issued": 0}}
-{"elapsed_ms": 431.5, "event": "run_finished", "step": 0, "data": {"status": "BLOCKED", "reason": "speedup_dialog_not_recognized", "clicks_issued": 0, "shortfall_seconds": 0, "initial_timer_seconds": null, "final_observed_timer_seconds": null, "submitted_uses": []}}
