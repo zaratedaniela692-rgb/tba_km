@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import sys
 from copy import deepcopy
 from dataclasses import dataclass
@@ -45,6 +46,7 @@ from task_controller import (
     task_queue_path,
 )
 from profile_identity import ProfileIdentityError, resolve_profile_from_game
+from workflow_trace import WorkflowTrace
 
 SOURCE = "army_training_manager"
 CLEAR_QUEUE_CONFIRMATION = "CLEAR ARMY QUEUE"
@@ -485,7 +487,7 @@ def _next_pending_goal_unit_type(queue):
     return Slot(**candidates[0]["payload"]["slot"]).unit_type if candidates else None
 
 
-def _command_execute(args, profiles_dir, now):
+def _command_execute_impl(args, profiles_dir, now):
     from army_training_live_e2e import capture_primary_monitor
     from army_training_navigation import open_army_training_screen
 
@@ -606,6 +608,51 @@ def _command_execute(args, profiles_dir, now):
         result["category_selection"] = category
     result["queue_path"] = str(path)
     return result
+
+
+def _collect_event_traces(value):
+    seen_lists = set()
+
+    def collect(item):
+        if isinstance(item, dict):
+            for key, nested in item.items():
+                if key == "event_trace" and isinstance(nested, list):
+                    if id(nested) not in seen_lists:
+                        seen_lists.add(id(nested))
+                        yield from nested
+                else:
+                    yield from collect(nested)
+        elif isinstance(item, (list, tuple)):
+            for nested in item:
+                yield from collect(nested)
+
+    yield from collect(value)
+
+
+def _command_execute(args, profiles_dir, now):
+    report = _command_execute_impl(args, profiles_dir, now)
+    events = list(_collect_event_traces(report))
+    manager_trace = WorkflowTrace(
+        "army_training_manager", run_id=now.isoformat(), profile_id=args.profile, clock=lambda: now,
+    )
+    manager_trace.record(
+        "workflow_result", observation={
+            "status": report.get("status"),
+            "actions_executed": report.get("actions_executed", False),
+            "queue_modified": report.get("queue_modified", False),
+        }, decision="completed", verification=report.get("status"),
+    )
+    events.extend(manager_trace.events)
+    report["workflow_trace_events"] = len(events)
+    trace_path = os.environ.get("TBA_WORKFLOW_TRACE_PATH")
+    if trace_path:
+        destination = Path(trace_path)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with destination.open("a", encoding="utf-8") as trace_file:
+            trace_file.writelines(
+                json.dumps(event, ensure_ascii=False, default=str) + "\n" for event in events
+            )
+    return report
 
 
 def build_parser():

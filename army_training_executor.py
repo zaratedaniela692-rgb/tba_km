@@ -190,6 +190,7 @@ def execute_training_goal(
         finish_report = finish_open_training(
             state_path, before_state["status"], speedup_fn, now,
             queue["settings"].get("speedup_retry_seconds") or DEFAULT_SPEEDUP_RETRY_SECONDS,
+            trace=trace,
         )
         result["finish"] = finish_report
         if finish_report["status"] not in {"idle", "finished"}:

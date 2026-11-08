@@ -1,5 +1,6 @@
 import subprocess
 from datetime import datetime, timedelta
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -164,6 +165,48 @@ def test_run_log_includes_module_event_trace(repo):
     assert log.index("use_click") < log.index("step 1 probe: OK")
     assert report["module_trace_events"] == 2
     assert (run_dir / "module_debug" / "speedup" / "run_fixture" / "event_trace.jsonl").exists()
+
+
+def test_run_log_includes_persisted_workflow_trace(repo):
+    def create_workflow_trace():
+        run_dir = next((repo.work / "device_runs" / "pc1" / "demo").iterdir())
+        trace_path = run_dir / "workflow_trace.jsonl"
+        trace_path.write_text(
+            '{"timestamp":"2026-11-08T12:00:00+00:00","workflow":"army_training",'
+            '"step":"train_click","action":{"point":[100,200]},"verification":"confirmed"}\n',
+            encoding="utf-8",
+        )
+
+    context = _context(repo, [], effect=create_workflow_trace)
+
+    code, results = dt.run_scenarios(["demo"], context, {"demo": SCENARIO})
+
+    run_dir = next((repo.work / "device_runs" / "pc1" / "demo").iterdir())
+    log = (run_dir / "log.txt").read_text(encoding="utf-8")
+    report = __import__("json").loads((run_dir / "report.json").read_text(encoding="utf-8"))
+    assert code == 0
+    assert results[0]["status"] == dt.OK
+    assert "train_click" in log and '"point":[100,200]' in log
+    assert report["workflow_trace_events"] == 1
+
+
+def test_workflow_trace_ingestion_reads_new_appended_events_once(tmp_path):
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    trace_path = run_dir / "workflow_trace.jsonl"
+    trace_path.write_text('{"timestamp":"t1","step":"first"}\n', encoding="utf-8")
+    offsets = {}
+    log_lines = []
+
+    first_count = dt._append_workflow_trace(log_lines, run_dir, offsets)
+    with trace_path.open("a", encoding="utf-8") as trace_file:
+        trace_file.write('{"timestamp":"t2","step":"second"}\n')
+    second_count = dt._append_workflow_trace(log_lines, run_dir, offsets)
+    repeated_count = dt._append_workflow_trace(log_lines, run_dir, offsets)
+
+    assert (first_count, second_count, repeated_count) == (1, 1, 0)
+    assert sum("first" in line for line in log_lines) == 1
+    assert sum("second" in line for line in log_lines) == 1
 
 
 def test_retention_keeps_the_current_run_and_three_earlier_ones(repo):

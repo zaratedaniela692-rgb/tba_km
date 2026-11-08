@@ -120,13 +120,13 @@ def open_army_training_screen(
         return finish({**plan, "status": "BLOCKED_UNSUPPORTED_VARIANT", "blockers": [variant["id"]]})
 
     try:
-        reset = clear_game_screen(execute=True, press_key=press_key_fn, stop_file=stop_file or Path.home() / ".tba_stop")
+        reset = clear_game_screen(
+            execute=True, press_key=press_key_fn, stop_file=stop_file or Path.home() / ".tba_stop", trace=trace,
+        )
     except GameScreenError as error:
-        trace.record("reset_screen", action="press_escape_three_times", verification="failed", reason=str(error))
         return finish({**plan, "status": "BLOCKED_SCREEN_RESET", "blockers": [str(error)]})
 
     result = {**plan, "actions_executed": reset["actions_executed"]}
-    trace.record("reset_screen", action="press_escape_three_times", verification="completed")
     try:
         frame, origin = _capture(capture_fn)
         trace.record("capture_world_map", observation={"frame_size": (frame.shape[1], frame.shape[0]),

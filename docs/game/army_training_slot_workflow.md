@@ -1,5 +1,11 @@
 # Army Training Slot Workflow
 
+## Persisted Workflow Trace (2026-11-08)
+
+The manager's `execute` command now aggregates the structured event traces returned by navigation, category selection, executor, and finish steps into `workflow_trace.jsonl` when `TBA_WORKFLOW_TRACE_PATH` is set by the device-test harness. The run log appends each workflow event once, and `report.json` includes `workflow_trace_events`. Direct CLI runs keep the existing JSON result and do not create an extra trace file unless the environment variable is provided. Finish-task decisions, Speed Up adapter observations/actions/postconditions, and the shared Escape reset now emit structured events. Existing nested `event_trace` result fields remain available. Speed Up runner traces continue to be ingested from their own `event_trace.jsonl`, not copied into the army workflow trace.
+
+Offline regressions cover manager persistence, duplicate prevention for aliased navigation results, finish trace return, reset events, and device-run log ingestion. The focused run passed 131 tests across device harness, reset, navigation, manager, finish, executor, and Speed Up adapter. No live game input was performed. The trace records decisions and calls; it does not claim that a click succeeded until its existing post-action verification says so.
+
 ## Completed Training Claim (2026-11-08)
 
 The supplied screenshot `device_runs/DESKTOP-LFGLEFV/speedup_use/image.png` confirms a post-training panel state with a `Zakończ` button. The desktop scanner returns `status=unknown` on this state and does not confirm idle. The annotated button template matches this screenshot at score 1.0 at `(1014, 290)`; no title text or separate completion-panel anchor is required. The clean screenshot is stored as `tests/data/army_training/training_complete_finish_button.png` for regression coverage.

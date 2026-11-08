@@ -28,6 +28,7 @@ from task_controller import (
     expire_tasks,
 )
 from ui_variants import resolve_variant
+from workflow_trace import WorkflowTrace
 
 CONFIRMATION_PHRASE = "EXECUTE ARMY TRAINING"
 FALLBACK_GOAL_KIND = "finish_training_v1"
@@ -56,10 +57,18 @@ def _accepts_recorder(function):
     )
 
 
+def _accepts_trace(function):
+    try:
+        parameters = inspect.signature(function).parameters.values()
+    except (TypeError, ValueError):
+        return False
+    return any(item.name == "trace" for item in parameters)
+
+
 def finish_open_training(
     state_path, training_status, speedup_fn, now, retry_seconds=DEFAULT_SPEEDUP_RETRY_SECONDS,
     attention_after=NEEDS_ATTENTION_AFTER_ATTEMPTS, before_finish_button_click=None,
-    short_retry_seconds=SHORT_RETRY_SECONDS,
+    short_retry_seconds=SHORT_RETRY_SECONDS, trace=None,
 ):
     """Decide the finish step from the observed state; `speedup_fn()` must return the observed state afterwards.
 
@@ -89,10 +98,12 @@ def finish_open_training(
     if attempted:
         recorder = before_finish_button_click or (lambda: record_finish_button_attempt(state_path, now))
         try:
+            kwargs = {}
             if _accepts_recorder(speedup_fn):
-                outcome = speedup_fn(on_finish_button_click=recorder)
-            else:
-                outcome = speedup_fn()
+                kwargs["on_finish_button_click"] = recorder
+            if _accepts_trace(speedup_fn):
+                kwargs["trace"] = trace
+            outcome = speedup_fn(**kwargs)
         except Exception as error:
             outcome, reason = "unknown", f"speedup_error:{error}"
         else:
@@ -149,13 +160,29 @@ def execute_finish_task(
         raise TaskQueueError("Fallback finish task not found.")
     if task["status"] not in {"queued", "waiting_resources"}:
         raise TaskQueueError("Only a pending fallback task can run.")
+    trace = WorkflowTrace("army_training_finish", profile_id=queue.get("profile_id"))
+
+    def finish(result):
+        trace.record(
+            "finish_task_result", observation={
+                "status": result.get("status"),
+                "actions_executed": result.get("actions_executed", False),
+                "queue_modified": result.get("queue_modified", False),
+            }, decision="completed", verification=result.get("status"),
+        )
+        result["event_trace"] = trace.events
+        return result
+
     marker = open_training(load_army_state(state_path))
     if marker is None or marker.get("order_id") != task["payload"].get("order_id"):
         if execute:
             complete_task(queue, task_id, "marker_already_cleared", now)
-        return {"status": "NOOP_MARKER_CLEARED", "actions_executed": False, "queue_modified": execute}
+        trace.record("read_open_training_marker", observation={"marker_present": marker is not None},
+                     decision="noop", reason="marker_already_cleared")
+        return finish({"status": "NOOP_MARKER_CLEARED", "actions_executed": False, "queue_modified": execute})
     if not execute:
-        return {"status": "PREVIEW_ONLY", "actions_executed": False, "queue_modified": False}
+        trace.record("finish_execution_gate", target=task_id, decision="preview_only", reason="execute_flag_not_set")
+        return finish({"status": "PREVIEW_ONLY", "actions_executed": False, "queue_modified": False})
     if confirmation != CONFIRMATION_PHRASE:
         raise LiveTrainingError(f"Live execution requires confirmation phrase: {CONFIRMATION_PHRASE}")
 
@@ -164,13 +191,16 @@ def execute_finish_task(
     if (frame.shape[1], frame.shape[0]) != EXPECTED_SIZE:
         raise LiveTrainingError(f"Expected primary-monitor frame {EXPECTED_SIZE}, got {(frame.shape[1], frame.shape[0])}.")
     state = _read_current_training_state(frame, resolve_variant())["status"]
+    trace.record("read_training_state", observation={"status": state}, decision="finish" if state in {"active", "completed"} else "stop")
 
-    def guarded_speedup(on_finish_button_click=None):
+    def guarded_speedup(on_finish_button_click=None, trace=None):
         _check_emergency_stop()
-        if on_finish_button_click is None:
-            outcome = speedup_fn()
-        else:
-            outcome = speedup_fn(on_finish_button_click=on_finish_button_click)
+        kwargs = {}
+        if on_finish_button_click is not None and _accepts_recorder(speedup_fn):
+            kwargs["on_finish_button_click"] = on_finish_button_click
+        if trace is not None and _accepts_trace(speedup_fn):
+            kwargs["trace"] = trace
+        outcome = speedup_fn(**kwargs)
         sleep_fn(VIEW_RESET_SECONDS)
         return outcome
 
@@ -178,7 +208,10 @@ def execute_finish_task(
     outcome = finish_open_training(
         state_path, state, guarded_speedup if speedup_fn else None, now, retry,
         before_finish_button_click=lambda: record_finish_button_attempt(state_path, now),
+        trace=trace,
     )
+    trace.record("finish_outcome", observation=outcome, decision="complete" if outcome["status"] in {"idle", "finished"} else "retry_or_stop",
+                 verification=outcome["status"], reason=outcome.get("reason"))
     result = {"status": outcome["status"].upper(), "finish": outcome, "actions_executed": bool(outcome.get("actions_attempted")), "queue_modified": False}
     if outcome["status"] in {"idle", "finished"}:
         complete_task(queue, task_id, "training_finished", now)
@@ -186,4 +219,4 @@ def execute_finish_task(
     elif outcome.get("next_attempt_at"):
         task["next_check_at"] = outcome["next_attempt_at"]
         result["queue_modified"] = True
-    return result
+    return finish(result)

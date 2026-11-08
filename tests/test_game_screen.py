@@ -1,6 +1,7 @@
 import pytest
 
 from game_screen import GameScreenError, clear_game_screen
+from workflow_trace import WorkflowTrace
 
 
 def test_clear_game_screen_dry_run_does_not_send_keys(tmp_path):
@@ -16,6 +17,21 @@ def test_clear_game_screen_dry_run_does_not_send_keys(tmp_path):
         "status": "DRY_RUN",
     }
     assert calls == []
+
+
+def test_clear_game_screen_records_reset_events(tmp_path):
+    trace = WorkflowTrace("test")
+
+    result = clear_game_screen(
+        execute=True,
+        press_key=lambda *_args, **_kwargs: None,
+        stop_file=tmp_path / ".tba_stop",
+        trace=trace,
+    )
+
+    assert result["status"] == "RESET_SENT"
+    assert trace.events[0]["step"] == "reset_screen"
+    assert trace.events[0]["verification"] == "completed"
 
 
 def test_clear_game_screen_sends_three_rapid_escape_presses(tmp_path):

@@ -350,6 +350,30 @@ def _append_module_event_traces(log_lines, run_dir, seen_traces=None):
     return event_count
 
 
+def _append_workflow_trace(log_lines, run_dir, trace_offsets=None):
+    trace_path = Path(run_dir) / "workflow_trace.jsonl"
+    if not trace_path.is_file():
+        return 0
+    trace_offsets = trace_offsets if trace_offsets is not None else {}
+    offset = trace_offsets.get(trace_path, 0)
+    with trace_path.open("r", encoding="utf-8") as trace_file:
+        trace_file.seek(offset)
+        new_content = trace_file.read()
+        trace_offsets[trace_path] = trace_file.tell()
+    event_count = 0
+    for line_number, raw_line in enumerate(new_content.splitlines(), 1):
+        try:
+            event = json.loads(raw_line)
+        except json.JSONDecodeError as error:
+            log_lines.append(f"[workflow trace] invalid JSON at {trace_path.name}:{line_number}: {error}")
+            continue
+        timestamp = event.get("timestamp", "unknown_time")
+        details = json.dumps(event, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        log_lines.append(f"{timestamp} [workflow] {details}")
+        event_count += 1
+    return event_count
+
+
 def _tail(text):
     return text if len(text) <= OUTPUT_LIMIT else text[-OUTPUT_LIMIT:]
 
@@ -378,11 +402,17 @@ def run_scenario(scenario, ctx, execute=None):
 
     values = {"python": sys.executable, "run_dir": str(run_dir), "profile": ctx.profile}
     before = _snapshot(ctx.root, scenario.get("debug_dirs", ()))
-    env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+    env = {
+        **os.environ,
+        "PYTHONIOENCODING": "utf-8",
+        "TBA_WORKFLOW_TRACE_PATH": str(run_dir / "workflow_trace.jsonl"),
+    }
     records, status = [], OK
     moved = []
     module_trace_events = 0
+    workflow_trace_events = 0
     seen_module_traces = set()
+    workflow_trace_offsets = {}
 
     log(f"[{scenario['name']}] prepare: {scenario['prepare']}")
     delay = ctx.delay if ctx.delay is not None else scenario.get("prepare_seconds", 10)
@@ -432,6 +462,10 @@ def run_scenario(scenario, ctx, execute=None):
         module_trace_events += new_trace_events
         if new_trace_events:
             log(f"module trace: appended {new_trace_events} events from event_trace.jsonl")
+        new_workflow_events = _append_workflow_trace(log_lines, run_dir, workflow_trace_offsets)
+        workflow_trace_events += new_workflow_events
+        if new_workflow_events:
+            log(f"workflow trace: appended {new_workflow_events} events from workflow_trace.jsonl")
         record["status"] = OK if returncode == 0 else FAILED
         log(f"step {index} {step['name']}: {record['status']} (rc={returncode}, {record['duration_seconds']} s)")
         if returncode != 0:
@@ -453,6 +487,7 @@ def run_scenario(scenario, ctx, execute=None):
         "steps": records,
         "module_debug": moved,
         "module_trace_events": module_trace_events,
+        "workflow_trace_events": workflow_trace_events,
     }
     (run_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (run_dir / "log.txt").write_text("\n".join(log_lines) + "\n", encoding="utf-8")

@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -219,6 +220,54 @@ def test_execute_preview_only_reports_navigation_without_capturing_screen(monkey
     assert result["navigation"]["status"] == "PREVIEW_ONLY"
     assert result["actions_executed"] is False
     assert result["queue_modified"] is False
+
+
+def test_execute_persists_nested_workflow_trace(monkeypatch, tmp_path):
+    queue = create_task_queue("p")
+    queue_path = tmp_path / "tasks.json"
+    trace_path = tmp_path / "run" / "workflow_trace.jsonl"
+    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
+    monkeypatch.setattr(manager, "army_state_path", lambda *_: tmp_path / "army_state.json")
+    monkeypatch.setattr(
+        navigation,
+        "open_army_training_screen",
+        lambda execute: {
+            "status": "PREVIEW_ONLY", "actions_executed": False,
+            "event_trace": [{"workflow": "army_training_navigation", "step": "navigation_plan"}],
+        },
+    )
+    monkeypatch.setenv("TBA_WORKFLOW_TRACE_PATH", str(trace_path))
+    args = SimpleNamespace(profile="p", execute=False, confirm="", navigate_only=False)
+
+    result = manager._command_execute(args, tmp_path, NOW)
+
+    events = [json.loads(line) for line in trace_path.read_text(encoding="utf-8").splitlines()]
+    assert result["status"] == "PREVIEW_ONLY"
+    assert result["workflow_trace_events"] == 2
+    assert [event["step"] for event in events] == ["navigation_plan", "workflow_result"]
+
+
+def test_execute_does_not_duplicate_flattened_navigation_trace(monkeypatch, tmp_path):
+    queue = create_task_queue("p")
+    queue_path = tmp_path / "tasks.json"
+    trace_path = tmp_path / "run" / "workflow_trace.jsonl"
+    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
+    monkeypatch.setattr(manager, "army_state_path", lambda *_: tmp_path / "army_state.json")
+    monkeypatch.setattr(
+        navigation,
+        "open_army_training_screen",
+        lambda execute: {
+            "status": "PREVIEW_ONLY", "actions_executed": False,
+            "event_trace": [{"workflow": "army_training_navigation", "step": "navigation_plan"}],
+        },
+    )
+    monkeypatch.setenv("TBA_WORKFLOW_TRACE_PATH", str(trace_path))
+    args = SimpleNamespace(profile="p", execute=True, confirm=manager.CONFIRMATION_PHRASE, navigate_only=True)
+
+    manager._command_execute(args, tmp_path, NOW)
+
+    events = [json.loads(line) for line in trace_path.read_text(encoding="utf-8").splitlines()]
+    assert [event["step"] for event in events].count("navigation_plan") == 1
 
 
 def test_remove_command_removes_only_the_requested_inactive_task(monkeypatch, tmp_path):

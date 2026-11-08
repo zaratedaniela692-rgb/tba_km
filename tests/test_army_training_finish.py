@@ -248,6 +248,9 @@ def test_fallback_is_noop_when_marker_was_already_cleared(tmp_path):
 
     assert result["status"] == "NOOP_MARKER_CLEARED" and result["actions_executed"] is False
     assert queue["tasks"][0]["completed_reason"] == "marker_already_cleared"
+    assert [event["step"] for event in result["event_trace"]] == [
+        "read_open_training_marker", "finish_task_result",
+    ]
 
 
 def test_fallback_schedules_retry_without_speedup_adapter(tmp_path, monkeypatch):
