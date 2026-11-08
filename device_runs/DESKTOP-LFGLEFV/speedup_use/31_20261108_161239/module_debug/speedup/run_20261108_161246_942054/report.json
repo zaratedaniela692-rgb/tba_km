@@ -1,42 +1,42 @@
 {
-  "timestamp": "2026-11-08T14:39:51.647631+00:00",
+  "timestamp": "2026-11-08T15:12:46.942054+00:00",
   "mode": "execute",
-  "status": "UNCERTAIN",
-  "reason": "timer_unreadable:minute_ocr_disagreement",
-  "remaining_seconds": 205200,
-  "final_remaining_seconds": 205200,
+  "status": "FINISHED",
+  "reason": "dialog_closed_after_last_use",
+  "remaining_seconds": 226800,
+  "final_remaining_seconds": 652,
   "inventory": [
     {
       "duration_seconds": 900,
-      "quantity": 4879
+      "quantity": 4891
     },
     {
       "duration_seconds": 3600,
-      "quantity": 5272
+      "quantity": 5286
     },
     {
       "duration_seconds": 10800,
-      "quantity": 3419
+      "quantity": 3458
     },
     {
       "duration_seconds": 28800,
-      "quantity": 475
+      "quantity": 468
     },
     {
       "duration_seconds": 54000,
-      "quantity": 637
+      "quantity": 648
     },
     {
       "duration_seconds": 86400,
-      "quantity": 467
+      "quantity": 484
     },
     {
       "duration_seconds": 259200,
-      "quantity": 533
+      "quantity": 538
     },
     {
       "duration_seconds": 604800,
-      "quantity": 245
+      "quantity": 252
     },
     {
       "duration_seconds": 2592000,
@@ -47,7 +47,7 @@
     {
       "duration_label": "15m",
       "duration_seconds": 900,
-      "raw_ocr": "4879 / 4879",
+      "raw_ocr": "4891 / 4891",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -55,7 +55,7 @@
     {
       "duration_label": "1h",
       "duration_seconds": 3600,
-      "raw_ocr": "5272 / 5272",
+      "raw_ocr": "5286 / 5286",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -63,7 +63,7 @@
     {
       "duration_label": "3h",
       "duration_seconds": 10800,
-      "raw_ocr": "3419 / 3419",
+      "raw_ocr": "3458 / 3458",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -71,7 +71,7 @@
     {
       "duration_label": "8h",
       "duration_seconds": 28800,
-      "raw_ocr": "475 / 475",
+      "raw_ocr": "468 / 468",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -79,7 +79,7 @@
     {
       "duration_label": "15h",
       "duration_seconds": 54000,
-      "raw_ocr": "637 / 637",
+      "raw_ocr": "648 / 648",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 11
@@ -87,7 +87,7 @@
     {
       "duration_label": "1d",
       "duration_seconds": 86400,
-      "raw_ocr": "467 / 467",
+      "raw_ocr": "484 / 484",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 11
@@ -95,7 +95,7 @@
     {
       "duration_label": "3d",
       "duration_seconds": 259200,
-      "raw_ocr": "533 / 533",
+      "raw_ocr": "538 / 538",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 11
@@ -103,7 +103,7 @@
     {
       "duration_label": "7d",
       "duration_seconds": 604800,
-      "raw_ocr": "245 / 245",
+      "raw_ocr": "252 / 252",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 16
@@ -125,6 +125,10 @@
         7
       ],
       [
+        10800,
+        2
+      ],
+      [
         3600,
         1
       ]
@@ -133,7 +137,7 @@
     "shortfall_seconds": 0,
     "decisions": [
       {
-        "remaining_before_seconds": 205200,
+        "remaining_before_seconds": 226800,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -142,35 +146,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            475
+            468
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -197,13 +201,13 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 1,
-        "quantity_before": 475,
-        "quantity_after": 474,
-        "remaining_after_seconds": 176400,
+        "quantity_before": 468,
+        "quantity_after": 467,
+        "remaining_after_seconds": 198000,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 176400,
+        "remaining_before_seconds": 198000,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -212,35 +216,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            474
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
             467
           ],
           [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -267,13 +271,13 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 2,
-        "quantity_before": 474,
-        "quantity_after": 473,
-        "remaining_after_seconds": 147600,
+        "quantity_before": 467,
+        "quantity_after": 466,
+        "remaining_after_seconds": 169200,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 147600,
+        "remaining_before_seconds": 169200,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -282,35 +286,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            473
+            466
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -337,13 +341,13 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 3,
-        "quantity_before": 473,
-        "quantity_after": 472,
-        "remaining_after_seconds": 118800,
+        "quantity_before": 466,
+        "quantity_after": 465,
+        "remaining_after_seconds": 140400,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 118800,
+        "remaining_before_seconds": 140400,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -352,35 +356,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            472
+            465
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -407,13 +411,13 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 4,
-        "quantity_before": 472,
-        "quantity_after": 471,
-        "remaining_after_seconds": 90000,
+        "quantity_before": 465,
+        "quantity_after": 464,
+        "remaining_after_seconds": 111600,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 90000,
+        "remaining_before_seconds": 111600,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -422,35 +426,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            471
+            464
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -477,13 +481,13 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 5,
-        "quantity_before": 471,
-        "quantity_after": 470,
-        "remaining_after_seconds": 61200,
+        "quantity_before": 464,
+        "quantity_after": 463,
+        "remaining_after_seconds": 82800,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 61200,
+        "remaining_before_seconds": 82800,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -492,35 +496,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            470
+            463
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -547,13 +551,13 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 6,
-        "quantity_before": 470,
-        "quantity_after": 469,
-        "remaining_after_seconds": 32400,
+        "quantity_before": 463,
+        "quantity_after": 462,
+        "remaining_after_seconds": 54000,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 32400,
+        "remaining_before_seconds": 54000,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -562,35 +566,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            469
+            462
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -617,8 +621,146 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 7,
-        "quantity_before": 469,
-        "quantity_after": 468,
+        "quantity_before": 462,
+        "quantity_after": 461,
+        "remaining_after_seconds": 25200,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 25200,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5286
+          ],
+          [
+            10800,
+            3458
+          ],
+          [
+            28800,
+            461
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800
+        ],
+        "selected_duration_seconds": 10800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 8,
+        "quantity_before": 3458,
+        "quantity_after": 3457,
+        "remaining_after_seconds": 14400,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 14400,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5286
+          ],
+          [
+            10800,
+            3457
+          ],
+          [
+            28800,
+            461
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800
+        ],
+        "selected_duration_seconds": 10800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 9,
+        "quantity_before": 3457,
+        "quantity_after": 3456,
         "remaining_after_seconds": 3600,
         "floor_breached_after_selection": false
       },
@@ -632,35 +774,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3456
           ],
           [
             28800,
-            468
+            461
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -684,9 +826,9 @@
         "selected_duration_seconds": 3600,
         "floor_seconds": 10,
         "breaks_floor": false,
-        "step": 8,
-        "quantity_before": 5272,
-        "quantity_after": 5271,
+        "step": 10,
+        "quantity_before": 5286,
+        "quantity_after": 5285,
         "remaining_after_seconds": 0,
         "floor_breached_after_selection": false
       }
@@ -698,12 +840,98 @@
       "quantity": 7
     },
     {
+      "duration_seconds": 10800,
+      "quantity": 2
+    },
+    {
       "duration_seconds": 3600,
-      "quantity": 1
+      "quantity": 2
     }
   ],
   "shortfall_seconds": 0,
-  "replan": null,
+  "replan": {
+    "status": "ok",
+    "uses": [
+      [
+        3600,
+        1
+      ]
+    ],
+    "breached_floors": [],
+    "shortfall_seconds": 0,
+    "decisions": [
+      {
+        "remaining_before_seconds": 652,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5285
+          ],
+          [
+            10800,
+            3456
+          ],
+          [
+            28800,
+            461
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_overshoot",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 3600,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 1,
+        "quantity_before": 5285,
+        "quantity_after": 5284,
+        "remaining_after_seconds": -2948,
+        "floor_breached_after_selection": false
+      }
+    ]
+  },
   "checkpoint_steps": [
     3,
     11,
@@ -716,10 +944,10 @@
       "use_number": 1,
       "plan_generation": 1,
       "plan_step": 1,
-      "plan_total": 8,
-      "navigation_ms": 8307.2,
-      "button_match_ms": 34.0,
-      "click_settle_capture_ms": 520.8
+      "plan_total": 10,
+      "navigation_ms": 8190.4,
+      "button_match_ms": 25.2,
+      "click_settle_capture_ms": 516.0
     },
     {
       "duration_seconds": 28800,
@@ -727,10 +955,10 @@
       "use_number": 2,
       "plan_generation": 1,
       "plan_step": 2,
-      "plan_total": 8,
+      "plan_total": 10,
       "navigation_ms": 0.0,
-      "button_match_ms": 45.5,
-      "click_settle_capture_ms": 531.8
+      "button_match_ms": 29.9,
+      "click_settle_capture_ms": 503.0
     },
     {
       "duration_seconds": 28800,
@@ -738,10 +966,10 @@
       "use_number": 3,
       "plan_generation": 1,
       "plan_step": 3,
-      "plan_total": 8,
+      "plan_total": 10,
       "navigation_ms": 0.0,
-      "button_match_ms": 64.0,
-      "click_settle_capture_ms": 507.9
+      "button_match_ms": 27.6,
+      "click_settle_capture_ms": 514.6
     },
     {
       "duration_seconds": 28800,
@@ -749,10 +977,10 @@
       "use_number": 4,
       "plan_generation": 1,
       "plan_step": 4,
-      "plan_total": 8,
+      "plan_total": 10,
       "navigation_ms": 0.0,
       "button_match_ms": 34.3,
-      "click_settle_capture_ms": 511.2
+      "click_settle_capture_ms": 508.7
     },
     {
       "duration_seconds": 28800,
@@ -760,10 +988,10 @@
       "use_number": 5,
       "plan_generation": 1,
       "plan_step": 5,
-      "plan_total": 8,
+      "plan_total": 10,
       "navigation_ms": 0.0,
-      "button_match_ms": 37.7,
-      "click_settle_capture_ms": 522.6
+      "button_match_ms": 38.1,
+      "click_settle_capture_ms": 501.4
     },
     {
       "duration_seconds": 28800,
@@ -771,10 +999,10 @@
       "use_number": 6,
       "plan_generation": 1,
       "plan_step": 6,
-      "plan_total": 8,
+      "plan_total": 10,
       "navigation_ms": 0.0,
-      "button_match_ms": 33.9,
-      "click_settle_capture_ms": 514.4
+      "button_match_ms": 31.8,
+      "click_settle_capture_ms": 517.6
     },
     {
       "duration_seconds": 28800,
@@ -782,24 +1010,57 @@
       "use_number": 7,
       "plan_generation": 1,
       "plan_step": 7,
-      "plan_total": 8,
+      "plan_total": 10,
       "navigation_ms": 0.0,
-      "button_match_ms": 33.5,
-      "click_settle_capture_ms": 510.2
+      "button_match_ms": 37.2,
+      "click_settle_capture_ms": 503.7
     },
     {
-      "duration_seconds": 3600,
+      "duration_seconds": 10800,
       "checkpoint": 3,
       "use_number": 8,
       "plan_generation": 1,
       "plan_step": 8,
-      "plan_total": 8,
+      "plan_total": 10,
       "navigation_ms": 0.0,
-      "button_match_ms": 36.3,
-      "click_settle_capture_ms": 509.3
+      "button_match_ms": 33.4,
+      "click_settle_capture_ms": 508.2
+    },
+    {
+      "duration_seconds": 10800,
+      "checkpoint": 3,
+      "use_number": 9,
+      "plan_generation": 1,
+      "plan_step": 9,
+      "plan_total": 10,
+      "navigation_ms": 0.0,
+      "button_match_ms": 31.4,
+      "click_settle_capture_ms": 521.5
+    },
+    {
+      "duration_seconds": 3600,
+      "checkpoint": 3,
+      "use_number": 10,
+      "plan_generation": 1,
+      "plan_step": 10,
+      "plan_total": 10,
+      "navigation_ms": 0.0,
+      "button_match_ms": 34.0,
+      "click_settle_capture_ms": 514.7
+    },
+    {
+      "duration_seconds": 3600,
+      "checkpoint": 3,
+      "use_number": 11,
+      "plan_generation": 2,
+      "plan_step": 1,
+      "plan_total": 1,
+      "navigation_ms": 0.0,
+      "button_match_ms": 33.3,
+      "click_settle_capture_ms": 514.2
     }
   ],
-  "final_timer_read_ms": null,
+  "final_timer_read_ms": 1966.4,
   "checkpoint_diagnostics": [
     {
       "scroll_count": 3,
@@ -884,15 +1145,15 @@
             "x": 0,
             "y": 0
           },
-          "confidence": 0.9999998211860657
+          "confidence": 1.0
         }
       ],
       "quantities": [
         {
           "duration_label": "15m",
           "duration_seconds": 900,
-          "raw_ocr": "4879 / 4879",
-          "quantity": 4879,
+          "raw_ocr": "4891 / 4891",
+          "quantity": 4891,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -905,8 +1166,8 @@
         {
           "duration_label": "1h",
           "duration_seconds": 3600,
-          "raw_ocr": "5272 / 5272",
-          "quantity": 5272,
+          "raw_ocr": "5286 / 5286",
+          "quantity": 5286,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -919,8 +1180,8 @@
         {
           "duration_label": "3h",
           "duration_seconds": 10800,
-          "raw_ocr": "3419 / 3419",
-          "quantity": 3419,
+          "raw_ocr": "3458 / 3458",
+          "quantity": 3458,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -933,8 +1194,8 @@
         {
           "duration_label": "8h",
           "duration_seconds": 28800,
-          "raw_ocr": "475 / 475",
-          "quantity": 475,
+          "raw_ocr": "468 / 468",
+          "quantity": 468,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1016,8 +1277,8 @@
         {
           "duration_label": "15h",
           "duration_seconds": 54000,
-          "raw_ocr": "637 / 637",
-          "quantity": 637,
+          "raw_ocr": "648 / 648",
+          "quantity": 648,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1030,8 +1291,8 @@
         {
           "duration_label": "1d",
           "duration_seconds": 86400,
-          "raw_ocr": "467 / 467",
-          "quantity": 467,
+          "raw_ocr": "484 / 484",
+          "quantity": 484,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1044,8 +1305,8 @@
         {
           "duration_label": "3d",
           "duration_seconds": 259200,
-          "raw_ocr": "533 / 533",
-          "quantity": 533,
+          "raw_ocr": "538 / 538",
+          "quantity": 538,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1127,8 +1388,8 @@
         {
           "duration_label": "3d",
           "duration_seconds": 259200,
-          "raw_ocr": "533 / 533",
-          "quantity": 533,
+          "raw_ocr": "538 / 538",
+          "quantity": 538,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1141,8 +1402,8 @@
         {
           "duration_label": "7d",
           "duration_seconds": 604800,
-          "raw_ocr": "245 / 245",
-          "quantity": 245,
+          "raw_ocr": "252 / 252",
+          "quantity": 252,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1251,7 +1512,95 @@
             "x": 0,
             "y": 10
           },
+          "confidence": 1.0
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
           "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.999999463558197
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678515195846558
         }
       ],
       "quantities": []
@@ -1320,6 +1669,94 @@
             "y": 10
           },
           "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678515195846558
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
         },
         {
           "duration_label": "8h",
@@ -1407,7 +1844,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 1.0
+          "confidence": 0.9999998211860657
         },
         {
           "duration_label": "8h",
@@ -1495,7 +1932,95 @@
             "x": 0,
             "y": 10
           },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678515195846558
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
           "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9999998211860657
         },
         {
           "duration_label": "8h",
@@ -1603,7 +2128,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 0.9678515195846558
+          "confidence": 0.9678508639335632
         }
       ],
       "quantities": []
@@ -1671,7 +2196,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 1.0
+          "confidence": 0.9678532481193542
         },
         {
           "duration_label": "8h",
@@ -1684,6 +2209,74 @@
           "detected_rectangle": {
             "x": 372,
             "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
             "width": 145,
             "height": 27
           },
@@ -1692,6 +2285,26 @@
             "y": 10
           },
           "confidence": 0.9678525328636169
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
         }
       ],
       "quantities": []
@@ -1739,95 +2352,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 0.9999998211860657
-        },
-        {
-          "duration_label": "3h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 250,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 260,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9999998211860657
-        },
-        {
-          "duration_label": "8h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 360,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 370,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678522348403931
-        }
-      ],
-      "quantities": []
-    },
-    {
-      "scroll_count": 3,
-      "status": "complete",
-      "reason": "",
-      "matches": [
-        {
-          "duration_label": "15m",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 30,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 40,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "1h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 140,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 150,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9999998211860657
+          "confidence": 0.9678508639335632
         },
         {
           "duration_label": "3h",
@@ -1867,7 +2392,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 0.9678518772125244
+          "confidence": 1.0
         }
       ],
       "quantities": []
@@ -1888,7 +2413,7 @@
       }
     },
     {
-      "elapsed_ms": 348.7,
+      "elapsed_ms": 456.1,
       "event": "capture",
       "step": 0,
       "data": {
@@ -1921,19 +2446,19 @@
       }
     },
     {
-      "elapsed_ms": 3465.7,
+      "elapsed_ms": 5503.0,
       "event": "timer_read",
       "step": 0,
       "data": {
         "phase": "initial",
         "status": "ok",
-        "raw": "2d.:9g.",
-        "value_seconds": 205200,
+        "raw": "2d.:16g.",
+        "value_seconds": 230400,
         "confidence": 100.0
       }
     },
     {
-      "elapsed_ms": 3465.9,
+      "elapsed_ms": 5503.3,
       "event": "emergency_stop_check",
       "step": 0,
       "data": {
@@ -1941,7 +2466,7 @@
       }
     },
     {
-      "elapsed_ms": 3567.3,
+      "elapsed_ms": 5605.1,
       "event": "pointer_move",
       "step": 0,
       "data": {
@@ -1953,7 +2478,7 @@
       }
     },
     {
-      "elapsed_ms": 3567.7,
+      "elapsed_ms": 5605.3,
       "event": "emergency_stop_check",
       "step": 0,
       "data": {
@@ -1961,7 +2486,7 @@
       }
     },
     {
-      "elapsed_ms": 3668.9,
+      "elapsed_ms": 5706.2,
       "event": "scroll",
       "step": 0,
       "data": {
@@ -1971,7 +2496,7 @@
       }
     },
     {
-      "elapsed_ms": 4085.4,
+      "elapsed_ms": 6125.1,
       "event": "capture",
       "step": 0,
       "data": {
@@ -2004,19 +2529,19 @@
       }
     },
     {
-      "elapsed_ms": 4107.9,
+      "elapsed_ms": 6153.0,
       "event": "viewport_check",
       "step": 1,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.643464046723084,
+        "change_score": 0.6434683035638271,
         "threshold": 0.003,
         "from_step": 0
       }
     },
     {
-      "elapsed_ms": 4108.8,
+      "elapsed_ms": 6154.2,
       "event": "emergency_stop_check",
       "step": 1,
       "data": {
@@ -2024,7 +2549,7 @@
       }
     },
     {
-      "elapsed_ms": 4209.4,
+      "elapsed_ms": 6255.4,
       "event": "pointer_move",
       "step": 1,
       "data": {
@@ -2036,7 +2561,7 @@
       }
     },
     {
-      "elapsed_ms": 4209.6,
+      "elapsed_ms": 6255.6,
       "event": "emergency_stop_check",
       "step": 1,
       "data": {
@@ -2044,7 +2569,7 @@
       }
     },
     {
-      "elapsed_ms": 4310.3,
+      "elapsed_ms": 6356.3,
       "event": "scroll",
       "step": 1,
       "data": {
@@ -2054,7 +2579,7 @@
       }
     },
     {
-      "elapsed_ms": 4741.9,
+      "elapsed_ms": 6780.3,
       "event": "capture",
       "step": 1,
       "data": {
@@ -2087,19 +2612,19 @@
       }
     },
     {
-      "elapsed_ms": 4765.3,
+      "elapsed_ms": 6804.1,
       "event": "viewport_check",
       "step": 2,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6443750106421019,
+        "change_score": 0.6443792674828449,
         "threshold": 0.003,
         "from_step": 1
       }
     },
     {
-      "elapsed_ms": 4766.7,
+      "elapsed_ms": 6805.3,
       "event": "emergency_stop_check",
       "step": 2,
       "data": {
@@ -2107,7 +2632,7 @@
       }
     },
     {
-      "elapsed_ms": 4867.9,
+      "elapsed_ms": 6906.3,
       "event": "pointer_move",
       "step": 2,
       "data": {
@@ -2119,7 +2644,7 @@
       }
     },
     {
-      "elapsed_ms": 4868.4,
+      "elapsed_ms": 6906.7,
       "event": "emergency_stop_check",
       "step": 2,
       "data": {
@@ -2127,7 +2652,7 @@
       }
     },
     {
-      "elapsed_ms": 4969.7,
+      "elapsed_ms": 7008.4,
       "event": "scroll",
       "step": 2,
       "data": {
@@ -2137,7 +2662,7 @@
       }
     },
     {
-      "elapsed_ms": 5635.7,
+      "elapsed_ms": 7698.4,
       "event": "capture",
       "step": 2,
       "data": {
@@ -2170,19 +2695,19 @@
       }
     },
     {
-      "elapsed_ms": 5673.9,
+      "elapsed_ms": 7717.6,
       "event": "viewport_check",
       "step": 3,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6468908035212587,
+        "change_score": 0.6468950603620017,
         "threshold": 0.003,
         "from_step": 2
       }
     },
     {
-      "elapsed_ms": 11091.7,
+      "elapsed_ms": 12508.7,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -2193,8 +2718,8 @@
           {
             "duration_label": "15m",
             "duration_seconds": 900,
-            "raw_quantity": "4879 / 4879",
-            "quantity": 4879,
+            "raw_quantity": "4891 / 4891",
+            "quantity": 4891,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2211,8 +2736,8 @@
           {
             "duration_label": "1h",
             "duration_seconds": 3600,
-            "raw_quantity": "5272 / 5272",
-            "quantity": 5272,
+            "raw_quantity": "5286 / 5286",
+            "quantity": 5286,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2229,8 +2754,8 @@
           {
             "duration_label": "3h",
             "duration_seconds": 10800,
-            "raw_quantity": "3419 / 3419",
-            "quantity": 3419,
+            "raw_quantity": "3458 / 3458",
+            "quantity": 3458,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2247,8 +2772,8 @@
           {
             "duration_label": "8h",
             "duration_seconds": 28800,
-            "raw_quantity": "475 / 475",
-            "quantity": 475,
+            "raw_quantity": "468 / 468",
+            "quantity": 468,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2342,15 +2867,15 @@
               "x": 0,
               "y": 0
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           }
         ],
         "quantities": [
           {
             "duration_label": "15m",
             "duration_seconds": 900,
-            "raw_ocr": "4879 / 4879",
-            "quantity": 4879,
+            "raw_ocr": "4891 / 4891",
+            "quantity": 4891,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2363,8 +2888,8 @@
           {
             "duration_label": "1h",
             "duration_seconds": 3600,
-            "raw_ocr": "5272 / 5272",
-            "quantity": 5272,
+            "raw_ocr": "5286 / 5286",
+            "quantity": 5286,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2377,8 +2902,8 @@
           {
             "duration_label": "3h",
             "duration_seconds": 10800,
-            "raw_ocr": "3419 / 3419",
-            "quantity": 3419,
+            "raw_ocr": "3458 / 3458",
+            "quantity": 3458,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2391,8 +2916,8 @@
           {
             "duration_label": "8h",
             "duration_seconds": 28800,
-            "raw_ocr": "475 / 475",
-            "quantity": 475,
+            "raw_ocr": "468 / 468",
+            "quantity": 468,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2406,7 +2931,7 @@
       }
     },
     {
-      "elapsed_ms": 11093.0,
+      "elapsed_ms": 12509.7,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -2414,7 +2939,7 @@
       }
     },
     {
-      "elapsed_ms": 11193.9,
+      "elapsed_ms": 12610.2,
       "event": "pointer_move",
       "step": 3,
       "data": {
@@ -2426,7 +2951,7 @@
       }
     },
     {
-      "elapsed_ms": 11194.1,
+      "elapsed_ms": 12610.3,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -2434,7 +2959,7 @@
       }
     },
     {
-      "elapsed_ms": 11297.0,
+      "elapsed_ms": 12711.6,
       "event": "scroll",
       "step": 3,
       "data": {
@@ -2444,7 +2969,7 @@
       }
     },
     {
-      "elapsed_ms": 11736.1,
+      "elapsed_ms": 13126.8,
       "event": "capture",
       "step": 3,
       "data": {
@@ -2461,23 +2986,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8919057250022888,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
+          "partial_score": 0.9863601326942444,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": false
+          "fallback_used": true
         }
       }
     },
     {
-      "elapsed_ms": 11761.4,
+      "elapsed_ms": 13145.7,
       "event": "viewport_check",
       "step": 4,
       "data": {
@@ -2489,7 +3014,7 @@
       }
     },
     {
-      "elapsed_ms": 11762.9,
+      "elapsed_ms": 13146.7,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -2497,7 +3022,7 @@
       }
     },
     {
-      "elapsed_ms": 11864.2,
+      "elapsed_ms": 13247.2,
       "event": "pointer_move",
       "step": 4,
       "data": {
@@ -2509,7 +3034,7 @@
       }
     },
     {
-      "elapsed_ms": 11864.3,
+      "elapsed_ms": 13247.3,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -2517,7 +3042,7 @@
       }
     },
     {
-      "elapsed_ms": 11965.3,
+      "elapsed_ms": 13348.2,
       "event": "scroll",
       "step": 4,
       "data": {
@@ -2527,7 +3052,7 @@
       }
     },
     {
-      "elapsed_ms": 12375.8,
+      "elapsed_ms": 13771.4,
       "event": "capture",
       "step": 4,
       "data": {
@@ -2560,7 +3085,7 @@
       }
     },
     {
-      "elapsed_ms": 12397.6,
+      "elapsed_ms": 13793.7,
       "event": "viewport_check",
       "step": 5,
       "data": {
@@ -2572,7 +3097,7 @@
       }
     },
     {
-      "elapsed_ms": 12398.8,
+      "elapsed_ms": 13795.0,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -2580,7 +3105,7 @@
       }
     },
     {
-      "elapsed_ms": 12499.5,
+      "elapsed_ms": 13895.5,
       "event": "pointer_move",
       "step": 5,
       "data": {
@@ -2592,7 +3117,7 @@
       }
     },
     {
-      "elapsed_ms": 12499.6,
+      "elapsed_ms": 13895.7,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -2600,7 +3125,7 @@
       }
     },
     {
-      "elapsed_ms": 12600.8,
+      "elapsed_ms": 13996.2,
       "event": "scroll",
       "step": 5,
       "data": {
@@ -2610,7 +3135,7 @@
       }
     },
     {
-      "elapsed_ms": 13009.2,
+      "elapsed_ms": 14421.5,
       "event": "capture",
       "step": 5,
       "data": {
@@ -2643,7 +3168,7 @@
       }
     },
     {
-      "elapsed_ms": 13030.8,
+      "elapsed_ms": 14444.1,
       "event": "viewport_check",
       "step": 6,
       "data": {
@@ -2655,7 +3180,7 @@
       }
     },
     {
-      "elapsed_ms": 13031.7,
+      "elapsed_ms": 14445.1,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -2663,7 +3188,7 @@
       }
     },
     {
-      "elapsed_ms": 13132.8,
+      "elapsed_ms": 14545.8,
       "event": "pointer_move",
       "step": 6,
       "data": {
@@ -2675,7 +3200,7 @@
       }
     },
     {
-      "elapsed_ms": 13132.9,
+      "elapsed_ms": 14545.9,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -2683,7 +3208,7 @@
       }
     },
     {
-      "elapsed_ms": 13233.5,
+      "elapsed_ms": 14646.6,
       "event": "scroll",
       "step": 6,
       "data": {
@@ -2693,7 +3218,7 @@
       }
     },
     {
-      "elapsed_ms": 13656.5,
+      "elapsed_ms": 15065.6,
       "event": "capture",
       "step": 6,
       "data": {
@@ -2726,7 +3251,7 @@
       }
     },
     {
-      "elapsed_ms": 13687.6,
+      "elapsed_ms": 15083.2,
       "event": "viewport_check",
       "step": 7,
       "data": {
@@ -2738,7 +3263,7 @@
       }
     },
     {
-      "elapsed_ms": 13688.7,
+      "elapsed_ms": 15084.5,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -2746,7 +3271,7 @@
       }
     },
     {
-      "elapsed_ms": 13789.1,
+      "elapsed_ms": 15185.9,
       "event": "pointer_move",
       "step": 7,
       "data": {
@@ -2758,7 +3283,7 @@
       }
     },
     {
-      "elapsed_ms": 13789.2,
+      "elapsed_ms": 15186.2,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -2766,7 +3291,7 @@
       }
     },
     {
-      "elapsed_ms": 13890.1,
+      "elapsed_ms": 15287.6,
       "event": "scroll",
       "step": 7,
       "data": {
@@ -2776,7 +3301,7 @@
       }
     },
     {
-      "elapsed_ms": 14317.9,
+      "elapsed_ms": 15703.4,
       "event": "capture",
       "step": 7,
       "data": {
@@ -2809,7 +3334,7 @@
       }
     },
     {
-      "elapsed_ms": 14338.5,
+      "elapsed_ms": 15720.3,
       "event": "viewport_check",
       "step": 8,
       "data": {
@@ -2821,7 +3346,7 @@
       }
     },
     {
-      "elapsed_ms": 14339.9,
+      "elapsed_ms": 15721.3,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -2829,7 +3354,7 @@
       }
     },
     {
-      "elapsed_ms": 14441.4,
+      "elapsed_ms": 15822.5,
       "event": "pointer_move",
       "step": 8,
       "data": {
@@ -2841,7 +3366,7 @@
       }
     },
     {
-      "elapsed_ms": 14441.7,
+      "elapsed_ms": 15822.8,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -2849,7 +3374,7 @@
       }
     },
     {
-      "elapsed_ms": 14542.6,
+      "elapsed_ms": 15924.6,
       "event": "scroll",
       "step": 8,
       "data": {
@@ -2859,7 +3384,7 @@
       }
     },
     {
-      "elapsed_ms": 14973.4,
+      "elapsed_ms": 16365.9,
       "event": "capture",
       "step": 8,
       "data": {
@@ -2892,7 +3417,7 @@
       }
     },
     {
-      "elapsed_ms": 14994.7,
+      "elapsed_ms": 16391.2,
       "event": "viewport_check",
       "step": 9,
       "data": {
@@ -2904,7 +3429,7 @@
       }
     },
     {
-      "elapsed_ms": 14995.8,
+      "elapsed_ms": 16392.6,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -2912,7 +3437,7 @@
       }
     },
     {
-      "elapsed_ms": 15096.8,
+      "elapsed_ms": 16493.6,
       "event": "pointer_move",
       "step": 9,
       "data": {
@@ -2924,7 +3449,7 @@
       }
     },
     {
-      "elapsed_ms": 15097.0,
+      "elapsed_ms": 16493.8,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -2932,7 +3457,7 @@
       }
     },
     {
-      "elapsed_ms": 15198.2,
+      "elapsed_ms": 16594.8,
       "event": "scroll",
       "step": 9,
       "data": {
@@ -2942,7 +3467,7 @@
       }
     },
     {
-      "elapsed_ms": 15614.4,
+      "elapsed_ms": 17021.3,
       "event": "capture",
       "step": 9,
       "data": {
@@ -2975,7 +3500,7 @@
       }
     },
     {
-      "elapsed_ms": 15632.0,
+      "elapsed_ms": 17042.3,
       "event": "viewport_check",
       "step": 10,
       "data": {
@@ -2987,7 +3512,7 @@
       }
     },
     {
-      "elapsed_ms": 15632.9,
+      "elapsed_ms": 17043.3,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -2995,7 +3520,7 @@
       }
     },
     {
-      "elapsed_ms": 15733.9,
+      "elapsed_ms": 17144.1,
       "event": "pointer_move",
       "step": 10,
       "data": {
@@ -3007,7 +3532,7 @@
       }
     },
     {
-      "elapsed_ms": 15734.1,
+      "elapsed_ms": 17144.2,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -3015,7 +3540,7 @@
       }
     },
     {
-      "elapsed_ms": 15835.0,
+      "elapsed_ms": 17244.8,
       "event": "scroll",
       "step": 10,
       "data": {
@@ -3025,7 +3550,7 @@
       }
     },
     {
-      "elapsed_ms": 16444.6,
+      "elapsed_ms": 17922.8,
       "event": "capture",
       "step": 10,
       "data": {
@@ -3058,7 +3583,7 @@
       }
     },
     {
-      "elapsed_ms": 16465.0,
+      "elapsed_ms": 17943.9,
       "event": "viewport_check",
       "step": 11,
       "data": {
@@ -3070,7 +3595,7 @@
       }
     },
     {
-      "elapsed_ms": 19268.6,
+      "elapsed_ms": 21262.8,
       "event": "checkpoint_read",
       "step": 11,
       "data": {
@@ -3081,8 +3606,8 @@
           {
             "duration_label": "15h",
             "duration_seconds": 54000,
-            "raw_quantity": "637 / 637",
-            "quantity": 637,
+            "raw_quantity": "648 / 648",
+            "quantity": 648,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3099,8 +3624,8 @@
           {
             "duration_label": "1d",
             "duration_seconds": 86400,
-            "raw_quantity": "467 / 467",
-            "quantity": 467,
+            "raw_quantity": "484 / 484",
+            "quantity": 484,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3117,8 +3642,8 @@
           {
             "duration_label": "3d",
             "duration_seconds": 259200,
-            "raw_quantity": "533 / 533",
-            "quantity": 533,
+            "raw_quantity": "538 / 538",
+            "quantity": 538,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3199,8 +3724,8 @@
           {
             "duration_label": "15h",
             "duration_seconds": 54000,
-            "raw_ocr": "637 / 637",
-            "quantity": 637,
+            "raw_ocr": "648 / 648",
+            "quantity": 648,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3213,8 +3738,8 @@
           {
             "duration_label": "1d",
             "duration_seconds": 86400,
-            "raw_ocr": "467 / 467",
-            "quantity": 467,
+            "raw_ocr": "484 / 484",
+            "quantity": 484,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3227,8 +3752,8 @@
           {
             "duration_label": "3d",
             "duration_seconds": 259200,
-            "raw_ocr": "533 / 533",
-            "quantity": 533,
+            "raw_ocr": "538 / 538",
+            "quantity": 538,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3242,7 +3767,7 @@
       }
     },
     {
-      "elapsed_ms": 19269.8,
+      "elapsed_ms": 21264.1,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -3250,7 +3775,7 @@
       }
     },
     {
-      "elapsed_ms": 19370.6,
+      "elapsed_ms": 21365.1,
       "event": "pointer_move",
       "step": 11,
       "data": {
@@ -3262,7 +3787,7 @@
       }
     },
     {
-      "elapsed_ms": 19370.8,
+      "elapsed_ms": 21365.3,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -3270,7 +3795,7 @@
       }
     },
     {
-      "elapsed_ms": 19471.5,
+      "elapsed_ms": 21466.8,
       "event": "scroll",
       "step": 11,
       "data": {
@@ -3280,7 +3805,7 @@
       }
     },
     {
-      "elapsed_ms": 19902.1,
+      "elapsed_ms": 21887.7,
       "event": "capture",
       "step": 11,
       "data": {
@@ -3313,7 +3838,7 @@
       }
     },
     {
-      "elapsed_ms": 19928.5,
+      "elapsed_ms": 21907.8,
       "event": "viewport_check",
       "step": 12,
       "data": {
@@ -3325,7 +3850,7 @@
       }
     },
     {
-      "elapsed_ms": 19929.7,
+      "elapsed_ms": 21909.2,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -3333,7 +3858,7 @@
       }
     },
     {
-      "elapsed_ms": 20030.5,
+      "elapsed_ms": 22010.1,
       "event": "pointer_move",
       "step": 12,
       "data": {
@@ -3345,7 +3870,7 @@
       }
     },
     {
-      "elapsed_ms": 20030.7,
+      "elapsed_ms": 22010.3,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -3353,7 +3878,7 @@
       }
     },
     {
-      "elapsed_ms": 20131.6,
+      "elapsed_ms": 22111.7,
       "event": "scroll",
       "step": 12,
       "data": {
@@ -3363,7 +3888,7 @@
       }
     },
     {
-      "elapsed_ms": 20555.7,
+      "elapsed_ms": 22530.4,
       "event": "capture",
       "step": 12,
       "data": {
@@ -3396,7 +3921,7 @@
       }
     },
     {
-      "elapsed_ms": 20572.4,
+      "elapsed_ms": 22549.5,
       "event": "viewport_check",
       "step": 13,
       "data": {
@@ -3408,7 +3933,7 @@
       }
     },
     {
-      "elapsed_ms": 20573.2,
+      "elapsed_ms": 22550.8,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -3416,7 +3941,7 @@
       }
     },
     {
-      "elapsed_ms": 20674.3,
+      "elapsed_ms": 22651.9,
       "event": "pointer_move",
       "step": 13,
       "data": {
@@ -3428,7 +3953,7 @@
       }
     },
     {
-      "elapsed_ms": 20674.4,
+      "elapsed_ms": 22652.2,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -3436,7 +3961,7 @@
       }
     },
     {
-      "elapsed_ms": 20774.8,
+      "elapsed_ms": 22753.3,
       "event": "scroll",
       "step": 13,
       "data": {
@@ -3446,7 +3971,7 @@
       }
     },
     {
-      "elapsed_ms": 21190.4,
+      "elapsed_ms": 23165.4,
       "event": "capture",
       "step": 13,
       "data": {
@@ -3479,19 +4004,19 @@
       }
     },
     {
-      "elapsed_ms": 21211.2,
+      "elapsed_ms": 23188.4,
       "event": "viewport_check",
       "step": 14,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6068381889696742,
+        "change_score": 0.6068254184474451,
         "threshold": 0.003,
         "from_step": 13
       }
     },
     {
-      "elapsed_ms": 21212.3,
+      "elapsed_ms": 23189.6,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -3499,7 +4024,7 @@
       }
     },
     {
-      "elapsed_ms": 21313.2,
+      "elapsed_ms": 23290.3,
       "event": "pointer_move",
       "step": 14,
       "data": {
@@ -3511,7 +4036,7 @@
       }
     },
     {
-      "elapsed_ms": 21313.4,
+      "elapsed_ms": 23290.4,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -3519,7 +4044,7 @@
       }
     },
     {
-      "elapsed_ms": 21414.8,
+      "elapsed_ms": 23391.8,
       "event": "scroll",
       "step": 14,
       "data": {
@@ -3529,7 +4054,7 @@
       }
     },
     {
-      "elapsed_ms": 21835.8,
+      "elapsed_ms": 23814.3,
       "event": "capture",
       "step": 14,
       "data": {
@@ -3562,7 +4087,7 @@
       }
     },
     {
-      "elapsed_ms": 21853.6,
+      "elapsed_ms": 23835.2,
       "event": "viewport_check",
       "step": 15,
       "data": {
@@ -3574,7 +4099,7 @@
       }
     },
     {
-      "elapsed_ms": 21854.4,
+      "elapsed_ms": 23836.5,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -3582,7 +4107,7 @@
       }
     },
     {
-      "elapsed_ms": 21955.7,
+      "elapsed_ms": 23937.6,
       "event": "pointer_move",
       "step": 15,
       "data": {
@@ -3594,7 +4119,7 @@
       }
     },
     {
-      "elapsed_ms": 21955.8,
+      "elapsed_ms": 23937.7,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -3602,7 +4127,7 @@
       }
     },
     {
-      "elapsed_ms": 22057.1,
+      "elapsed_ms": 24038.3,
       "event": "scroll",
       "step": 15,
       "data": {
@@ -3612,7 +4137,7 @@
       }
     },
     {
-      "elapsed_ms": 22687.2,
+      "elapsed_ms": 24671.4,
       "event": "capture",
       "step": 15,
       "data": {
@@ -3645,7 +4170,7 @@
       }
     },
     {
-      "elapsed_ms": 22706.7,
+      "elapsed_ms": 24689.9,
       "event": "viewport_check",
       "step": 16,
       "data": {
@@ -3657,7 +4182,7 @@
       }
     },
     {
-      "elapsed_ms": 25735.3,
+      "elapsed_ms": 27917.5,
       "event": "checkpoint_read",
       "step": 16,
       "data": {
@@ -3668,8 +4193,8 @@
           {
             "duration_label": "3d",
             "duration_seconds": 259200,
-            "raw_quantity": "533 / 533",
-            "quantity": 533,
+            "raw_quantity": "538 / 538",
+            "quantity": 538,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3686,8 +4211,8 @@
           {
             "duration_label": "7d",
             "duration_seconds": 604800,
-            "raw_quantity": "245 / 245",
-            "quantity": 245,
+            "raw_quantity": "252 / 252",
+            "quantity": 252,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3786,8 +4311,8 @@
           {
             "duration_label": "3d",
             "duration_seconds": 259200,
-            "raw_ocr": "533 / 533",
-            "quantity": 533,
+            "raw_ocr": "538 / 538",
+            "quantity": 538,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3800,8 +4325,8 @@
           {
             "duration_label": "7d",
             "duration_seconds": 604800,
-            "raw_ocr": "245 / 245",
-            "quantity": 245,
+            "raw_ocr": "252 / 252",
+            "quantity": 252,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3829,72 +4354,72 @@
       }
     },
     {
-      "elapsed_ms": 28670.3,
+      "elapsed_ms": 31441.4,
       "event": "timer_read",
       "step": 16,
       "data": {
         "phase": "post_scan",
         "status": "ok",
-        "raw": "2d.:9g.",
-        "value_seconds": 205200,
+        "raw": "2d.:15g.",
+        "value_seconds": 226800,
         "confidence": 100.0
       }
     },
     {
-      "elapsed_ms": 28670.4,
+      "elapsed_ms": 31441.5,
       "event": "planning_started",
       "step": 16,
       "data": {
-        "remaining_seconds": 205200,
+        "remaining_seconds": 226800,
         "inventory": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            475
+            468
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
             1
           ]
         ],
-        "owned_seconds": 437643900,
-        "coverage_surplus_seconds": 437438700
+        "owned_seconds": 445517100,
+        "coverage_surplus_seconds": 445290300
       }
     },
     {
-      "elapsed_ms": 28670.6,
+      "elapsed_ms": 31442.0,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 205200,
+        "remaining_before_seconds": 226800,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -3903,35 +4428,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            475
+            468
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -3958,19 +4483,19 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 1,
-        "quantity_before": 475,
-        "quantity_after": 474,
-        "remaining_after_seconds": 176400,
+        "quantity_before": 468,
+        "quantity_after": 467,
+        "remaining_after_seconds": 198000,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 28670.7,
+      "elapsed_ms": 31442.0,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 176400,
+        "remaining_before_seconds": 198000,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -3979,35 +4504,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            474
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
             467
           ],
           [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -4034,19 +4559,19 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 2,
-        "quantity_before": 474,
-        "quantity_after": 473,
-        "remaining_after_seconds": 147600,
+        "quantity_before": 467,
+        "quantity_after": 466,
+        "remaining_after_seconds": 169200,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 28670.7,
+      "elapsed_ms": 31442.0,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 147600,
+        "remaining_before_seconds": 169200,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -4055,35 +4580,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            473
+            466
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -4110,19 +4635,19 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 3,
-        "quantity_before": 473,
-        "quantity_after": 472,
-        "remaining_after_seconds": 118800,
+        "quantity_before": 466,
+        "quantity_after": 465,
+        "remaining_after_seconds": 140400,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 28670.7,
+      "elapsed_ms": 31442.0,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 118800,
+        "remaining_before_seconds": 140400,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -4131,35 +4656,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            472
+            465
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -4186,19 +4711,19 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 4,
-        "quantity_before": 472,
-        "quantity_after": 471,
-        "remaining_after_seconds": 90000,
+        "quantity_before": 465,
+        "quantity_after": 464,
+        "remaining_after_seconds": 111600,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 28670.7,
+      "elapsed_ms": 31442.1,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 90000,
+        "remaining_before_seconds": 111600,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -4207,35 +4732,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            471
+            464
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -4262,19 +4787,19 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 5,
-        "quantity_before": 471,
-        "quantity_after": 470,
-        "remaining_after_seconds": 61200,
+        "quantity_before": 464,
+        "quantity_after": 463,
+        "remaining_after_seconds": 82800,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 28670.7,
+      "elapsed_ms": 31442.1,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 61200,
+        "remaining_before_seconds": 82800,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -4283,35 +4808,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            470
+            463
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -4338,19 +4863,19 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 6,
-        "quantity_before": 470,
-        "quantity_after": 469,
-        "remaining_after_seconds": 32400,
+        "quantity_before": 463,
+        "quantity_after": 462,
+        "remaining_after_seconds": 54000,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 28670.7,
+      "elapsed_ms": 31442.1,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 32400,
+        "remaining_before_seconds": 54000,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -4359,35 +4884,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            469
+            462
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -4414,14 +4939,164 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 7,
-        "quantity_before": 469,
-        "quantity_after": 468,
+        "quantity_before": 462,
+        "quantity_after": 461,
+        "remaining_after_seconds": 25200,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 31442.1,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "3h",
+        "remaining_before_seconds": 25200,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5286
+          ],
+          [
+            10800,
+            3458
+          ],
+          [
+            28800,
+            461
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800
+        ],
+        "selected_duration_seconds": 10800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 8,
+        "quantity_before": 3458,
+        "quantity_after": 3457,
+        "remaining_after_seconds": 14400,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 31442.1,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "3h",
+        "remaining_before_seconds": 14400,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5286
+          ],
+          [
+            10800,
+            3457
+          ],
+          [
+            28800,
+            461
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800
+        ],
+        "selected_duration_seconds": 10800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 9,
+        "quantity_before": 3457,
+        "quantity_after": 3456,
         "remaining_after_seconds": 3600,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 28670.7,
+      "elapsed_ms": 31442.1,
       "event": "plan_choice",
       "step": 16,
       "data": {
@@ -4435,35 +5110,35 @@
         "stock_before": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3456
           ],
           [
             28800,
-            468
+            461
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -4487,66 +5162,72 @@
         "selected_duration_seconds": 3600,
         "floor_seconds": 10,
         "breaks_floor": false,
-        "step": 8,
-        "quantity_before": 5272,
-        "quantity_after": 5271,
+        "step": 10,
+        "quantity_before": 5286,
+        "quantity_after": 5285,
         "remaining_after_seconds": 0,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 28670.8,
+      "elapsed_ms": 31442.1,
       "event": "plan_built",
       "step": 16,
       "data": {
         "status": "ok",
-        "remaining_seconds": 205200,
+        "remaining_seconds": 226800,
         "inventory": [
           [
             900,
-            4879
+            4891
           ],
           [
             3600,
-            5272
+            5286
           ],
           [
             10800,
-            3419
+            3458
           ],
           [
             28800,
-            475
+            468
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
             1
           ]
         ],
-        "owned_seconds": 437643900,
-        "coverage_surplus_seconds": 437438700,
+        "owned_seconds": 445517100,
+        "coverage_surplus_seconds": 445290300,
         "uses": [
           {
             "duration_seconds": 28800,
             "duration_label": "8h",
             "quantity": 7,
             "total_seconds": 201600
+          },
+          {
+            "duration_seconds": 10800,
+            "duration_label": "3h",
+            "quantity": 2,
+            "total_seconds": 21600
           },
           {
             "duration_seconds": 3600,
@@ -4560,31 +5241,31 @@
       }
     },
     {
-      "elapsed_ms": 28670.8,
+      "elapsed_ms": 31442.2,
       "event": "execution_started",
       "step": 16,
       "data": {
         "plan_generation": 1,
-        "planned_uses": 8,
-        "planned_seconds": 205200,
-        "initial_timer_seconds": 205200
+        "planned_uses": 10,
+        "planned_seconds": 226800,
+        "initial_timer_seconds": 226800
       }
     },
     {
-      "elapsed_ms": 28670.8,
+      "elapsed_ms": 31442.2,
       "event": "use_step_started",
       "step": 16,
       "data": {
         "use_number": 1,
         "plan_generation": 1,
         "plan_step": 1,
-        "plan_total": 8,
+        "plan_total": 10,
         "duration_seconds": 28800,
         "duration_label": "8h",
         "checkpoint": 3,
-        "remaining_queue": 7,
+        "remaining_queue": 9,
         "decision": {
-          "remaining_before_seconds": 205200,
+          "remaining_before_seconds": 226800,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -4593,35 +5274,35 @@
           "stock_before": [
             [
               900,
-              4879
+              4891
             ],
             [
               3600,
-              5272
+              5286
             ],
             [
               10800,
-              3419
+              3458
             ],
             [
               28800,
-              475
+              468
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
             ],
             [
               2592000,
@@ -4648,15 +5329,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 1,
-          "quantity_before": 475,
-          "quantity_after": 474,
-          "remaining_after_seconds": 176400,
+          "quantity_before": 468,
+          "quantity_after": 467,
+          "remaining_after_seconds": 198000,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 28671.9,
+      "elapsed_ms": 31443.4,
       "event": "emergency_stop_check",
       "step": 16,
       "data": {
@@ -4664,7 +5345,7 @@
       }
     },
     {
-      "elapsed_ms": 28772.3,
+      "elapsed_ms": 31544.1,
       "event": "pointer_move",
       "step": 16,
       "data": {
@@ -4676,7 +5357,7 @@
       }
     },
     {
-      "elapsed_ms": 28772.5,
+      "elapsed_ms": 31544.2,
       "event": "emergency_stop_check",
       "step": 16,
       "data": {
@@ -4684,7 +5365,7 @@
       }
     },
     {
-      "elapsed_ms": 28873.8,
+      "elapsed_ms": 31644.8,
       "event": "scroll",
       "step": 16,
       "data": {
@@ -4694,7 +5375,7 @@
       }
     },
     {
-      "elapsed_ms": 29284.1,
+      "elapsed_ms": 32059.1,
       "event": "capture",
       "step": 16,
       "data": {
@@ -4727,7 +5408,7 @@
       }
     },
     {
-      "elapsed_ms": 29303.3,
+      "elapsed_ms": 32079.6,
       "event": "viewport_check",
       "step": 15,
       "data": {
@@ -4739,7 +5420,7 @@
       }
     },
     {
-      "elapsed_ms": 29304.2,
+      "elapsed_ms": 32080.7,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -4747,7 +5428,7 @@
       }
     },
     {
-      "elapsed_ms": 29404.9,
+      "elapsed_ms": 32181.8,
       "event": "pointer_move",
       "step": 15,
       "data": {
@@ -4759,7 +5440,7 @@
       }
     },
     {
-      "elapsed_ms": 29405.1,
+      "elapsed_ms": 32182.0,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -4767,7 +5448,7 @@
       }
     },
     {
-      "elapsed_ms": 29506.7,
+      "elapsed_ms": 32284.0,
       "event": "scroll",
       "step": 15,
       "data": {
@@ -4777,7 +5458,7 @@
       }
     },
     {
-      "elapsed_ms": 29911.9,
+      "elapsed_ms": 32689.6,
       "event": "capture",
       "step": 15,
       "data": {
@@ -4810,7 +5491,7 @@
       }
     },
     {
-      "elapsed_ms": 29928.6,
+      "elapsed_ms": 32708.8,
       "event": "viewport_check",
       "step": 14,
       "data": {
@@ -4822,7 +5503,7 @@
       }
     },
     {
-      "elapsed_ms": 29929.4,
+      "elapsed_ms": 32709.7,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -4830,7 +5511,7 @@
       }
     },
     {
-      "elapsed_ms": 30030.0,
+      "elapsed_ms": 32810.5,
       "event": "pointer_move",
       "step": 14,
       "data": {
@@ -4842,7 +5523,7 @@
       }
     },
     {
-      "elapsed_ms": 30030.2,
+      "elapsed_ms": 32810.6,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -4850,7 +5531,7 @@
       }
     },
     {
-      "elapsed_ms": 30131.4,
+      "elapsed_ms": 32911.2,
       "event": "scroll",
       "step": 14,
       "data": {
@@ -4860,7 +5541,7 @@
       }
     },
     {
-      "elapsed_ms": 30546.1,
+      "elapsed_ms": 33323.1,
       "event": "capture",
       "step": 14,
       "data": {
@@ -4893,7 +5574,7 @@
       }
     },
     {
-      "elapsed_ms": 30566.1,
+      "elapsed_ms": 33338.9,
       "event": "viewport_check",
       "step": 13,
       "data": {
@@ -4905,7 +5586,7 @@
       }
     },
     {
-      "elapsed_ms": 30567.0,
+      "elapsed_ms": 33340.1,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -4913,7 +5594,7 @@
       }
     },
     {
-      "elapsed_ms": 30667.2,
+      "elapsed_ms": 33440.8,
       "event": "pointer_move",
       "step": 13,
       "data": {
@@ -4925,7 +5606,7 @@
       }
     },
     {
-      "elapsed_ms": 30667.4,
+      "elapsed_ms": 33441.0,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -4933,7 +5614,7 @@
       }
     },
     {
-      "elapsed_ms": 30768.5,
+      "elapsed_ms": 33542.4,
       "event": "scroll",
       "step": 13,
       "data": {
@@ -4943,7 +5624,7 @@
       }
     },
     {
-      "elapsed_ms": 31177.3,
+      "elapsed_ms": 33952.6,
       "event": "capture",
       "step": 13,
       "data": {
@@ -4976,7 +5657,7 @@
       }
     },
     {
-      "elapsed_ms": 31193.3,
+      "elapsed_ms": 33969.4,
       "event": "viewport_check",
       "step": 12,
       "data": {
@@ -4988,7 +5669,7 @@
       }
     },
     {
-      "elapsed_ms": 31194.3,
+      "elapsed_ms": 33970.3,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -4996,7 +5677,7 @@
       }
     },
     {
-      "elapsed_ms": 31295.1,
+      "elapsed_ms": 34070.6,
       "event": "pointer_move",
       "step": 12,
       "data": {
@@ -5008,7 +5689,7 @@
       }
     },
     {
-      "elapsed_ms": 31295.3,
+      "elapsed_ms": 34070.7,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -5016,7 +5697,7 @@
       }
     },
     {
-      "elapsed_ms": 31396.1,
+      "elapsed_ms": 34171.3,
       "event": "scroll",
       "step": 12,
       "data": {
@@ -5026,7 +5707,7 @@
       }
     },
     {
-      "elapsed_ms": 31811.3,
+      "elapsed_ms": 34588.5,
       "event": "capture",
       "step": 12,
       "data": {
@@ -5059,7 +5740,7 @@
       }
     },
     {
-      "elapsed_ms": 31829.4,
+      "elapsed_ms": 34605.5,
       "event": "viewport_check",
       "step": 11,
       "data": {
@@ -5071,7 +5752,7 @@
       }
     },
     {
-      "elapsed_ms": 31830.3,
+      "elapsed_ms": 34606.6,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -5079,7 +5760,7 @@
       }
     },
     {
-      "elapsed_ms": 31930.7,
+      "elapsed_ms": 34707.2,
       "event": "pointer_move",
       "step": 11,
       "data": {
@@ -5091,7 +5772,7 @@
       }
     },
     {
-      "elapsed_ms": 31930.9,
+      "elapsed_ms": 34707.3,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -5099,7 +5780,7 @@
       }
     },
     {
-      "elapsed_ms": 32032.1,
+      "elapsed_ms": 34808.6,
       "event": "scroll",
       "step": 11,
       "data": {
@@ -5109,7 +5790,7 @@
       }
     },
     {
-      "elapsed_ms": 32444.9,
+      "elapsed_ms": 35217.9,
       "event": "capture",
       "step": 11,
       "data": {
@@ -5126,23 +5807,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8910538554191589,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
+          "partial_score": 0.9863595366477966,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": false
+          "fallback_used": true
         }
       }
     },
     {
-      "elapsed_ms": 32462.8,
+      "elapsed_ms": 35233.2,
       "event": "viewport_check",
       "step": 10,
       "data": {
@@ -5154,7 +5835,7 @@
       }
     },
     {
-      "elapsed_ms": 32463.9,
+      "elapsed_ms": 35234.5,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -5162,7 +5843,7 @@
       }
     },
     {
-      "elapsed_ms": 32564.6,
+      "elapsed_ms": 35336.2,
       "event": "pointer_move",
       "step": 10,
       "data": {
@@ -5174,7 +5855,7 @@
       }
     },
     {
-      "elapsed_ms": 32564.8,
+      "elapsed_ms": 35336.4,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -5182,7 +5863,7 @@
       }
     },
     {
-      "elapsed_ms": 32665.5,
+      "elapsed_ms": 35437.7,
       "event": "scroll",
       "step": 10,
       "data": {
@@ -5192,7 +5873,7 @@
       }
     },
     {
-      "elapsed_ms": 33096.6,
+      "elapsed_ms": 35852.2,
       "event": "capture",
       "step": 10,
       "data": {
@@ -5209,23 +5890,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8910538554191589,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
+          "partial_score": 0.9863595366477966,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": false
+          "fallback_used": true
         }
       }
     },
     {
-      "elapsed_ms": 33123.0,
+      "elapsed_ms": 35870.4,
       "event": "viewport_check",
       "step": 9,
       "data": {
@@ -5237,7 +5918,7 @@
       }
     },
     {
-      "elapsed_ms": 33124.4,
+      "elapsed_ms": 35871.4,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -5245,7 +5926,7 @@
       }
     },
     {
-      "elapsed_ms": 33224.6,
+      "elapsed_ms": 35971.7,
       "event": "pointer_move",
       "step": 9,
       "data": {
@@ -5257,7 +5938,7 @@
       }
     },
     {
-      "elapsed_ms": 33224.8,
+      "elapsed_ms": 35971.9,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -5265,7 +5946,7 @@
       }
     },
     {
-      "elapsed_ms": 33325.9,
+      "elapsed_ms": 36073.3,
       "event": "scroll",
       "step": 9,
       "data": {
@@ -5275,7 +5956,7 @@
       }
     },
     {
-      "elapsed_ms": 33748.6,
+      "elapsed_ms": 36482.1,
       "event": "capture",
       "step": 9,
       "data": {
@@ -5292,23 +5973,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8910538554191589,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
+          "partial_score": 0.9863595366477966,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": false
+          "fallback_used": true
         }
       }
     },
     {
-      "elapsed_ms": 33766.7,
+      "elapsed_ms": 36499.2,
       "event": "viewport_check",
       "step": 8,
       "data": {
@@ -5320,7 +6001,7 @@
       }
     },
     {
-      "elapsed_ms": 33767.5,
+      "elapsed_ms": 36500.0,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -5328,7 +6009,7 @@
       }
     },
     {
-      "elapsed_ms": 33868.5,
+      "elapsed_ms": 36600.7,
       "event": "pointer_move",
       "step": 8,
       "data": {
@@ -5340,7 +6021,7 @@
       }
     },
     {
-      "elapsed_ms": 33868.9,
+      "elapsed_ms": 36600.9,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -5348,7 +6029,7 @@
       }
     },
     {
-      "elapsed_ms": 33970.1,
+      "elapsed_ms": 36701.9,
       "event": "scroll",
       "step": 8,
       "data": {
@@ -5358,7 +6039,7 @@
       }
     },
     {
-      "elapsed_ms": 34378.2,
+      "elapsed_ms": 37119.3,
       "event": "capture",
       "step": 8,
       "data": {
@@ -5375,23 +6056,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8910538554191589,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
+          "partial_score": 0.9863595366477966,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": false
+          "fallback_used": true
         }
       }
     },
     {
-      "elapsed_ms": 34404.9,
+      "elapsed_ms": 37139.8,
       "event": "viewport_check",
       "step": 7,
       "data": {
@@ -5403,7 +6084,7 @@
       }
     },
     {
-      "elapsed_ms": 34406.2,
+      "elapsed_ms": 37141.3,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -5411,7 +6092,7 @@
       }
     },
     {
-      "elapsed_ms": 34507.3,
+      "elapsed_ms": 37242.1,
       "event": "pointer_move",
       "step": 7,
       "data": {
@@ -5423,7 +6104,7 @@
       }
     },
     {
-      "elapsed_ms": 34507.6,
+      "elapsed_ms": 37242.3,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -5431,7 +6112,7 @@
       }
     },
     {
-      "elapsed_ms": 34608.8,
+      "elapsed_ms": 37342.9,
       "event": "scroll",
       "step": 7,
       "data": {
@@ -5441,7 +6122,7 @@
       }
     },
     {
-      "elapsed_ms": 35030.5,
+      "elapsed_ms": 37747.3,
       "event": "capture",
       "step": 7,
       "data": {
@@ -5458,23 +6139,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8910538554191589,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
+          "partial_score": 0.9863595366477966,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": false
+          "fallback_used": true
         }
       }
     },
     {
-      "elapsed_ms": 35053.3,
+      "elapsed_ms": 37761.9,
       "event": "viewport_check",
       "step": 6,
       "data": {
@@ -5486,7 +6167,7 @@
       }
     },
     {
-      "elapsed_ms": 35054.4,
+      "elapsed_ms": 37763.1,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -5494,7 +6175,7 @@
       }
     },
     {
-      "elapsed_ms": 35155.3,
+      "elapsed_ms": 37863.4,
       "event": "pointer_move",
       "step": 6,
       "data": {
@@ -5506,7 +6187,7 @@
       }
     },
     {
-      "elapsed_ms": 35155.5,
+      "elapsed_ms": 37863.6,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -5514,7 +6195,7 @@
       }
     },
     {
-      "elapsed_ms": 35256.8,
+      "elapsed_ms": 37965.3,
       "event": "scroll",
       "step": 6,
       "data": {
@@ -5524,7 +6205,7 @@
       }
     },
     {
-      "elapsed_ms": 35683.1,
+      "elapsed_ms": 38361.5,
       "event": "capture",
       "step": 6,
       "data": {
@@ -5557,7 +6238,7 @@
       }
     },
     {
-      "elapsed_ms": 35705.1,
+      "elapsed_ms": 38374.5,
       "event": "viewport_check",
       "step": 5,
       "data": {
@@ -5569,7 +6250,7 @@
       }
     },
     {
-      "elapsed_ms": 35706.7,
+      "elapsed_ms": 38376.0,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -5577,7 +6258,7 @@
       }
     },
     {
-      "elapsed_ms": 35807.4,
+      "elapsed_ms": 38476.8,
       "event": "pointer_move",
       "step": 5,
       "data": {
@@ -5589,7 +6270,7 @@
       }
     },
     {
-      "elapsed_ms": 35807.7,
+      "elapsed_ms": 38476.9,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -5597,7 +6278,7 @@
       }
     },
     {
-      "elapsed_ms": 35908.7,
+      "elapsed_ms": 38578.3,
       "event": "scroll",
       "step": 5,
       "data": {
@@ -5607,7 +6288,7 @@
       }
     },
     {
-      "elapsed_ms": 36328.0,
+      "elapsed_ms": 38983.6,
       "event": "capture",
       "step": 5,
       "data": {
@@ -5640,7 +6321,7 @@
       }
     },
     {
-      "elapsed_ms": 36347.4,
+      "elapsed_ms": 39004.7,
       "event": "viewport_check",
       "step": 4,
       "data": {
@@ -5652,7 +6333,7 @@
       }
     },
     {
-      "elapsed_ms": 36348.3,
+      "elapsed_ms": 39007.1,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -5660,7 +6341,7 @@
       }
     },
     {
-      "elapsed_ms": 36448.8,
+      "elapsed_ms": 39108.3,
       "event": "pointer_move",
       "step": 4,
       "data": {
@@ -5672,7 +6353,7 @@
       }
     },
     {
-      "elapsed_ms": 36449.0,
+      "elapsed_ms": 39108.5,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -5680,7 +6361,7 @@
       }
     },
     {
-      "elapsed_ms": 36550.1,
+      "elapsed_ms": 39209.0,
       "event": "scroll",
       "step": 4,
       "data": {
@@ -5690,7 +6371,7 @@
       }
     },
     {
-      "elapsed_ms": 36961.5,
+      "elapsed_ms": 39614.5,
       "event": "capture",
       "step": 4,
       "data": {
@@ -5723,19 +6404,19 @@
       }
     },
     {
-      "elapsed_ms": 36978.0,
+      "elapsed_ms": 39632.5,
       "event": "viewport_check",
       "step": 3,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6454945597575303,
+        "change_score": 0.6454988165982735,
         "threshold": 0.003,
         "from_step": 4
       }
     },
     {
-      "elapsed_ms": 37012.0,
+      "elapsed_ms": 39657.8,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -5822,14 +6503,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 37012.1,
+      "elapsed_ms": 39657.9,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -5850,7 +6531,7 @@
           1122,
           759
         ],
-        "initial_quantity": 475,
+        "initial_quantity": 468,
         "matches": [
           {
             "duration_label": "15m",
@@ -5930,17 +6611,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           }
         ],
         "use_number": 1,
         "plan_generation": 1,
         "plan_step": 1,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 37012.2,
+      "elapsed_ms": 39658.0,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -5948,7 +6629,7 @@
       }
     },
     {
-      "elapsed_ms": 37114.3,
+      "elapsed_ms": 39775.8,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -5961,11 +6642,11 @@
         "use_number": 1,
         "plan_generation": 1,
         "plan_step": 1,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 37533.0,
+      "elapsed_ms": 40174.0,
       "event": "capture",
       "step": 3,
       "data": {
@@ -5984,7 +6665,7 @@
       }
     },
     {
-      "elapsed_ms": 37535.6,
+      "elapsed_ms": 40175.7,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -5993,13 +6674,13 @@
         "duration_seconds": 28800,
         "dialog_match": {
           "recognized": true,
-          "score": 0.8922062516212463,
+          "score": 0.8910801410675049,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9864123463630676,
+          "partial_score": 0.9863606095314026,
           "partial_location": {
             "x": 900,
             "y": 251
@@ -6009,41 +6690,41 @@
         "use_number": 1,
         "plan_generation": 1,
         "plan_step": 1,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 37535.6,
+      "elapsed_ms": 40175.7,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 474,
+        "expected_quantity": 467,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
         "use_number": 1,
         "plan_generation": 1,
         "plan_step": 1,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 37536.8,
+      "elapsed_ms": 40176.3,
       "event": "use_step_started",
       "step": 3,
       "data": {
         "use_number": 2,
         "plan_generation": 1,
         "plan_step": 2,
-        "plan_total": 8,
+        "plan_total": 10,
         "duration_seconds": 28800,
         "duration_label": "8h",
         "checkpoint": 3,
-        "remaining_queue": 6,
+        "remaining_queue": 8,
         "decision": {
-          "remaining_before_seconds": 176400,
+          "remaining_before_seconds": 198000,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -6052,35 +6733,35 @@
           "stock_before": [
             [
               900,
-              4879
+              4891
             ],
             [
               3600,
-              5272
+              5286
             ],
             [
               10800,
-              3419
+              3458
             ],
             [
               28800,
-              474
-            ],
-            [
-              54000,
-              637
-            ],
-            [
-              86400,
               467
             ],
             [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
             ],
             [
               2592000,
@@ -6107,15 +6788,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 2,
-          "quantity_before": 474,
-          "quantity_after": 473,
-          "remaining_after_seconds": 147600,
+          "quantity_before": 467,
+          "quantity_after": 466,
+          "remaining_after_seconds": 169200,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 37582.3,
+      "elapsed_ms": 40206.3,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -6182,7 +6863,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 0.999999463558197
           },
           {
             "duration_label": "8h",
@@ -6202,14 +6883,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678522348403931
+            "confidence": 0.9678515195846558
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 37582.4,
+      "elapsed_ms": 40206.3,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -6230,7 +6911,7 @@
           1122,
           759
         ],
-        "initial_quantity": 474,
+        "initial_quantity": 467,
         "matches": [
           {
             "duration_label": "15m",
@@ -6290,7 +6971,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 0.999999463558197
           },
           {
             "duration_label": "8h",
@@ -6310,17 +6991,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678522348403931
+            "confidence": 0.9678515195846558
           }
         ],
         "use_number": 2,
         "plan_generation": 1,
         "plan_step": 2,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 37582.7,
+      "elapsed_ms": 40206.4,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -6328,7 +7009,7 @@
       }
     },
     {
-      "elapsed_ms": 37684.2,
+      "elapsed_ms": 40307.7,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -6341,11 +7022,11 @@
         "use_number": 2,
         "plan_generation": 1,
         "plan_step": 2,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 38114.4,
+      "elapsed_ms": 40709.4,
       "event": "capture",
       "step": 3,
       "data": {
@@ -6364,7 +7045,7 @@
       }
     },
     {
-      "elapsed_ms": 38117.4,
+      "elapsed_ms": 40711.1,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -6373,13 +7054,13 @@
         "duration_seconds": 28800,
         "dialog_match": {
           "recognized": true,
-          "score": 0.8910499811172485,
+          "score": 0.8910801410675049,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9863595366477966,
+          "partial_score": 0.9863606095314026,
           "partial_location": {
             "x": 900,
             "y": 251
@@ -6389,41 +7070,41 @@
         "use_number": 2,
         "plan_generation": 1,
         "plan_step": 2,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 38117.4,
+      "elapsed_ms": 40711.1,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 473,
+        "expected_quantity": 466,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
         "use_number": 2,
         "plan_generation": 1,
         "plan_step": 2,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 38118.5,
+      "elapsed_ms": 40711.7,
       "event": "use_step_started",
       "step": 3,
       "data": {
         "use_number": 3,
         "plan_generation": 1,
         "plan_step": 3,
-        "plan_total": 8,
+        "plan_total": 10,
         "duration_seconds": 28800,
         "duration_label": "8h",
         "checkpoint": 3,
-        "remaining_queue": 5,
+        "remaining_queue": 7,
         "decision": {
-          "remaining_before_seconds": 147600,
+          "remaining_before_seconds": 169200,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -6432,35 +7113,35 @@
           "stock_before": [
             [
               900,
-              4879
+              4891
             ],
             [
               3600,
-              5272
+              5286
             ],
             [
               10800,
-              3419
+              3458
             ],
             [
               28800,
-              473
+              466
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
             ],
             [
               2592000,
@@ -6487,15 +7168,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 3,
-          "quantity_before": 473,
-          "quantity_after": 472,
-          "remaining_after_seconds": 118800,
+          "quantity_before": 466,
+          "quantity_after": 465,
+          "remaining_after_seconds": 140400,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 38182.5,
+      "elapsed_ms": 40739.3,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -6562,7 +7243,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "8h",
@@ -6582,14 +7263,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678518772125244
+            "confidence": 0.9678515195846558
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 38182.6,
+      "elapsed_ms": 40739.4,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -6610,7 +7291,7 @@
           1122,
           759
         ],
-        "initial_quantity": 473,
+        "initial_quantity": 466,
         "matches": [
           {
             "duration_label": "15m",
@@ -6670,7 +7351,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "8h",
@@ -6690,17 +7371,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678518772125244
+            "confidence": 0.9678515195846558
           }
         ],
         "use_number": 3,
         "plan_generation": 1,
         "plan_step": 3,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 38182.7,
+      "elapsed_ms": 40739.6,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -6708,7 +7389,7 @@
       }
     },
     {
-      "elapsed_ms": 38284.3,
+      "elapsed_ms": 40840.5,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -6721,11 +7402,11 @@
         "use_number": 3,
         "plan_generation": 1,
         "plan_step": 3,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 38690.6,
+      "elapsed_ms": 41254.2,
       "event": "capture",
       "step": 3,
       "data": {
@@ -6744,7 +7425,7 @@
       }
     },
     {
-      "elapsed_ms": 38693.1,
+      "elapsed_ms": 41257.1,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -6753,13 +7434,13 @@
         "duration_seconds": 28800,
         "dialog_match": {
           "recognized": true,
-          "score": 0.8910499811172485,
+          "score": 0.8910801410675049,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9863595366477966,
+          "partial_score": 0.9863606095314026,
           "partial_location": {
             "x": 900,
             "y": 251
@@ -6769,41 +7450,41 @@
         "use_number": 3,
         "plan_generation": 1,
         "plan_step": 3,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 38693.2,
+      "elapsed_ms": 41257.1,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 472,
+        "expected_quantity": 465,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
         "use_number": 3,
         "plan_generation": 1,
         "plan_step": 3,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 38694.3,
+      "elapsed_ms": 41258.0,
       "event": "use_step_started",
       "step": 3,
       "data": {
         "use_number": 4,
         "plan_generation": 1,
         "plan_step": 4,
-        "plan_total": 8,
+        "plan_total": 10,
         "duration_seconds": 28800,
         "duration_label": "8h",
         "checkpoint": 3,
-        "remaining_queue": 4,
+        "remaining_queue": 6,
         "decision": {
-          "remaining_before_seconds": 118800,
+          "remaining_before_seconds": 140400,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -6812,35 +7493,35 @@
           "stock_before": [
             [
               900,
-              4879
+              4891
             ],
             [
               3600,
-              5272
+              5286
             ],
             [
               10800,
-              3419
+              3458
             ],
             [
               28800,
-              472
+              465
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
             ],
             [
               2592000,
@@ -6867,15 +7548,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 4,
-          "quantity_before": 472,
-          "quantity_after": 471,
-          "remaining_after_seconds": 90000,
+          "quantity_before": 465,
+          "quantity_after": 464,
+          "remaining_after_seconds": 111600,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 38728.6,
+      "elapsed_ms": 41292.3,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -6962,14 +7643,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678515195846558
+            "confidence": 0.9678522348403931
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 38728.7,
+      "elapsed_ms": 41292.3,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -6990,7 +7671,7 @@
           1122,
           759
         ],
-        "initial_quantity": 472,
+        "initial_quantity": 465,
         "matches": [
           {
             "duration_label": "15m",
@@ -7070,17 +7751,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678515195846558
+            "confidence": 0.9678522348403931
           }
         ],
         "use_number": 4,
         "plan_generation": 1,
         "plan_step": 4,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 38728.8,
+      "elapsed_ms": 41292.5,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -7088,7 +7769,7 @@
       }
     },
     {
-      "elapsed_ms": 38830.1,
+      "elapsed_ms": 41393.4,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -7101,11 +7782,11 @@
         "use_number": 4,
         "plan_generation": 1,
         "plan_step": 4,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 39240.0,
+      "elapsed_ms": 41801.2,
       "event": "capture",
       "step": 3,
       "data": {
@@ -7124,7 +7805,7 @@
       }
     },
     {
-      "elapsed_ms": 39243.1,
+      "elapsed_ms": 41805.2,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -7133,13 +7814,13 @@
         "duration_seconds": 28800,
         "dialog_match": {
           "recognized": true,
-          "score": 0.8910499811172485,
+          "score": 0.8910801410675049,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9863595366477966,
+          "partial_score": 0.9863606095314026,
           "partial_location": {
             "x": 900,
             "y": 251
@@ -7149,41 +7830,41 @@
         "use_number": 4,
         "plan_generation": 1,
         "plan_step": 4,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 39243.1,
+      "elapsed_ms": 41805.3,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 471,
+        "expected_quantity": 464,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
         "use_number": 4,
         "plan_generation": 1,
         "plan_step": 4,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 39244.5,
+      "elapsed_ms": 41806.1,
       "event": "use_step_started",
       "step": 3,
       "data": {
         "use_number": 5,
         "plan_generation": 1,
         "plan_step": 5,
-        "plan_total": 8,
+        "plan_total": 10,
         "duration_seconds": 28800,
         "duration_label": "8h",
         "checkpoint": 3,
-        "remaining_queue": 3,
+        "remaining_queue": 5,
         "decision": {
-          "remaining_before_seconds": 90000,
+          "remaining_before_seconds": 111600,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -7192,35 +7873,35 @@
           "stock_before": [
             [
               900,
-              4879
+              4891
             ],
             [
               3600,
-              5272
+              5286
             ],
             [
               10800,
-              3419
+              3458
             ],
             [
               28800,
-              471
+              464
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
             ],
             [
               2592000,
@@ -7247,15 +7928,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 5,
-          "quantity_before": 471,
-          "quantity_after": 470,
-          "remaining_after_seconds": 61200,
+          "quantity_before": 464,
+          "quantity_after": 463,
+          "remaining_after_seconds": 82800,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 39282.3,
+      "elapsed_ms": 41844.3,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -7322,7 +8003,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "8h",
@@ -7342,14 +8023,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678515195846558
+            "confidence": 0.9678518772125244
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 39282.3,
+      "elapsed_ms": 41844.3,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -7370,7 +8051,7 @@
           1122,
           759
         ],
-        "initial_quantity": 471,
+        "initial_quantity": 464,
         "matches": [
           {
             "duration_label": "15m",
@@ -7430,7 +8111,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "8h",
@@ -7450,17 +8131,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678515195846558
+            "confidence": 0.9678518772125244
           }
         ],
         "use_number": 5,
         "plan_generation": 1,
         "plan_step": 5,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 39282.5,
+      "elapsed_ms": 41844.5,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -7468,7 +8149,7 @@
       }
     },
     {
-      "elapsed_ms": 39383.4,
+      "elapsed_ms": 41945.8,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -7481,11 +8162,11 @@
         "use_number": 5,
         "plan_generation": 1,
         "plan_step": 5,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 39805.1,
+      "elapsed_ms": 42345.9,
       "event": "capture",
       "step": 3,
       "data": {
@@ -7504,7 +8185,7 @@
       }
     },
     {
-      "elapsed_ms": 39808.4,
+      "elapsed_ms": 42348.1,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -7513,13 +8194,13 @@
         "duration_seconds": 28800,
         "dialog_match": {
           "recognized": true,
-          "score": 0.8910499811172485,
+          "score": 0.8910801410675049,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9863595366477966,
+          "partial_score": 0.9863606095314026,
           "partial_location": {
             "x": 900,
             "y": 251
@@ -7529,41 +8210,41 @@
         "use_number": 5,
         "plan_generation": 1,
         "plan_step": 5,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 39808.4,
+      "elapsed_ms": 42348.1,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 470,
+        "expected_quantity": 463,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
         "use_number": 5,
         "plan_generation": 1,
         "plan_step": 5,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 39809.7,
+      "elapsed_ms": 42349.5,
       "event": "use_step_started",
       "step": 3,
       "data": {
         "use_number": 6,
         "plan_generation": 1,
         "plan_step": 6,
-        "plan_total": 8,
+        "plan_total": 10,
         "duration_seconds": 28800,
         "duration_label": "8h",
         "checkpoint": 3,
-        "remaining_queue": 2,
+        "remaining_queue": 4,
         "decision": {
-          "remaining_before_seconds": 61200,
+          "remaining_before_seconds": 82800,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -7572,35 +8253,35 @@
           "stock_before": [
             [
               900,
-              4879
+              4891
             ],
             [
               3600,
-              5272
+              5286
             ],
             [
               10800,
-              3419
+              3458
             ],
             [
               28800,
-              470
+              463
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
             ],
             [
               2592000,
@@ -7627,15 +8308,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 6,
-          "quantity_before": 470,
-          "quantity_after": 469,
-          "remaining_after_seconds": 32400,
+          "quantity_before": 463,
+          "quantity_after": 462,
+          "remaining_after_seconds": 54000,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 39843.7,
+      "elapsed_ms": 42381.3,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -7702,7 +8383,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "8h",
@@ -7722,14 +8403,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678525328636169
+            "confidence": 0.9678515195846558
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 39843.7,
+      "elapsed_ms": 42381.3,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -7750,7 +8431,7 @@
           1122,
           759
         ],
-        "initial_quantity": 470,
+        "initial_quantity": 463,
         "matches": [
           {
             "duration_label": "15m",
@@ -7810,7 +8491,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "8h",
@@ -7830,17 +8511,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678525328636169
+            "confidence": 0.9678515195846558
           }
         ],
         "use_number": 6,
         "plan_generation": 1,
         "plan_step": 6,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 39843.8,
+      "elapsed_ms": 42381.5,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -7848,7 +8529,7 @@
       }
     },
     {
-      "elapsed_ms": 39945.6,
+      "elapsed_ms": 42482.5,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -7861,11 +8542,11 @@
         "use_number": 6,
         "plan_generation": 1,
         "plan_step": 6,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 40358.2,
+      "elapsed_ms": 42899.0,
       "event": "capture",
       "step": 3,
       "data": {
@@ -7884,7 +8565,7 @@
       }
     },
     {
-      "elapsed_ms": 40361.3,
+      "elapsed_ms": 42901.9,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -7893,13 +8574,13 @@
         "duration_seconds": 28800,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9934118986129761,
+          "score": 0.9999951124191284,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9991354942321777,
+          "partial_score": 1.0,
           "partial_location": {
             "x": 900,
             "y": 251
@@ -7909,41 +8590,41 @@
         "use_number": 6,
         "plan_generation": 1,
         "plan_step": 6,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 40361.3,
+      "elapsed_ms": 42902.0,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 469,
+        "expected_quantity": 462,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
         "use_number": 6,
         "plan_generation": 1,
         "plan_step": 6,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 40362.3,
+      "elapsed_ms": 42902.9,
       "event": "use_step_started",
       "step": 3,
       "data": {
         "use_number": 7,
         "plan_generation": 1,
         "plan_step": 7,
-        "plan_total": 8,
+        "plan_total": 10,
         "duration_seconds": 28800,
         "duration_label": "8h",
         "checkpoint": 3,
-        "remaining_queue": 1,
+        "remaining_queue": 3,
         "decision": {
-          "remaining_before_seconds": 32400,
+          "remaining_before_seconds": 54000,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -7952,35 +8633,35 @@
           "stock_before": [
             [
               900,
-              4879
+              4891
             ],
             [
               3600,
-              5272
+              5286
             ],
             [
               10800,
-              3419
+              3458
             ],
             [
               28800,
-              469
+              462
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
             ],
             [
               2592000,
@@ -8007,15 +8688,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 7,
-          "quantity_before": 469,
-          "quantity_after": 468,
-          "remaining_after_seconds": 3600,
+          "quantity_before": 462,
+          "quantity_after": 461,
+          "remaining_after_seconds": 25200,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 40395.8,
+      "elapsed_ms": 42940.1,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -8102,14 +8783,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678522348403931
+            "confidence": 0.9678515195846558
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 40395.8,
+      "elapsed_ms": 42940.1,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -8130,7 +8811,7 @@
           1122,
           759
         ],
-        "initial_quantity": 469,
+        "initial_quantity": 462,
         "matches": [
           {
             "duration_label": "15m",
@@ -8210,17 +8891,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678522348403931
+            "confidence": 0.9678515195846558
           }
         ],
         "use_number": 7,
         "plan_generation": 1,
         "plan_step": 7,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 40396.0,
+      "elapsed_ms": 42940.4,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -8228,7 +8909,7 @@
       }
     },
     {
-      "elapsed_ms": 40497.0,
+      "elapsed_ms": 43041.7,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -8241,11 +8922,11 @@
         "use_number": 7,
         "plan_generation": 1,
         "plan_step": 7,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 40906.1,
+      "elapsed_ms": 43444.1,
       "event": "capture",
       "step": 3,
       "data": {
@@ -8264,7 +8945,7 @@
       }
     },
     {
-      "elapsed_ms": 40908.9,
+      "elapsed_ms": 43446.9,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -8289,35 +8970,793 @@
         "use_number": 7,
         "plan_generation": 1,
         "plan_step": 7,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 40909.0,
+      "elapsed_ms": 43446.9,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 468,
+        "expected_quantity": 461,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
         "use_number": 7,
         "plan_generation": 1,
         "plan_step": 7,
-        "plan_total": 8
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 40909.9,
+      "elapsed_ms": 43447.7,
       "event": "use_step_started",
       "step": 3,
       "data": {
         "use_number": 8,
         "plan_generation": 1,
         "plan_step": 8,
-        "plan_total": 8,
+        "plan_total": 10,
+        "duration_seconds": 10800,
+        "duration_label": "3h",
+        "checkpoint": 3,
+        "remaining_queue": 2,
+        "decision": {
+          "remaining_before_seconds": 25200,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5286
+            ],
+            [
+              10800,
+              3458
+            ],
+            [
+              28800,
+              461
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800
+          ],
+          "selected_duration_seconds": 10800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 8,
+          "quantity_before": 3458,
+          "quantity_after": 3457,
+          "remaining_after_seconds": 14400,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 43481.1,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 10800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678508639335632
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 43481.3,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 10800,
+        "duration_label": "3h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 260,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 273
+        },
+        "screen_point": [
+          1122,
+          649
+        ],
+        "initial_quantity": 3458,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678508639335632
+          }
+        ],
+        "use_number": 8,
+        "plan_generation": 1,
+        "plan_step": 8,
+        "plan_total": 10
+      }
+    },
+    {
+      "elapsed_ms": 43481.6,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 43583.1,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 10800,
+        "screen_point": [
+          1122,
+          649
+        ],
+        "use_number": 8,
+        "plan_generation": 1,
+        "plan_step": 8,
+        "plan_total": 10
+      }
+    },
+    {
+      "elapsed_ms": 43989.8,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 43991.9,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 10800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 8,
+        "plan_generation": 1,
+        "plan_step": 8,
+        "plan_total": 10
+      }
+    },
+    {
+      "elapsed_ms": 43992.0,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 3457,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 10800,
+        "use_number": 8,
+        "plan_generation": 1,
+        "plan_step": 8,
+        "plan_total": 10
+      }
+    },
+    {
+      "elapsed_ms": 43992.6,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 9,
+        "plan_generation": 1,
+        "plan_step": 9,
+        "plan_total": 10,
+        "duration_seconds": 10800,
+        "duration_label": "3h",
+        "checkpoint": 3,
+        "remaining_queue": 1,
+        "decision": {
+          "remaining_before_seconds": 14400,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5286
+            ],
+            [
+              10800,
+              3457
+            ],
+            [
+              28800,
+              461
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800
+          ],
+          "selected_duration_seconds": 10800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 9,
+          "quantity_before": 3457,
+          "quantity_after": 3456,
+          "remaining_after_seconds": 3600,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 44024.0,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 10800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678532481193542
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 44024.1,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 10800,
+        "duration_label": "3h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 260,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 273
+        },
+        "screen_point": [
+          1122,
+          649
+        ],
+        "initial_quantity": 3457,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678532481193542
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "use_number": 9,
+        "plan_generation": 1,
+        "plan_step": 9,
+        "plan_total": 10
+      }
+    },
+    {
+      "elapsed_ms": 44024.2,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 44125.9,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 10800,
+        "screen_point": [
+          1122,
+          649
+        ],
+        "use_number": 9,
+        "plan_generation": 1,
+        "plan_step": 9,
+        "plan_total": 10
+      }
+    },
+    {
+      "elapsed_ms": 44545.7,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 44548.7,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 10800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 9,
+        "plan_generation": 1,
+        "plan_step": 9,
+        "plan_total": 10
+      }
+    },
+    {
+      "elapsed_ms": 44548.7,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 3456,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 10800,
+        "use_number": 9,
+        "plan_generation": 1,
+        "plan_step": 9,
+        "plan_total": 10
+      }
+    },
+    {
+      "elapsed_ms": 44549.6,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 10,
+        "plan_generation": 1,
+        "plan_step": 10,
+        "plan_total": 10,
         "duration_seconds": 3600,
         "duration_label": "1h",
         "checkpoint": 3,
@@ -8332,35 +9771,35 @@
           "stock_before": [
             [
               900,
-              4879
+              4891
             ],
             [
               3600,
-              5272
+              5286
             ],
             [
               10800,
-              3419
+              3456
             ],
             [
               28800,
-              468
+              461
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
             ],
             [
               2592000,
@@ -8384,16 +9823,16 @@
           "selected_duration_seconds": 3600,
           "floor_seconds": 10,
           "breaks_floor": false,
-          "step": 8,
-          "quantity_before": 5272,
-          "quantity_after": 5271,
+          "step": 10,
+          "quantity_before": 5286,
+          "quantity_after": 5285,
           "remaining_after_seconds": 0,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 40946.2,
+      "elapsed_ms": 44583.6,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -8460,7 +9899,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9678525328636169
           },
           {
             "duration_label": "8h",
@@ -8480,14 +9919,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678518772125244
+            "confidence": 1.0
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 40946.3,
+      "elapsed_ms": 44583.7,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -8508,7 +9947,7 @@
           1122,
           539
         ],
-        "initial_quantity": 5272,
+        "initial_quantity": 5286,
         "matches": [
           {
             "duration_label": "15m",
@@ -8568,7 +10007,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9678525328636169
           },
           {
             "duration_label": "8h",
@@ -8588,17 +10027,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678518772125244
+            "confidence": 1.0
           }
         ],
-        "use_number": 8,
+        "use_number": 10,
         "plan_generation": 1,
-        "plan_step": 8,
-        "plan_total": 8
+        "plan_step": 10,
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 40946.4,
+      "elapsed_ms": 44583.9,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -8606,7 +10045,7 @@
       }
     },
     {
-      "elapsed_ms": 41048.7,
+      "elapsed_ms": 44684.8,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -8616,14 +10055,14 @@
           1122,
           539
         ],
-        "use_number": 8,
+        "use_number": 10,
         "plan_generation": 1,
-        "plan_step": 8,
-        "plan_total": 8
+        "plan_step": 10,
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 41455.6,
+      "elapsed_ms": 45098.5,
       "event": "capture",
       "step": 3,
       "data": {
@@ -8642,7 +10081,7 @@
       }
     },
     {
-      "elapsed_ms": 41459.1,
+      "elapsed_ms": 45101.4,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -8664,66 +10103,628 @@
           },
           "fallback_used": false
         },
-        "use_number": 8,
+        "use_number": 10,
         "plan_generation": 1,
-        "plan_step": 8,
-        "plan_total": 8
+        "plan_step": 10,
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 41459.1,
+      "elapsed_ms": 45101.4,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 5271,
+        "expected_quantity": 5285,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 3600,
-        "use_number": 8,
+        "use_number": 10,
         "plan_generation": 1,
-        "plan_step": 8,
-        "plan_total": 8
+        "plan_step": 10,
+        "plan_total": 10
       }
     },
     {
-      "elapsed_ms": 43517.4,
+      "elapsed_ms": 47068.7,
       "event": "timer_read",
       "step": 3,
       "data": {
         "phase": "final",
-        "status": "minute_ocr_disagreement",
-        "raw": "H4m22s / 4m22s / 4m22s / 4m22s5",
-        "value": null,
-        "confidence": 50.0
+        "status": "ok",
+        "raw": "10m52s",
+        "value_seconds": 652,
+        "confidence": 100.0
       }
     },
     {
-      "elapsed_ms": 43517.4,
-      "event": "run_aborted",
+      "elapsed_ms": 47068.7,
+      "event": "residual_plan_started",
       "step": 3,
       "data": {
-        "status": "UNCERTAIN",
-        "reason": "timer_unreadable:minute_ocr_disagreement",
-        "clicks_issued": 8
+        "remaining_seconds": 652,
+        "previous_remaining_seconds": 226800,
+        "estimated_stock": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5285
+          ],
+          [
+            10800,
+            3456
+          ],
+          [
+            28800,
+            461
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "stock_source": "initial_inventory_minus_submitted_clicks"
       }
     },
     {
-      "elapsed_ms": 43517.4,
-      "event": "run_finished",
+      "elapsed_ms": 47068.8,
+      "event": "plan_rebuilt",
       "step": 3,
       "data": {
-        "status": "UNCERTAIN",
-        "reason": "timer_unreadable:minute_ocr_disagreement",
-        "clicks_issued": 8,
-        "shortfall_seconds": 0,
-        "initial_timer_seconds": 205200,
-        "final_observed_timer_seconds": 205200,
-        "submitted_uses": [
+        "plan_generation": 2,
+        "status": "ok",
+        "remaining_seconds": 652,
+        "inventory": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5285
+          ],
+          [
+            10800,
+            3456
+          ],
+          [
+            28800,
+            461
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "uses": [
           [
             3600,
             1
+          ]
+        ],
+        "shortfall_seconds": 0,
+        "breached_floors": [],
+        "reason": "positive_remaining_time_after_batch",
+        "stock_source": "initial_inventory_minus_submitted_clicks"
+      }
+    },
+    {
+      "elapsed_ms": 47068.8,
+      "event": "plan_choice",
+      "step": 3,
+      "data": {
+        "plan_generation": 2,
+        "remaining_before_seconds": 652,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5285
+          ],
+          [
+            10800,
+            3456
+          ],
+          [
+            28800,
+            461
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_overshoot",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 3600,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 1,
+        "quantity_before": 5285,
+        "quantity_after": 5284,
+        "remaining_after_seconds": -2948,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 47068.9,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 11,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1,
+        "duration_seconds": 3600,
+        "duration_label": "1h",
+        "checkpoint": 3,
+        "remaining_queue": 0,
+        "decision": {
+          "remaining_before_seconds": 652,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5285
+            ],
+            [
+              10800,
+              3456
+            ],
+            [
+              28800,
+              461
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_overshoot",
+          "candidates_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "selected_duration_seconds": 3600,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 1,
+          "quantity_before": 5285,
+          "quantity_after": 5284,
+          "remaining_after_seconds": -2948,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 47102.2,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 3600,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678508639335632
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 47102.2,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 3600,
+        "duration_label": "1h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 150,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 163
+        },
+        "screen_point": [
+          1122,
+          539
+        ],
+        "initial_quantity": 5285,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678508639335632
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "use_number": 11,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1
+      }
+    },
+    {
+      "elapsed_ms": 47102.3,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 47203.1,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 3600,
+        "screen_point": [
+          1122,
+          539
+        ],
+        "use_number": 11,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1
+      }
+    },
+    {
+      "elapsed_ms": 47616.5,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 47619.7,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "not_recognized",
+        "phase": "post_use",
+        "duration_seconds": 3600,
+        "dialog_match": {
+          "recognized": false,
+          "score": 0.06998635083436966,
+          "threshold": 0.95,
+          "location": {
+            "x": 893,
+            "y": 252
+          },
+          "partial_score": 0.05416179075837135,
+          "partial_location": {
+            "x": 893,
+            "y": 252
+          },
+          "fallback_used": false
+        },
+        "use_number": 11,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1
+      }
+    },
+    {
+      "elapsed_ms": 47619.7,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "dialog_closed",
+        "quantity_checked": false,
+        "duration_seconds": 3600,
+        "use_number": 11,
+        "plan_generation": 2,
+        "plan_step": 1,
+        "plan_total": 1
+      }
+    },
+    {
+      "elapsed_ms": 47620.7,
+      "event": "execution_decision",
+      "step": 3,
+      "data": {
+        "action": "finish_dialog_closed",
+        "reason": "last_planned_use_closed_dialog"
+      }
+    },
+    {
+      "elapsed_ms": 47620.7,
+      "event": "run_finished",
+      "step": 3,
+      "data": {
+        "status": "FINISHED",
+        "reason": "dialog_closed_after_last_use",
+        "clicks_issued": 11,
+        "shortfall_seconds": 0,
+        "initial_timer_seconds": 226800,
+        "final_observed_timer_seconds": 652,
+        "submitted_uses": [
+          [
+            3600,
+            2
+          ],
+          [
+            10800,
+            2
           ],
           [
             28800,
@@ -8739,6 +10740,5 @@
     "frame_011.png",
     "frame_016.png"
   ],
-  "debug_capture": "uncertain.png",
   "event_trace_file": "event_trace.jsonl"
 }
