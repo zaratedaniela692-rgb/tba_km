@@ -1,0 +1,35 @@
+{
+  "scenario": "speedup_use",
+  "device": "DESKTOP-LFGLEFV",
+  "status": "FAILED",
+  "run_number": 3,
+  "run_dir": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\speedup_use\\3_20261108_093744",
+  "execute": true,
+  "commit": "45fdd7c",
+  "code_commit": "62db9a0468bd6218c73c837b4a0238b0569cc87e",
+  "started_at": "2026-11-08T09:37:44",
+  "finished_at": "2026-11-08T09:38:02",
+  "python": "3.11.7",
+  "steps": [
+    {
+      "index": 1,
+      "name": "use_items",
+      "command": [
+        "C:\\Users\\Konrad\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "speedup.py",
+        "--execute",
+        "--confirm",
+        "USE OWNED SPEEDUPS FROM TOP"
+      ],
+      "screenshot_before_error": null,
+      "duration_seconds": 11.98,
+      "returncode": 2,
+      "output_tail": "{\n  \"timestamp\": \"2026-11-08T08:37:50.961235+00:00\",\n  \"mode\": \"execute\",\n  \"status\": \"BLOCKED\",\n  \"reason\": \"speedup_dialog_not_recognized\",\n  \"remaining_seconds\": null,\n  \"inventory\": [],\n  \"inventory_evidence\": [],\n  \"plan\": null,\n  \"used\": [],\n  \"shortfall_seconds\": 0,\n  \"replan\": null,\n  \"checkpoint_steps\": [],\n  \"click_timings\": [],\n  \"evidence_frames\": [\n    \"frame_000.png\",\n    \"frame_003.png\"\n  ],\n  \"debug_capture\": \"uncertain.png\"\n}\nreport_path=C:\\Users\\Konrad\\tba\\debug\\speedup\\run_20261108_093750_961235\\report.json\n",
+      "screenshot_after_error": null,
+      "status": "FAILED"
+    }
+  ],
+  "module_debug": [
+    "debug/speedup/run_20261108_093750_961235"
+  ]
+}
