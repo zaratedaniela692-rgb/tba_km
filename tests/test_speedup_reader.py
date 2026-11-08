@@ -68,6 +68,39 @@ def test_minute_timer_consensus_ignores_leading_hourglass_ocr_artifact(monkeypat
     assert reading.raw == "H12m18s"
 
 
+def test_segmented_timer_fallback_crops_adjacent_icons(monkeypatch):
+    image = cv2.imread(str(SHOTS / "speedup_view.png"))
+    first_digits = [(13, 6, 6, 10), (21, 7, 7, 11)]
+    first_unit = (33, 8, 7, 12)
+    second_digits = [(59, 6, 6, 12), (66, 6, 8, 12)]
+    second_unit = (80, 8, 12, 8)
+    parts = (first_digits, first_unit, second_digits, second_unit)
+    monkeypatch.setattr(speedup_reader, "_split_label", lambda _components: parts)
+    monkeypatch.setattr(
+        speedup_reader,
+        "_read_number",
+        lambda _gray, digits: "17" if digits is first_digits else None,
+    )
+    monkeypatch.setattr(
+        speedup_reader,
+        "_read_unit",
+        lambda _gray, unit: "g" if unit is first_unit else "m",
+    )
+    fallback_shapes = []
+
+    def read_fallback(gray):
+        fallback_shapes.append(gray.shape)
+        return speedup_reader.ParsedReading("17g39m", 17 * 3600 + 39 * 60, 100.0, "ok")
+
+    monkeypatch.setattr(speedup_reader, "_read_minute_timer", read_fallback)
+
+    reading = read_remaining_time(image)
+
+    assert reading.status == "ok"
+    assert reading.value == 17 * 3600 + 39 * 60
+    assert fallback_shapes == [(16, 81)]
+
+
 def test_minute_only_timer_ocr_disagreement_remains_unknown(monkeypatch):
     image = cv2.imread(str(SHOTS / "speedup_view.png"))
     monkeypatch.setattr(speedup_reader, "_split_label", lambda _components: None)
@@ -132,6 +165,11 @@ def test_disagreement_for_an_unverified_digit_is_still_rejected(monkeypatch):
 def test_disagreeing_scales_are_rejected(monkeypatch):
     answers = iter("1313131313")
     monkeypatch.setattr(speedup_reader, "_read_digit", lambda *args: next(answers, "7"))
+    monkeypatch.setattr(
+        speedup_reader,
+        "_read_minute_timer",
+        lambda _gray: speedup_reader.ParsedReading("", None, 50.0, "minute_ocr_disagreement"),
+    )
 
     assert _read("speedup_view").value is None
 

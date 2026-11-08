@@ -86,6 +86,17 @@ def _split_label(components):
     return first_digits, first_unit, second_digits, second_unit
 
 
+def _crop_timer_text(gray, parts):
+    """Exclude adjacent icons by cropping to the detected timer glyph bounds."""
+    first_digits, first_unit, second_digits, second_unit = parts
+    boxes = first_digits + [first_unit] + second_digits + [second_unit]
+    x0 = max(0, min(box[0] for box in boxes) - 1)
+    y0 = max(0, min(box[1] for box in boxes) - 1)
+    x1 = min(gray.shape[1], max(box[0] + box[2] for box in boxes) + 1)
+    y1 = min(gray.shape[0], max(box[1] + box[3] for box in boxes) + 1)
+    return gray[y0:y1, x0:x1]
+
+
 def _read_digit(gray, component, scale):
     x, y, width, height = component
     patch = gray[max(0, y - DIGIT_PAD):y + height + DIGIT_PAD, max(0, x - DIGIT_PAD):x + width + DIGIT_PAD]
@@ -183,6 +194,6 @@ def read_remaining_time(image, variant=None, tesseract_cmd=None):
     )
     raw = f"{first or '?'}{first_unit or '?'}.:{second or '?'}{second_unit or '?'}."
     if first is None or second is None or first_unit is None or second_unit is None:
-        minute_reading = _read_minute_timer(gray)
+        minute_reading = _read_minute_timer(_crop_timer_text(gray, parts))
         return minute_reading if minute_reading.value is not None else ParsedReading(raw, None, None, "digit_unverified")
     return parse_remaining_time(raw, 100.0)
