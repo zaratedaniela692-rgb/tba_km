@@ -10,6 +10,7 @@ from speedup_calibration import (
     CHECKPOINT_STEPS,
     CalibrationError,
     CONFIRMATION_PHRASE,
+    dialog_anchor_match_details,
     dialog_anchor_matches,
     run_scroll_calibration,
 )
@@ -234,3 +235,22 @@ def test_dialog_anchor_recognition_handles_small_offset_and_rejects_other_screen
 
     assert frame is not None, relative_path
     assert dialog_anchor_matches(frame) is expected
+
+
+def test_dialog_anchor_fallback_recognizes_run16_header_with_lower_rows_obscured():
+    frame = cv2.imread(str(ROOT / "tests/data/speedup_anchor_obscured_run16.png"))
+    regions = {
+        "speedup_dialog_anchor": {
+            "x": 8, "y": 8, "w": 120, "h": 24,
+            "template": "templates/speedup/speedup_dialog_anchor.png",
+        },
+    }
+
+    details = dialog_anchor_match_details(frame, regions, ROOT)
+
+    assert details["recognized"] is True
+    assert details["score"] == pytest.approx(0.8910787, abs=1e-5)
+    assert details["partial_score"] == pytest.approx(0.9863592, abs=1e-5)
+    assert details["location"] == {"x": 8, "y": 9}
+    assert details["partial_location"] == details["location"]
+    assert details["fallback_used"] is True

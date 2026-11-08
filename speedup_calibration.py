@@ -27,6 +27,7 @@ SETTLE_SECONDS = 0.35
 CONFIRMATION_PHRASE = "SCROLL SPEEDUP LIST"
 ANCHOR_THRESHOLD = 0.95
 ANCHOR_SEARCH_MARGIN = 8
+ANCHOR_PARTIAL_ROWS = 16
 CHANGE_THRESHOLD = 0.003
 
 
@@ -51,7 +52,7 @@ def load_speedup_regions(path=REGIONS_PATH):
         raise CalibrationError("regions.json does not contain speedup regions") from error
 
 
-def dialog_anchor_matches(frame, regions=None, root_dir=ROOT_DIR):
+def dialog_anchor_match_details(frame, regions=None, root_dir=ROOT_DIR):
     regions = regions or load_speedup_regions()
     region = regions["speedup_dialog_anchor"]
     template_path = root_dir / region["template"]
@@ -66,10 +67,46 @@ def dialog_anchor_matches(frame, regions=None, root_dir=ROOT_DIR):
     search_bottom = min(frame.shape[0], region_top + height + margin)
     search = frame[search_top:search_bottom, search_left:search_right]
     if search.shape[0] < template.shape[0] or search.shape[1] < template.shape[1]:
-        return False
+        return {
+            "recognized": False,
+            "score": None,
+            "threshold": ANCHOR_THRESHOLD,
+            "location": None,
+            "partial_score": None,
+            "partial_location": None,
+            "fallback_used": False,
+        }
     scores = cv2.matchTemplate(search, template, cv2.TM_CCOEFF_NORMED)
-    _, score, _, _ = cv2.minMaxLoc(scores)
-    return score >= ANCHOR_THRESHOLD
+    _, score, _, location = cv2.minMaxLoc(scores)
+    partial_template = template[:min(ANCHOR_PARTIAL_ROWS, template.shape[0]), :]
+    partial_scores = cv2.matchTemplate(search, partial_template, cv2.TM_CCOEFF_NORMED)
+    _, partial_score, _, partial_location = cv2.minMaxLoc(partial_scores)
+    full_location = (search_left + location[0], search_top + location[1])
+    partial_absolute_location = (
+        search_left + partial_location[0],
+        search_top + partial_location[1],
+    )
+    partial_match = (
+        partial_score >= ANCHOR_THRESHOLD
+        and partial_location == location
+    )
+    fallback_used = score < ANCHOR_THRESHOLD and partial_match
+    return {
+        "recognized": bool(score >= ANCHOR_THRESHOLD or fallback_used),
+        "score": float(score),
+        "threshold": ANCHOR_THRESHOLD,
+        "location": {"x": full_location[0], "y": full_location[1]},
+        "partial_score": float(partial_score),
+        "partial_location": {
+            "x": partial_absolute_location[0],
+            "y": partial_absolute_location[1],
+        },
+        "fallback_used": bool(fallback_used),
+    }
+
+
+def dialog_anchor_matches(frame, regions=None, root_dir=ROOT_DIR):
+    return dialog_anchor_match_details(frame, regions, root_dir)["recognized"]
 
 
 def _viewport_crop(frame, region):

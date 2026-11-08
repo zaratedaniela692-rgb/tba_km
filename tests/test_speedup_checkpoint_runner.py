@@ -106,7 +106,7 @@ class FakeGame:
             match_diagnostics=diagnostics,
         )
 
-    def run(self, dry_run=True, stop_fn=lambda: None, timer_reader_fn=None):
+    def run(self, dry_run=True, stop_fn=lambda: None, timer_reader_fn=None, anchor_fn=None):
         return run_checkpoint_speedups(
             self.capture,
             self.move,
@@ -118,7 +118,7 @@ class FakeGame:
             stop_fn=stop_fn,
             sleep_fn=lambda _: None,
             dry_run=dry_run,
-            anchor_fn=lambda _: True,
+            anchor_fn=anchor_fn or (lambda _: True),
             timer_reader_fn=lambda frame: self._read_timer(
                 frame, timer_reader_fn or (
                     lambda current: ParsedReading(str(current.timer), current.timer, 100.0, "ok")
@@ -155,6 +155,26 @@ def test_dry_run_scans_exact_checkpoints_and_never_clicks():
     assert [event["data"]["selected_duration_seconds"] for event in result.event_trace if event["event"] == "plan_choice"] == [HOUR]
     assert events[-1] == "run_finished"
     assert result.event_trace[-1]["data"]["reason"] == "dry_run"
+
+
+def test_failed_anchor_capture_records_match_diagnostics():
+    game = FakeGame()
+    match = {
+        "recognized": False,
+        "score": 0.891,
+        "threshold": 0.95,
+        "location": {"x": 900, "y": 251},
+        "partial_score": 0.90,
+        "partial_location": {"x": 900, "y": 251},
+        "fallback_used": False,
+    }
+
+    result = game.run(anchor_fn=lambda _: match)
+
+    assert result.status == BLOCKED
+    capture = next(event for event in result.event_trace if event["event"] == "capture")
+    assert capture["data"]["dialog_recognized"] is False
+    assert capture["data"]["dialog_match"] == match
 
 
 def test_execution_uses_the_single_initial_plan_after_timer_changes():

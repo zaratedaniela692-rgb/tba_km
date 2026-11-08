@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 
 from speedup import FINISHED, NOT_ENOUGH, PLANNED, UNCERTAIN
-from speedup_calibration import CHANGE_THRESHOLD, dialog_anchor_matches, load_speedup_regions
+from speedup_calibration import CHANGE_THRESHOLD, dialog_anchor_match_details, load_speedup_regions
 from speedup_inventory_reader import (
     CheckpointInventoryReading,
     combine_checkpoint_readings,
@@ -142,6 +142,24 @@ class _CheckpointRunner:
         self.started_at = time.perf_counter()
         self.event_trace = []
 
+    def dialog_match(self, frame):
+        match = (
+            self.anchor_fn(frame)
+            if self.anchor_fn is not None
+            else dialog_anchor_match_details(frame, self.regions)
+        )
+        if isinstance(match, dict):
+            return match
+        return {
+            "recognized": bool(match),
+            "score": None,
+            "threshold": None,
+            "location": None,
+            "partial_score": None,
+            "partial_location": None,
+            "fallback_used": False,
+        }
+
     def record(self, event, **data):
         self.event_trace.append({
             "elapsed_ms": round((time.perf_counter() - self.started_at) * 1000, 1),
@@ -177,10 +195,12 @@ class _CheckpointRunner:
             self.abort("capture_origin_changed")
         if self.origin is None:
             self.origin = tuple(origin)
-        dialog_recognized = self.anchor_fn(frame) if require_dialog else None
+        dialog_match = self.dialog_match(frame) if require_dialog else None
+        dialog_recognized = dialog_match["recognized"] if dialog_match is not None else None
         self.record(
             "capture", status="ok", frame_size=self.frame_size_fn(frame), origin=tuple(origin),
             dialog_required=require_dialog, dialog_recognized=bool(dialog_recognized),
+            dialog_match=dialog_match,
         )
         if require_dialog and not dialog_recognized:
             self.abort("speedup_dialog_not_recognized")
@@ -463,10 +483,11 @@ class _CheckpointRunner:
         self.sleep_fn(SETTLE_SECONDS)
         after = self.capture(require_dialog=False)
         timing["click_settle_capture_ms"] = round((time.perf_counter() - started) * 1000, 1)
-        dialog_recognized = self.anchor_fn(after)
+        dialog_match = self.dialog_match(after)
+        dialog_recognized = dialog_match["recognized"]
         self.record(
             "dialog_check", status="recognized" if dialog_recognized else "not_recognized",
-            phase="post_use", duration_seconds=duration, **use_context,
+            phase="post_use", duration_seconds=duration, dialog_match=dialog_match, **use_context,
         )
         if not dialog_recognized:
             self.stock[duration] -= 1
@@ -669,7 +690,7 @@ def run_checkpoint_speedups(
         button_template=button_template,
         regions=regions,
         dry_run=dry_run,
-        anchor_fn=anchor_fn or dialog_anchor_matches,
+        anchor_fn=anchor_fn,
         timer_reader_fn=timer_reader_fn or read_remaining_time,
         inventory_reader_fn=inventory_reader_fn or read_checkpoint_viewport,
         frame_size_fn=frame_size_fn or _frame_size,
