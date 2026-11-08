@@ -1,42 +1,42 @@
 {
-  "timestamp": "2026-11-08T14:56:21.284723+00:00",
+  "timestamp": "2026-11-08T15:27:21.886571+00:00",
   "mode": "execute",
   "status": "UNCERTAIN",
-  "reason": "timer_unreadable:minute_ocr_disagreement",
-  "remaining_seconds": 187200,
-  "final_remaining_seconds": 187200,
+  "reason": "dialog_closed_before_plan_end",
+  "remaining_seconds": 57300,
+  "final_remaining_seconds": 57300,
   "inventory": [
     {
       "duration_seconds": 900,
-      "quantity": 4878
+      "quantity": 4891
     },
     {
       "duration_seconds": 3600,
-      "quantity": 5268
+      "quantity": 5285
     },
     {
       "duration_seconds": 10800,
-      "quantity": 3419
+      "quantity": 3456
     },
     {
       "duration_seconds": 28800,
-      "quantity": 463
+      "quantity": 461
     },
     {
       "duration_seconds": 54000,
-      "quantity": 637
+      "quantity": 648
     },
     {
       "duration_seconds": 86400,
-      "quantity": 467
+      "quantity": 484
     },
     {
       "duration_seconds": 259200,
-      "quantity": 533
+      "quantity": 538
     },
     {
       "duration_seconds": 604800,
-      "quantity": 245
+      "quantity": 252
     },
     {
       "duration_seconds": 2592000,
@@ -47,7 +47,7 @@
     {
       "duration_label": "15m",
       "duration_seconds": 900,
-      "raw_ocr": "4878 / 4878",
+      "raw_ocr": "4891 / 4891",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -55,7 +55,7 @@
     {
       "duration_label": "1h",
       "duration_seconds": 3600,
-      "raw_ocr": "5268 / 5268",
+      "raw_ocr": "5285 / 5285",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -63,7 +63,7 @@
     {
       "duration_label": "3h",
       "duration_seconds": 10800,
-      "raw_ocr": "3419 / 3419",
+      "raw_ocr": "3456 / 3456",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -71,7 +71,7 @@
     {
       "duration_label": "8h",
       "duration_seconds": 28800,
-      "raw_ocr": "463 / 463",
+      "raw_ocr": "461 / 461",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -79,7 +79,7 @@
     {
       "duration_label": "15h",
       "duration_seconds": 54000,
-      "raw_ocr": "637 / 637",
+      "raw_ocr": "648 / 648",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 11
@@ -87,7 +87,7 @@
     {
       "duration_label": "1d",
       "duration_seconds": 86400,
-      "raw_ocr": "467 / 467",
+      "raw_ocr": "484 / 484",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 11
@@ -95,7 +95,7 @@
     {
       "duration_label": "3d",
       "duration_seconds": 259200,
-      "raw_ocr": "533 / 533",
+      "raw_ocr": "538 / 538",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 11
@@ -103,7 +103,7 @@
     {
       "duration_label": "7d",
       "duration_seconds": 604800,
-      "raw_ocr": "245 / 245",
+      "raw_ocr": "252 / 252",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 16
@@ -122,22 +122,26 @@
     "uses": [
       [
         28800,
-        6
+        1
       ],
       [
         10800,
-        1
+        2
       ],
       [
         3600,
-        1
+        2
+      ],
+      [
+        900,
+        3
       ]
     ],
     "breached_floors": [],
     "shortfall_seconds": 0,
     "decisions": [
       {
-        "remaining_before_seconds": 187200,
+        "remaining_before_seconds": 57300,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -146,35 +150,35 @@
         "stock_before": [
           [
             900,
-            4878
+            4891
           ],
           [
             3600,
-            5268
+            5285
           ],
           [
             10800,
-            3419
+            3456
           ],
           [
             28800,
-            463
+            461
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -201,153 +205,13 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 1,
-        "quantity_before": 463,
-        "quantity_after": 462,
-        "remaining_after_seconds": 158400,
-        "floor_breached_after_selection": false
-      },
-      {
-        "remaining_before_seconds": 158400,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            462
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 2,
-        "quantity_before": 462,
-        "quantity_after": 461,
-        "remaining_after_seconds": 129600,
-        "floor_breached_after_selection": false
-      },
-      {
-        "remaining_before_seconds": 129600,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            461
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 3,
         "quantity_before": 461,
         "quantity_after": 460,
-        "remaining_after_seconds": 100800,
+        "remaining_after_seconds": 28500,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 100800,
+        "remaining_before_seconds": 28500,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -356,15 +220,15 @@
         "stock_before": [
           [
             900,
-            4878
+            4891
           ],
           [
             3600,
-            5268
+            5285
           ],
           [
             10800,
-            3419
+            3456
           ],
           [
             28800,
@@ -372,229 +236,19 @@
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 4,
-        "quantity_before": 460,
-        "quantity_after": 459,
-        "remaining_after_seconds": 72000,
-        "floor_breached_after_selection": false
-      },
-      {
-        "remaining_before_seconds": 72000,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            459
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 5,
-        "quantity_before": 459,
-        "quantity_after": 458,
-        "remaining_after_seconds": 43200,
-        "floor_breached_after_selection": false
-      },
-      {
-        "remaining_before_seconds": 43200,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            458
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 6,
-        "quantity_before": 458,
-        "quantity_after": 457,
-        "remaining_after_seconds": 14400,
-        "floor_breached_after_selection": false
-      },
-      {
-        "remaining_before_seconds": 14400,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            457
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
+            252
           ],
           [
             2592000,
@@ -619,14 +273,14 @@
         "selected_duration_seconds": 10800,
         "floor_seconds": 10,
         "breaks_floor": false,
-        "step": 7,
-        "quantity_before": 3419,
-        "quantity_after": 3418,
-        "remaining_after_seconds": 3600,
+        "step": 2,
+        "quantity_before": 3456,
+        "quantity_after": 3455,
+        "remaining_after_seconds": 17700,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 3600,
+        "remaining_before_seconds": 17700,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -635,35 +289,104 @@
         "stock_before": [
           [
             900,
-            4878
+            4891
           ],
           [
             3600,
-            5268
+            5285
           ],
           [
             10800,
-            3418
+            3455
           ],
           [
             28800,
-            457
+            460
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800
+        ],
+        "selected_duration_seconds": 10800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 3,
+        "quantity_before": 3455,
+        "quantity_after": 3454,
+        "remaining_after_seconds": 6900,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 6900,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5285
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            460
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
           ],
           [
             2592000,
@@ -687,10 +410,284 @@
         "selected_duration_seconds": 3600,
         "floor_seconds": 10,
         "breaks_floor": false,
+        "step": 4,
+        "quantity_before": 5285,
+        "quantity_after": 5284,
+        "remaining_after_seconds": 3300,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 3300,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5284
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            460
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "any_fit",
+        "candidates_seconds": [
+          900
+        ],
+        "selected_duration_seconds": 900,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 5,
+        "quantity_before": 4891,
+        "quantity_after": 4890,
+        "remaining_after_seconds": 2400,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 2400,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4890
+          ],
+          [
+            3600,
+            5284
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            460
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "any_fit",
+        "candidates_seconds": [
+          900
+        ],
+        "selected_duration_seconds": 900,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 6,
+        "quantity_before": 4890,
+        "quantity_after": 4889,
+        "remaining_after_seconds": 1500,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 1500,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4889
+          ],
+          [
+            3600,
+            5284
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            460
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "any_fit",
+        "candidates_seconds": [
+          900
+        ],
+        "selected_duration_seconds": 900,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 7,
+        "quantity_before": 4889,
+        "quantity_after": 4888,
+        "remaining_after_seconds": 600,
+        "floor_breached_after_selection": false
+      },
+      {
+        "remaining_before_seconds": 600,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4888
+          ],
+          [
+            3600,
+            5284
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            460
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_overshoot",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 3600,
+        "floor_seconds": 10,
+        "breaks_floor": false,
         "step": 8,
-        "quantity_before": 5268,
-        "quantity_after": 5267,
-        "remaining_after_seconds": 0,
+        "quantity_before": 5284,
+        "quantity_after": 5283,
+        "remaining_after_seconds": -3000,
         "floor_breached_after_selection": false
       }
     ]
@@ -698,15 +695,15 @@
   "used": [
     {
       "duration_seconds": 28800,
-      "quantity": 6
+      "quantity": 1
     },
     {
       "duration_seconds": 10800,
-      "quantity": 1
+      "quantity": 2
     },
     {
       "duration_seconds": 3600,
-      "quantity": 1
+      "quantity": 2
     }
   ],
   "shortfall_seconds": 0,
@@ -724,86 +721,42 @@
       "plan_generation": 1,
       "plan_step": 1,
       "plan_total": 8,
-      "navigation_ms": 9336.4,
-      "button_match_ms": 63.3,
-      "click_settle_capture_ms": 569.7
+      "navigation_ms": 8161.8,
+      "button_match_ms": 26.7,
+      "click_settle_capture_ms": 517.2
     },
     {
-      "duration_seconds": 28800,
+      "duration_seconds": 10800,
       "checkpoint": 3,
       "use_number": 2,
       "plan_generation": 1,
       "plan_step": 2,
       "plan_total": 8,
       "navigation_ms": 0.0,
-      "button_match_ms": 82.8,
-      "click_settle_capture_ms": 601.3
+      "button_match_ms": 36.7,
+      "click_settle_capture_ms": 498.5
     },
     {
-      "duration_seconds": 28800,
+      "duration_seconds": 10800,
       "checkpoint": 3,
       "use_number": 3,
       "plan_generation": 1,
       "plan_step": 3,
       "plan_total": 8,
       "navigation_ms": 0.0,
-      "button_match_ms": 86.4,
-      "click_settle_capture_ms": 568.1
+      "button_match_ms": 29.4,
+      "click_settle_capture_ms": 517.4
     },
     {
-      "duration_seconds": 28800,
+      "duration_seconds": 3600,
       "checkpoint": 3,
       "use_number": 4,
       "plan_generation": 1,
       "plan_step": 4,
       "plan_total": 8,
       "navigation_ms": 0.0,
-      "button_match_ms": 69.9,
-      "click_settle_capture_ms": 548.1
-    },
-    {
-      "duration_seconds": 28800,
-      "checkpoint": 3,
-      "use_number": 5,
-      "plan_generation": 1,
-      "plan_step": 5,
-      "plan_total": 8,
-      "navigation_ms": 0.0,
-      "button_match_ms": 66.7,
-      "click_settle_capture_ms": 547.8
-    },
-    {
-      "duration_seconds": 28800,
-      "checkpoint": 3,
-      "use_number": 6,
-      "plan_generation": 1,
-      "plan_step": 6,
-      "plan_total": 8,
-      "navigation_ms": 0.0,
-      "button_match_ms": 84.2,
-      "click_settle_capture_ms": 554.1
-    },
-    {
-      "duration_seconds": 10800,
-      "checkpoint": 3,
-      "use_number": 7,
-      "plan_generation": 1,
-      "plan_step": 7,
-      "plan_total": 8,
-      "navigation_ms": 0.0,
-      "button_match_ms": 92.4,
-      "click_settle_capture_ms": 552.8
-    },
-    {
-      "duration_seconds": 3600,
-      "checkpoint": 3,
-      "use_number": 8,
-      "plan_generation": 1,
-      "plan_step": 8,
-      "plan_total": 8,
-      "navigation_ms": 0.0,
-      "button_match_ms": 94.0,
-      "click_settle_capture_ms": 569.6
+      "button_match_ms": 34.6,
+      "click_settle_capture_ms": 517.8
     }
   ],
   "final_timer_read_ms": null,
@@ -891,15 +844,15 @@
             "x": 0,
             "y": 0
           },
-          "confidence": 0.999999463558197
+          "confidence": 0.9999990463256836
         }
       ],
       "quantities": [
         {
           "duration_label": "15m",
           "duration_seconds": 900,
-          "raw_ocr": "4878 / 4878",
-          "quantity": 4878,
+          "raw_ocr": "4891 / 4891",
+          "quantity": 4891,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -912,8 +865,8 @@
         {
           "duration_label": "1h",
           "duration_seconds": 3600,
-          "raw_ocr": "5268 / 5268",
-          "quantity": 5268,
+          "raw_ocr": "5285 / 5285",
+          "quantity": 5285,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -926,8 +879,8 @@
         {
           "duration_label": "3h",
           "duration_seconds": 10800,
-          "raw_ocr": "3419 / 3419",
-          "quantity": 3419,
+          "raw_ocr": "3456 / 3456",
+          "quantity": 3456,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -940,8 +893,8 @@
         {
           "duration_label": "8h",
           "duration_seconds": 28800,
-          "raw_ocr": "463 / 463",
-          "quantity": 463,
+          "raw_ocr": "461 / 461",
+          "quantity": 461,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1023,8 +976,8 @@
         {
           "duration_label": "15h",
           "duration_seconds": 54000,
-          "raw_ocr": "637 / 637",
-          "quantity": 637,
+          "raw_ocr": "648 / 648",
+          "quantity": 648,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1037,8 +990,8 @@
         {
           "duration_label": "1d",
           "duration_seconds": 86400,
-          "raw_ocr": "467 / 467",
-          "quantity": 467,
+          "raw_ocr": "484 / 484",
+          "quantity": 484,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1051,8 +1004,8 @@
         {
           "duration_label": "3d",
           "duration_seconds": 259200,
-          "raw_ocr": "533 / 533",
-          "quantity": 533,
+          "raw_ocr": "538 / 538",
+          "quantity": 538,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1107,7 +1060,7 @@
             "x": 0,
             "y": 0
           },
-          "confidence": 1.0
+          "confidence": 0.9999998211860657
         },
         {
           "duration_label": "30d",
@@ -1134,8 +1087,8 @@
         {
           "duration_label": "3d",
           "duration_seconds": 259200,
-          "raw_ocr": "533 / 533",
-          "quantity": 533,
+          "raw_ocr": "538 / 538",
+          "quantity": 538,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1148,8 +1101,8 @@
         {
           "duration_label": "7d",
           "duration_seconds": 604800,
-          "raw_ocr": "245 / 245",
-          "quantity": 245,
+          "raw_ocr": "252 / 252",
+          "quantity": 252,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1198,7 +1151,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 0.9999998211860657
+          "confidence": 1.0
         },
         {
           "duration_label": "1h",
@@ -1286,183 +1239,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 0.9999998211860657
-        },
-        {
-          "duration_label": "1h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 140,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 150,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
           "confidence": 1.0
-        },
-        {
-          "duration_label": "3h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 250,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 260,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "8h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 360,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 370,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678515195846558
-        }
-      ],
-      "quantities": []
-    },
-    {
-      "scroll_count": 3,
-      "status": "complete",
-      "reason": "",
-      "matches": [
-        {
-          "duration_label": "15m",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 30,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 40,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9999998211860657
-        },
-        {
-          "duration_label": "1h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 140,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 150,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "3h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 250,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 260,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "8h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 360,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 370,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678511619567871
-        }
-      ],
-      "quantities": []
-    },
-    {
-      "scroll_count": 3,
-      "status": "complete",
-      "reason": "",
-      "matches": [
-        {
-          "duration_label": "15m",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 30,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 40,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9999998211860657
         },
         {
           "duration_label": "1h",
@@ -1550,271 +1327,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 0.9999998211860657
-        },
-        {
-          "duration_label": "1h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 140,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 150,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
           "confidence": 1.0
-        },
-        {
-          "duration_label": "3h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 250,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 260,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "8h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 360,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 370,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678515195846558
-        }
-      ],
-      "quantities": []
-    },
-    {
-      "scroll_count": 3,
-      "status": "complete",
-      "reason": "",
-      "matches": [
-        {
-          "duration_label": "15m",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 30,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 40,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9999998211860657
-        },
-        {
-          "duration_label": "1h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 140,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 150,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "3h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 250,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 260,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "8h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 360,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 370,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678515195846558
-        }
-      ],
-      "quantities": []
-    },
-    {
-      "scroll_count": 3,
-      "status": "complete",
-      "reason": "",
-      "matches": [
-        {
-          "duration_label": "15m",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 30,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 40,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9999998211860657
-        },
-        {
-          "duration_label": "1h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 140,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 150,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "3h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 250,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 260,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "8h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 360,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 370,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678518772125244
-        }
-      ],
-      "quantities": []
-    },
-    {
-      "scroll_count": 3,
-      "status": "complete",
-      "reason": "",
-      "matches": [
-        {
-          "duration_label": "15m",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 30,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 40,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9999998211860657
         },
         {
           "duration_label": "1h",
@@ -1855,6 +1368,182 @@
             "y": 10
           },
           "confidence": 0.9678515195846558
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678522348403931
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678511619567871
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
         },
         {
           "duration_label": "8h",
@@ -1895,7 +1584,7 @@
       }
     },
     {
-      "elapsed_ms": 634.9,
+      "elapsed_ms": 312.5,
       "event": "capture",
       "step": 0,
       "data": {
@@ -1928,19 +1617,19 @@
       }
     },
     {
-      "elapsed_ms": 7922.0,
+      "elapsed_ms": 6937.0,
       "event": "timer_read",
       "step": 0,
       "data": {
         "phase": "initial",
         "status": "ok",
-        "raw": "2d.:6g.",
-        "value_seconds": 194400,
+        "raw": "15g56m",
+        "value_seconds": 57360,
         "confidence": 100.0
       }
     },
     {
-      "elapsed_ms": 7922.3,
+      "elapsed_ms": 6937.2,
       "event": "emergency_stop_check",
       "step": 0,
       "data": {
@@ -1948,7 +1637,7 @@
       }
     },
     {
-      "elapsed_ms": 8029.8,
+      "elapsed_ms": 7037.8,
       "event": "pointer_move",
       "step": 0,
       "data": {
@@ -1960,7 +1649,7 @@
       }
     },
     {
-      "elapsed_ms": 8030.2,
+      "elapsed_ms": 7038.2,
       "event": "emergency_stop_check",
       "step": 0,
       "data": {
@@ -1968,7 +1657,7 @@
       }
     },
     {
-      "elapsed_ms": 8132.0,
+      "elapsed_ms": 7139.5,
       "event": "scroll",
       "step": 0,
       "data": {
@@ -1978,7 +1667,7 @@
       }
     },
     {
-      "elapsed_ms": 8573.6,
+      "elapsed_ms": 7557.6,
       "event": "capture",
       "step": 0,
       "data": {
@@ -1995,23 +1684,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.8910573124885559,
+          "score": 0.9972743988037109,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9863606095314026,
+          "partial_score": 0.9995942115783691,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": true
+          "fallback_used": false
         }
       }
     },
     {
-      "elapsed_ms": 8601.1,
+      "elapsed_ms": 7578.1,
       "event": "viewport_check",
       "step": 1,
       "data": {
@@ -2023,7 +1712,7 @@
       }
     },
     {
-      "elapsed_ms": 8603.2,
+      "elapsed_ms": 7580.1,
       "event": "emergency_stop_check",
       "step": 1,
       "data": {
@@ -2031,7 +1720,7 @@
       }
     },
     {
-      "elapsed_ms": 8704.0,
+      "elapsed_ms": 7680.6,
       "event": "pointer_move",
       "step": 1,
       "data": {
@@ -2043,7 +1732,7 @@
       }
     },
     {
-      "elapsed_ms": 8704.3,
+      "elapsed_ms": 7680.8,
       "event": "emergency_stop_check",
       "step": 1,
       "data": {
@@ -2051,7 +1740,7 @@
       }
     },
     {
-      "elapsed_ms": 8806.3,
+      "elapsed_ms": 7781.6,
       "event": "scroll",
       "step": 1,
       "data": {
@@ -2061,7 +1750,7 @@
       }
     },
     {
-      "elapsed_ms": 9251.9,
+      "elapsed_ms": 8194.9,
       "event": "capture",
       "step": 1,
       "data": {
@@ -2078,23 +1767,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.8910573124885559,
+          "score": 0.9972743988037109,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9863606095314026,
+          "partial_score": 0.9995942115783691,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": true
+          "fallback_used": false
         }
       }
     },
     {
-      "elapsed_ms": 9281.7,
+      "elapsed_ms": 8211.4,
       "event": "viewport_check",
       "step": 2,
       "data": {
@@ -2106,7 +1795,7 @@
       }
     },
     {
-      "elapsed_ms": 9282.9,
+      "elapsed_ms": 8212.2,
       "event": "emergency_stop_check",
       "step": 2,
       "data": {
@@ -2114,7 +1803,7 @@
       }
     },
     {
-      "elapsed_ms": 9384.3,
+      "elapsed_ms": 8312.9,
       "event": "pointer_move",
       "step": 2,
       "data": {
@@ -2126,7 +1815,7 @@
       }
     },
     {
-      "elapsed_ms": 9384.5,
+      "elapsed_ms": 8313.1,
       "event": "emergency_stop_check",
       "step": 2,
       "data": {
@@ -2134,7 +1823,7 @@
       }
     },
     {
-      "elapsed_ms": 9486.1,
+      "elapsed_ms": 8413.9,
       "event": "scroll",
       "step": 2,
       "data": {
@@ -2144,7 +1833,7 @@
       }
     },
     {
-      "elapsed_ms": 10492.3,
+      "elapsed_ms": 9051.6,
       "event": "capture",
       "step": 2,
       "data": {
@@ -2161,35 +1850,35 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.8910573124885559,
+          "score": 0.9972743988037109,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9863606095314026,
+          "partial_score": 0.9995942115783691,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": true
+          "fallback_used": false
         }
       }
     },
     {
-      "elapsed_ms": 10559.1,
+      "elapsed_ms": 9070.1,
       "event": "viewport_check",
       "step": 3,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6468950603620017,
+        "change_score": 0.6469035740434879,
         "threshold": 0.003,
         "from_step": 2
       }
     },
     {
-      "elapsed_ms": 20573.3,
+      "elapsed_ms": 12985.9,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -2200,8 +1889,8 @@
           {
             "duration_label": "15m",
             "duration_seconds": 900,
-            "raw_quantity": "4878 / 4878",
-            "quantity": 4878,
+            "raw_quantity": "4891 / 4891",
+            "quantity": 4891,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2218,8 +1907,8 @@
           {
             "duration_label": "1h",
             "duration_seconds": 3600,
-            "raw_quantity": "5268 / 5268",
-            "quantity": 5268,
+            "raw_quantity": "5285 / 5285",
+            "quantity": 5285,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2236,8 +1925,8 @@
           {
             "duration_label": "3h",
             "duration_seconds": 10800,
-            "raw_quantity": "3419 / 3419",
-            "quantity": 3419,
+            "raw_quantity": "3456 / 3456",
+            "quantity": 3456,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2254,8 +1943,8 @@
           {
             "duration_label": "8h",
             "duration_seconds": 28800,
-            "raw_quantity": "463 / 463",
-            "quantity": 463,
+            "raw_quantity": "461 / 461",
+            "quantity": 461,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2349,15 +2038,15 @@
               "x": 0,
               "y": 0
             },
-            "confidence": 0.999999463558197
+            "confidence": 0.9999990463256836
           }
         ],
         "quantities": [
           {
             "duration_label": "15m",
             "duration_seconds": 900,
-            "raw_ocr": "4878 / 4878",
-            "quantity": 4878,
+            "raw_ocr": "4891 / 4891",
+            "quantity": 4891,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2370,8 +2059,8 @@
           {
             "duration_label": "1h",
             "duration_seconds": 3600,
-            "raw_ocr": "5268 / 5268",
-            "quantity": 5268,
+            "raw_ocr": "5285 / 5285",
+            "quantity": 5285,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2384,8 +2073,8 @@
           {
             "duration_label": "3h",
             "duration_seconds": 10800,
-            "raw_ocr": "3419 / 3419",
-            "quantity": 3419,
+            "raw_ocr": "3456 / 3456",
+            "quantity": 3456,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2398,8 +2087,8 @@
           {
             "duration_label": "8h",
             "duration_seconds": 28800,
-            "raw_ocr": "463 / 463",
-            "quantity": 463,
+            "raw_ocr": "461 / 461",
+            "quantity": 461,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2413,7 +2102,7 @@
       }
     },
     {
-      "elapsed_ms": 20575.1,
+      "elapsed_ms": 12987.1,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -2421,7 +2110,7 @@
       }
     },
     {
-      "elapsed_ms": 20676.0,
+      "elapsed_ms": 13088.3,
       "event": "pointer_move",
       "step": 3,
       "data": {
@@ -2433,7 +2122,7 @@
       }
     },
     {
-      "elapsed_ms": 20676.4,
+      "elapsed_ms": 13088.6,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -2441,7 +2130,7 @@
       }
     },
     {
-      "elapsed_ms": 20778.1,
+      "elapsed_ms": 13189.3,
       "event": "scroll",
       "step": 3,
       "data": {
@@ -2451,7 +2140,7 @@
       }
     },
     {
-      "elapsed_ms": 21231.9,
+      "elapsed_ms": 13624.9,
       "event": "capture",
       "step": 3,
       "data": {
@@ -2484,19 +2173,19 @@
       }
     },
     {
-      "elapsed_ms": 21285.7,
+      "elapsed_ms": 13642.5,
       "event": "viewport_check",
       "step": 4,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6467843825026818,
+        "change_score": 0.6467801256619388,
         "threshold": 0.003,
         "from_step": 3
       }
     },
     {
-      "elapsed_ms": 21292.6,
+      "elapsed_ms": 13643.3,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -2504,7 +2193,7 @@
       }
     },
     {
-      "elapsed_ms": 21395.5,
+      "elapsed_ms": 13743.7,
       "event": "pointer_move",
       "step": 4,
       "data": {
@@ -2516,7 +2205,7 @@
       }
     },
     {
-      "elapsed_ms": 21395.9,
+      "elapsed_ms": 13743.9,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -2524,7 +2213,7 @@
       }
     },
     {
-      "elapsed_ms": 21496.7,
+      "elapsed_ms": 13844.7,
       "event": "scroll",
       "step": 4,
       "data": {
@@ -2534,7 +2223,7 @@
       }
     },
     {
-      "elapsed_ms": 21964.2,
+      "elapsed_ms": 14255.6,
       "event": "capture",
       "step": 4,
       "data": {
@@ -2567,7 +2256,7 @@
       }
     },
     {
-      "elapsed_ms": 22040.0,
+      "elapsed_ms": 14269.3,
       "event": "viewport_check",
       "step": 5,
       "data": {
@@ -2579,7 +2268,7 @@
       }
     },
     {
-      "elapsed_ms": 22043.1,
+      "elapsed_ms": 14270.1,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -2587,7 +2276,7 @@
       }
     },
     {
-      "elapsed_ms": 22143.9,
+      "elapsed_ms": 14371.1,
       "event": "pointer_move",
       "step": 5,
       "data": {
@@ -2599,7 +2288,7 @@
       }
     },
     {
-      "elapsed_ms": 22144.2,
+      "elapsed_ms": 14371.2,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -2607,7 +2296,7 @@
       }
     },
     {
-      "elapsed_ms": 22246.6,
+      "elapsed_ms": 14472.1,
       "event": "scroll",
       "step": 5,
       "data": {
@@ -2617,7 +2306,7 @@
       }
     },
     {
-      "elapsed_ms": 22698.6,
+      "elapsed_ms": 14894.3,
       "event": "capture",
       "step": 5,
       "data": {
@@ -2650,7 +2339,7 @@
       }
     },
     {
-      "elapsed_ms": 22744.7,
+      "elapsed_ms": 14917.2,
       "event": "viewport_check",
       "step": 6,
       "data": {
@@ -2662,7 +2351,7 @@
       }
     },
     {
-      "elapsed_ms": 22746.9,
+      "elapsed_ms": 14918.0,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -2670,7 +2359,7 @@
       }
     },
     {
-      "elapsed_ms": 22848.4,
+      "elapsed_ms": 15018.7,
       "event": "pointer_move",
       "step": 6,
       "data": {
@@ -2682,7 +2371,7 @@
       }
     },
     {
-      "elapsed_ms": 22848.5,
+      "elapsed_ms": 15019.2,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -2690,7 +2379,7 @@
       }
     },
     {
-      "elapsed_ms": 22952.2,
+      "elapsed_ms": 15120.0,
       "event": "scroll",
       "step": 6,
       "data": {
@@ -2700,7 +2389,7 @@
       }
     },
     {
-      "elapsed_ms": 23405.1,
+      "elapsed_ms": 15524.8,
       "event": "capture",
       "step": 6,
       "data": {
@@ -2733,19 +2422,19 @@
       }
     },
     {
-      "elapsed_ms": 23445.2,
+      "elapsed_ms": 15543.8,
       "event": "viewport_check",
       "step": 7,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6356399734373137,
+        "change_score": 0.6356442302780568,
         "threshold": 0.003,
         "from_step": 6
       }
     },
     {
-      "elapsed_ms": 23447.5,
+      "elapsed_ms": 15544.8,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -2753,7 +2442,7 @@
       }
     },
     {
-      "elapsed_ms": 23548.6,
+      "elapsed_ms": 15645.8,
       "event": "pointer_move",
       "step": 7,
       "data": {
@@ -2765,7 +2454,7 @@
       }
     },
     {
-      "elapsed_ms": 23549.5,
+      "elapsed_ms": 15646.0,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -2773,7 +2462,7 @@
       }
     },
     {
-      "elapsed_ms": 23654.5,
+      "elapsed_ms": 15747.0,
       "event": "scroll",
       "step": 7,
       "data": {
@@ -2783,7 +2472,7 @@
       }
     },
     {
-      "elapsed_ms": 24083.5,
+      "elapsed_ms": 16154.6,
       "event": "capture",
       "step": 7,
       "data": {
@@ -2816,19 +2505,19 @@
       }
     },
     {
-      "elapsed_ms": 24121.9,
+      "elapsed_ms": 16171.0,
       "event": "viewport_check",
       "step": 8,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6386793577278687,
+        "change_score": 0.6386921282500979,
         "threshold": 0.003,
         "from_step": 7
       }
     },
     {
-      "elapsed_ms": 24123.7,
+      "elapsed_ms": 16171.8,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -2836,7 +2525,7 @@
       }
     },
     {
-      "elapsed_ms": 24224.9,
+      "elapsed_ms": 16272.7,
       "event": "pointer_move",
       "step": 8,
       "data": {
@@ -2848,7 +2537,7 @@
       }
     },
     {
-      "elapsed_ms": 24225.6,
+      "elapsed_ms": 16272.9,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -2856,7 +2545,7 @@
       }
     },
     {
-      "elapsed_ms": 24329.7,
+      "elapsed_ms": 16374.2,
       "event": "scroll",
       "step": 8,
       "data": {
@@ -2866,7 +2555,7 @@
       }
     },
     {
-      "elapsed_ms": 24796.5,
+      "elapsed_ms": 16787.5,
       "event": "capture",
       "step": 8,
       "data": {
@@ -2899,7 +2588,7 @@
       }
     },
     {
-      "elapsed_ms": 24849.5,
+      "elapsed_ms": 16805.3,
       "event": "viewport_check",
       "step": 9,
       "data": {
@@ -2911,7 +2600,7 @@
       }
     },
     {
-      "elapsed_ms": 24851.2,
+      "elapsed_ms": 16806.3,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -2919,7 +2608,7 @@
       }
     },
     {
-      "elapsed_ms": 24952.8,
+      "elapsed_ms": 16906.6,
       "event": "pointer_move",
       "step": 9,
       "data": {
@@ -2931,7 +2620,7 @@
       }
     },
     {
-      "elapsed_ms": 24952.9,
+      "elapsed_ms": 16906.8,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -2939,7 +2628,7 @@
       }
     },
     {
-      "elapsed_ms": 25055.0,
+      "elapsed_ms": 17007.6,
       "event": "scroll",
       "step": 9,
       "data": {
@@ -2949,7 +2638,7 @@
       }
     },
     {
-      "elapsed_ms": 25502.9,
+      "elapsed_ms": 17418.9,
       "event": "capture",
       "step": 9,
       "data": {
@@ -2982,19 +2671,19 @@
       }
     },
     {
-      "elapsed_ms": 25536.8,
+      "elapsed_ms": 17436.5,
       "event": "viewport_check",
       "step": 10,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.63663181733045,
+        "change_score": 0.6366360741711931,
         "threshold": 0.003,
         "from_step": 9
       }
     },
     {
-      "elapsed_ms": 25538.4,
+      "elapsed_ms": 17437.4,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -3002,7 +2691,7 @@
       }
     },
     {
-      "elapsed_ms": 25639.4,
+      "elapsed_ms": 17537.7,
       "event": "pointer_move",
       "step": 10,
       "data": {
@@ -3014,7 +2703,7 @@
       }
     },
     {
-      "elapsed_ms": 25639.7,
+      "elapsed_ms": 17537.9,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -3022,7 +2711,7 @@
       }
     },
     {
-      "elapsed_ms": 25740.4,
+      "elapsed_ms": 17638.4,
       "event": "scroll",
       "step": 10,
       "data": {
@@ -3032,7 +2721,7 @@
       }
     },
     {
-      "elapsed_ms": 26761.4,
+      "elapsed_ms": 18244.8,
       "event": "capture",
       "step": 10,
       "data": {
@@ -3065,7 +2754,7 @@
       }
     },
     {
-      "elapsed_ms": 26816.2,
+      "elapsed_ms": 18262.3,
       "event": "viewport_check",
       "step": 11,
       "data": {
@@ -3077,7 +2766,7 @@
       }
     },
     {
-      "elapsed_ms": 34195.6,
+      "elapsed_ms": 20906.0,
       "event": "checkpoint_read",
       "step": 11,
       "data": {
@@ -3088,8 +2777,8 @@
           {
             "duration_label": "15h",
             "duration_seconds": 54000,
-            "raw_quantity": "637 / 637",
-            "quantity": 637,
+            "raw_quantity": "648 / 648",
+            "quantity": 648,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3106,8 +2795,8 @@
           {
             "duration_label": "1d",
             "duration_seconds": 86400,
-            "raw_quantity": "467 / 467",
-            "quantity": 467,
+            "raw_quantity": "484 / 484",
+            "quantity": 484,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3124,8 +2813,8 @@
           {
             "duration_label": "3d",
             "duration_seconds": 259200,
-            "raw_quantity": "533 / 533",
-            "quantity": 533,
+            "raw_quantity": "538 / 538",
+            "quantity": 538,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3206,8 +2895,8 @@
           {
             "duration_label": "15h",
             "duration_seconds": 54000,
-            "raw_ocr": "637 / 637",
-            "quantity": 637,
+            "raw_ocr": "648 / 648",
+            "quantity": 648,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3220,8 +2909,8 @@
           {
             "duration_label": "1d",
             "duration_seconds": 86400,
-            "raw_ocr": "467 / 467",
-            "quantity": 467,
+            "raw_ocr": "484 / 484",
+            "quantity": 484,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3234,8 +2923,8 @@
           {
             "duration_label": "3d",
             "duration_seconds": 259200,
-            "raw_ocr": "533 / 533",
-            "quantity": 533,
+            "raw_ocr": "538 / 538",
+            "quantity": 538,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3249,7 +2938,7 @@
       }
     },
     {
-      "elapsed_ms": 34197.1,
+      "elapsed_ms": 20906.9,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -3257,7 +2946,7 @@
       }
     },
     {
-      "elapsed_ms": 34298.0,
+      "elapsed_ms": 21007.9,
       "event": "pointer_move",
       "step": 11,
       "data": {
@@ -3269,7 +2958,7 @@
       }
     },
     {
-      "elapsed_ms": 34298.2,
+      "elapsed_ms": 21008.0,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -3277,7 +2966,7 @@
       }
     },
     {
-      "elapsed_ms": 34399.6,
+      "elapsed_ms": 21109.1,
       "event": "scroll",
       "step": 11,
       "data": {
@@ -3287,7 +2976,7 @@
       }
     },
     {
-      "elapsed_ms": 34875.6,
+      "elapsed_ms": 21525.0,
       "event": "capture",
       "step": 11,
       "data": {
@@ -3320,7 +3009,7 @@
       }
     },
     {
-      "elapsed_ms": 34905.9,
+      "elapsed_ms": 21547.6,
       "event": "viewport_check",
       "step": 12,
       "data": {
@@ -3332,7 +3021,7 @@
       }
     },
     {
-      "elapsed_ms": 34907.4,
+      "elapsed_ms": 21549.5,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -3340,7 +3029,7 @@
       }
     },
     {
-      "elapsed_ms": 35009.0,
+      "elapsed_ms": 21650.1,
       "event": "pointer_move",
       "step": 12,
       "data": {
@@ -3352,7 +3041,7 @@
       }
     },
     {
-      "elapsed_ms": 35009.6,
+      "elapsed_ms": 21650.3,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -3360,7 +3049,7 @@
       }
     },
     {
-      "elapsed_ms": 35112.8,
+      "elapsed_ms": 21750.7,
       "event": "scroll",
       "step": 12,
       "data": {
@@ -3370,7 +3059,7 @@
       }
     },
     {
-      "elapsed_ms": 35563.2,
+      "elapsed_ms": 22151.4,
       "event": "capture",
       "step": 12,
       "data": {
@@ -3403,7 +3092,7 @@
       }
     },
     {
-      "elapsed_ms": 35602.0,
+      "elapsed_ms": 22166.1,
       "event": "viewport_check",
       "step": 13,
       "data": {
@@ -3415,7 +3104,7 @@
       }
     },
     {
-      "elapsed_ms": 35603.9,
+      "elapsed_ms": 22167.2,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -3423,7 +3112,7 @@
       }
     },
     {
-      "elapsed_ms": 35706.2,
+      "elapsed_ms": 22268.0,
       "event": "pointer_move",
       "step": 13,
       "data": {
@@ -3435,7 +3124,7 @@
       }
     },
     {
-      "elapsed_ms": 35712.2,
+      "elapsed_ms": 22268.1,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -3443,7 +3132,7 @@
       }
     },
     {
-      "elapsed_ms": 35817.8,
+      "elapsed_ms": 22368.7,
       "event": "scroll",
       "step": 13,
       "data": {
@@ -3453,7 +3142,7 @@
       }
     },
     {
-      "elapsed_ms": 36257.0,
+      "elapsed_ms": 22789.6,
       "event": "capture",
       "step": 13,
       "data": {
@@ -3486,19 +3175,19 @@
       }
     },
     {
-      "elapsed_ms": 36294.1,
+      "elapsed_ms": 22808.9,
       "event": "viewport_check",
       "step": 14,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6068381889696742,
+        "change_score": 0.6068254184474451,
         "threshold": 0.003,
         "from_step": 13
       }
     },
     {
-      "elapsed_ms": 36295.3,
+      "elapsed_ms": 22809.9,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -3506,7 +3195,7 @@
       }
     },
     {
-      "elapsed_ms": 36399.0,
+      "elapsed_ms": 22910.9,
       "event": "pointer_move",
       "step": 14,
       "data": {
@@ -3518,7 +3207,7 @@
       }
     },
     {
-      "elapsed_ms": 36399.3,
+      "elapsed_ms": 22911.2,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -3526,7 +3215,7 @@
       }
     },
     {
-      "elapsed_ms": 36500.6,
+      "elapsed_ms": 23012.6,
       "event": "scroll",
       "step": 14,
       "data": {
@@ -3536,7 +3225,7 @@
       }
     },
     {
-      "elapsed_ms": 37060.7,
+      "elapsed_ms": 23420.5,
       "event": "capture",
       "step": 14,
       "data": {
@@ -3569,7 +3258,7 @@
       }
     },
     {
-      "elapsed_ms": 37148.2,
+      "elapsed_ms": 23435.5,
       "event": "viewport_check",
       "step": 15,
       "data": {
@@ -3581,7 +3270,7 @@
       }
     },
     {
-      "elapsed_ms": 37150.0,
+      "elapsed_ms": 23436.5,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -3589,7 +3278,7 @@
       }
     },
     {
-      "elapsed_ms": 37254.8,
+      "elapsed_ms": 23536.9,
       "event": "pointer_move",
       "step": 15,
       "data": {
@@ -3601,7 +3290,7 @@
       }
     },
     {
-      "elapsed_ms": 37255.1,
+      "elapsed_ms": 23537.1,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -3609,7 +3298,7 @@
       }
     },
     {
-      "elapsed_ms": 37356.6,
+      "elapsed_ms": 23638.5,
       "event": "scroll",
       "step": 15,
       "data": {
@@ -3619,7 +3308,7 @@
       }
     },
     {
-      "elapsed_ms": 38326.0,
+      "elapsed_ms": 24247.8,
       "event": "capture",
       "step": 15,
       "data": {
@@ -3652,7 +3341,7 @@
       }
     },
     {
-      "elapsed_ms": 38375.5,
+      "elapsed_ms": 24263.0,
       "event": "viewport_check",
       "step": 16,
       "data": {
@@ -3664,7 +3353,7 @@
       }
     },
     {
-      "elapsed_ms": 45687.9,
+      "elapsed_ms": 26855.1,
       "event": "checkpoint_read",
       "step": 16,
       "data": {
@@ -3675,8 +3364,8 @@
           {
             "duration_label": "3d",
             "duration_seconds": 259200,
-            "raw_quantity": "533 / 533",
-            "quantity": 533,
+            "raw_quantity": "538 / 538",
+            "quantity": 538,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3693,8 +3382,8 @@
           {
             "duration_label": "7d",
             "duration_seconds": 604800,
-            "raw_quantity": "245 / 245",
-            "quantity": 245,
+            "raw_quantity": "252 / 252",
+            "quantity": 252,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3766,7 +3455,7 @@
               "x": 0,
               "y": 0
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "30d",
@@ -3793,8 +3482,8 @@
           {
             "duration_label": "3d",
             "duration_seconds": 259200,
-            "raw_ocr": "533 / 533",
-            "quantity": 533,
+            "raw_ocr": "538 / 538",
+            "quantity": 538,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3807,8 +3496,8 @@
           {
             "duration_label": "7d",
             "duration_seconds": 604800,
-            "raw_ocr": "245 / 245",
-            "quantity": 245,
+            "raw_ocr": "252 / 252",
+            "quantity": 252,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -3836,72 +3525,72 @@
       }
     },
     {
-      "elapsed_ms": 53192.6,
+      "elapsed_ms": 30974.7,
       "event": "timer_read",
       "step": 16,
       "data": {
         "phase": "post_scan",
         "status": "ok",
-        "raw": "2d.:4g.",
-        "value_seconds": 187200,
+        "raw": "15g.:55m.",
+        "value_seconds": 57300,
         "confidence": 100.0
       }
     },
     {
-      "elapsed_ms": 53192.7,
+      "elapsed_ms": 30974.8,
       "event": "planning_started",
       "step": 16,
       "data": {
-        "remaining_seconds": 187200,
+        "remaining_seconds": 57300,
         "inventory": [
           [
             900,
-            4878
+            4891
           ],
           [
             3600,
-            5268
+            5285
           ],
           [
             10800,
-            3419
+            3456
           ],
           [
             28800,
-            463
+            461
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
             1
           ]
         ],
-        "owned_seconds": 437283000,
-        "coverage_surplus_seconds": 437095800
+        "owned_seconds": 445290300,
+        "coverage_surplus_seconds": 445233000
       }
     },
     {
-      "elapsed_ms": 53193.4,
+      "elapsed_ms": 30975.1,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 187200,
+        "remaining_before_seconds": 57300,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -3910,35 +3599,35 @@
         "stock_before": [
           [
             900,
-            4878
+            4891
           ],
           [
             3600,
-            5268
+            5285
           ],
           [
             10800,
-            3419
+            3456
           ],
           [
             28800,
-            463
+            461
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
@@ -3965,171 +3654,19 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 1,
-        "quantity_before": 463,
-        "quantity_after": 462,
-        "remaining_after_seconds": 158400,
-        "floor_breached_after_selection": false
-      }
-    },
-    {
-      "elapsed_ms": 53193.5,
-      "event": "plan_choice",
-      "step": 16,
-      "data": {
-        "duration_label": "8h",
-        "remaining_before_seconds": 158400,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            462
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 2,
-        "quantity_before": 462,
-        "quantity_after": 461,
-        "remaining_after_seconds": 129600,
-        "floor_breached_after_selection": false
-      }
-    },
-    {
-      "elapsed_ms": 53193.6,
-      "event": "plan_choice",
-      "step": 16,
-      "data": {
-        "duration_label": "8h",
-        "remaining_before_seconds": 129600,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            461
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 3,
         "quantity_before": 461,
         "quantity_after": 460,
-        "remaining_after_seconds": 100800,
+        "remaining_after_seconds": 28500,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 53193.6,
+      "elapsed_ms": 30975.1,
       "event": "plan_choice",
       "step": 16,
       "data": {
-        "duration_label": "8h",
-        "remaining_before_seconds": 100800,
+        "duration_label": "3h",
+        "remaining_before_seconds": 28500,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -4138,15 +3675,15 @@
         "stock_before": [
           [
             900,
-            4878
+            4891
           ],
           [
             3600,
-            5268
+            5285
           ],
           [
             10800,
-            3419
+            3456
           ],
           [
             28800,
@@ -4154,247 +3691,19 @@
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 4,
-        "quantity_before": 460,
-        "quantity_after": 459,
-        "remaining_after_seconds": 72000,
-        "floor_breached_after_selection": false
-      }
-    },
-    {
-      "elapsed_ms": 53193.6,
-      "event": "plan_choice",
-      "step": 16,
-      "data": {
-        "duration_label": "8h",
-        "remaining_before_seconds": 72000,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            459
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 5,
-        "quantity_before": 459,
-        "quantity_after": 458,
-        "remaining_after_seconds": 43200,
-        "floor_breached_after_selection": false
-      }
-    },
-    {
-      "elapsed_ms": 53193.7,
-      "event": "plan_choice",
-      "step": 16,
-      "data": {
-        "duration_label": "8h",
-        "remaining_before_seconds": 43200,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            458
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
-          ],
-          [
-            2592000,
-            1
-          ]
-        ],
-        "available_above_floors_seconds": [
-          900,
-          3600,
-          10800,
-          28800,
-          54000,
-          86400,
-          259200,
-          604800
-        ],
-        "strategy": "preferred_fit",
-        "candidates_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "selected_duration_seconds": 28800,
-        "floor_seconds": 10,
-        "breaks_floor": false,
-        "step": 6,
-        "quantity_before": 458,
-        "quantity_after": 457,
-        "remaining_after_seconds": 14400,
-        "floor_breached_after_selection": false
-      }
-    },
-    {
-      "elapsed_ms": 53193.7,
-      "event": "plan_choice",
-      "step": 16,
-      "data": {
-        "duration_label": "3h",
-        "remaining_before_seconds": 14400,
-        "preferred_durations_seconds": [
-          3600,
-          10800,
-          28800
-        ],
-        "stock_before": [
-          [
-            900,
-            4878
-          ],
-          [
-            3600,
-            5268
-          ],
-          [
-            10800,
-            3419
-          ],
-          [
-            28800,
-            457
-          ],
-          [
-            54000,
-            637
-          ],
-          [
-            86400,
-            467
-          ],
-          [
-            259200,
-            533
-          ],
-          [
-            604800,
-            245
+            252
           ],
           [
             2592000,
@@ -4419,20 +3728,20 @@
         "selected_duration_seconds": 10800,
         "floor_seconds": 10,
         "breaks_floor": false,
-        "step": 7,
-        "quantity_before": 3419,
-        "quantity_after": 3418,
-        "remaining_after_seconds": 3600,
+        "step": 2,
+        "quantity_before": 3456,
+        "quantity_after": 3455,
+        "remaining_after_seconds": 17700,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 53193.7,
+      "elapsed_ms": 30975.1,
       "event": "plan_choice",
       "step": 16,
       "data": {
-        "duration_label": "1h",
-        "remaining_before_seconds": 3600,
+        "duration_label": "3h",
+        "remaining_before_seconds": 17700,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -4441,35 +3750,110 @@
         "stock_before": [
           [
             900,
-            4878
+            4891
           ],
           [
             3600,
-            5268
+            5285
           ],
           [
             10800,
-            3418
+            3455
           ],
           [
             28800,
-            457
+            460
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_fit",
+        "candidates_seconds": [
+          3600,
+          10800
+        ],
+        "selected_duration_seconds": 10800,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 3,
+        "quantity_before": 3455,
+        "quantity_after": 3454,
+        "remaining_after_seconds": 6900,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 30975.1,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "1h",
+        "remaining_before_seconds": 6900,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5285
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            460
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
           ],
           [
             2592000,
@@ -4493,78 +3877,382 @@
         "selected_duration_seconds": 3600,
         "floor_seconds": 10,
         "breaks_floor": false,
-        "step": 8,
-        "quantity_before": 5268,
-        "quantity_after": 5267,
-        "remaining_after_seconds": 0,
+        "step": 4,
+        "quantity_before": 5285,
+        "quantity_after": 5284,
+        "remaining_after_seconds": 3300,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 53193.8,
-      "event": "plan_built",
+      "elapsed_ms": 30975.1,
+      "event": "plan_choice",
       "step": 16,
       "data": {
-        "status": "ok",
-        "remaining_seconds": 187200,
-        "inventory": [
+        "duration_label": "15m",
+        "remaining_before_seconds": 3300,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
           [
             900,
-            4878
+            4891
           ],
           [
             3600,
-            5268
+            5284
           ],
           [
             10800,
-            3419
+            3454
           ],
           [
             28800,
-            463
+            460
           ],
           [
             54000,
-            637
+            648
           ],
           [
             86400,
-            467
+            484
           ],
           [
             259200,
-            533
+            538
           ],
           [
             604800,
-            245
+            252
           ],
           [
             2592000,
             1
           ]
         ],
-        "owned_seconds": 437283000,
-        "coverage_surplus_seconds": 437095800,
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "any_fit",
+        "candidates_seconds": [
+          900
+        ],
+        "selected_duration_seconds": 900,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 5,
+        "quantity_before": 4891,
+        "quantity_after": 4890,
+        "remaining_after_seconds": 2400,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 30975.1,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "15m",
+        "remaining_before_seconds": 2400,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4890
+          ],
+          [
+            3600,
+            5284
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            460
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "any_fit",
+        "candidates_seconds": [
+          900
+        ],
+        "selected_duration_seconds": 900,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 6,
+        "quantity_before": 4890,
+        "quantity_after": 4889,
+        "remaining_after_seconds": 1500,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 30975.1,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "15m",
+        "remaining_before_seconds": 1500,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4889
+          ],
+          [
+            3600,
+            5284
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            460
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "any_fit",
+        "candidates_seconds": [
+          900
+        ],
+        "selected_duration_seconds": 900,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 7,
+        "quantity_before": 4889,
+        "quantity_after": 4888,
+        "remaining_after_seconds": 600,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 30975.1,
+      "event": "plan_choice",
+      "step": 16,
+      "data": {
+        "duration_label": "1h",
+        "remaining_before_seconds": 600,
+        "preferred_durations_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "stock_before": [
+          [
+            900,
+            4888
+          ],
+          [
+            3600,
+            5284
+          ],
+          [
+            10800,
+            3454
+          ],
+          [
+            28800,
+            460
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "available_above_floors_seconds": [
+          900,
+          3600,
+          10800,
+          28800,
+          54000,
+          86400,
+          259200,
+          604800
+        ],
+        "strategy": "preferred_overshoot",
+        "candidates_seconds": [
+          3600,
+          10800,
+          28800
+        ],
+        "selected_duration_seconds": 3600,
+        "floor_seconds": 10,
+        "breaks_floor": false,
+        "step": 8,
+        "quantity_before": 5284,
+        "quantity_after": 5283,
+        "remaining_after_seconds": -3000,
+        "floor_breached_after_selection": false
+      }
+    },
+    {
+      "elapsed_ms": 30975.1,
+      "event": "plan_built",
+      "step": 16,
+      "data": {
+        "status": "ok",
+        "remaining_seconds": 57300,
+        "inventory": [
+          [
+            900,
+            4891
+          ],
+          [
+            3600,
+            5285
+          ],
+          [
+            10800,
+            3456
+          ],
+          [
+            28800,
+            461
+          ],
+          [
+            54000,
+            648
+          ],
+          [
+            86400,
+            484
+          ],
+          [
+            259200,
+            538
+          ],
+          [
+            604800,
+            252
+          ],
+          [
+            2592000,
+            1
+          ]
+        ],
+        "owned_seconds": 445290300,
+        "coverage_surplus_seconds": 445233000,
         "uses": [
           {
             "duration_seconds": 28800,
             "duration_label": "8h",
-            "quantity": 6,
-            "total_seconds": 172800
+            "quantity": 1,
+            "total_seconds": 28800
           },
           {
             "duration_seconds": 10800,
             "duration_label": "3h",
-            "quantity": 1,
-            "total_seconds": 10800
+            "quantity": 2,
+            "total_seconds": 21600
           },
           {
             "duration_seconds": 3600,
             "duration_label": "1h",
-            "quantity": 1,
-            "total_seconds": 3600
+            "quantity": 2,
+            "total_seconds": 7200
+          },
+          {
+            "duration_seconds": 900,
+            "duration_label": "15m",
+            "quantity": 3,
+            "total_seconds": 2700
           }
         ],
         "breached_floors": [],
@@ -4572,18 +4260,18 @@
       }
     },
     {
-      "elapsed_ms": 53193.8,
+      "elapsed_ms": 30975.2,
       "event": "execution_started",
       "step": 16,
       "data": {
         "plan_generation": 1,
         "planned_uses": 8,
-        "planned_seconds": 187200,
-        "initial_timer_seconds": 187200
+        "planned_seconds": 60300,
+        "initial_timer_seconds": 57300
       }
     },
     {
-      "elapsed_ms": 53193.9,
+      "elapsed_ms": 30975.2,
       "event": "use_step_started",
       "step": 16,
       "data": {
@@ -4596,7 +4284,7 @@
         "checkpoint": 3,
         "remaining_queue": 7,
         "decision": {
-          "remaining_before_seconds": 187200,
+          "remaining_before_seconds": 57300,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -4605,35 +4293,35 @@
           "stock_before": [
             [
               900,
-              4878
+              4891
             ],
             [
               3600,
-              5268
+              5285
             ],
             [
               10800,
-              3419
+              3456
             ],
             [
               28800,
-              463
+              461
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
             ],
             [
               2592000,
@@ -4660,15 +4348,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 1,
-          "quantity_before": 463,
-          "quantity_after": 462,
-          "remaining_after_seconds": 158400,
+          "quantity_before": 461,
+          "quantity_after": 460,
+          "remaining_after_seconds": 28500,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 53196.0,
+      "elapsed_ms": 30976.2,
       "event": "emergency_stop_check",
       "step": 16,
       "data": {
@@ -4676,7 +4364,7 @@
       }
     },
     {
-      "elapsed_ms": 53298.7,
+      "elapsed_ms": 31077.2,
       "event": "pointer_move",
       "step": 16,
       "data": {
@@ -4688,7 +4376,7 @@
       }
     },
     {
-      "elapsed_ms": 53299.1,
+      "elapsed_ms": 31077.4,
       "event": "emergency_stop_check",
       "step": 16,
       "data": {
@@ -4696,7 +4384,7 @@
       }
     },
     {
-      "elapsed_ms": 53401.4,
+      "elapsed_ms": 31178.3,
       "event": "scroll",
       "step": 16,
       "data": {
@@ -4706,7 +4394,7 @@
       }
     },
     {
-      "elapsed_ms": 53865.7,
+      "elapsed_ms": 31610.4,
       "event": "capture",
       "step": 16,
       "data": {
@@ -4739,7 +4427,7 @@
       }
     },
     {
-      "elapsed_ms": 53904.1,
+      "elapsed_ms": 31627.9,
       "event": "viewport_check",
       "step": 15,
       "data": {
@@ -4751,7 +4439,7 @@
       }
     },
     {
-      "elapsed_ms": 53905.6,
+      "elapsed_ms": 31629.0,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -4759,7 +4447,7 @@
       }
     },
     {
-      "elapsed_ms": 54006.9,
+      "elapsed_ms": 31729.3,
       "event": "pointer_move",
       "step": 15,
       "data": {
@@ -4771,7 +4459,7 @@
       }
     },
     {
-      "elapsed_ms": 54007.1,
+      "elapsed_ms": 31729.5,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -4779,7 +4467,7 @@
       }
     },
     {
-      "elapsed_ms": 54109.9,
+      "elapsed_ms": 31830.2,
       "event": "scroll",
       "step": 15,
       "data": {
@@ -4789,7 +4477,7 @@
       }
     },
     {
-      "elapsed_ms": 54559.8,
+      "elapsed_ms": 32242.9,
       "event": "capture",
       "step": 15,
       "data": {
@@ -4822,7 +4510,7 @@
       }
     },
     {
-      "elapsed_ms": 54590.5,
+      "elapsed_ms": 32258.7,
       "event": "viewport_check",
       "step": 14,
       "data": {
@@ -4834,7 +4522,7 @@
       }
     },
     {
-      "elapsed_ms": 54592.1,
+      "elapsed_ms": 32259.6,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -4842,7 +4530,7 @@
       }
     },
     {
-      "elapsed_ms": 54693.6,
+      "elapsed_ms": 32360.6,
       "event": "pointer_move",
       "step": 14,
       "data": {
@@ -4854,7 +4542,7 @@
       }
     },
     {
-      "elapsed_ms": 54693.9,
+      "elapsed_ms": 32360.8,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -4862,7 +4550,7 @@
       }
     },
     {
-      "elapsed_ms": 54795.3,
+      "elapsed_ms": 32461.9,
       "event": "scroll",
       "step": 14,
       "data": {
@@ -4872,7 +4560,7 @@
       }
     },
     {
-      "elapsed_ms": 55245.6,
+      "elapsed_ms": 32859.0,
       "event": "capture",
       "step": 14,
       "data": {
@@ -4905,7 +4593,7 @@
       }
     },
     {
-      "elapsed_ms": 55284.6,
+      "elapsed_ms": 32873.2,
       "event": "viewport_check",
       "step": 13,
       "data": {
@@ -4917,7 +4605,7 @@
       }
     },
     {
-      "elapsed_ms": 55285.8,
+      "elapsed_ms": 32874.0,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -4925,7 +4613,7 @@
       }
     },
     {
-      "elapsed_ms": 55386.7,
+      "elapsed_ms": 32974.3,
       "event": "pointer_move",
       "step": 13,
       "data": {
@@ -4937,7 +4625,7 @@
       }
     },
     {
-      "elapsed_ms": 55387.0,
+      "elapsed_ms": 32974.4,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -4945,7 +4633,7 @@
       }
     },
     {
-      "elapsed_ms": 55488.2,
+      "elapsed_ms": 33075.0,
       "event": "scroll",
       "step": 13,
       "data": {
@@ -4955,7 +4643,7 @@
       }
     },
     {
-      "elapsed_ms": 55938.3,
+      "elapsed_ms": 33477.1,
       "event": "capture",
       "step": 13,
       "data": {
@@ -4988,19 +4676,19 @@
       }
     },
     {
-      "elapsed_ms": 55975.2,
+      "elapsed_ms": 33491.1,
       "event": "viewport_check",
       "step": 12,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6462948458172283,
+        "change_score": 0.6462905889764852,
         "threshold": 0.003,
         "from_step": 13
       }
     },
     {
-      "elapsed_ms": 55977.7,
+      "elapsed_ms": 33491.9,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -5008,7 +4696,7 @@
       }
     },
     {
-      "elapsed_ms": 56082.3,
+      "elapsed_ms": 33592.7,
       "event": "pointer_move",
       "step": 12,
       "data": {
@@ -5020,7 +4708,7 @@
       }
     },
     {
-      "elapsed_ms": 56084.2,
+      "elapsed_ms": 33593.1,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -5028,7 +4716,7 @@
       }
     },
     {
-      "elapsed_ms": 56185.2,
+      "elapsed_ms": 33694.5,
       "event": "scroll",
       "step": 12,
       "data": {
@@ -5038,7 +4726,7 @@
       }
     },
     {
-      "elapsed_ms": 56660.9,
+      "elapsed_ms": 34089.9,
       "event": "capture",
       "step": 12,
       "data": {
@@ -5071,19 +4759,19 @@
       }
     },
     {
-      "elapsed_ms": 56722.9,
+      "elapsed_ms": 34105.4,
       "event": "viewport_check",
       "step": 11,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6464182941987774,
+        "change_score": 0.6464268078802636,
         "threshold": 0.003,
         "from_step": 12
       }
     },
     {
-      "elapsed_ms": 56726.3,
+      "elapsed_ms": 34106.2,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -5091,7 +4779,7 @@
       }
     },
     {
-      "elapsed_ms": 56831.2,
+      "elapsed_ms": 34206.4,
       "event": "pointer_move",
       "step": 11,
       "data": {
@@ -5103,7 +4791,7 @@
       }
     },
     {
-      "elapsed_ms": 56831.6,
+      "elapsed_ms": 34206.6,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -5111,7 +4799,7 @@
       }
     },
     {
-      "elapsed_ms": 56938.1,
+      "elapsed_ms": 34308.0,
       "event": "scroll",
       "step": 11,
       "data": {
@@ -5121,7 +4809,7 @@
       }
     },
     {
-      "elapsed_ms": 57406.5,
+      "elapsed_ms": 34710.8,
       "event": "capture",
       "step": 11,
       "data": {
@@ -5154,7 +4842,7 @@
       }
     },
     {
-      "elapsed_ms": 57472.4,
+      "elapsed_ms": 34726.6,
       "event": "viewport_check",
       "step": 10,
       "data": {
@@ -5166,7 +4854,7 @@
       }
     },
     {
-      "elapsed_ms": 57474.2,
+      "elapsed_ms": 34727.5,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -5174,7 +4862,7 @@
       }
     },
     {
-      "elapsed_ms": 57575.9,
+      "elapsed_ms": 34828.1,
       "event": "pointer_move",
       "step": 10,
       "data": {
@@ -5186,7 +4874,7 @@
       }
     },
     {
-      "elapsed_ms": 57576.2,
+      "elapsed_ms": 34828.3,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -5194,7 +4882,7 @@
       }
     },
     {
-      "elapsed_ms": 57679.5,
+      "elapsed_ms": 34928.9,
       "event": "scroll",
       "step": 10,
       "data": {
@@ -5204,7 +4892,7 @@
       }
     },
     {
-      "elapsed_ms": 58144.6,
+      "elapsed_ms": 35343.0,
       "event": "capture",
       "step": 10,
       "data": {
@@ -5237,7 +4925,7 @@
       }
     },
     {
-      "elapsed_ms": 58183.9,
+      "elapsed_ms": 35356.1,
       "event": "viewport_check",
       "step": 9,
       "data": {
@@ -5249,7 +4937,7 @@
       }
     },
     {
-      "elapsed_ms": 58185.6,
+      "elapsed_ms": 35356.9,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -5257,7 +4945,7 @@
       }
     },
     {
-      "elapsed_ms": 58292.8,
+      "elapsed_ms": 35457.4,
       "event": "pointer_move",
       "step": 9,
       "data": {
@@ -5269,7 +4957,7 @@
       }
     },
     {
-      "elapsed_ms": 58293.2,
+      "elapsed_ms": 35457.9,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -5277,7 +4965,7 @@
       }
     },
     {
-      "elapsed_ms": 58397.6,
+      "elapsed_ms": 35558.6,
       "event": "scroll",
       "step": 9,
       "data": {
@@ -5287,7 +4975,7 @@
       }
     },
     {
-      "elapsed_ms": 58856.3,
+      "elapsed_ms": 35957.8,
       "event": "capture",
       "step": 9,
       "data": {
@@ -5320,7 +5008,7 @@
       }
     },
     {
-      "elapsed_ms": 58900.9,
+      "elapsed_ms": 35974.8,
       "event": "viewport_check",
       "step": 8,
       "data": {
@@ -5332,7 +5020,7 @@
       }
     },
     {
-      "elapsed_ms": 58902.6,
+      "elapsed_ms": 35975.6,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -5340,7 +5028,7 @@
       }
     },
     {
-      "elapsed_ms": 59004.1,
+      "elapsed_ms": 36076.3,
       "event": "pointer_move",
       "step": 8,
       "data": {
@@ -5352,7 +5040,7 @@
       }
     },
     {
-      "elapsed_ms": 59007.5,
+      "elapsed_ms": 36076.4,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -5360,7 +5048,7 @@
       }
     },
     {
-      "elapsed_ms": 59108.7,
+      "elapsed_ms": 36177.1,
       "event": "scroll",
       "step": 8,
       "data": {
@@ -5370,7 +5058,7 @@
       }
     },
     {
-      "elapsed_ms": 59556.6,
+      "elapsed_ms": 36602.1,
       "event": "capture",
       "step": 8,
       "data": {
@@ -5403,19 +5091,19 @@
       }
     },
     {
-      "elapsed_ms": 59602.6,
+      "elapsed_ms": 36619.7,
       "event": "viewport_check",
       "step": 7,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6363040405932333,
+        "change_score": 0.6363082974339764,
         "threshold": 0.003,
         "from_step": 8
       }
     },
     {
-      "elapsed_ms": 59604.3,
+      "elapsed_ms": 36620.5,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -5423,7 +5111,7 @@
       }
     },
     {
-      "elapsed_ms": 59705.7,
+      "elapsed_ms": 36720.8,
       "event": "pointer_move",
       "step": 7,
       "data": {
@@ -5435,7 +5123,7 @@
       }
     },
     {
-      "elapsed_ms": 59706.1,
+      "elapsed_ms": 36720.9,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -5443,7 +5131,7 @@
       }
     },
     {
-      "elapsed_ms": 59809.0,
+      "elapsed_ms": 36821.5,
       "event": "scroll",
       "step": 7,
       "data": {
@@ -5453,7 +5141,7 @@
       }
     },
     {
-      "elapsed_ms": 60264.5,
+      "elapsed_ms": 37234.5,
       "event": "capture",
       "step": 7,
       "data": {
@@ -5486,7 +5174,7 @@
       }
     },
     {
-      "elapsed_ms": 60311.0,
+      "elapsed_ms": 37251.4,
       "event": "viewport_check",
       "step": 6,
       "data": {
@@ -5498,7 +5186,7 @@
       }
     },
     {
-      "elapsed_ms": 60323.0,
+      "elapsed_ms": 37252.6,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -5506,7 +5194,7 @@
       }
     },
     {
-      "elapsed_ms": 60424.8,
+      "elapsed_ms": 37353.5,
       "event": "pointer_move",
       "step": 6,
       "data": {
@@ -5518,7 +5206,7 @@
       }
     },
     {
-      "elapsed_ms": 60427.3,
+      "elapsed_ms": 37353.6,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -5526,7 +5214,7 @@
       }
     },
     {
-      "elapsed_ms": 60528.6,
+      "elapsed_ms": 37454.9,
       "event": "scroll",
       "step": 6,
       "data": {
@@ -5536,7 +5224,7 @@
       }
     },
     {
-      "elapsed_ms": 61015.5,
+      "elapsed_ms": 37857.7,
       "event": "capture",
       "step": 6,
       "data": {
@@ -5569,19 +5257,19 @@
       }
     },
     {
-      "elapsed_ms": 61082.6,
+      "elapsed_ms": 37881.9,
       "event": "viewport_check",
       "step": 5,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6384580020092289,
+        "change_score": 0.638466515690715,
         "threshold": 0.003,
         "from_step": 6
       }
     },
     {
-      "elapsed_ms": 61086.3,
+      "elapsed_ms": 37883.3,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -5589,7 +5277,7 @@
       }
     },
     {
-      "elapsed_ms": 61188.1,
+      "elapsed_ms": 37984.0,
       "event": "pointer_move",
       "step": 5,
       "data": {
@@ -5601,7 +5289,7 @@
       }
     },
     {
-      "elapsed_ms": 61188.3,
+      "elapsed_ms": 37984.4,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -5609,7 +5297,7 @@
       }
     },
     {
-      "elapsed_ms": 61289.5,
+      "elapsed_ms": 38085.2,
       "event": "scroll",
       "step": 5,
       "data": {
@@ -5619,7 +5307,7 @@
       }
     },
     {
-      "elapsed_ms": 61765.7,
+      "elapsed_ms": 38491.1,
       "event": "capture",
       "step": 5,
       "data": {
@@ -5652,19 +5340,19 @@
       }
     },
     {
-      "elapsed_ms": 61806.7,
+      "elapsed_ms": 38505.0,
       "event": "viewport_check",
       "step": 4,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6356655144817722,
+        "change_score": 0.6356697713225152,
         "threshold": 0.003,
         "from_step": 5
       }
     },
     {
-      "elapsed_ms": 61809.4,
+      "elapsed_ms": 38505.9,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -5672,7 +5360,7 @@
       }
     },
     {
-      "elapsed_ms": 61910.5,
+      "elapsed_ms": 38606.7,
       "event": "pointer_move",
       "step": 4,
       "data": {
@@ -5684,7 +5372,7 @@
       }
     },
     {
-      "elapsed_ms": 61911.0,
+      "elapsed_ms": 38607.1,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -5692,7 +5380,7 @@
       }
     },
     {
-      "elapsed_ms": 62021.8,
+      "elapsed_ms": 38707.8,
       "event": "scroll",
       "step": 4,
       "data": {
@@ -5702,7 +5390,7 @@
       }
     },
     {
-      "elapsed_ms": 62479.0,
+      "elapsed_ms": 39123.0,
       "event": "capture",
       "step": 4,
       "data": {
@@ -5735,7 +5423,7 @@
       }
     },
     {
-      "elapsed_ms": 62530.3,
+      "elapsed_ms": 39137.0,
       "event": "viewport_check",
       "step": 3,
       "data": {
@@ -5747,7 +5435,7 @@
       }
     },
     {
-      "elapsed_ms": 62593.5,
+      "elapsed_ms": 39163.7,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -5774,7 +5462,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           },
           {
             "duration_label": "1h",
@@ -5841,767 +5529,7 @@
       }
     },
     {
-      "elapsed_ms": 62593.6,
-      "event": "use_button_check",
-      "step": 3,
-      "data": {
-        "status": "matched",
-        "duration_seconds": 28800,
-        "duration_label": "8h",
-        "button_rectangle": {
-          "x": 372,
-          "y": 370,
-          "width": 145,
-          "height": 27
-        },
-        "button_center": {
-          "x": 444,
-          "y": 383
-        },
-        "screen_point": [
-          1122,
-          759
-        ],
-        "initial_quantity": 463,
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          }
-        ],
-        "use_number": 1,
-        "plan_generation": 1,
-        "plan_step": 1,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 62594.2,
-      "event": "emergency_stop_check",
-      "step": 3,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 62720.8,
-      "event": "use_click",
-      "step": 3,
-      "data": {
-        "status": "sent",
-        "duration_seconds": 28800,
-        "screen_point": [
-          1122,
-          759
-        ],
-        "use_number": 1,
-        "plan_generation": 1,
-        "plan_step": 1,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 63163.9,
-      "event": "capture",
-      "step": 3,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": false,
-        "dialog_recognized": false,
-        "dialog_match": null
-      }
-    },
-    {
-      "elapsed_ms": 63169.9,
-      "event": "dialog_check",
-      "step": 3,
-      "data": {
-        "status": "recognized",
-        "phase": "post_use",
-        "duration_seconds": 28800,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9972743988037109,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        },
-        "use_number": 1,
-        "plan_generation": 1,
-        "plan_step": 1,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 63170.0,
-      "event": "use_verification",
-      "step": 3,
-      "data": {
-        "status": "deferred_to_final_timer",
-        "quantity_checked": false,
-        "expected_quantity": 462,
-        "observed_quantity": null,
-        "reason": "post_click_ocr_disabled",
-        "duration_seconds": 28800,
-        "use_number": 1,
-        "plan_generation": 1,
-        "plan_step": 1,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 63171.1,
-      "event": "use_step_started",
-      "step": 3,
-      "data": {
-        "use_number": 2,
-        "plan_generation": 1,
-        "plan_step": 2,
-        "plan_total": 8,
-        "duration_seconds": 28800,
-        "duration_label": "8h",
-        "checkpoint": 3,
-        "remaining_queue": 6,
-        "decision": {
-          "remaining_before_seconds": 158400,
-          "preferred_durations_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "stock_before": [
-            [
-              900,
-              4878
-            ],
-            [
-              3600,
-              5268
-            ],
-            [
-              10800,
-              3419
-            ],
-            [
-              28800,
-              462
-            ],
-            [
-              54000,
-              637
-            ],
-            [
-              86400,
-              467
-            ],
-            [
-              259200,
-              533
-            ],
-            [
-              604800,
-              245
-            ],
-            [
-              2592000,
-              1
-            ]
-          ],
-          "available_above_floors_seconds": [
-            900,
-            3600,
-            10800,
-            28800,
-            54000,
-            86400,
-            259200,
-            604800
-          ],
-          "strategy": "preferred_fit",
-          "candidates_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "selected_duration_seconds": 28800,
-          "floor_seconds": 10,
-          "breaks_floor": false,
-          "step": 2,
-          "quantity_before": 462,
-          "quantity_after": 461,
-          "remaining_after_seconds": 129600,
-          "floor_breached_after_selection": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 63254.0,
-      "event": "checkpoint_read",
-      "step": 3,
-      "data": {
-        "status": "complete",
-        "reason": "",
-        "requested_duration": 28800,
-        "rows": [],
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678515195846558
-          }
-        ],
-        "quantities": []
-      }
-    },
-    {
-      "elapsed_ms": 63254.0,
-      "event": "use_button_check",
-      "step": 3,
-      "data": {
-        "status": "matched",
-        "duration_seconds": 28800,
-        "duration_label": "8h",
-        "button_rectangle": {
-          "x": 372,
-          "y": 370,
-          "width": 145,
-          "height": 27
-        },
-        "button_center": {
-          "x": 444,
-          "y": 383
-        },
-        "screen_point": [
-          1122,
-          759
-        ],
-        "initial_quantity": 462,
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678515195846558
-          }
-        ],
-        "use_number": 2,
-        "plan_generation": 1,
-        "plan_step": 2,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 63254.3,
-      "event": "emergency_stop_check",
-      "step": 3,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 63362.8,
-      "event": "use_click",
-      "step": 3,
-      "data": {
-        "status": "sent",
-        "duration_seconds": 28800,
-        "screen_point": [
-          1122,
-          759
-        ],
-        "use_number": 2,
-        "plan_generation": 1,
-        "plan_step": 2,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 63855.5,
-      "event": "capture",
-      "step": 3,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": false,
-        "dialog_recognized": false,
-        "dialog_match": null
-      }
-    },
-    {
-      "elapsed_ms": 63863.3,
-      "event": "dialog_check",
-      "step": 3,
-      "data": {
-        "status": "recognized",
-        "phase": "post_use",
-        "duration_seconds": 28800,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9972743988037109,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        },
-        "use_number": 2,
-        "plan_generation": 1,
-        "plan_step": 2,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 63863.3,
-      "event": "use_verification",
-      "step": 3,
-      "data": {
-        "status": "deferred_to_final_timer",
-        "quantity_checked": false,
-        "expected_quantity": 461,
-        "observed_quantity": null,
-        "reason": "post_click_ocr_disabled",
-        "duration_seconds": 28800,
-        "use_number": 2,
-        "plan_generation": 1,
-        "plan_step": 2,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 63865.0,
-      "event": "use_step_started",
-      "step": 3,
-      "data": {
-        "use_number": 3,
-        "plan_generation": 1,
-        "plan_step": 3,
-        "plan_total": 8,
-        "duration_seconds": 28800,
-        "duration_label": "8h",
-        "checkpoint": 3,
-        "remaining_queue": 5,
-        "decision": {
-          "remaining_before_seconds": 129600,
-          "preferred_durations_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "stock_before": [
-            [
-              900,
-              4878
-            ],
-            [
-              3600,
-              5268
-            ],
-            [
-              10800,
-              3419
-            ],
-            [
-              28800,
-              461
-            ],
-            [
-              54000,
-              637
-            ],
-            [
-              86400,
-              467
-            ],
-            [
-              259200,
-              533
-            ],
-            [
-              604800,
-              245
-            ],
-            [
-              2592000,
-              1
-            ]
-          ],
-          "available_above_floors_seconds": [
-            900,
-            3600,
-            10800,
-            28800,
-            54000,
-            86400,
-            259200,
-            604800
-          ],
-          "strategy": "preferred_fit",
-          "candidates_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "selected_duration_seconds": 28800,
-          "floor_seconds": 10,
-          "breaks_floor": false,
-          "step": 3,
-          "quantity_before": 461,
-          "quantity_after": 460,
-          "remaining_after_seconds": 100800,
-          "floor_breached_after_selection": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 63951.4,
-      "event": "checkpoint_read",
-      "step": 3,
-      "data": {
-        "status": "complete",
-        "reason": "",
-        "requested_duration": 28800,
-        "rows": [],
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678511619567871
-          }
-        ],
-        "quantities": []
-      }
-    },
-    {
-      "elapsed_ms": 63951.5,
+      "elapsed_ms": 39163.7,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -6642,7 +5570,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           },
           {
             "duration_label": "1h",
@@ -6702,17 +5630,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678511619567871
+            "confidence": 1.0
           }
         ],
-        "use_number": 3,
+        "use_number": 1,
         "plan_generation": 1,
-        "plan_step": 3,
+        "plan_step": 1,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 63951.8,
+      "elapsed_ms": 39163.8,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -6720,7 +5648,7 @@
       }
     },
     {
-      "elapsed_ms": 64062.7,
+      "elapsed_ms": 39267.4,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -6730,14 +5658,14 @@
           1122,
           759
         ],
-        "use_number": 3,
+        "use_number": 1,
         "plan_generation": 1,
-        "plan_step": 3,
+        "plan_step": 1,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 64519.8,
+      "elapsed_ms": 39681.0,
       "event": "capture",
       "step": 3,
       "data": {
@@ -6756,7 +5684,7 @@
       }
     },
     {
-      "elapsed_ms": 64524.2,
+      "elapsed_ms": 39684.0,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -6778,14 +5706,14 @@
           },
           "fallback_used": false
         },
-        "use_number": 3,
+        "use_number": 1,
         "plan_generation": 1,
-        "plan_step": 3,
+        "plan_step": 1,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 64524.2,
+      "elapsed_ms": 39684.0,
       "event": "use_verification",
       "step": 3,
       "data": {
@@ -6795,27 +5723,27 @@
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
-        "use_number": 3,
+        "use_number": 1,
         "plan_generation": 1,
-        "plan_step": 3,
+        "plan_step": 1,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 64526.6,
+      "elapsed_ms": 39685.7,
       "event": "use_step_started",
       "step": 3,
       "data": {
-        "use_number": 4,
+        "use_number": 2,
         "plan_generation": 1,
-        "plan_step": 4,
+        "plan_step": 2,
         "plan_total": 8,
-        "duration_seconds": 28800,
-        "duration_label": "8h",
+        "duration_seconds": 10800,
+        "duration_label": "3h",
         "checkpoint": 3,
-        "remaining_queue": 4,
+        "remaining_queue": 6,
         "decision": {
-          "remaining_before_seconds": 100800,
+          "remaining_before_seconds": 28500,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -6824,15 +5752,15 @@
           "stock_before": [
             [
               900,
-              4878
+              4891
             ],
             [
               3600,
-              5268
+              5285
             ],
             [
               10800,
-              3419
+              3456
             ],
             [
               28800,
@@ -6840,1159 +5768,19 @@
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
-            ],
-            [
-              2592000,
-              1
-            ]
-          ],
-          "available_above_floors_seconds": [
-            900,
-            3600,
-            10800,
-            28800,
-            54000,
-            86400,
-            259200,
-            604800
-          ],
-          "strategy": "preferred_fit",
-          "candidates_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "selected_duration_seconds": 28800,
-          "floor_seconds": 10,
-          "breaks_floor": false,
-          "step": 4,
-          "quantity_before": 460,
-          "quantity_after": 459,
-          "remaining_after_seconds": 72000,
-          "floor_breached_after_selection": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 64596.7,
-      "event": "checkpoint_read",
-      "step": 3,
-      "data": {
-        "status": "complete",
-        "reason": "",
-        "requested_duration": 28800,
-        "rows": [],
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678522348403931
-          }
-        ],
-        "quantities": []
-      }
-    },
-    {
-      "elapsed_ms": 64596.8,
-      "event": "use_button_check",
-      "step": 3,
-      "data": {
-        "status": "matched",
-        "duration_seconds": 28800,
-        "duration_label": "8h",
-        "button_rectangle": {
-          "x": 372,
-          "y": 370,
-          "width": 145,
-          "height": 27
-        },
-        "button_center": {
-          "x": 444,
-          "y": 383
-        },
-        "screen_point": [
-          1122,
-          759
-        ],
-        "initial_quantity": 460,
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678522348403931
-          }
-        ],
-        "use_number": 4,
-        "plan_generation": 1,
-        "plan_step": 4,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 64597.0,
-      "event": "emergency_stop_check",
-      "step": 3,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 64699.4,
-      "event": "use_click",
-      "step": 3,
-      "data": {
-        "status": "sent",
-        "duration_seconds": 28800,
-        "screen_point": [
-          1122,
-          759
-        ],
-        "use_number": 4,
-        "plan_generation": 1,
-        "plan_step": 4,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 65145.1,
-      "event": "capture",
-      "step": 3,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": false,
-        "dialog_recognized": false,
-        "dialog_match": null
-      }
-    },
-    {
-      "elapsed_ms": 65150.6,
-      "event": "dialog_check",
-      "step": 3,
-      "data": {
-        "status": "recognized",
-        "phase": "post_use",
-        "duration_seconds": 28800,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9972743988037109,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        },
-        "use_number": 4,
-        "plan_generation": 1,
-        "plan_step": 4,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 65150.7,
-      "event": "use_verification",
-      "step": 3,
-      "data": {
-        "status": "deferred_to_final_timer",
-        "quantity_checked": false,
-        "expected_quantity": 459,
-        "observed_quantity": null,
-        "reason": "post_click_ocr_disabled",
-        "duration_seconds": 28800,
-        "use_number": 4,
-        "plan_generation": 1,
-        "plan_step": 4,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 65152.4,
-      "event": "use_step_started",
-      "step": 3,
-      "data": {
-        "use_number": 5,
-        "plan_generation": 1,
-        "plan_step": 5,
-        "plan_total": 8,
-        "duration_seconds": 28800,
-        "duration_label": "8h",
-        "checkpoint": 3,
-        "remaining_queue": 3,
-        "decision": {
-          "remaining_before_seconds": 72000,
-          "preferred_durations_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "stock_before": [
-            [
-              900,
-              4878
-            ],
-            [
-              3600,
-              5268
-            ],
-            [
-              10800,
-              3419
-            ],
-            [
-              28800,
-              459
-            ],
-            [
-              54000,
-              637
-            ],
-            [
-              86400,
-              467
-            ],
-            [
-              259200,
-              533
-            ],
-            [
-              604800,
-              245
-            ],
-            [
-              2592000,
-              1
-            ]
-          ],
-          "available_above_floors_seconds": [
-            900,
-            3600,
-            10800,
-            28800,
-            54000,
-            86400,
-            259200,
-            604800
-          ],
-          "strategy": "preferred_fit",
-          "candidates_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "selected_duration_seconds": 28800,
-          "floor_seconds": 10,
-          "breaks_floor": false,
-          "step": 5,
-          "quantity_before": 459,
-          "quantity_after": 458,
-          "remaining_after_seconds": 43200,
-          "floor_breached_after_selection": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 65219.1,
-      "event": "checkpoint_read",
-      "step": 3,
-      "data": {
-        "status": "complete",
-        "reason": "",
-        "requested_duration": 28800,
-        "rows": [],
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678515195846558
-          }
-        ],
-        "quantities": []
-      }
-    },
-    {
-      "elapsed_ms": 65219.1,
-      "event": "use_button_check",
-      "step": 3,
-      "data": {
-        "status": "matched",
-        "duration_seconds": 28800,
-        "duration_label": "8h",
-        "button_rectangle": {
-          "x": 372,
-          "y": 370,
-          "width": 145,
-          "height": 27
-        },
-        "button_center": {
-          "x": 444,
-          "y": 383
-        },
-        "screen_point": [
-          1122,
-          759
-        ],
-        "initial_quantity": 459,
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678515195846558
-          }
-        ],
-        "use_number": 5,
-        "plan_generation": 1,
-        "plan_step": 5,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 65219.3,
-      "event": "emergency_stop_check",
-      "step": 3,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 65321.0,
-      "event": "use_click",
-      "step": 3,
-      "data": {
-        "status": "sent",
-        "duration_seconds": 28800,
-        "screen_point": [
-          1122,
-          759
-        ],
-        "use_number": 5,
-        "plan_generation": 1,
-        "plan_step": 5,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 65767.1,
-      "event": "capture",
-      "step": 3,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": false,
-        "dialog_recognized": false,
-        "dialog_match": null
-      }
-    },
-    {
-      "elapsed_ms": 65771.4,
-      "event": "dialog_check",
-      "step": 3,
-      "data": {
-        "status": "recognized",
-        "phase": "post_use",
-        "duration_seconds": 28800,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9972743988037109,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        },
-        "use_number": 5,
-        "plan_generation": 1,
-        "plan_step": 5,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 65771.5,
-      "event": "use_verification",
-      "step": 3,
-      "data": {
-        "status": "deferred_to_final_timer",
-        "quantity_checked": false,
-        "expected_quantity": 458,
-        "observed_quantity": null,
-        "reason": "post_click_ocr_disabled",
-        "duration_seconds": 28800,
-        "use_number": 5,
-        "plan_generation": 1,
-        "plan_step": 5,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 65772.8,
-      "event": "use_step_started",
-      "step": 3,
-      "data": {
-        "use_number": 6,
-        "plan_generation": 1,
-        "plan_step": 6,
-        "plan_total": 8,
-        "duration_seconds": 28800,
-        "duration_label": "8h",
-        "checkpoint": 3,
-        "remaining_queue": 2,
-        "decision": {
-          "remaining_before_seconds": 43200,
-          "preferred_durations_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "stock_before": [
-            [
-              900,
-              4878
-            ],
-            [
-              3600,
-              5268
-            ],
-            [
-              10800,
-              3419
-            ],
-            [
-              28800,
-              458
-            ],
-            [
-              54000,
-              637
-            ],
-            [
-              86400,
-              467
-            ],
-            [
-              259200,
-              533
-            ],
-            [
-              604800,
-              245
-            ],
-            [
-              2592000,
-              1
-            ]
-          ],
-          "available_above_floors_seconds": [
-            900,
-            3600,
-            10800,
-            28800,
-            54000,
-            86400,
-            259200,
-            604800
-          ],
-          "strategy": "preferred_fit",
-          "candidates_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "selected_duration_seconds": 28800,
-          "floor_seconds": 10,
-          "breaks_floor": false,
-          "step": 6,
-          "quantity_before": 458,
-          "quantity_after": 457,
-          "remaining_after_seconds": 14400,
-          "floor_breached_after_selection": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 65857.0,
-      "event": "checkpoint_read",
-      "step": 3,
-      "data": {
-        "status": "complete",
-        "reason": "",
-        "requested_duration": 28800,
-        "rows": [],
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678515195846558
-          }
-        ],
-        "quantities": []
-      }
-    },
-    {
-      "elapsed_ms": 65857.1,
-      "event": "use_button_check",
-      "step": 3,
-      "data": {
-        "status": "matched",
-        "duration_seconds": 28800,
-        "duration_label": "8h",
-        "button_rectangle": {
-          "x": 372,
-          "y": 370,
-          "width": 145,
-          "height": 27
-        },
-        "button_center": {
-          "x": 444,
-          "y": 383
-        },
-        "screen_point": [
-          1122,
-          759
-        ],
-        "initial_quantity": 458,
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678515195846558
-          }
-        ],
-        "use_number": 6,
-        "plan_generation": 1,
-        "plan_step": 6,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 65857.4,
-      "event": "emergency_stop_check",
-      "step": 3,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 65970.4,
-      "event": "use_click",
-      "step": 3,
-      "data": {
-        "status": "sent",
-        "duration_seconds": 28800,
-        "screen_point": [
-          1122,
-          759
-        ],
-        "use_number": 6,
-        "plan_generation": 1,
-        "plan_step": 6,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 66411.4,
-      "event": "capture",
-      "step": 3,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": false,
-        "dialog_recognized": false,
-        "dialog_match": null
-      }
-    },
-    {
-      "elapsed_ms": 66417.4,
-      "event": "dialog_check",
-      "step": 3,
-      "data": {
-        "status": "recognized",
-        "phase": "post_use",
-        "duration_seconds": 28800,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9972743988037109,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        },
-        "use_number": 6,
-        "plan_generation": 1,
-        "plan_step": 6,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 66417.5,
-      "event": "use_verification",
-      "step": 3,
-      "data": {
-        "status": "deferred_to_final_timer",
-        "quantity_checked": false,
-        "expected_quantity": 457,
-        "observed_quantity": null,
-        "reason": "post_click_ocr_disabled",
-        "duration_seconds": 28800,
-        "use_number": 6,
-        "plan_generation": 1,
-        "plan_step": 6,
-        "plan_total": 8
-      }
-    },
-    {
-      "elapsed_ms": 66418.9,
-      "event": "use_step_started",
-      "step": 3,
-      "data": {
-        "use_number": 7,
-        "plan_generation": 1,
-        "plan_step": 7,
-        "plan_total": 8,
-        "duration_seconds": 10800,
-        "duration_label": "3h",
-        "checkpoint": 3,
-        "remaining_queue": 1,
-        "decision": {
-          "remaining_before_seconds": 14400,
-          "preferred_durations_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "stock_before": [
-            [
-              900,
-              4878
-            ],
-            [
-              3600,
-              5268
-            ],
-            [
-              10800,
-              3419
-            ],
-            [
-              28800,
-              457
-            ],
-            [
-              54000,
-              637
-            ],
-            [
-              86400,
-              467
-            ],
-            [
-              259200,
-              533
-            ],
-            [
-              604800,
-              245
+              252
             ],
             [
               2592000,
@@ -8017,16 +5805,16 @@
           "selected_duration_seconds": 10800,
           "floor_seconds": 10,
           "breaks_floor": false,
-          "step": 7,
-          "quantity_before": 3419,
-          "quantity_after": 3418,
-          "remaining_after_seconds": 3600,
+          "step": 2,
+          "quantity_before": 3456,
+          "quantity_after": 3455,
+          "remaining_after_seconds": 17700,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 66511.4,
+      "elapsed_ms": 39722.5,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -8053,7 +5841,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           },
           {
             "duration_label": "1h",
@@ -8113,14 +5901,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678518772125244
+            "confidence": 0.9678522348403931
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 66511.5,
+      "elapsed_ms": 39722.5,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -8141,7 +5929,7 @@
           1122,
           649
         ],
-        "initial_quantity": 3419,
+        "initial_quantity": 3456,
         "matches": [
           {
             "duration_label": "15m",
@@ -8161,7 +5949,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           },
           {
             "duration_label": "1h",
@@ -8221,17 +6009,17 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678518772125244
+            "confidence": 0.9678522348403931
           }
         ],
-        "use_number": 7,
+        "use_number": 2,
         "plan_generation": 1,
-        "plan_step": 7,
+        "plan_step": 2,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 66511.8,
+      "elapsed_ms": 39722.6,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -8239,7 +6027,7 @@
       }
     },
     {
-      "elapsed_ms": 66613.7,
+      "elapsed_ms": 39823.7,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -8249,14 +6037,14 @@
           1122,
           649
         ],
-        "use_number": 7,
+        "use_number": 2,
         "plan_generation": 1,
-        "plan_step": 7,
+        "plan_step": 2,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 67064.6,
+      "elapsed_ms": 40221.1,
       "event": "capture",
       "step": 3,
       "data": {
@@ -8275,7 +6063,7 @@
       }
     },
     {
-      "elapsed_ms": 67088.3,
+      "elapsed_ms": 40223.0,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -8297,44 +6085,44 @@
           },
           "fallback_used": false
         },
-        "use_number": 7,
+        "use_number": 2,
         "plan_generation": 1,
-        "plan_step": 7,
+        "plan_step": 2,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 67088.3,
+      "elapsed_ms": 40223.0,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 3418,
+        "expected_quantity": 3455,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 10800,
-        "use_number": 7,
+        "use_number": 2,
         "plan_generation": 1,
-        "plan_step": 7,
+        "plan_step": 2,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 67089.8,
+      "elapsed_ms": 40223.8,
       "event": "use_step_started",
       "step": 3,
       "data": {
-        "use_number": 8,
+        "use_number": 3,
         "plan_generation": 1,
-        "plan_step": 8,
+        "plan_step": 3,
         "plan_total": 8,
-        "duration_seconds": 3600,
-        "duration_label": "1h",
+        "duration_seconds": 10800,
+        "duration_label": "3h",
         "checkpoint": 3,
-        "remaining_queue": 0,
+        "remaining_queue": 5,
         "decision": {
-          "remaining_before_seconds": 3600,
+          "remaining_before_seconds": 17700,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -8343,35 +6131,414 @@
           "stock_before": [
             [
               900,
-              4878
+              4891
             ],
             [
               3600,
-              5268
+              5285
             ],
             [
               10800,
-              3418
+              3455
             ],
             [
               28800,
-              457
+              460
             ],
             [
               54000,
-              637
+              648
             ],
             [
               86400,
-              467
+              484
             ],
             [
               259200,
-              533
+              538
             ],
             [
               604800,
-              245
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800
+          ],
+          "selected_duration_seconds": 10800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 3,
+          "quantity_before": 3455,
+          "quantity_after": 3454,
+          "remaining_after_seconds": 6900,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 40253.2,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 10800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 40253.3,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 10800,
+        "duration_label": "3h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 260,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 273
+        },
+        "screen_point": [
+          1122,
+          649
+        ],
+        "initial_quantity": 3455,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 8
+      }
+    },
+    {
+      "elapsed_ms": 40253.4,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 40355.2,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 10800,
+        "screen_point": [
+          1122,
+          649
+        ],
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 8
+      }
+    },
+    {
+      "elapsed_ms": 40770.8,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 40773.6,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 10800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 8
+      }
+    },
+    {
+      "elapsed_ms": 40773.7,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 3454,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 10800,
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 8
+      }
+    },
+    {
+      "elapsed_ms": 40774.6,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 4,
+        "plan_generation": 1,
+        "plan_step": 4,
+        "plan_total": 8,
+        "duration_seconds": 3600,
+        "duration_label": "1h",
+        "checkpoint": 3,
+        "remaining_queue": 4,
+        "decision": {
+          "remaining_before_seconds": 6900,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5285
+            ],
+            [
+              10800,
+              3454
+            ],
+            [
+              28800,
+              460
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
             ],
             [
               2592000,
@@ -8395,16 +6562,16 @@
           "selected_duration_seconds": 3600,
           "floor_seconds": 10,
           "breaks_floor": false,
-          "step": 8,
-          "quantity_before": 5268,
-          "quantity_after": 5267,
-          "remaining_after_seconds": 0,
+          "step": 4,
+          "quantity_before": 5285,
+          "quantity_after": 5284,
+          "remaining_after_seconds": 3300,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 67183.8,
+      "elapsed_ms": 40809.2,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -8431,7 +6598,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           },
           {
             "duration_label": "1h",
@@ -8471,7 +6638,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678515195846558
+            "confidence": 0.9678522348403931
           },
           {
             "duration_label": "8h",
@@ -8498,7 +6665,7 @@
       }
     },
     {
-      "elapsed_ms": 67183.8,
+      "elapsed_ms": 40809.2,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -8519,7 +6686,7 @@
           1122,
           539
         ],
-        "initial_quantity": 5268,
+        "initial_quantity": 5285,
         "matches": [
           {
             "duration_label": "15m",
@@ -8539,7 +6706,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           },
           {
             "duration_label": "1h",
@@ -8579,7 +6746,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678515195846558
+            "confidence": 0.9678522348403931
           },
           {
             "duration_label": "8h",
@@ -8602,14 +6769,14 @@
             "confidence": 1.0
           }
         ],
-        "use_number": 8,
+        "use_number": 4,
         "plan_generation": 1,
-        "plan_step": 8,
+        "plan_step": 4,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 67184.1,
+      "elapsed_ms": 40809.4,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -8617,7 +6784,7 @@
       }
     },
     {
-      "elapsed_ms": 67286.1,
+      "elapsed_ms": 40911.0,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -8627,14 +6794,14 @@
           1122,
           539
         ],
-        "use_number": 8,
+        "use_number": 4,
         "plan_generation": 1,
-        "plan_step": 8,
+        "plan_step": 4,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 67753.4,
+      "elapsed_ms": 41327.1,
       "event": "capture",
       "step": 3,
       "data": {
@@ -8653,7 +6820,7 @@
       }
     },
     {
-      "elapsed_ms": 67759.7,
+      "elapsed_ms": 41329.6,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -8675,74 +6842,437 @@
           },
           "fallback_used": false
         },
-        "use_number": 8,
+        "use_number": 4,
         "plan_generation": 1,
-        "plan_step": 8,
+        "plan_step": 4,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 67759.8,
+      "elapsed_ms": 41329.6,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 5267,
+        "expected_quantity": 5284,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 3600,
-        "use_number": 8,
+        "use_number": 4,
         "plan_generation": 1,
-        "plan_step": 8,
+        "plan_step": 4,
         "plan_total": 8
       }
     },
     {
-      "elapsed_ms": 73553.5,
-      "event": "timer_read",
+      "elapsed_ms": 41330.6,
+      "event": "use_step_started",
       "step": 3,
       "data": {
-        "phase": "final",
-        "status": "minute_ocr_disagreement",
-        "raw": "12m18s / H12m18s / 12m18s / H12m18s",
-        "value": null,
-        "confidence": 50.0
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 8,
+        "duration_seconds": 3600,
+        "duration_label": "1h",
+        "checkpoint": 3,
+        "remaining_queue": 3,
+        "decision": {
+          "remaining_before_seconds": 3300,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4891
+            ],
+            [
+              3600,
+              5284
+            ],
+            [
+              10800,
+              3454
+            ],
+            [
+              28800,
+              460
+            ],
+            [
+              54000,
+              648
+            ],
+            [
+              86400,
+              484
+            ],
+            [
+              259200,
+              538
+            ],
+            [
+              604800,
+              252
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "any_fit",
+          "candidates_seconds": [
+            900
+          ],
+          "selected_duration_seconds": 900,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 5,
+          "quantity_before": 4891,
+          "quantity_after": 4890,
+          "remaining_after_seconds": 2400,
+          "floor_breached_after_selection": false
+        }
       }
     },
     {
-      "elapsed_ms": 73553.5,
+      "elapsed_ms": 41368.9,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 3600,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678511619567871
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 41368.9,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 3600,
+        "duration_label": "1h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 150,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 163
+        },
+        "screen_point": [
+          1122,
+          539
+        ],
+        "initial_quantity": 5284,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678511619567871
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          }
+        ],
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 8
+      }
+    },
+    {
+      "elapsed_ms": 41369.1,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 41470.8,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 3600,
+        "screen_point": [
+          1122,
+          539
+        ],
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 8
+      }
+    },
+    {
+      "elapsed_ms": 41872.8,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 41875.9,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "not_recognized",
+        "phase": "post_use",
+        "duration_seconds": 3600,
+        "dialog_match": {
+          "recognized": false,
+          "score": 0.22219830751419067,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 252
+          },
+          "partial_score": 0.25034016370773315,
+          "partial_location": {
+            "x": 900,
+            "y": 252
+          },
+          "fallback_used": false
+        },
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 8
+      }
+    },
+    {
+      "elapsed_ms": 41876.0,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "dialog_closed",
+        "quantity_checked": false,
+        "duration_seconds": 3600,
+        "use_number": 5,
+        "plan_generation": 1,
+        "plan_step": 5,
+        "plan_total": 8
+      }
+    },
+    {
+      "elapsed_ms": 41876.0,
       "event": "run_aborted",
       "step": 3,
       "data": {
         "status": "UNCERTAIN",
-        "reason": "timer_unreadable:minute_ocr_disagreement",
-        "clicks_issued": 8
+        "reason": "dialog_closed_before_plan_end",
+        "clicks_issued": 5
       }
     },
     {
-      "elapsed_ms": 73553.5,
+      "elapsed_ms": 41876.0,
       "event": "run_finished",
       "step": 3,
       "data": {
         "status": "UNCERTAIN",
-        "reason": "timer_unreadable:minute_ocr_disagreement",
-        "clicks_issued": 8,
+        "reason": "dialog_closed_before_plan_end",
+        "clicks_issued": 5,
         "shortfall_seconds": 0,
-        "initial_timer_seconds": 187200,
-        "final_observed_timer_seconds": 187200,
+        "initial_timer_seconds": 57300,
+        "final_observed_timer_seconds": 57300,
         "submitted_uses": [
           [
             3600,
-            1
+            2
           ],
           [
             10800,
-            1
+            2
           ],
           [
             28800,
-            6
+            1
           ]
         ]
       }
