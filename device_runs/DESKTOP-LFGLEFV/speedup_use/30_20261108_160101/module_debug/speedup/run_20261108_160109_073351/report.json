@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-11-08T14:37:51.313261+00:00",
+  "timestamp": "2026-11-08T15:01:09.073351+00:00",
   "mode": "execute",
-  "status": "FINISHED",
-  "reason": "dialog_closed_after_last_use",
-  "remaining_seconds": 83400,
-  "final_remaining_seconds": 83400,
+  "status": "UNCERTAIN",
+  "reason": "timer_unreadable:minute_ocr_disagreement",
+  "remaining_seconds": 172800,
+  "final_remaining_seconds": 172800,
   "inventory": [
     {
       "duration_seconds": 900,
-      "quantity": 4879
+      "quantity": 4878
     },
     {
       "duration_seconds": 3600,
-      "quantity": 5274
+      "quantity": 5267
     },
     {
       "duration_seconds": 10800,
-      "quantity": 3421
+      "quantity": 3418
     },
     {
       "duration_seconds": 28800,
-      "quantity": 477
+      "quantity": 457
     },
     {
       "duration_seconds": 54000,
@@ -47,7 +47,7 @@
     {
       "duration_label": "15m",
       "duration_seconds": 900,
-      "raw_ocr": "4879 / 4879",
+      "raw_ocr": "4878 / 4878",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -55,7 +55,7 @@
     {
       "duration_label": "1h",
       "duration_seconds": 3600,
-      "raw_ocr": "5274 / 5274",
+      "raw_ocr": "5267 / 5267",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -63,7 +63,7 @@
     {
       "duration_label": "3h",
       "duration_seconds": 10800,
-      "raw_ocr": "3421 / 3421",
+      "raw_ocr": "3418 / 3418",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -71,7 +71,7 @@
     {
       "duration_label": "8h",
       "duration_seconds": 28800,
-      "raw_ocr": "477 / 77; psm7: 477 / 477",
+      "raw_ocr": "457 / 457",
       "confidence": 100.0,
       "status": "ok",
       "scroll_count": 3
@@ -122,22 +122,14 @@
     "uses": [
       [
         28800,
-        2
-      ],
-      [
-        10800,
-        2
-      ],
-      [
-        3600,
-        2
+        6
       ]
     ],
     "breached_floors": [],
     "shortfall_seconds": 0,
     "decisions": [
       {
-        "remaining_before_seconds": 83400,
+        "remaining_before_seconds": 172800,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -146,19 +138,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3421
+            3418
           ],
           [
             28800,
-            477
+            457
           ],
           [
             54000,
@@ -201,13 +193,13 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 1,
-        "quantity_before": 477,
-        "quantity_after": 476,
-        "remaining_after_seconds": 54600,
+        "quantity_before": 457,
+        "quantity_after": 456,
+        "remaining_after_seconds": 144000,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 54600,
+        "remaining_before_seconds": 144000,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -216,19 +208,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3421
+            3418
           ],
           [
             28800,
-            476
+            456
           ],
           [
             54000,
@@ -271,13 +263,13 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 2,
-        "quantity_before": 476,
-        "quantity_after": 475,
-        "remaining_after_seconds": 25800,
+        "quantity_before": 456,
+        "quantity_after": 455,
+        "remaining_after_seconds": 115200,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 25800,
+        "remaining_before_seconds": 115200,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -286,19 +278,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3421
+            3418
           ],
           [
             28800,
-            475
+            455
           ],
           [
             54000,
@@ -334,19 +326,20 @@
         "strategy": "preferred_fit",
         "candidates_seconds": [
           3600,
-          10800
+          10800,
+          28800
         ],
-        "selected_duration_seconds": 10800,
+        "selected_duration_seconds": 28800,
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 3,
-        "quantity_before": 3421,
-        "quantity_after": 3420,
-        "remaining_after_seconds": 15000,
+        "quantity_before": 455,
+        "quantity_after": 454,
+        "remaining_after_seconds": 86400,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 15000,
+        "remaining_before_seconds": 86400,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -355,19 +348,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3420
+            3418
           ],
           [
             28800,
-            475
+            454
           ],
           [
             54000,
@@ -403,19 +396,20 @@
         "strategy": "preferred_fit",
         "candidates_seconds": [
           3600,
-          10800
+          10800,
+          28800
         ],
-        "selected_duration_seconds": 10800,
+        "selected_duration_seconds": 28800,
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 4,
-        "quantity_before": 3420,
-        "quantity_after": 3419,
-        "remaining_after_seconds": 4200,
+        "quantity_before": 454,
+        "quantity_after": 453,
+        "remaining_after_seconds": 57600,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 4200,
+        "remaining_before_seconds": 57600,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -424,19 +418,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3419
+            3418
           ],
           [
             28800,
-            475
+            453
           ],
           [
             54000,
@@ -471,19 +465,21 @@
         ],
         "strategy": "preferred_fit",
         "candidates_seconds": [
-          3600
+          3600,
+          10800,
+          28800
         ],
-        "selected_duration_seconds": 3600,
+        "selected_duration_seconds": 28800,
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 5,
-        "quantity_before": 5274,
-        "quantity_after": 5273,
-        "remaining_after_seconds": 600,
+        "quantity_before": 453,
+        "quantity_after": 452,
+        "remaining_after_seconds": 28800,
         "floor_breached_after_selection": false
       },
       {
-        "remaining_before_seconds": 600,
+        "remaining_before_seconds": 28800,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -492,19 +488,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5273
+            5267
           ],
           [
             10800,
-            3419
+            3418
           ],
           [
             28800,
-            475
+            452
           ],
           [
             54000,
@@ -537,19 +533,19 @@
           259200,
           604800
         ],
-        "strategy": "preferred_overshoot",
+        "strategy": "preferred_fit",
         "candidates_seconds": [
           3600,
           10800,
           28800
         ],
-        "selected_duration_seconds": 3600,
+        "selected_duration_seconds": 28800,
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 6,
-        "quantity_before": 5273,
-        "quantity_after": 5272,
-        "remaining_after_seconds": -3000,
+        "quantity_before": 452,
+        "quantity_after": 451,
+        "remaining_after_seconds": 0,
         "floor_breached_after_selection": false
       }
     ]
@@ -557,15 +553,7 @@
   "used": [
     {
       "duration_seconds": 28800,
-      "quantity": 2
-    },
-    {
-      "duration_seconds": 10800,
-      "quantity": 2
-    },
-    {
-      "duration_seconds": 3600,
-      "quantity": 2
+      "quantity": 6
     }
   ],
   "shortfall_seconds": 0,
@@ -583,9 +571,9 @@
       "plan_generation": 1,
       "plan_step": 1,
       "plan_total": 6,
-      "navigation_ms": 9632.2,
-      "button_match_ms": 126.0,
-      "click_settle_capture_ms": 573.4
+      "navigation_ms": 8332.8,
+      "button_match_ms": 36.9,
+      "click_settle_capture_ms": 525.1
     },
     {
       "duration_seconds": 28800,
@@ -595,52 +583,52 @@
       "plan_step": 2,
       "plan_total": 6,
       "navigation_ms": 0.0,
-      "button_match_ms": 103.9,
-      "click_settle_capture_ms": 614.7
+      "button_match_ms": 35.9,
+      "click_settle_capture_ms": 511.9
     },
     {
-      "duration_seconds": 10800,
+      "duration_seconds": 28800,
       "checkpoint": 3,
       "use_number": 3,
       "plan_generation": 1,
       "plan_step": 3,
       "plan_total": 6,
       "navigation_ms": 0.0,
-      "button_match_ms": 144.0,
-      "click_settle_capture_ms": 559.0
+      "button_match_ms": 38.0,
+      "click_settle_capture_ms": 519.5
     },
     {
-      "duration_seconds": 10800,
+      "duration_seconds": 28800,
       "checkpoint": 3,
       "use_number": 4,
       "plan_generation": 1,
       "plan_step": 4,
       "plan_total": 6,
       "navigation_ms": 0.0,
-      "button_match_ms": 72.4,
-      "click_settle_capture_ms": 558.4
+      "button_match_ms": 35.4,
+      "click_settle_capture_ms": 508.8
     },
     {
-      "duration_seconds": 3600,
+      "duration_seconds": 28800,
       "checkpoint": 3,
       "use_number": 5,
       "plan_generation": 1,
       "plan_step": 5,
       "plan_total": 6,
       "navigation_ms": 0.0,
-      "button_match_ms": 81.7,
-      "click_settle_capture_ms": 548.4
+      "button_match_ms": 34.7,
+      "click_settle_capture_ms": 516.1
     },
     {
-      "duration_seconds": 3600,
+      "duration_seconds": 28800,
       "checkpoint": 3,
       "use_number": 6,
       "plan_generation": 1,
       "plan_step": 6,
       "plan_total": 6,
       "navigation_ms": 0.0,
-      "button_match_ms": 85.5,
-      "click_settle_capture_ms": 549.5
+      "button_match_ms": 39.7,
+      "click_settle_capture_ms": 518.5
     }
   ],
   "final_timer_read_ms": null,
@@ -688,7 +676,7 @@
             "x": 0,
             "y": 0
           },
-          "confidence": 0.9999998211860657
+          "confidence": 1.0
         },
         {
           "duration_label": "3h",
@@ -728,15 +716,15 @@
             "x": 0,
             "y": 0
           },
-          "confidence": 0.9999998211860657
+          "confidence": 1.0
         }
       ],
       "quantities": [
         {
           "duration_label": "15m",
           "duration_seconds": 900,
-          "raw_ocr": "4879 / 4879",
-          "quantity": 4879,
+          "raw_ocr": "4878 / 4878",
+          "quantity": 4878,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -749,8 +737,8 @@
         {
           "duration_label": "1h",
           "duration_seconds": 3600,
-          "raw_ocr": "5274 / 5274",
-          "quantity": 5274,
+          "raw_ocr": "5267 / 5267",
+          "quantity": 5267,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -763,8 +751,8 @@
         {
           "duration_label": "3h",
           "duration_seconds": 10800,
-          "raw_ocr": "3421 / 3421",
-          "quantity": 3421,
+          "raw_ocr": "3418 / 3418",
+          "quantity": 3418,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -777,8 +765,8 @@
         {
           "duration_label": "8h",
           "duration_seconds": 28800,
-          "raw_ocr": "477 / 77; psm7: 477 / 477",
-          "quantity": 477,
+          "raw_ocr": "457 / 457",
+          "quantity": 457,
           "confidence": 100.0,
           "status": "ok",
           "button_rectangle": {
@@ -1055,7 +1043,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 1.0
+          "confidence": 0.9999998211860657
         },
         {
           "duration_label": "3h",
@@ -1095,7 +1083,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 1.0
+          "confidence": 0.9999998211860657
         }
       ],
       "quantities": []
@@ -1143,7 +1131,183 @@
             "x": 0,
             "y": 10
           },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
           "confidence": 1.0
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678515195846558
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9999998211860657
+        },
+        {
+          "duration_label": "3h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 250,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678515195846558
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9999998211860657
         },
         {
           "duration_label": "3h",
@@ -1231,7 +1395,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 1.0
+          "confidence": 0.9999998211860657
         },
         {
           "duration_label": "3h",
@@ -1244,6 +1408,74 @@
           "detected_rectangle": {
             "x": 372,
             "y": 260,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "8h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 360,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 370,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 0.9678522348403931
+        }
+      ],
+      "quantities": []
+    },
+    {
+      "scroll_count": 3,
+      "status": "complete",
+      "reason": "",
+      "matches": [
+        {
+          "duration_label": "15m",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 30,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 40,
+            "width": 145,
+            "height": 27
+          },
+          "offset": {
+            "x": 0,
+            "y": 10
+          },
+          "confidence": 1.0
+        },
+        {
+          "duration_label": "1h",
+          "expected_rectangle": {
+            "x": 372,
+            "y": 140,
+            "width": 145,
+            "height": 27
+          },
+          "detected_rectangle": {
+            "x": 372,
+            "y": 150,
             "width": 145,
             "height": 27
           },
@@ -1254,250 +1486,6 @@
           "confidence": 0.9999998211860657
         },
         {
-          "duration_label": "8h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 360,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 370,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678518772125244
-        }
-      ],
-      "quantities": []
-    },
-    {
-      "scroll_count": 3,
-      "status": "complete",
-      "reason": "",
-      "matches": [
-        {
-          "duration_label": "15m",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 30,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 40,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "1h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 140,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 150,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "3h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 250,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 260,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678515195846558
-        },
-        {
-          "duration_label": "8h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 360,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 370,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.999999463558197
-        }
-      ],
-      "quantities": []
-    },
-    {
-      "scroll_count": 3,
-      "status": "complete",
-      "reason": "",
-      "matches": [
-        {
-          "duration_label": "15m",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 30,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 40,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "1h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 140,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 150,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "3h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 250,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 260,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678518772125244
-        },
-        {
-          "duration_label": "8h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 360,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 370,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9999990463256836
-        }
-      ],
-      "quantities": []
-    },
-    {
-      "scroll_count": 3,
-      "status": "complete",
-      "reason": "",
-      "matches": [
-        {
-          "duration_label": "15m",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 30,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 40,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 1.0
-        },
-        {
-          "duration_label": "1h",
-          "expected_rectangle": {
-            "x": 372,
-            "y": 140,
-            "width": 145,
-            "height": 27
-          },
-          "detected_rectangle": {
-            "x": 372,
-            "y": 150,
-            "width": 145,
-            "height": 27
-          },
-          "offset": {
-            "x": 0,
-            "y": 10
-          },
-          "confidence": 0.9678515195846558
-        },
-        {
           "duration_label": "3h",
           "expected_rectangle": {
             "x": 372,
@@ -1535,7 +1523,7 @@
             "x": 0,
             "y": 10
           },
-          "confidence": 0.9999998211860657
+          "confidence": 0.9678522348403931
         }
       ],
       "quantities": []
@@ -1556,7 +1544,7 @@
       }
     },
     {
-      "elapsed_ms": 678.8,
+      "elapsed_ms": 406.8,
       "event": "capture",
       "step": 0,
       "data": {
@@ -1573,262 +1561,13 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8911023139953613,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 15142.0,
-      "event": "timer_read",
-      "step": 0,
-      "data": {
-        "phase": "initial",
-        "status": "ok",
-        "raw": "23g.:33m.",
-        "value_seconds": 84780,
-        "confidence": 100.0
-      }
-    },
-    {
-      "elapsed_ms": 15142.3,
-      "event": "emergency_stop_check",
-      "step": 0,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 15243.9,
-      "event": "pointer_move",
-      "step": 0,
-      "data": {
-        "status": "ok",
-        "point": [
-          959,
-          585
-        ]
-      }
-    },
-    {
-      "elapsed_ms": 15244.3,
-      "event": "emergency_stop_check",
-      "step": 0,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 15349.2,
-      "event": "scroll",
-      "step": 0,
-      "data": {
-        "status": "sent",
-        "direction": -1,
-        "from_step": 0
-      }
-    },
-    {
-      "elapsed_ms": 15843.3,
-      "event": "capture",
-      "step": 0,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": true,
-        "dialog_recognized": true,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9972743988037109,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 15883.7,
-      "event": "viewport_check",
-      "step": 1,
-      "data": {
-        "status": "changed",
-        "direction": -1,
-        "change_score": 0.643464046723084,
-        "threshold": 0.003,
-        "from_step": 0
-      }
-    },
-    {
-      "elapsed_ms": 15885.3,
-      "event": "emergency_stop_check",
-      "step": 1,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 15985.8,
-      "event": "pointer_move",
-      "step": 1,
-      "data": {
-        "status": "ok",
-        "point": [
-          959,
-          585
-        ]
-      }
-    },
-    {
-      "elapsed_ms": 15986.0,
-      "event": "emergency_stop_check",
-      "step": 1,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 16093.0,
-      "event": "scroll",
-      "step": 1,
-      "data": {
-        "status": "sent",
-        "direction": -1,
-        "from_step": 1
-      }
-    },
-    {
-      "elapsed_ms": 16546.1,
-      "event": "capture",
-      "step": 1,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": true,
-        "dialog_recognized": true,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9972743988037109,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 16606.7,
-      "event": "viewport_check",
-      "step": 2,
-      "data": {
-        "status": "changed",
-        "direction": -1,
-        "change_score": 0.6443750106421019,
-        "threshold": 0.003,
-        "from_step": 1
-      }
-    },
-    {
-      "elapsed_ms": 16608.4,
-      "event": "emergency_stop_check",
-      "step": 2,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 16709.4,
-      "event": "pointer_move",
-      "step": 2,
-      "data": {
-        "status": "ok",
-        "point": [
-          959,
-          585
-        ]
-      }
-    },
-    {
-      "elapsed_ms": 16709.6,
-      "event": "emergency_stop_check",
-      "step": 2,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 16810.3,
-      "event": "scroll",
-      "step": 2,
-      "data": {
-        "status": "sent",
-        "direction": -1,
-        "from_step": 2
-      }
-    },
-    {
-      "elapsed_ms": 17781.5,
-      "event": "capture",
-      "step": 2,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": true,
-        "dialog_recognized": true,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9142128825187683,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9998758435249329,
+          "partial_score": 0.9863595366477966,
           "partial_location": {
             "x": 900,
             "y": 251
@@ -1838,19 +1577,268 @@
       }
     },
     {
-      "elapsed_ms": 17839.2,
+      "elapsed_ms": 3810.5,
+      "event": "timer_read",
+      "step": 0,
+      "data": {
+        "phase": "initial",
+        "status": "ok",
+        "raw": "2d.:1g.",
+        "value_seconds": 176400,
+        "confidence": 100.0
+      }
+    },
+    {
+      "elapsed_ms": 3810.7,
+      "event": "emergency_stop_check",
+      "step": 0,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 3912.4,
+      "event": "pointer_move",
+      "step": 0,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 3912.6,
+      "event": "emergency_stop_check",
+      "step": 0,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 4013.5,
+      "event": "scroll",
+      "step": 0,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 0
+      }
+    },
+    {
+      "elapsed_ms": 4432.0,
+      "event": "capture",
+      "step": 0,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 4475.5,
+      "event": "viewport_check",
+      "step": 1,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6434683035638271,
+        "threshold": 0.003,
+        "from_step": 0
+      }
+    },
+    {
+      "elapsed_ms": 4476.8,
+      "event": "emergency_stop_check",
+      "step": 1,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 4577.9,
+      "event": "pointer_move",
+      "step": 1,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 4578.1,
+      "event": "emergency_stop_check",
+      "step": 1,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 4678.6,
+      "event": "scroll",
+      "step": 1,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 1
+      }
+    },
+    {
+      "elapsed_ms": 5095.7,
+      "event": "capture",
+      "step": 1,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 5117.3,
+      "event": "viewport_check",
+      "step": 2,
+      "data": {
+        "status": "changed",
+        "direction": -1,
+        "change_score": 0.6443792674828449,
+        "threshold": 0.003,
+        "from_step": 1
+      }
+    },
+    {
+      "elapsed_ms": 5118.2,
+      "event": "emergency_stop_check",
+      "step": 2,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 5218.6,
+      "event": "pointer_move",
+      "step": 2,
+      "data": {
+        "status": "ok",
+        "point": [
+          959,
+          585
+        ]
+      }
+    },
+    {
+      "elapsed_ms": 5218.7,
+      "event": "emergency_stop_check",
+      "step": 2,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 5319.8,
+      "event": "scroll",
+      "step": 2,
+      "data": {
+        "status": "sent",
+        "direction": -1,
+        "from_step": 2
+      }
+    },
+    {
+      "elapsed_ms": 5948.2,
+      "event": "capture",
+      "step": 2,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": true,
+        "dialog_recognized": true,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 5966.8,
       "event": "viewport_check",
       "step": 3,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6468908035212587,
+        "change_score": 0.6469035740434879,
         "threshold": 0.003,
         "from_step": 2
       }
     },
     {
-      "elapsed_ms": 30457.2,
+      "elapsed_ms": 9884.6,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -1861,8 +1849,8 @@
           {
             "duration_label": "15m",
             "duration_seconds": 900,
-            "raw_quantity": "4879 / 4879",
-            "quantity": 4879,
+            "raw_quantity": "4878 / 4878",
+            "quantity": 4878,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -1879,8 +1867,8 @@
           {
             "duration_label": "1h",
             "duration_seconds": 3600,
-            "raw_quantity": "5274 / 5274",
-            "quantity": 5274,
+            "raw_quantity": "5267 / 5267",
+            "quantity": 5267,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -1897,8 +1885,8 @@
           {
             "duration_label": "3h",
             "duration_seconds": 10800,
-            "raw_quantity": "3421 / 3421",
-            "quantity": 3421,
+            "raw_quantity": "3418 / 3418",
+            "quantity": 3418,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -1915,8 +1903,8 @@
           {
             "duration_label": "8h",
             "duration_seconds": 28800,
-            "raw_quantity": "477 / 77; psm7: 477 / 477",
-            "quantity": 477,
+            "raw_quantity": "457 / 457",
+            "quantity": 457,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -1970,7 +1958,7 @@
               "x": 0,
               "y": 0
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           },
           {
             "duration_label": "3h",
@@ -2010,15 +1998,15 @@
               "x": 0,
               "y": 0
             },
-            "confidence": 0.9999998211860657
+            "confidence": 1.0
           }
         ],
         "quantities": [
           {
             "duration_label": "15m",
             "duration_seconds": 900,
-            "raw_ocr": "4879 / 4879",
-            "quantity": 4879,
+            "raw_ocr": "4878 / 4878",
+            "quantity": 4878,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2031,8 +2019,8 @@
           {
             "duration_label": "1h",
             "duration_seconds": 3600,
-            "raw_ocr": "5274 / 5274",
-            "quantity": 5274,
+            "raw_ocr": "5267 / 5267",
+            "quantity": 5267,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2045,8 +2033,8 @@
           {
             "duration_label": "3h",
             "duration_seconds": 10800,
-            "raw_ocr": "3421 / 3421",
-            "quantity": 3421,
+            "raw_ocr": "3418 / 3418",
+            "quantity": 3418,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2059,8 +2047,8 @@
           {
             "duration_label": "8h",
             "duration_seconds": 28800,
-            "raw_ocr": "477 / 77; psm7: 477 / 477",
-            "quantity": 477,
+            "raw_ocr": "457 / 457",
+            "quantity": 457,
             "confidence": 100.0,
             "status": "ok",
             "button_rectangle": {
@@ -2074,7 +2062,7 @@
       }
     },
     {
-      "elapsed_ms": 30460.0,
+      "elapsed_ms": 9885.8,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -2082,7 +2070,7 @@
       }
     },
     {
-      "elapsed_ms": 30561.8,
+      "elapsed_ms": 9986.5,
       "event": "pointer_move",
       "step": 3,
       "data": {
@@ -2094,7 +2082,7 @@
       }
     },
     {
-      "elapsed_ms": 30562.5,
+      "elapsed_ms": 9986.7,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -2102,7 +2090,7 @@
       }
     },
     {
-      "elapsed_ms": 30664.5,
+      "elapsed_ms": 10087.2,
       "event": "scroll",
       "step": 3,
       "data": {
@@ -2112,7 +2100,7 @@
       }
     },
     {
-      "elapsed_ms": 31128.5,
+      "elapsed_ms": 10507.9,
       "event": "capture",
       "step": 3,
       "data": {
@@ -2145,19 +2133,19 @@
       }
     },
     {
-      "elapsed_ms": 31169.5,
+      "elapsed_ms": 10526.7,
       "event": "viewport_check",
       "step": 4,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6467843825026818,
+        "change_score": 0.6467801256619388,
         "threshold": 0.003,
         "from_step": 3
       }
     },
     {
-      "elapsed_ms": 31171.0,
+      "elapsed_ms": 10527.9,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -2165,7 +2153,7 @@
       }
     },
     {
-      "elapsed_ms": 31271.7,
+      "elapsed_ms": 10628.9,
       "event": "pointer_move",
       "step": 4,
       "data": {
@@ -2177,7 +2165,7 @@
       }
     },
     {
-      "elapsed_ms": 31272.6,
+      "elapsed_ms": 10629.0,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -2185,7 +2173,7 @@
       }
     },
     {
-      "elapsed_ms": 31375.9,
+      "elapsed_ms": 10729.8,
       "event": "scroll",
       "step": 4,
       "data": {
@@ -2195,7 +2183,7 @@
       }
     },
     {
-      "elapsed_ms": 31840.6,
+      "elapsed_ms": 11160.3,
       "event": "capture",
       "step": 4,
       "data": {
@@ -2228,7 +2216,7 @@
       }
     },
     {
-      "elapsed_ms": 31879.5,
+      "elapsed_ms": 11179.0,
       "event": "viewport_check",
       "step": 5,
       "data": {
@@ -2240,7 +2228,7 @@
       }
     },
     {
-      "elapsed_ms": 31881.4,
+      "elapsed_ms": 11179.8,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -2248,7 +2236,7 @@
       }
     },
     {
-      "elapsed_ms": 31982.2,
+      "elapsed_ms": 11280.8,
       "event": "pointer_move",
       "step": 5,
       "data": {
@@ -2260,7 +2248,7 @@
       }
     },
     {
-      "elapsed_ms": 31982.5,
+      "elapsed_ms": 11280.9,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -2268,7 +2256,7 @@
       }
     },
     {
-      "elapsed_ms": 32083.9,
+      "elapsed_ms": 11381.7,
       "event": "scroll",
       "step": 5,
       "data": {
@@ -2278,7 +2266,7 @@
       }
     },
     {
-      "elapsed_ms": 32549.4,
+      "elapsed_ms": 11786.4,
       "event": "capture",
       "step": 5,
       "data": {
@@ -2311,7 +2299,7 @@
       }
     },
     {
-      "elapsed_ms": 32631.8,
+      "elapsed_ms": 11805.9,
       "event": "viewport_check",
       "step": 6,
       "data": {
@@ -2323,7 +2311,7 @@
       }
     },
     {
-      "elapsed_ms": 32633.5,
+      "elapsed_ms": 11806.9,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -2331,7 +2319,7 @@
       }
     },
     {
-      "elapsed_ms": 32736.3,
+      "elapsed_ms": 11907.7,
       "event": "pointer_move",
       "step": 6,
       "data": {
@@ -2343,7 +2331,7 @@
       }
     },
     {
-      "elapsed_ms": 32736.8,
+      "elapsed_ms": 11907.9,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -2351,7 +2339,7 @@
       }
     },
     {
-      "elapsed_ms": 32840.3,
+      "elapsed_ms": 12008.6,
       "event": "scroll",
       "step": 6,
       "data": {
@@ -2361,7 +2349,7 @@
       }
     },
     {
-      "elapsed_ms": 33318.9,
+      "elapsed_ms": 12420.4,
       "event": "capture",
       "step": 6,
       "data": {
@@ -2394,19 +2382,19 @@
       }
     },
     {
-      "elapsed_ms": 33359.0,
+      "elapsed_ms": 12438.6,
       "event": "viewport_check",
       "step": 7,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6356399734373137,
+        "change_score": 0.6356442302780568,
         "threshold": 0.003,
         "from_step": 6
       }
     },
     {
-      "elapsed_ms": 33361.3,
+      "elapsed_ms": 12439.7,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -2414,7 +2402,7 @@
       }
     },
     {
-      "elapsed_ms": 33465.9,
+      "elapsed_ms": 12540.4,
       "event": "pointer_move",
       "step": 7,
       "data": {
@@ -2426,7 +2414,7 @@
       }
     },
     {
-      "elapsed_ms": 33466.3,
+      "elapsed_ms": 12540.6,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -2434,7 +2422,7 @@
       }
     },
     {
-      "elapsed_ms": 33568.1,
+      "elapsed_ms": 12641.1,
       "event": "scroll",
       "step": 7,
       "data": {
@@ -2444,7 +2432,7 @@
       }
     },
     {
-      "elapsed_ms": 34013.2,
+      "elapsed_ms": 13052.0,
       "event": "capture",
       "step": 7,
       "data": {
@@ -2477,19 +2465,19 @@
       }
     },
     {
-      "elapsed_ms": 34046.8,
+      "elapsed_ms": 13069.1,
       "event": "viewport_check",
       "step": 8,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.6386793577278687,
+        "change_score": 0.6386921282500979,
         "threshold": 0.003,
         "from_step": 7
       }
     },
     {
-      "elapsed_ms": 34048.3,
+      "elapsed_ms": 13070.4,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -2497,7 +2485,7 @@
       }
     },
     {
-      "elapsed_ms": 34148.9,
+      "elapsed_ms": 13171.2,
       "event": "pointer_move",
       "step": 8,
       "data": {
@@ -2509,7 +2497,7 @@
       }
     },
     {
-      "elapsed_ms": 34149.1,
+      "elapsed_ms": 13171.4,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -2517,7 +2505,7 @@
       }
     },
     {
-      "elapsed_ms": 34250.7,
+      "elapsed_ms": 13271.9,
       "event": "scroll",
       "step": 8,
       "data": {
@@ -2527,7 +2515,7 @@
       }
     },
     {
-      "elapsed_ms": 34725.6,
+      "elapsed_ms": 13687.9,
       "event": "capture",
       "step": 8,
       "data": {
@@ -2560,7 +2548,7 @@
       }
     },
     {
-      "elapsed_ms": 34787.8,
+      "elapsed_ms": 13707.2,
       "event": "viewport_check",
       "step": 9,
       "data": {
@@ -2572,7 +2560,7 @@
       }
     },
     {
-      "elapsed_ms": 34789.3,
+      "elapsed_ms": 13708.0,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -2580,7 +2568,7 @@
       }
     },
     {
-      "elapsed_ms": 34890.7,
+      "elapsed_ms": 13808.4,
       "event": "pointer_move",
       "step": 9,
       "data": {
@@ -2592,7 +2580,7 @@
       }
     },
     {
-      "elapsed_ms": 34891.3,
+      "elapsed_ms": 13808.5,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -2600,7 +2588,7 @@
       }
     },
     {
-      "elapsed_ms": 34993.7,
+      "elapsed_ms": 13910.0,
       "event": "scroll",
       "step": 9,
       "data": {
@@ -2610,7 +2598,7 @@
       }
     },
     {
-      "elapsed_ms": 35456.9,
+      "elapsed_ms": 14341.9,
       "event": "capture",
       "step": 9,
       "data": {
@@ -2643,19 +2631,19 @@
       }
     },
     {
-      "elapsed_ms": 35485.1,
+      "elapsed_ms": 14360.1,
       "event": "viewport_check",
       "step": 10,
       "data": {
         "status": "changed",
         "direction": -1,
-        "change_score": 0.63663181733045,
+        "change_score": 0.6366360741711931,
         "threshold": 0.003,
         "from_step": 9
       }
     },
     {
-      "elapsed_ms": 35486.6,
+      "elapsed_ms": 14361.0,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -2663,7 +2651,7 @@
       }
     },
     {
-      "elapsed_ms": 35587.6,
+      "elapsed_ms": 14461.3,
       "event": "pointer_move",
       "step": 10,
       "data": {
@@ -2675,7 +2663,7 @@
       }
     },
     {
-      "elapsed_ms": 35587.8,
+      "elapsed_ms": 14461.8,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -2683,7 +2671,7 @@
       }
     },
     {
-      "elapsed_ms": 35691.0,
+      "elapsed_ms": 14562.7,
       "event": "scroll",
       "step": 10,
       "data": {
@@ -2693,7 +2681,7 @@
       }
     },
     {
-      "elapsed_ms": 36692.4,
+      "elapsed_ms": 15198.3,
       "event": "capture",
       "step": 10,
       "data": {
@@ -2726,7 +2714,7 @@
       }
     },
     {
-      "elapsed_ms": 36746.8,
+      "elapsed_ms": 15220.0,
       "event": "viewport_check",
       "step": 11,
       "data": {
@@ -2738,7 +2726,7 @@
       }
     },
     {
-      "elapsed_ms": 44826.4,
+      "elapsed_ms": 18899.7,
       "event": "checkpoint_read",
       "step": 11,
       "data": {
@@ -2910,7 +2898,7 @@
       }
     },
     {
-      "elapsed_ms": 44831.8,
+      "elapsed_ms": 18902.1,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -2918,7 +2906,7 @@
       }
     },
     {
-      "elapsed_ms": 44933.7,
+      "elapsed_ms": 19003.2,
       "event": "pointer_move",
       "step": 11,
       "data": {
@@ -2930,7 +2918,7 @@
       }
     },
     {
-      "elapsed_ms": 44934.3,
+      "elapsed_ms": 19003.5,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -2938,7 +2926,7 @@
       }
     },
     {
-      "elapsed_ms": 45035.7,
+      "elapsed_ms": 19105.0,
       "event": "scroll",
       "step": 11,
       "data": {
@@ -2948,7 +2936,7 @@
       }
     },
     {
-      "elapsed_ms": 45505.3,
+      "elapsed_ms": 19522.2,
       "event": "capture",
       "step": 11,
       "data": {
@@ -2981,7 +2969,7 @@
       }
     },
     {
-      "elapsed_ms": 45538.3,
+      "elapsed_ms": 19542.6,
       "event": "viewport_check",
       "step": 12,
       "data": {
@@ -2993,7 +2981,7 @@
       }
     },
     {
-      "elapsed_ms": 45540.3,
+      "elapsed_ms": 19544.5,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -3001,7 +2989,7 @@
       }
     },
     {
-      "elapsed_ms": 45640.6,
+      "elapsed_ms": 19645.1,
       "event": "pointer_move",
       "step": 12,
       "data": {
@@ -3013,7 +3001,7 @@
       }
     },
     {
-      "elapsed_ms": 45640.9,
+      "elapsed_ms": 19645.4,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -3021,7 +3009,7 @@
       }
     },
     {
-      "elapsed_ms": 45742.4,
+      "elapsed_ms": 19746.8,
       "event": "scroll",
       "step": 12,
       "data": {
@@ -3031,7 +3019,7 @@
       }
     },
     {
-      "elapsed_ms": 46196.4,
+      "elapsed_ms": 20176.9,
       "event": "capture",
       "step": 12,
       "data": {
@@ -3064,7 +3052,7 @@
       }
     },
     {
-      "elapsed_ms": 46245.4,
+      "elapsed_ms": 20196.7,
       "event": "viewport_check",
       "step": 13,
       "data": {
@@ -3076,7 +3064,7 @@
       }
     },
     {
-      "elapsed_ms": 46247.3,
+      "elapsed_ms": 20197.5,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -3084,7 +3072,7 @@
       }
     },
     {
-      "elapsed_ms": 46350.6,
+      "elapsed_ms": 20298.6,
       "event": "pointer_move",
       "step": 13,
       "data": {
@@ -3096,7 +3084,7 @@
       }
     },
     {
-      "elapsed_ms": 46353.6,
+      "elapsed_ms": 20298.8,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -3104,7 +3092,7 @@
       }
     },
     {
-      "elapsed_ms": 46457.5,
+      "elapsed_ms": 20400.0,
       "event": "scroll",
       "step": 13,
       "data": {
@@ -3114,7 +3102,7 @@
       }
     },
     {
-      "elapsed_ms": 46920.0,
+      "elapsed_ms": 20824.4,
       "event": "capture",
       "step": 13,
       "data": {
@@ -3147,7 +3135,7 @@
       }
     },
     {
-      "elapsed_ms": 46958.2,
+      "elapsed_ms": 20853.3,
       "event": "viewport_check",
       "step": 14,
       "data": {
@@ -3159,7 +3147,7 @@
       }
     },
     {
-      "elapsed_ms": 46959.8,
+      "elapsed_ms": 20854.8,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -3167,7 +3155,7 @@
       }
     },
     {
-      "elapsed_ms": 47060.8,
+      "elapsed_ms": 20956.0,
       "event": "pointer_move",
       "step": 14,
       "data": {
@@ -3179,7 +3167,7 @@
       }
     },
     {
-      "elapsed_ms": 47061.7,
+      "elapsed_ms": 20956.1,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -3187,7 +3175,7 @@
       }
     },
     {
-      "elapsed_ms": 47174.3,
+      "elapsed_ms": 21057.0,
       "event": "scroll",
       "step": 14,
       "data": {
@@ -3197,7 +3185,7 @@
       }
     },
     {
-      "elapsed_ms": 47641.2,
+      "elapsed_ms": 21465.9,
       "event": "capture",
       "step": 14,
       "data": {
@@ -3230,7 +3218,7 @@
       }
     },
     {
-      "elapsed_ms": 47704.1,
+      "elapsed_ms": 21485.6,
       "event": "viewport_check",
       "step": 15,
       "data": {
@@ -3242,7 +3230,7 @@
       }
     },
     {
-      "elapsed_ms": 47706.1,
+      "elapsed_ms": 21486.6,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -3250,7 +3238,7 @@
       }
     },
     {
-      "elapsed_ms": 47811.7,
+      "elapsed_ms": 21587.9,
       "event": "pointer_move",
       "step": 15,
       "data": {
@@ -3262,7 +3250,7 @@
       }
     },
     {
-      "elapsed_ms": 47811.9,
+      "elapsed_ms": 21588.1,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -3270,7 +3258,7 @@
       }
     },
     {
-      "elapsed_ms": 47913.5,
+      "elapsed_ms": 21688.6,
       "event": "scroll",
       "step": 15,
       "data": {
@@ -3280,7 +3268,7 @@
       }
     },
     {
-      "elapsed_ms": 48908.0,
+      "elapsed_ms": 22319.6,
       "event": "capture",
       "step": 15,
       "data": {
@@ -3313,7 +3301,7 @@
       }
     },
     {
-      "elapsed_ms": 48950.3,
+      "elapsed_ms": 22336.6,
       "event": "viewport_check",
       "step": 16,
       "data": {
@@ -3325,7 +3313,7 @@
       }
     },
     {
-      "elapsed_ms": 57908.6,
+      "elapsed_ms": 26094.8,
       "event": "checkpoint_read",
       "step": 16,
       "data": {
@@ -3497,39 +3485,39 @@
       }
     },
     {
-      "elapsed_ms": 72592.4,
+      "elapsed_ms": 31205.4,
       "event": "timer_read",
       "step": 16,
       "data": {
         "phase": "post_scan",
         "status": "ok",
-        "raw": "23g.:10m.",
-        "value_seconds": 83400,
+        "raw": "2d0g",
+        "value_seconds": 172800,
         "confidence": 100.0
       }
     },
     {
-      "elapsed_ms": 72592.5,
+      "elapsed_ms": 31205.5,
       "event": "planning_started",
       "step": 16,
       "data": {
-        "remaining_seconds": 83400,
+        "remaining_seconds": 172800,
         "inventory": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3421
+            3418
           ],
           [
             28800,
-            477
+            457
           ],
           [
             54000,
@@ -3552,17 +3540,17 @@
             1
           ]
         ],
-        "owned_seconds": 437730300,
-        "coverage_surplus_seconds": 437646900
+        "owned_seconds": 437095800,
+        "coverage_surplus_seconds": 436923000
       }
     },
     {
-      "elapsed_ms": 72593.6,
+      "elapsed_ms": 31205.8,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 83400,
+        "remaining_before_seconds": 172800,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -3571,19 +3559,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3421
+            3418
           ],
           [
             28800,
-            477
+            457
           ],
           [
             54000,
@@ -3626,19 +3614,19 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 1,
-        "quantity_before": 477,
-        "quantity_after": 476,
-        "remaining_after_seconds": 54600,
+        "quantity_before": 457,
+        "quantity_after": 456,
+        "remaining_after_seconds": 144000,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 72593.7,
+      "elapsed_ms": 31205.8,
       "event": "plan_choice",
       "step": 16,
       "data": {
         "duration_label": "8h",
-        "remaining_before_seconds": 54600,
+        "remaining_before_seconds": 144000,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -3647,19 +3635,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3421
+            3418
           ],
           [
             28800,
-            476
+            456
           ],
           [
             54000,
@@ -3702,19 +3690,19 @@
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 2,
-        "quantity_before": 476,
-        "quantity_after": 475,
-        "remaining_after_seconds": 25800,
+        "quantity_before": 456,
+        "quantity_after": 455,
+        "remaining_after_seconds": 115200,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 72593.7,
+      "elapsed_ms": 31205.8,
       "event": "plan_choice",
       "step": 16,
       "data": {
-        "duration_label": "3h",
-        "remaining_before_seconds": 25800,
+        "duration_label": "8h",
+        "remaining_before_seconds": 115200,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -3723,19 +3711,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3421
+            3418
           ],
           [
             28800,
-            475
+            455
           ],
           [
             54000,
@@ -3771,25 +3759,26 @@
         "strategy": "preferred_fit",
         "candidates_seconds": [
           3600,
-          10800
+          10800,
+          28800
         ],
-        "selected_duration_seconds": 10800,
+        "selected_duration_seconds": 28800,
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 3,
-        "quantity_before": 3421,
-        "quantity_after": 3420,
-        "remaining_after_seconds": 15000,
+        "quantity_before": 455,
+        "quantity_after": 454,
+        "remaining_after_seconds": 86400,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 72593.7,
+      "elapsed_ms": 31205.8,
       "event": "plan_choice",
       "step": 16,
       "data": {
-        "duration_label": "3h",
-        "remaining_before_seconds": 15000,
+        "duration_label": "8h",
+        "remaining_before_seconds": 86400,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -3798,19 +3787,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3420
+            3418
           ],
           [
             28800,
-            475
+            454
           ],
           [
             54000,
@@ -3846,25 +3835,26 @@
         "strategy": "preferred_fit",
         "candidates_seconds": [
           3600,
-          10800
+          10800,
+          28800
         ],
-        "selected_duration_seconds": 10800,
+        "selected_duration_seconds": 28800,
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 4,
-        "quantity_before": 3420,
-        "quantity_after": 3419,
-        "remaining_after_seconds": 4200,
+        "quantity_before": 454,
+        "quantity_after": 453,
+        "remaining_after_seconds": 57600,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 72593.8,
+      "elapsed_ms": 31205.8,
       "event": "plan_choice",
       "step": 16,
       "data": {
-        "duration_label": "1h",
-        "remaining_before_seconds": 4200,
+        "duration_label": "8h",
+        "remaining_before_seconds": 57600,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -3873,19 +3863,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3419
+            3418
           ],
           [
             28800,
-            475
+            453
           ],
           [
             54000,
@@ -3920,25 +3910,27 @@
         ],
         "strategy": "preferred_fit",
         "candidates_seconds": [
-          3600
+          3600,
+          10800,
+          28800
         ],
-        "selected_duration_seconds": 3600,
+        "selected_duration_seconds": 28800,
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 5,
-        "quantity_before": 5274,
-        "quantity_after": 5273,
-        "remaining_after_seconds": 600,
+        "quantity_before": 453,
+        "quantity_after": 452,
+        "remaining_after_seconds": 28800,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 72593.8,
+      "elapsed_ms": 31205.8,
       "event": "plan_choice",
       "step": 16,
       "data": {
-        "duration_label": "1h",
-        "remaining_before_seconds": 600,
+        "duration_label": "8h",
+        "remaining_before_seconds": 28800,
         "preferred_durations_seconds": [
           3600,
           10800,
@@ -3947,19 +3939,19 @@
         "stock_before": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5273
+            5267
           ],
           [
             10800,
-            3419
+            3418
           ],
           [
             28800,
-            475
+            452
           ],
           [
             54000,
@@ -3992,45 +3984,45 @@
           259200,
           604800
         ],
-        "strategy": "preferred_overshoot",
+        "strategy": "preferred_fit",
         "candidates_seconds": [
           3600,
           10800,
           28800
         ],
-        "selected_duration_seconds": 3600,
+        "selected_duration_seconds": 28800,
         "floor_seconds": 10,
         "breaks_floor": false,
         "step": 6,
-        "quantity_before": 5273,
-        "quantity_after": 5272,
-        "remaining_after_seconds": -3000,
+        "quantity_before": 452,
+        "quantity_after": 451,
+        "remaining_after_seconds": 0,
         "floor_breached_after_selection": false
       }
     },
     {
-      "elapsed_ms": 72593.9,
+      "elapsed_ms": 31205.8,
       "event": "plan_built",
       "step": 16,
       "data": {
         "status": "ok",
-        "remaining_seconds": 83400,
+        "remaining_seconds": 172800,
         "inventory": [
           [
             900,
-            4879
+            4878
           ],
           [
             3600,
-            5274
+            5267
           ],
           [
             10800,
-            3421
+            3418
           ],
           [
             28800,
-            477
+            457
           ],
           [
             54000,
@@ -4053,26 +4045,14 @@
             1
           ]
         ],
-        "owned_seconds": 437730300,
-        "coverage_surplus_seconds": 437646900,
+        "owned_seconds": 437095800,
+        "coverage_surplus_seconds": 436923000,
         "uses": [
           {
             "duration_seconds": 28800,
             "duration_label": "8h",
-            "quantity": 2,
-            "total_seconds": 57600
-          },
-          {
-            "duration_seconds": 10800,
-            "duration_label": "3h",
-            "quantity": 2,
-            "total_seconds": 21600
-          },
-          {
-            "duration_seconds": 3600,
-            "duration_label": "1h",
-            "quantity": 2,
-            "total_seconds": 7200
+            "quantity": 6,
+            "total_seconds": 172800
           }
         ],
         "breached_floors": [],
@@ -4080,18 +4060,18 @@
       }
     },
     {
-      "elapsed_ms": 72595.0,
+      "elapsed_ms": 31205.9,
       "event": "execution_started",
       "step": 16,
       "data": {
         "plan_generation": 1,
         "planned_uses": 6,
-        "planned_seconds": 86400,
-        "initial_timer_seconds": 83400
+        "planned_seconds": 172800,
+        "initial_timer_seconds": 172800
       }
     },
     {
-      "elapsed_ms": 72595.0,
+      "elapsed_ms": 31205.9,
       "event": "use_step_started",
       "step": 16,
       "data": {
@@ -4104,7 +4084,7 @@
         "checkpoint": 3,
         "remaining_queue": 5,
         "decision": {
-          "remaining_before_seconds": 83400,
+          "remaining_before_seconds": 172800,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -4113,19 +4093,19 @@
           "stock_before": [
             [
               900,
-              4879
+              4878
             ],
             [
               3600,
-              5274
+              5267
             ],
             [
               10800,
-              3421
+              3418
             ],
             [
               28800,
-              477
+              457
             ],
             [
               54000,
@@ -4168,15 +4148,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 1,
-          "quantity_before": 477,
-          "quantity_after": 476,
-          "remaining_after_seconds": 54600,
+          "quantity_before": 457,
+          "quantity_after": 456,
+          "remaining_after_seconds": 144000,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 72597.3,
+      "elapsed_ms": 31206.9,
       "event": "emergency_stop_check",
       "step": 16,
       "data": {
@@ -4184,7 +4164,7 @@
       }
     },
     {
-      "elapsed_ms": 72708.5,
+      "elapsed_ms": 31307.6,
       "event": "pointer_move",
       "step": 16,
       "data": {
@@ -4196,7 +4176,7 @@
       }
     },
     {
-      "elapsed_ms": 72708.8,
+      "elapsed_ms": 31307.8,
       "event": "emergency_stop_check",
       "step": 16,
       "data": {
@@ -4204,7 +4184,7 @@
       }
     },
     {
-      "elapsed_ms": 72812.7,
+      "elapsed_ms": 31408.9,
       "event": "scroll",
       "step": 16,
       "data": {
@@ -4214,7 +4194,7 @@
       }
     },
     {
-      "elapsed_ms": 73296.8,
+      "elapsed_ms": 31826.5,
       "event": "capture",
       "step": 16,
       "data": {
@@ -4231,23 +4211,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8910913467407227,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
+          "partial_score": 0.9863606095314026,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": false
+          "fallback_used": true
         }
       }
     },
     {
-      "elapsed_ms": 73345.8,
+      "elapsed_ms": 31846.3,
       "event": "viewport_check",
       "step": 15,
       "data": {
@@ -4259,7 +4239,7 @@
       }
     },
     {
-      "elapsed_ms": 73348.1,
+      "elapsed_ms": 31847.4,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -4267,7 +4247,7 @@
       }
     },
     {
-      "elapsed_ms": 73449.2,
+      "elapsed_ms": 31947.7,
       "event": "pointer_move",
       "step": 15,
       "data": {
@@ -4279,7 +4259,7 @@
       }
     },
     {
-      "elapsed_ms": 73450.8,
+      "elapsed_ms": 31947.8,
       "event": "emergency_stop_check",
       "step": 15,
       "data": {
@@ -4287,7 +4267,7 @@
       }
     },
     {
-      "elapsed_ms": 73552.9,
+      "elapsed_ms": 32049.2,
       "event": "scroll",
       "step": 15,
       "data": {
@@ -4297,7 +4277,7 @@
       }
     },
     {
-      "elapsed_ms": 74028.2,
+      "elapsed_ms": 32455.6,
       "event": "capture",
       "step": 15,
       "data": {
@@ -4314,23 +4294,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8910913467407227,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
+          "partial_score": 0.9863606095314026,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": false
+          "fallback_used": true
         }
       }
     },
     {
-      "elapsed_ms": 74074.3,
+      "elapsed_ms": 32472.8,
       "event": "viewport_check",
       "step": 14,
       "data": {
@@ -4342,7 +4322,7 @@
       }
     },
     {
-      "elapsed_ms": 74075.8,
+      "elapsed_ms": 32473.7,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -4350,7 +4330,7 @@
       }
     },
     {
-      "elapsed_ms": 74177.5,
+      "elapsed_ms": 32574.3,
       "event": "pointer_move",
       "step": 14,
       "data": {
@@ -4362,7 +4342,7 @@
       }
     },
     {
-      "elapsed_ms": 74177.8,
+      "elapsed_ms": 32574.5,
       "event": "emergency_stop_check",
       "step": 14,
       "data": {
@@ -4370,7 +4350,7 @@
       }
     },
     {
-      "elapsed_ms": 74278.6,
+      "elapsed_ms": 32675.5,
       "event": "scroll",
       "step": 14,
       "data": {
@@ -4380,7 +4360,7 @@
       }
     },
     {
-      "elapsed_ms": 74737.2,
+      "elapsed_ms": 33087.3,
       "event": "capture",
       "step": 14,
       "data": {
@@ -4397,23 +4377,23 @@
         "dialog_recognized": true,
         "dialog_match": {
           "recognized": true,
-          "score": 0.9972743988037109,
+          "score": 0.8910913467407227,
           "threshold": 0.95,
           "location": {
             "x": 900,
             "y": 251
           },
-          "partial_score": 0.9995942115783691,
+          "partial_score": 0.9863606095314026,
           "partial_location": {
             "x": 900,
             "y": 251
           },
-          "fallback_used": false
+          "fallback_used": true
         }
       }
     },
     {
-      "elapsed_ms": 74771.7,
+      "elapsed_ms": 33104.6,
       "event": "viewport_check",
       "step": 13,
       "data": {
@@ -4425,7 +4405,7 @@
       }
     },
     {
-      "elapsed_ms": 74773.0,
+      "elapsed_ms": 33105.7,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -4433,7 +4413,7 @@
       }
     },
     {
-      "elapsed_ms": 74875.0,
+      "elapsed_ms": 33206.0,
       "event": "pointer_move",
       "step": 13,
       "data": {
@@ -4445,7 +4425,7 @@
       }
     },
     {
-      "elapsed_ms": 74875.3,
+      "elapsed_ms": 33206.2,
       "event": "emergency_stop_check",
       "step": 13,
       "data": {
@@ -4453,7 +4433,7 @@
       }
     },
     {
-      "elapsed_ms": 74976.1,
+      "elapsed_ms": 33306.8,
       "event": "scroll",
       "step": 13,
       "data": {
@@ -4463,7 +4443,7 @@
       }
     },
     {
-      "elapsed_ms": 75455.2,
+      "elapsed_ms": 33728.7,
       "event": "capture",
       "step": 13,
       "data": {
@@ -4496,19 +4476,19 @@
       }
     },
     {
-      "elapsed_ms": 75489.3,
+      "elapsed_ms": 33753.7,
       "event": "viewport_check",
       "step": 12,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6462948458172283,
+        "change_score": 0.6462905889764852,
         "threshold": 0.003,
         "from_step": 13
       }
     },
     {
-      "elapsed_ms": 75490.9,
+      "elapsed_ms": 33754.9,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -4516,7 +4496,7 @@
       }
     },
     {
-      "elapsed_ms": 75592.8,
+      "elapsed_ms": 33855.4,
       "event": "pointer_move",
       "step": 12,
       "data": {
@@ -4528,7 +4508,7 @@
       }
     },
     {
-      "elapsed_ms": 75593.0,
+      "elapsed_ms": 33855.7,
       "event": "emergency_stop_check",
       "step": 12,
       "data": {
@@ -4536,7 +4516,7 @@
       }
     },
     {
-      "elapsed_ms": 75696.4,
+      "elapsed_ms": 33956.3,
       "event": "scroll",
       "step": 12,
       "data": {
@@ -4546,7 +4526,7 @@
       }
     },
     {
-      "elapsed_ms": 76149.8,
+      "elapsed_ms": 34381.6,
       "event": "capture",
       "step": 12,
       "data": {
@@ -4579,19 +4559,19 @@
       }
     },
     {
-      "elapsed_ms": 76238.8,
+      "elapsed_ms": 34409.4,
       "event": "viewport_check",
       "step": 11,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6464182941987774,
+        "change_score": 0.6464268078802636,
         "threshold": 0.003,
         "from_step": 12
       }
     },
     {
-      "elapsed_ms": 76240.5,
+      "elapsed_ms": 34411.2,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -4599,7 +4579,7 @@
       }
     },
     {
-      "elapsed_ms": 76341.7,
+      "elapsed_ms": 34512.2,
       "event": "pointer_move",
       "step": 11,
       "data": {
@@ -4611,7 +4591,7 @@
       }
     },
     {
-      "elapsed_ms": 76342.1,
+      "elapsed_ms": 34512.4,
       "event": "emergency_stop_check",
       "step": 11,
       "data": {
@@ -4619,7 +4599,7 @@
       }
     },
     {
-      "elapsed_ms": 76443.6,
+      "elapsed_ms": 34613.0,
       "event": "scroll",
       "step": 11,
       "data": {
@@ -4629,7 +4609,7 @@
       }
     },
     {
-      "elapsed_ms": 76926.9,
+      "elapsed_ms": 35031.8,
       "event": "capture",
       "step": 11,
       "data": {
@@ -4662,7 +4642,7 @@
       }
     },
     {
-      "elapsed_ms": 76977.9,
+      "elapsed_ms": 35057.4,
       "event": "viewport_check",
       "step": 10,
       "data": {
@@ -4674,7 +4654,7 @@
       }
     },
     {
-      "elapsed_ms": 76980.2,
+      "elapsed_ms": 35058.9,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -4682,7 +4662,7 @@
       }
     },
     {
-      "elapsed_ms": 77081.9,
+      "elapsed_ms": 35159.8,
       "event": "pointer_move",
       "step": 10,
       "data": {
@@ -4694,7 +4674,7 @@
       }
     },
     {
-      "elapsed_ms": 77082.1,
+      "elapsed_ms": 35160.0,
       "event": "emergency_stop_check",
       "step": 10,
       "data": {
@@ -4702,7 +4682,7 @@
       }
     },
     {
-      "elapsed_ms": 77183.7,
+      "elapsed_ms": 35261.2,
       "event": "scroll",
       "step": 10,
       "data": {
@@ -4712,7 +4692,7 @@
       }
     },
     {
-      "elapsed_ms": 77657.5,
+      "elapsed_ms": 35672.2,
       "event": "capture",
       "step": 10,
       "data": {
@@ -4745,7 +4725,7 @@
       }
     },
     {
-      "elapsed_ms": 77734.9,
+      "elapsed_ms": 35690.7,
       "event": "viewport_check",
       "step": 9,
       "data": {
@@ -4757,7 +4737,7 @@
       }
     },
     {
-      "elapsed_ms": 77737.1,
+      "elapsed_ms": 35692.0,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -4765,7 +4745,7 @@
       }
     },
     {
-      "elapsed_ms": 77838.6,
+      "elapsed_ms": 35792.5,
       "event": "pointer_move",
       "step": 9,
       "data": {
@@ -4777,7 +4757,7 @@
       }
     },
     {
-      "elapsed_ms": 77838.8,
+      "elapsed_ms": 35792.7,
       "event": "emergency_stop_check",
       "step": 9,
       "data": {
@@ -4785,7 +4765,7 @@
       }
     },
     {
-      "elapsed_ms": 77940.1,
+      "elapsed_ms": 35893.9,
       "event": "scroll",
       "step": 9,
       "data": {
@@ -4795,7 +4775,7 @@
       }
     },
     {
-      "elapsed_ms": 78412.3,
+      "elapsed_ms": 36310.6,
       "event": "capture",
       "step": 9,
       "data": {
@@ -4828,7 +4808,7 @@
       }
     },
     {
-      "elapsed_ms": 78451.4,
+      "elapsed_ms": 36330.2,
       "event": "viewport_check",
       "step": 8,
       "data": {
@@ -4840,7 +4820,7 @@
       }
     },
     {
-      "elapsed_ms": 78453.1,
+      "elapsed_ms": 36332.0,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -4848,7 +4828,7 @@
       }
     },
     {
-      "elapsed_ms": 78554.9,
+      "elapsed_ms": 36433.1,
       "event": "pointer_move",
       "step": 8,
       "data": {
@@ -4860,7 +4840,7 @@
       }
     },
     {
-      "elapsed_ms": 78555.2,
+      "elapsed_ms": 36433.3,
       "event": "emergency_stop_check",
       "step": 8,
       "data": {
@@ -4868,7 +4848,7 @@
       }
     },
     {
-      "elapsed_ms": 78657.3,
+      "elapsed_ms": 36534.9,
       "event": "scroll",
       "step": 8,
       "data": {
@@ -4878,7 +4858,7 @@
       }
     },
     {
-      "elapsed_ms": 79165.9,
+      "elapsed_ms": 36955.9,
       "event": "capture",
       "step": 8,
       "data": {
@@ -4911,19 +4891,19 @@
       }
     },
     {
-      "elapsed_ms": 79226.0,
+      "elapsed_ms": 36974.0,
       "event": "viewport_check",
       "step": 7,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6363040405932333,
+        "change_score": 0.6363082974339764,
         "threshold": 0.003,
         "from_step": 8
       }
     },
     {
-      "elapsed_ms": 79237.5,
+      "elapsed_ms": 36975.1,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -4931,7 +4911,7 @@
       }
     },
     {
-      "elapsed_ms": 79340.9,
+      "elapsed_ms": 37076.2,
       "event": "pointer_move",
       "step": 7,
       "data": {
@@ -4943,7 +4923,7 @@
       }
     },
     {
-      "elapsed_ms": 79341.3,
+      "elapsed_ms": 37076.6,
       "event": "emergency_stop_check",
       "step": 7,
       "data": {
@@ -4951,7 +4931,7 @@
       }
     },
     {
-      "elapsed_ms": 79451.8,
+      "elapsed_ms": 37177.4,
       "event": "scroll",
       "step": 7,
       "data": {
@@ -4961,7 +4941,7 @@
       }
     },
     {
-      "elapsed_ms": 79945.5,
+      "elapsed_ms": 37591.0,
       "event": "capture",
       "step": 7,
       "data": {
@@ -4994,7 +4974,7 @@
       }
     },
     {
-      "elapsed_ms": 79996.4,
+      "elapsed_ms": 37614.7,
       "event": "viewport_check",
       "step": 6,
       "data": {
@@ -5006,7 +4986,7 @@
       }
     },
     {
-      "elapsed_ms": 79999.0,
+      "elapsed_ms": 37616.2,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -5014,7 +4994,7 @@
       }
     },
     {
-      "elapsed_ms": 80116.3,
+      "elapsed_ms": 37716.9,
       "event": "pointer_move",
       "step": 6,
       "data": {
@@ -5026,7 +5006,7 @@
       }
     },
     {
-      "elapsed_ms": 80116.6,
+      "elapsed_ms": 37717.2,
       "event": "emergency_stop_check",
       "step": 6,
       "data": {
@@ -5034,7 +5014,7 @@
       }
     },
     {
-      "elapsed_ms": 80220.5,
+      "elapsed_ms": 37817.9,
       "event": "scroll",
       "step": 6,
       "data": {
@@ -5044,7 +5024,7 @@
       }
     },
     {
-      "elapsed_ms": 80685.2,
+      "elapsed_ms": 38239.4,
       "event": "capture",
       "step": 6,
       "data": {
@@ -5077,19 +5057,19 @@
       }
     },
     {
-      "elapsed_ms": 80727.2,
+      "elapsed_ms": 38256.8,
       "event": "viewport_check",
       "step": 5,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6384580020092289,
+        "change_score": 0.638466515690715,
         "threshold": 0.003,
         "from_step": 6
       }
     },
     {
-      "elapsed_ms": 80728.8,
+      "elapsed_ms": 38258.7,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -5097,7 +5077,7 @@
       }
     },
     {
-      "elapsed_ms": 80829.9,
+      "elapsed_ms": 38359.7,
       "event": "pointer_move",
       "step": 5,
       "data": {
@@ -5109,7 +5089,7 @@
       }
     },
     {
-      "elapsed_ms": 80830.9,
+      "elapsed_ms": 38360.0,
       "event": "emergency_stop_check",
       "step": 5,
       "data": {
@@ -5117,7 +5097,7 @@
       }
     },
     {
-      "elapsed_ms": 80957.3,
+      "elapsed_ms": 38461.4,
       "event": "scroll",
       "step": 5,
       "data": {
@@ -5127,7 +5107,7 @@
       }
     },
     {
-      "elapsed_ms": 81418.6,
+      "elapsed_ms": 38888.7,
       "event": "capture",
       "step": 5,
       "data": {
@@ -5160,19 +5140,19 @@
       }
     },
     {
-      "elapsed_ms": 81466.9,
+      "elapsed_ms": 38908.5,
       "event": "viewport_check",
       "step": 4,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6356655144817722,
+        "change_score": 0.6356697713225152,
         "threshold": 0.003,
         "from_step": 5
       }
     },
     {
-      "elapsed_ms": 81469.8,
+      "elapsed_ms": 38909.5,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -5180,7 +5160,7 @@
       }
     },
     {
-      "elapsed_ms": 81581.2,
+      "elapsed_ms": 39010.6,
       "event": "pointer_move",
       "step": 4,
       "data": {
@@ -5192,7 +5172,7 @@
       }
     },
     {
-      "elapsed_ms": 81582.2,
+      "elapsed_ms": 39010.8,
       "event": "emergency_stop_check",
       "step": 4,
       "data": {
@@ -5200,7 +5180,7 @@
       }
     },
     {
-      "elapsed_ms": 81684.6,
+      "elapsed_ms": 39111.3,
       "event": "scroll",
       "step": 4,
       "data": {
@@ -5210,7 +5190,7 @@
       }
     },
     {
-      "elapsed_ms": 82183.9,
+      "elapsed_ms": 39520.1,
       "event": "capture",
       "step": 4,
       "data": {
@@ -5243,19 +5223,19 @@
       }
     },
     {
-      "elapsed_ms": 82227.2,
+      "elapsed_ms": 39538.7,
       "event": "viewport_check",
       "step": 3,
       "data": {
         "status": "changed",
         "direction": 1,
-        "change_score": 0.6454945597575303,
+        "change_score": 0.6454988165982735,
         "threshold": 0.003,
         "from_step": 4
       }
     },
     {
-      "elapsed_ms": 82353.2,
+      "elapsed_ms": 39575.7,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -5302,7 +5282,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "3h",
@@ -5342,14 +5322,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 82353.3,
+      "elapsed_ms": 39575.7,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -5370,7 +5350,7 @@
           1122,
           759
         ],
-        "initial_quantity": 477,
+        "initial_quantity": 457,
         "matches": [
           {
             "duration_label": "15m",
@@ -5410,7 +5390,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "3h",
@@ -5450,7 +5430,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           }
         ],
         "use_number": 1,
@@ -5460,7 +5440,7 @@
       }
     },
     {
-      "elapsed_ms": 82353.5,
+      "elapsed_ms": 39575.8,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -5468,7 +5448,7 @@
       }
     },
     {
-      "elapsed_ms": 82465.3,
+      "elapsed_ms": 39694.1,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -5485,7 +5465,7 @@
       }
     },
     {
-      "elapsed_ms": 82926.8,
+      "elapsed_ms": 40100.9,
       "event": "capture",
       "step": 3,
       "data": {
@@ -5504,7 +5484,7 @@
       }
     },
     {
-      "elapsed_ms": 82932.1,
+      "elapsed_ms": 40104.1,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -5533,13 +5513,13 @@
       }
     },
     {
-      "elapsed_ms": 82932.2,
+      "elapsed_ms": 40104.1,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 476,
+        "expected_quantity": 456,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
@@ -5550,7 +5530,7 @@
       }
     },
     {
-      "elapsed_ms": 82933.9,
+      "elapsed_ms": 40105.5,
       "event": "use_step_started",
       "step": 3,
       "data": {
@@ -5563,7 +5543,7 @@
         "checkpoint": 3,
         "remaining_queue": 4,
         "decision": {
-          "remaining_before_seconds": 54600,
+          "remaining_before_seconds": 144000,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -5572,19 +5552,19 @@
           "stock_before": [
             [
               900,
-              4879
+              4878
             ],
             [
               3600,
-              5274
+              5267
             ],
             [
               10800,
-              3421
+              3418
             ],
             [
               28800,
-              476
+              456
             ],
             [
               54000,
@@ -5627,15 +5607,15 @@
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 2,
-          "quantity_before": 476,
-          "quantity_after": 475,
-          "remaining_after_seconds": 25800,
+          "quantity_before": 456,
+          "quantity_after": 455,
+          "remaining_after_seconds": 115200,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 83037.8,
+      "elapsed_ms": 40141.4,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
@@ -5682,7 +5662,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "3h",
@@ -5722,14 +5702,14 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678522348403931
+            "confidence": 0.9678515195846558
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 83038.0,
+      "elapsed_ms": 40141.4,
       "event": "use_button_check",
       "step": 3,
       "data": {
@@ -5750,7 +5730,7 @@
           1122,
           759
         ],
-        "initial_quantity": 476,
+        "initial_quantity": 456,
         "matches": [
           {
             "duration_label": "15m",
@@ -5790,7 +5770,659 @@
               "x": 0,
               "y": 10
             },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
             "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          }
+        ],
+        "use_number": 2,
+        "plan_generation": 1,
+        "plan_step": 2,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 40141.6,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 40243.2,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 28800,
+        "screen_point": [
+          1122,
+          759
+        ],
+        "use_number": 2,
+        "plan_generation": 1,
+        "plan_step": 2,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 40653.5,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 40656.4,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 28800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 2,
+        "plan_generation": 1,
+        "plan_step": 2,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 40656.4,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 455,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 28800,
+        "use_number": 2,
+        "plan_generation": 1,
+        "plan_step": 2,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 40657.3,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6,
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "checkpoint": 3,
+        "remaining_queue": 3,
+        "decision": {
+          "remaining_before_seconds": 115200,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4878
+            ],
+            [
+              3600,
+              5267
+            ],
+            [
+              10800,
+              3418
+            ],
+            [
+              28800,
+              455
+            ],
+            [
+              54000,
+              637
+            ],
+            [
+              86400,
+              467
+            ],
+            [
+              259200,
+              533
+            ],
+            [
+              604800,
+              245
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "selected_duration_seconds": 28800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 3,
+          "quantity_before": 455,
+          "quantity_after": 454,
+          "remaining_after_seconds": 86400,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 40695.3,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 28800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          }
+        ],
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 40695.3,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 370,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 383
+        },
+        "screen_point": [
+          1122,
+          759
+        ],
+        "initial_quantity": 455,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678515195846558
+          }
+        ],
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 40695.5,
+      "event": "emergency_stop_check",
+      "step": 3,
+      "data": {
+        "status": "clear"
+      }
+    },
+    {
+      "elapsed_ms": 40797.2,
+      "event": "use_click",
+      "step": 3,
+      "data": {
+        "status": "sent",
+        "duration_seconds": 28800,
+        "screen_point": [
+          1122,
+          759
+        ],
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 41215.0,
+      "event": "capture",
+      "step": 3,
+      "data": {
+        "status": "ok",
+        "frame_size": [
+          1920,
+          1080
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "dialog_required": false,
+        "dialog_recognized": false,
+        "dialog_match": null
+      }
+    },
+    {
+      "elapsed_ms": 41218.2,
+      "event": "dialog_check",
+      "step": 3,
+      "data": {
+        "status": "recognized",
+        "phase": "post_use",
+        "duration_seconds": 28800,
+        "dialog_match": {
+          "recognized": true,
+          "score": 0.9972743988037109,
+          "threshold": 0.95,
+          "location": {
+            "x": 900,
+            "y": 251
+          },
+          "partial_score": 0.9995942115783691,
+          "partial_location": {
+            "x": 900,
+            "y": 251
+          },
+          "fallback_used": false
+        },
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 41218.2,
+      "event": "use_verification",
+      "step": 3,
+      "data": {
+        "status": "deferred_to_final_timer",
+        "quantity_checked": false,
+        "expected_quantity": 454,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 28800,
+        "use_number": 3,
+        "plan_generation": 1,
+        "plan_step": 3,
+        "plan_total": 6
+      }
+    },
+    {
+      "elapsed_ms": 41219.5,
+      "event": "use_step_started",
+      "step": 3,
+      "data": {
+        "use_number": 4,
+        "plan_generation": 1,
+        "plan_step": 4,
+        "plan_total": 6,
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "checkpoint": 3,
+        "remaining_queue": 2,
+        "decision": {
+          "remaining_before_seconds": 86400,
+          "preferred_durations_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "stock_before": [
+            [
+              900,
+              4878
+            ],
+            [
+              3600,
+              5267
+            ],
+            [
+              10800,
+              3418
+            ],
+            [
+              28800,
+              454
+            ],
+            [
+              54000,
+              637
+            ],
+            [
+              86400,
+              467
+            ],
+            [
+              259200,
+              533
+            ],
+            [
+              604800,
+              245
+            ],
+            [
+              2592000,
+              1
+            ]
+          ],
+          "available_above_floors_seconds": [
+            900,
+            3600,
+            10800,
+            28800,
+            54000,
+            86400,
+            259200,
+            604800
+          ],
+          "strategy": "preferred_fit",
+          "candidates_seconds": [
+            3600,
+            10800,
+            28800
+          ],
+          "selected_duration_seconds": 28800,
+          "floor_seconds": 10,
+          "breaks_floor": false,
+          "step": 4,
+          "quantity_before": 454,
+          "quantity_after": 453,
+          "remaining_after_seconds": 57600,
+          "floor_breached_after_selection": false
+        }
+      }
+    },
+    {
+      "elapsed_ms": 41254.9,
+      "event": "checkpoint_read",
+      "step": 3,
+      "data": {
+        "status": "complete",
+        "reason": "",
+        "requested_duration": 28800,
+        "rows": [],
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "3h",
@@ -5833,14 +6465,122 @@
             "confidence": 0.9678522348403931
           }
         ],
-        "use_number": 2,
+        "quantities": []
+      }
+    },
+    {
+      "elapsed_ms": 41254.9,
+      "event": "use_button_check",
+      "step": 3,
+      "data": {
+        "status": "matched",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
+        "button_rectangle": {
+          "x": 372,
+          "y": 370,
+          "width": 145,
+          "height": 27
+        },
+        "button_center": {
+          "x": 444,
+          "y": 383
+        },
+        "screen_point": [
+          1122,
+          759
+        ],
+        "initial_quantity": 454,
+        "matches": [
+          {
+            "duration_label": "15m",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 30,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 40,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "1h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 140,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 150,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9999998211860657
+          },
+          {
+            "duration_label": "3h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 250,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 260,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 1.0
+          },
+          {
+            "duration_label": "8h",
+            "expected_rectangle": {
+              "x": 372,
+              "y": 360,
+              "width": 145,
+              "height": 27
+            },
+            "detected_rectangle": {
+              "x": 372,
+              "y": 370,
+              "width": 145,
+              "height": 27
+            },
+            "offset": {
+              "x": 0,
+              "y": 10
+            },
+            "confidence": 0.9678522348403931
+          }
+        ],
+        "use_number": 4,
         "plan_generation": 1,
-        "plan_step": 2,
+        "plan_step": 4,
         "plan_total": 6
       }
     },
     {
-      "elapsed_ms": 83038.2,
+      "elapsed_ms": 41255.7,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -5848,7 +6588,7 @@
       }
     },
     {
-      "elapsed_ms": 83141.6,
+      "elapsed_ms": 41356.9,
       "event": "use_click",
       "step": 3,
       "data": {
@@ -5858,14 +6598,14 @@
           1122,
           759
         ],
-        "use_number": 2,
+        "use_number": 4,
         "plan_generation": 1,
-        "plan_step": 2,
+        "plan_step": 4,
         "plan_total": 6
       }
     },
     {
-      "elapsed_ms": 83652.8,
+      "elapsed_ms": 41764.5,
       "event": "capture",
       "step": 3,
       "data": {
@@ -5884,7 +6624,7 @@
       }
     },
     {
-      "elapsed_ms": 83659.3,
+      "elapsed_ms": 41767.2,
       "event": "dialog_check",
       "step": 3,
       "data": {
@@ -5906,691 +6646,23 @@
           },
           "fallback_used": false
         },
-        "use_number": 2,
+        "use_number": 4,
         "plan_generation": 1,
-        "plan_step": 2,
+        "plan_step": 4,
         "plan_total": 6
       }
     },
     {
-      "elapsed_ms": 83659.5,
+      "elapsed_ms": 41767.2,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 475,
+        "expected_quantity": 453,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
         "duration_seconds": 28800,
-        "use_number": 2,
-        "plan_generation": 1,
-        "plan_step": 2,
-        "plan_total": 6
-      }
-    },
-    {
-      "elapsed_ms": 83660.9,
-      "event": "use_step_started",
-      "step": 3,
-      "data": {
-        "use_number": 3,
-        "plan_generation": 1,
-        "plan_step": 3,
-        "plan_total": 6,
-        "duration_seconds": 10800,
-        "duration_label": "3h",
-        "checkpoint": 3,
-        "remaining_queue": 3,
-        "decision": {
-          "remaining_before_seconds": 25800,
-          "preferred_durations_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "stock_before": [
-            [
-              900,
-              4879
-            ],
-            [
-              3600,
-              5274
-            ],
-            [
-              10800,
-              3421
-            ],
-            [
-              28800,
-              475
-            ],
-            [
-              54000,
-              637
-            ],
-            [
-              86400,
-              467
-            ],
-            [
-              259200,
-              533
-            ],
-            [
-              604800,
-              245
-            ],
-            [
-              2592000,
-              1
-            ]
-          ],
-          "available_above_floors_seconds": [
-            900,
-            3600,
-            10800,
-            28800,
-            54000,
-            86400,
-            259200,
-            604800
-          ],
-          "strategy": "preferred_fit",
-          "candidates_seconds": [
-            3600,
-            10800
-          ],
-          "selected_duration_seconds": 10800,
-          "floor_seconds": 10,
-          "breaks_floor": false,
-          "step": 3,
-          "quantity_before": 3421,
-          "quantity_after": 3420,
-          "remaining_after_seconds": 15000,
-          "floor_breached_after_selection": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 83805.0,
-      "event": "checkpoint_read",
-      "step": 3,
-      "data": {
-        "status": "complete",
-        "reason": "",
-        "requested_duration": 10800,
-        "rows": [],
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678518772125244
-          }
-        ],
-        "quantities": []
-      }
-    },
-    {
-      "elapsed_ms": 83805.1,
-      "event": "use_button_check",
-      "step": 3,
-      "data": {
-        "status": "matched",
-        "duration_seconds": 10800,
-        "duration_label": "3h",
-        "button_rectangle": {
-          "x": 372,
-          "y": 260,
-          "width": 145,
-          "height": 27
-        },
-        "button_center": {
-          "x": 444,
-          "y": 273
-        },
-        "screen_point": [
-          1122,
-          649
-        ],
-        "initial_quantity": 3421,
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9999998211860657
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678518772125244
-          }
-        ],
-        "use_number": 3,
-        "plan_generation": 1,
-        "plan_step": 3,
-        "plan_total": 6
-      }
-    },
-    {
-      "elapsed_ms": 83805.4,
-      "event": "emergency_stop_check",
-      "step": 3,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 83913.4,
-      "event": "use_click",
-      "step": 3,
-      "data": {
-        "status": "sent",
-        "duration_seconds": 10800,
-        "screen_point": [
-          1122,
-          649
-        ],
-        "use_number": 3,
-        "plan_generation": 1,
-        "plan_step": 3,
-        "plan_total": 6
-      }
-    },
-    {
-      "elapsed_ms": 84364.4,
-      "event": "capture",
-      "step": 3,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": false,
-        "dialog_recognized": false,
-        "dialog_match": null
-      }
-    },
-    {
-      "elapsed_ms": 84374.0,
-      "event": "dialog_check",
-      "step": 3,
-      "data": {
-        "status": "recognized",
-        "phase": "post_use",
-        "duration_seconds": 10800,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9972743988037109,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        },
-        "use_number": 3,
-        "plan_generation": 1,
-        "plan_step": 3,
-        "plan_total": 6
-      }
-    },
-    {
-      "elapsed_ms": 84374.0,
-      "event": "use_verification",
-      "step": 3,
-      "data": {
-        "status": "deferred_to_final_timer",
-        "quantity_checked": false,
-        "expected_quantity": 3420,
-        "observed_quantity": null,
-        "reason": "post_click_ocr_disabled",
-        "duration_seconds": 10800,
-        "use_number": 3,
-        "plan_generation": 1,
-        "plan_step": 3,
-        "plan_total": 6
-      }
-    },
-    {
-      "elapsed_ms": 84375.5,
-      "event": "use_step_started",
-      "step": 3,
-      "data": {
-        "use_number": 4,
-        "plan_generation": 1,
-        "plan_step": 4,
-        "plan_total": 6,
-        "duration_seconds": 10800,
-        "duration_label": "3h",
-        "checkpoint": 3,
-        "remaining_queue": 2,
-        "decision": {
-          "remaining_before_seconds": 15000,
-          "preferred_durations_seconds": [
-            3600,
-            10800,
-            28800
-          ],
-          "stock_before": [
-            [
-              900,
-              4879
-            ],
-            [
-              3600,
-              5274
-            ],
-            [
-              10800,
-              3420
-            ],
-            [
-              28800,
-              475
-            ],
-            [
-              54000,
-              637
-            ],
-            [
-              86400,
-              467
-            ],
-            [
-              259200,
-              533
-            ],
-            [
-              604800,
-              245
-            ],
-            [
-              2592000,
-              1
-            ]
-          ],
-          "available_above_floors_seconds": [
-            900,
-            3600,
-            10800,
-            28800,
-            54000,
-            86400,
-            259200,
-            604800
-          ],
-          "strategy": "preferred_fit",
-          "candidates_seconds": [
-            3600,
-            10800
-          ],
-          "selected_duration_seconds": 10800,
-          "floor_seconds": 10,
-          "breaks_floor": false,
-          "step": 4,
-          "quantity_before": 3420,
-          "quantity_after": 3419,
-          "remaining_after_seconds": 4200,
-          "floor_breached_after_selection": false
-        }
-      }
-    },
-    {
-      "elapsed_ms": 84448.3,
-      "event": "checkpoint_read",
-      "step": 3,
-      "data": {
-        "status": "complete",
-        "reason": "",
-        "requested_duration": 10800,
-        "rows": [],
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678515195846558
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.999999463558197
-          }
-        ],
-        "quantities": []
-      }
-    },
-    {
-      "elapsed_ms": 84448.6,
-      "event": "use_button_check",
-      "step": 3,
-      "data": {
-        "status": "matched",
-        "duration_seconds": 10800,
-        "duration_label": "3h",
-        "button_rectangle": {
-          "x": 372,
-          "y": 260,
-          "width": 145,
-          "height": 27
-        },
-        "button_center": {
-          "x": 444,
-          "y": 273
-        },
-        "screen_point": [
-          1122,
-          649
-        ],
-        "initial_quantity": 3420,
-        "matches": [
-          {
-            "duration_label": "15m",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 30,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 40,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "1h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 140,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 150,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 1.0
-          },
-          {
-            "duration_label": "3h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 250,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 260,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.9678515195846558
-          },
-          {
-            "duration_label": "8h",
-            "expected_rectangle": {
-              "x": 372,
-              "y": 360,
-              "width": 145,
-              "height": 27
-            },
-            "detected_rectangle": {
-              "x": 372,
-              "y": 370,
-              "width": 145,
-              "height": 27
-            },
-            "offset": {
-              "x": 0,
-              "y": 10
-            },
-            "confidence": 0.999999463558197
-          }
-        ],
         "use_number": 4,
         "plan_generation": 1,
         "plan_step": 4,
@@ -6598,97 +6670,7 @@
       }
     },
     {
-      "elapsed_ms": 84449.4,
-      "event": "emergency_stop_check",
-      "step": 3,
-      "data": {
-        "status": "clear"
-      }
-    },
-    {
-      "elapsed_ms": 84553.5,
-      "event": "use_click",
-      "step": 3,
-      "data": {
-        "status": "sent",
-        "duration_seconds": 10800,
-        "screen_point": [
-          1122,
-          649
-        ],
-        "use_number": 4,
-        "plan_generation": 1,
-        "plan_step": 4,
-        "plan_total": 6
-      }
-    },
-    {
-      "elapsed_ms": 85007.8,
-      "event": "capture",
-      "step": 3,
-      "data": {
-        "status": "ok",
-        "frame_size": [
-          1920,
-          1080
-        ],
-        "origin": [
-          0,
-          0
-        ],
-        "dialog_required": false,
-        "dialog_recognized": false,
-        "dialog_match": null
-      }
-    },
-    {
-      "elapsed_ms": 85013.0,
-      "event": "dialog_check",
-      "step": 3,
-      "data": {
-        "status": "recognized",
-        "phase": "post_use",
-        "duration_seconds": 10800,
-        "dialog_match": {
-          "recognized": true,
-          "score": 0.9972743988037109,
-          "threshold": 0.95,
-          "location": {
-            "x": 900,
-            "y": 251
-          },
-          "partial_score": 0.9995942115783691,
-          "partial_location": {
-            "x": 900,
-            "y": 251
-          },
-          "fallback_used": false
-        },
-        "use_number": 4,
-        "plan_generation": 1,
-        "plan_step": 4,
-        "plan_total": 6
-      }
-    },
-    {
-      "elapsed_ms": 85013.0,
-      "event": "use_verification",
-      "step": 3,
-      "data": {
-        "status": "deferred_to_final_timer",
-        "quantity_checked": false,
-        "expected_quantity": 3419,
-        "observed_quantity": null,
-        "reason": "post_click_ocr_disabled",
-        "duration_seconds": 10800,
-        "use_number": 4,
-        "plan_generation": 1,
-        "plan_step": 4,
-        "plan_total": 6
-      }
-    },
-    {
-      "elapsed_ms": 85014.2,
+      "elapsed_ms": 41768.2,
       "event": "use_step_started",
       "step": 3,
       "data": {
@@ -6696,12 +6678,12 @@
         "plan_generation": 1,
         "plan_step": 5,
         "plan_total": 6,
-        "duration_seconds": 3600,
-        "duration_label": "1h",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
         "checkpoint": 3,
         "remaining_queue": 1,
         "decision": {
-          "remaining_before_seconds": 4200,
+          "remaining_before_seconds": 57600,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -6710,19 +6692,19 @@
           "stock_before": [
             [
               900,
-              4879
+              4878
             ],
             [
               3600,
-              5274
+              5267
             ],
             [
               10800,
-              3419
+              3418
             ],
             [
               28800,
-              475
+              453
             ],
             [
               54000,
@@ -6757,27 +6739,29 @@
           ],
           "strategy": "preferred_fit",
           "candidates_seconds": [
-            3600
+            3600,
+            10800,
+            28800
           ],
-          "selected_duration_seconds": 3600,
+          "selected_duration_seconds": 28800,
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 5,
-          "quantity_before": 5274,
-          "quantity_after": 5273,
-          "remaining_after_seconds": 600,
+          "quantity_before": 453,
+          "quantity_after": 452,
+          "remaining_after_seconds": 28800,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 85095.9,
+      "elapsed_ms": 41802.8,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
         "status": "complete",
         "reason": "",
-        "requested_duration": 3600,
+        "requested_duration": 28800,
         "rows": [],
         "matches": [
           {
@@ -6818,7 +6802,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "3h",
@@ -6838,7 +6822,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678518772125244
+            "confidence": 1.0
           },
           {
             "duration_label": "8h",
@@ -6858,35 +6842,35 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999990463256836
+            "confidence": 0.9678522348403931
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 85096.0,
+      "elapsed_ms": 41802.9,
       "event": "use_button_check",
       "step": 3,
       "data": {
         "status": "matched",
-        "duration_seconds": 3600,
-        "duration_label": "1h",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
         "button_rectangle": {
           "x": 372,
-          "y": 150,
+          "y": 370,
           "width": 145,
           "height": 27
         },
         "button_center": {
           "x": 444,
-          "y": 163
+          "y": 383
         },
         "screen_point": [
           1122,
-          539
+          759
         ],
-        "initial_quantity": 5274,
+        "initial_quantity": 453,
         "matches": [
           {
             "duration_label": "15m",
@@ -6926,7 +6910,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 1.0
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "3h",
@@ -6946,7 +6930,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678518772125244
+            "confidence": 1.0
           },
           {
             "duration_label": "8h",
@@ -6966,7 +6950,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999990463256836
+            "confidence": 0.9678522348403931
           }
         ],
         "use_number": 5,
@@ -6976,7 +6960,7 @@
       }
     },
     {
-      "elapsed_ms": 85096.3,
+      "elapsed_ms": 41803.1,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -6984,15 +6968,15 @@
       }
     },
     {
-      "elapsed_ms": 85199.2,
+      "elapsed_ms": 41904.8,
       "event": "use_click",
       "step": 3,
       "data": {
         "status": "sent",
-        "duration_seconds": 3600,
+        "duration_seconds": 28800,
         "screen_point": [
           1122,
-          539
+          759
         ],
         "use_number": 5,
         "plan_generation": 1,
@@ -7001,7 +6985,7 @@
       }
     },
     {
-      "elapsed_ms": 85644.6,
+      "elapsed_ms": 42319.2,
       "event": "capture",
       "step": 3,
       "data": {
@@ -7020,13 +7004,13 @@
       }
     },
     {
-      "elapsed_ms": 85649.1,
+      "elapsed_ms": 42322.7,
       "event": "dialog_check",
       "step": 3,
       "data": {
         "status": "recognized",
         "phase": "post_use",
-        "duration_seconds": 3600,
+        "duration_seconds": 28800,
         "dialog_match": {
           "recognized": true,
           "score": 0.9972743988037109,
@@ -7049,16 +7033,16 @@
       }
     },
     {
-      "elapsed_ms": 85649.1,
+      "elapsed_ms": 42322.7,
       "event": "use_verification",
       "step": 3,
       "data": {
         "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "expected_quantity": 5273,
+        "expected_quantity": 452,
         "observed_quantity": null,
         "reason": "post_click_ocr_disabled",
-        "duration_seconds": 3600,
+        "duration_seconds": 28800,
         "use_number": 5,
         "plan_generation": 1,
         "plan_step": 5,
@@ -7066,7 +7050,7 @@
       }
     },
     {
-      "elapsed_ms": 85650.3,
+      "elapsed_ms": 42323.8,
       "event": "use_step_started",
       "step": 3,
       "data": {
@@ -7074,12 +7058,12 @@
         "plan_generation": 1,
         "plan_step": 6,
         "plan_total": 6,
-        "duration_seconds": 3600,
-        "duration_label": "1h",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
         "checkpoint": 3,
         "remaining_queue": 0,
         "decision": {
-          "remaining_before_seconds": 600,
+          "remaining_before_seconds": 28800,
           "preferred_durations_seconds": [
             3600,
             10800,
@@ -7088,19 +7072,19 @@
           "stock_before": [
             [
               900,
-              4879
+              4878
             ],
             [
               3600,
-              5273
+              5267
             ],
             [
               10800,
-              3419
+              3418
             ],
             [
               28800,
-              475
+              452
             ],
             [
               54000,
@@ -7133,31 +7117,31 @@
             259200,
             604800
           ],
-          "strategy": "preferred_overshoot",
+          "strategy": "preferred_fit",
           "candidates_seconds": [
             3600,
             10800,
             28800
           ],
-          "selected_duration_seconds": 3600,
+          "selected_duration_seconds": 28800,
           "floor_seconds": 10,
           "breaks_floor": false,
           "step": 6,
-          "quantity_before": 5273,
-          "quantity_after": 5272,
-          "remaining_after_seconds": -3000,
+          "quantity_before": 452,
+          "quantity_after": 451,
+          "remaining_after_seconds": 0,
           "floor_breached_after_selection": false
         }
       }
     },
     {
-      "elapsed_ms": 85735.9,
+      "elapsed_ms": 42363.6,
       "event": "checkpoint_read",
       "step": 3,
       "data": {
         "status": "complete",
         "reason": "",
-        "requested_duration": 3600,
+        "requested_duration": 28800,
         "rows": [],
         "matches": [
           {
@@ -7198,7 +7182,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678515195846558
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "3h",
@@ -7238,35 +7222,35 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 0.9678522348403931
           }
         ],
         "quantities": []
       }
     },
     {
-      "elapsed_ms": 85736.0,
+      "elapsed_ms": 42363.6,
       "event": "use_button_check",
       "step": 3,
       "data": {
         "status": "matched",
-        "duration_seconds": 3600,
-        "duration_label": "1h",
+        "duration_seconds": 28800,
+        "duration_label": "8h",
         "button_rectangle": {
           "x": 372,
-          "y": 150,
+          "y": 370,
           "width": 145,
           "height": 27
         },
         "button_center": {
           "x": 444,
-          "y": 163
+          "y": 383
         },
         "screen_point": [
           1122,
-          539
+          759
         ],
-        "initial_quantity": 5273,
+        "initial_quantity": 452,
         "matches": [
           {
             "duration_label": "15m",
@@ -7306,7 +7290,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9678515195846558
+            "confidence": 0.9999998211860657
           },
           {
             "duration_label": "3h",
@@ -7346,7 +7330,7 @@
               "x": 0,
               "y": 10
             },
-            "confidence": 0.9999998211860657
+            "confidence": 0.9678522348403931
           }
         ],
         "use_number": 6,
@@ -7356,7 +7340,7 @@
       }
     },
     {
-      "elapsed_ms": 85736.6,
+      "elapsed_ms": 42363.9,
       "event": "emergency_stop_check",
       "step": 3,
       "data": {
@@ -7364,15 +7348,15 @@
       }
     },
     {
-      "elapsed_ms": 85844.1,
+      "elapsed_ms": 42465.5,
       "event": "use_click",
       "step": 3,
       "data": {
         "status": "sent",
-        "duration_seconds": 3600,
+        "duration_seconds": 28800,
         "screen_point": [
           1122,
-          539
+          759
         ],
         "use_number": 6,
         "plan_generation": 1,
@@ -7381,7 +7365,7 @@
       }
     },
     {
-      "elapsed_ms": 86286.0,
+      "elapsed_ms": 42882.3,
       "event": "capture",
       "step": 3,
       "data": {
@@ -7400,25 +7384,25 @@
       }
     },
     {
-      "elapsed_ms": 86291.0,
+      "elapsed_ms": 42885.7,
       "event": "dialog_check",
       "step": 3,
       "data": {
-        "status": "not_recognized",
+        "status": "recognized",
         "phase": "post_use",
-        "duration_seconds": 3600,
+        "duration_seconds": 28800,
         "dialog_match": {
-          "recognized": false,
-          "score": 0.22219830751419067,
+          "recognized": true,
+          "score": 0.9972743988037109,
           "threshold": 0.95,
           "location": {
             "x": 900,
-            "y": 252
+            "y": 251
           },
-          "partial_score": 0.25034016370773315,
+          "partial_score": 0.9995942115783691,
           "partial_location": {
             "x": 900,
-            "y": 252
+            "y": 251
           },
           "fallback_used": false
         },
@@ -7429,13 +7413,16 @@
       }
     },
     {
-      "elapsed_ms": 86291.1,
+      "elapsed_ms": 42885.8,
       "event": "use_verification",
       "step": 3,
       "data": {
-        "status": "dialog_closed",
+        "status": "deferred_to_final_timer",
         "quantity_checked": false,
-        "duration_seconds": 3600,
+        "expected_quantity": 451,
+        "observed_quantity": null,
+        "reason": "post_click_ocr_disabled",
+        "duration_seconds": 28800,
         "use_number": 6,
         "plan_generation": 1,
         "plan_step": 6,
@@ -7443,37 +7430,42 @@
       }
     },
     {
-      "elapsed_ms": 86292.8,
-      "event": "execution_decision",
+      "elapsed_ms": 45238.9,
+      "event": "timer_read",
       "step": 3,
       "data": {
-        "action": "finish_dialog_closed",
-        "reason": "last_planned_use_closed_dialog"
+        "phase": "final",
+        "status": "minute_ocr_disagreement",
+        "raw": "5m01s / H5m01s / 5m01s / H5m01s",
+        "value": null,
+        "confidence": 50.0
       }
     },
     {
-      "elapsed_ms": 86292.9,
+      "elapsed_ms": 45238.9,
+      "event": "run_aborted",
+      "step": 3,
+      "data": {
+        "status": "UNCERTAIN",
+        "reason": "timer_unreadable:minute_ocr_disagreement",
+        "clicks_issued": 6
+      }
+    },
+    {
+      "elapsed_ms": 45239.0,
       "event": "run_finished",
       "step": 3,
       "data": {
-        "status": "FINISHED",
-        "reason": "dialog_closed_after_last_use",
+        "status": "UNCERTAIN",
+        "reason": "timer_unreadable:minute_ocr_disagreement",
         "clicks_issued": 6,
         "shortfall_seconds": 0,
-        "initial_timer_seconds": 83400,
-        "final_observed_timer_seconds": 83400,
+        "initial_timer_seconds": 172800,
+        "final_observed_timer_seconds": 172800,
         "submitted_uses": [
           [
-            3600,
-            2
-          ],
-          [
-            10800,
-            2
-          ],
-          [
             28800,
-            2
+            6
           ]
         ]
       }
@@ -7485,5 +7477,6 @@
     "frame_011.png",
     "frame_016.png"
   ],
+  "debug_capture": "uncertain.png",
   "event_trace_file": "event_trace.jsonl"
 }
