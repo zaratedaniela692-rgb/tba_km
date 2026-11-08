@@ -25,6 +25,7 @@ MAX_DOT_SIZE = 3
 GLYPH_HEIGHTS = range(8, 14)  # the hourglass icon is taller and is dropped
 MAX_DAY_DIGITS = 3
 MAX_HOUR_DIGITS = 2
+MAX_DIGIT_GAP = 8  # px; the hourglass icon sits 14 px left of the first digit
 DIGIT_SCALES = (6, 10)
 DIGIT_PAD = 2
 DIGIT_BORDER = 30
@@ -69,14 +70,23 @@ def _split_label(components):
         return None
     first_dot, last_dot = dots[0], dots[-1]
     before_first_dot = [g for g in glyphs if g[0] + g[2] <= first_dot[0]]
-    if not before_first_dot or last_dot[0] < glyphs[-1][0] + glyphs[-1][2]:
+    if not before_first_dot:
         return None
     first_unit = before_first_dot[-1]
-    before_last_dot = [g for g in glyphs if g[0] + g[2] <= last_dot[0]]
-    if not before_last_dot:
-        return None
-    second_unit = before_last_dot[-1]
-    first_digits = before_first_dot[:-1]
+    if last_dot[0] < glyphs[-1][0] + glyphs[-1][2]:
+        # Minutes and seconds ("36m.:55s") have no dot after the last unit.
+        second_unit = glyphs[-1]
+    else:
+        before_last_dot = [g for g in glyphs if g[0] + g[2] <= last_dot[0]]
+        if not before_last_dot:
+            return None
+        second_unit = before_last_dot[-1]
+    first_digits = []
+    for glyph in reversed(before_first_dot[:-1]):
+        right_edge = first_digits[0][0] if first_digits else first_unit[0]
+        if right_edge - (glyph[0] + glyph[2]) > MAX_DIGIT_GAP:
+            break
+        first_digits.insert(0, glyph)
     second_digits = [
         g for g in glyphs
         if g[0] > first_unit[0] and g[0] + g[2] <= second_unit[0]
@@ -192,6 +202,9 @@ def read_remaining_time(image, variant=None, tesseract_cmd=None):
         _read_unit(gray, component)
         for component in (first_unit_component, second_unit_component)
     )
+    if first_unit == "m" and second_unit is None:
+        # The dialog shows the two largest units, so only seconds can follow minutes.
+        second_unit = "s"
     raw = f"{first or '?'}{first_unit or '?'}.:{second or '?'}{second_unit or '?'}."
     if first is None or second is None or first_unit is None or second_unit is None:
         minute_reading = _read_minute_timer(_crop_timer_text(gray, parts))

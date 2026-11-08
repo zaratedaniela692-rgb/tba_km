@@ -42,6 +42,25 @@ def test_live_run_timer_with_previously_unverified_digits_is_read():
     assert reading.confidence == 100.0
 
 
+def test_minutes_seconds_timer_without_trailing_dot_is_segmented_run37():
+    image = cv2.imread(str(Path(__file__).resolve().parents[1] / "tests" / "data" / "speedup" / "timer_36m55s.png"))
+
+    reading = read_remaining_time(image)
+
+    assert reading.status == "ok"
+    assert reading.raw == "36m.:55s."
+    assert reading.value == 36 * 60 + 55
+
+
+def test_minutes_seconds_unit_inference_requires_minutes_first(monkeypatch):
+    image = cv2.imread(str(Path(__file__).resolve().parents[1] / "tests" / "data" / "speedup" / "timer_36m55s.png"))
+    monkeypatch.setattr(speedup_reader, "_read_unit", lambda *_args: None)
+
+    reading = read_remaining_time(image)
+
+    assert reading.value is None
+
+
 def test_minute_only_timer_uses_consensus_ocr_fallback(monkeypatch):
     image = cv2.imread(str(SHOTS / "speedup_view.png"))
     monkeypatch.setattr(speedup_reader, "_split_label", lambda _components: None)
