@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-11-08T15:15:06.823925+00:00",
+  "timestamp": "2026-11-08T16:07:05.419073+00:00",
   "mode": "execute",
   "status": "BLOCKED",
-  "reason": "timer_unreadable:digit_unverified",
+  "reason": "speedup_dialog_not_recognized",
   "remaining_seconds": null,
   "final_remaining_seconds": null,
   "inventory": [],
@@ -30,7 +30,7 @@
       }
     },
     {
-      "elapsed_ms": 367.3,
+      "elapsed_ms": 431.4,
       "event": "capture",
       "step": 0,
       "data": {
@@ -44,53 +44,41 @@
           0
         ],
         "dialog_required": true,
-        "dialog_recognized": true,
+        "dialog_recognized": false,
         "dialog_match": {
-          "recognized": true,
-          "score": 0.8914832472801208,
+          "recognized": false,
+          "score": 0.04750281944870949,
           "threshold": 0.95,
           "location": {
-            "x": 900,
-            "y": 251
+            "x": 904,
+            "y": 258
           },
-          "partial_score": 0.9863589406013489,
+          "partial_score": 0.11181110143661499,
           "partial_location": {
-            "x": 900,
-            "y": 251
+            "x": 905,
+            "y": 250
           },
-          "fallback_used": true
+          "fallback_used": false
         }
       }
     },
     {
-      "elapsed_ms": 8695.3,
-      "event": "timer_read",
-      "step": 0,
-      "data": {
-        "phase": "initial",
-        "status": "digit_unverified",
-        "raw": "17g.:?m.",
-        "value": null,
-        "confidence": null
-      }
-    },
-    {
-      "elapsed_ms": 8695.3,
+      "elapsed_ms": 431.4,
       "event": "run_aborted",
       "step": 0,
       "data": {
         "status": "BLOCKED",
-        "reason": "timer_unreadable:digit_unverified",
+        "reason": "speedup_dialog_not_recognized",
         "clicks_issued": 0
       }
     },
     {
-      "elapsed_ms": 8695.3,
+      "elapsed_ms": 431.5,
       "event": "run_finished",
       "step": 0,
       "data": {
         "status": "BLOCKED",
-        "reason": "timer_unreadable:digit_unverified",
+        "reason": "speedup_dialog_not_recognized",
         "clicks_issued": 0,
         "shortfall_seconds": 0,
         "initial_timer_seconds": null,
