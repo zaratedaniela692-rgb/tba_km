@@ -27,6 +27,9 @@ MAX_HOUR_DIGITS = 2
 DIGIT_SCALES = (6, 10)
 DIGIT_PAD = 2
 DIGIT_BORDER = 30
+UNIT_SCALES = (8, 12)
+UNIT_PAD = 3
+UNIT_BORDER = 40
 MINUTE_OCR_SCALES = (4, 6)
 MINUTE_OCR_PSMS = (7, 8)
 # Digits confirmed on fixtures; informational only, not an acceptance whitelist.
@@ -58,7 +61,7 @@ def _components(gray):
 
 
 def _split_label(components):
-    """(day digits, hour digits) of `digits d . : digits g .`, or None for any other layout."""
+    """Return the two digit groups and their adjacent unit glyphs, or None for unknown layouts."""
     dots = [c for c in components if c[2] <= MAX_DOT_SIZE and c[3] <= MAX_DOT_SIZE]
     glyphs = [c for c in components if c not in dots and c[3] in GLYPH_HEIGHTS]
     if len(dots) < 2 or len(glyphs) < 4:
@@ -67,12 +70,19 @@ def _split_label(components):
     before_first_dot = [g for g in glyphs if g[0] + g[2] <= first_dot[0]]
     if not before_first_dot or last_dot[0] < glyphs[-1][0] + glyphs[-1][2]:
         return None
-    day_label = before_first_dot[-1]
-    day_digits = before_first_dot[:-1]
-    hour_digits = [g for g in glyphs if g[0] > day_label[0] and g is not glyphs[-1]]
-    if not 1 <= len(day_digits) <= MAX_DAY_DIGITS or not 1 <= len(hour_digits) <= MAX_HOUR_DIGITS:
+    first_unit = before_first_dot[-1]
+    before_last_dot = [g for g in glyphs if g[0] + g[2] <= last_dot[0]]
+    if not before_last_dot:
         return None
-    return day_digits, hour_digits
+    second_unit = before_last_dot[-1]
+    first_digits = before_first_dot[:-1]
+    second_digits = [
+        g for g in glyphs
+        if g[0] > first_unit[0] and g[0] + g[2] <= second_unit[0]
+    ]
+    if not 1 <= len(first_digits) <= MAX_DAY_DIGITS or not 1 <= len(second_digits) <= MAX_HOUR_DIGITS:
+        return None
+    return first_digits, first_unit, second_digits, second_unit
 
 
 def _read_digit(gray, component, scale):
@@ -96,6 +106,39 @@ def _read_number(gray, digits):
     return reads[0]
 
 
+def _read_unit(gray, component):
+    x, y, width, height = component
+    patch = gray[
+        max(0, y - UNIT_PAD):y + height + UNIT_PAD,
+        max(0, x - UNIT_PAD):x + width + UNIT_PAD,
+    ]
+    variants = []
+    for scale in UNIT_SCALES:
+        enlarged = cv2.resize(patch, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+        _, mask = cv2.threshold(enlarged, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        variants.append(cv2.copyMakeBorder(
+            mask, UNIT_BORDER, UNIT_BORDER, UNIT_BORDER, UNIT_BORDER,
+            cv2.BORDER_CONSTANT, value=255,
+        ))
+
+    height = max(variant.shape[0] for variant in variants)
+    canvas = np.full((height, sum(variant.shape[1] for variant in variants) + UNIT_BORDER, 3), 255, dtype=np.uint8)
+    offset = 0
+    for variant in variants:
+        top = (height - variant.shape[0]) // 2
+        canvas[top:top + variant.shape[0], offset:offset + variant.shape[1]] = cv2.cvtColor(variant, cv2.COLOR_GRAY2BGR)
+        offset += variant.shape[1] + UNIT_BORDER
+
+    try:
+        text = pytesseract.image_to_string(
+            canvas,
+            config="--psm 7 -c tessedit_char_whitelist=dDgGhHmMsS",
+        ).strip().lower()
+    except pytesseract.TesseractNotFoundError as error:
+        raise ArmyTrainingScannerError("Tesseract OCR was not found.") from error
+    return text[0] if len(text) == 2 and text[0] == text[1] and text[0] in {"d", "g", "h", "m", "s"} else None
+
+
 def _read_minute_timer(gray):
     reads = []
     for scale in MINUTE_OCR_SCALES:
@@ -104,7 +147,7 @@ def _read_minute_timer(gray):
             try:
                 text = pytesseract.image_to_string(
                     enlarged,
-                    config=f"--psm {psm} -c tessedit_char_whitelist=0123456789mMinIN",
+                    config=f"--psm {psm} -c tessedit_char_whitelist=0123456789dDgGhHmMsS",
                 ).strip()
             except pytesseract.TesseractNotFoundError as error:
                 raise ArmyTrainingScannerError("Tesseract OCR was not found.") from error
@@ -120,7 +163,7 @@ def _read_minute_timer(gray):
 
 
 def read_remaining_time(image, variant=None, tesseract_cmd=None):
-    """Read day/hour or minute-only remaining time; ambiguous values remain unset."""
+    """Read timer values from their recognized units; ambiguous values remain unset."""
     configure_tesseract(tesseract_cmd)
     variant = variant or resolve_variant()
     region = _load_regions(variant["regions"])[REGION_SCREEN][REGION_NAME]
@@ -130,9 +173,14 @@ def read_remaining_time(image, variant=None, tesseract_cmd=None):
     parts = _split_label(_components(gray))
     if parts is None:
         return _read_minute_timer(gray)
-    days, hours = (_read_number(gray, digits) for digits in parts)
-    raw = f"{days or '?'}d.:{hours or '?'}g."
-    if days is None or hours is None:
+    first_digits, first_unit_component, second_digits, second_unit_component = parts
+    first, second = _read_number(gray, first_digits), _read_number(gray, second_digits)
+    first_unit, second_unit = (
+        _read_unit(gray, component)
+        for component in (first_unit_component, second_unit_component)
+    )
+    raw = f"{first or '?'}{first_unit or '?'}.:{second or '?'}{second_unit or '?'}."
+    if first is None or second is None or first_unit is None or second_unit is None:
         minute_reading = _read_minute_timer(gray)
         return minute_reading if minute_reading.value is not None else ParsedReading(raw, None, None, "digit_unverified")
     return parse_remaining_time(raw, 100.0)

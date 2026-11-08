@@ -7,16 +7,11 @@ MIN_CONFIDENCE = 70.0
 SECONDS_PER_MINUTE = 60
 SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE
 SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR
+SECONDS_PER_SECOND = 1
 
-_TIME_PATTERN = re.compile(
-    r"^\s*(?:(?P<days>\d+)\s*d\s*\.?(?:\s*:?\s*"
-    r"(?P<hours>\d+)\s*(?:g|h)\s*\.?)?(?:\s*:?\s*"
-    r"(?P<minutes>\d+)\s*(?:min|m)\s*\.?)?|"
-    r"(?P<hours_only>\d+)\s*(?:g|h)\s*\.?(?:\s*:?\s*"
-    r"(?P<hours_minutes>\d+)\s*(?:min|m)\s*\.?)?|"
-    r"(?P<minutes_only>\d+)\s*(?:min|m)\s*\.?)\s*$",
-    re.IGNORECASE,
-)
+_TIME_TOKEN_PATTERN = re.compile(r"(?P<amount>\d+)\s*(?P<unit>min|[dghms])", re.IGNORECASE)
+_TIME_SEPARATOR_PATTERN = re.compile(r"[\s:.]*")
+_TIME_TRAILING_PATTERN = re.compile(r"[\s.]*")
 _DURATION_PATTERN = re.compile(r"^\s*(?P<amount>\d+)\s*(?P<unit>m|min|g|h|d)\s*\.?\s*$", re.IGNORECASE)
 _QUANTITY_PATTERN = re.compile(r"^\s*\d+(?:[,. ]\d{3})*\s*$")
 
@@ -39,25 +34,40 @@ def _confidence_is_valid(confidence, minimum_confidence):
 
 
 def parse_remaining_time(raw_text, confidence=None, minimum_confidence=MIN_CONFIDENCE):
-    """Parse day/hour timer text such as ``13 d. : 7 g.`` into seconds."""
+    """Parse one to three ordered timer units, such as ``13d 7g`` or ``30m 05s``."""
     raw = raw_text if isinstance(raw_text, str) else ""
     if not _confidence_is_valid(confidence, minimum_confidence):
         return ParsedReading(raw, None, confidence, "low_confidence" if confidence is not None else "unreadable")
 
-    match = _TIME_PATTERN.fullmatch(raw)
-    if match is None:
+    tokens = []
+    position = 0
+    for match in _TIME_TOKEN_PATTERN.finditer(raw):
+        separator = raw[position:match.start()]
+        if (not tokens and separator.strip()) or (tokens and _TIME_SEPARATOR_PATTERN.fullmatch(separator) is None):
+            return ParsedReading(raw, None, confidence, "unrecognized_time")
+        unit = match.group("unit").lower()
+        rank = {"d": 4, "g": 3, "h": 3, "m": 2, "min": 2, "s": 1}[unit]
+        tokens.append((int(match.group("amount")), unit, rank))
+        position = match.end()
+
+    if not tokens or len(tokens) > 3 or _TIME_TRAILING_PATTERN.fullmatch(raw[position:]) is None:
         return ParsedReading(raw, None, confidence, "unrecognized_time")
 
-    days = int(match.group("days") or 0)
-    hours = int(match.group("hours") or match.group("hours_only") or 0)
-    minutes = int(match.group("minutes") or match.group("hours_minutes") or match.group("minutes_only") or 0)
-    if hours > 23:
-        return ParsedReading(raw, None, confidence, "hours_out_of_range")
-    if minutes > 59:
-        return ParsedReading(raw, None, confidence, "minutes_out_of_range")
+    ranks = [rank for _, _, rank in tokens]
+    if any(left <= right for left, right in zip(ranks, ranks[1:])):
+        return ParsedReading(raw, None, confidence, "unrecognized_time")
 
-    seconds = days * SECONDS_PER_DAY + hours * SECONDS_PER_HOUR + minutes * SECONDS_PER_MINUTE
-    return ParsedReading(raw, seconds, float(confidence), "ok")
+    multipliers = {4: SECONDS_PER_DAY, 3: SECONDS_PER_HOUR, 2: SECONDS_PER_MINUTE, 1: SECONDS_PER_SECOND}
+    total_seconds = 0
+    for amount, unit, rank in tokens:
+        if rank == 3 and amount > 23:
+            return ParsedReading(raw, None, confidence, "hours_out_of_range")
+        if rank in (2, 1) and amount > 59:
+            status = "minutes_out_of_range" if rank == 2 else "seconds_out_of_range"
+            return ParsedReading(raw, None, confidence, status)
+        total_seconds += amount * multipliers[rank]
+
+    return ParsedReading(raw, total_seconds, float(confidence), "ok")
 
 
 def parse_duration(raw_text, confidence=None, minimum_confidence=MIN_CONFIDENCE):

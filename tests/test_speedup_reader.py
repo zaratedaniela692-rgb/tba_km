@@ -67,6 +67,39 @@ def test_minute_only_timer_ocr_disagreement_remains_unknown(monkeypatch):
     assert reading.status == "minute_ocr_disagreement"
 
 
+@pytest.mark.parametrize(
+    ("first", "first_unit", "second", "second_unit", "expected"),
+    [
+        ("14", "g", "56", "m", 14 * HOUR + 56 * 60),
+        ("30", "m", "05", "s", 30 * 60 + 5),
+    ],
+)
+def test_segmented_timer_uses_recognized_units(monkeypatch, first, first_unit, second, second_unit, expected):
+    image = cv2.imread(str(SHOTS / "speedup_view.png"))
+    first_digits, first_marker = [(1, 1, 1, 10)], (10, 1, 1, 10)
+    second_digits, second_marker = [(20, 1, 1, 10)], (30, 1, 1, 10)
+    monkeypatch.setattr(
+        speedup_reader,
+        "_split_label",
+        lambda _components: (first_digits, first_marker, second_digits, second_marker),
+    )
+    monkeypatch.setattr(
+        speedup_reader,
+        "_read_number",
+        lambda _gray, digits: first if digits is first_digits else second,
+    )
+    monkeypatch.setattr(
+        speedup_reader,
+        "_read_unit",
+        lambda _gray, marker: first_unit if marker is first_marker else second_unit,
+    )
+
+    reading = read_remaining_time(image)
+
+    assert reading.status == "ok"
+    assert reading.value == expected
+
+
 def test_unverified_digit_is_accepted_when_both_scales_agree(monkeypatch):
     monkeypatch.setattr(speedup_reader, "_read_digit", lambda *args: "8")
 

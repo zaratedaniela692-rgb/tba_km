@@ -12,7 +12,8 @@ from speedup_readings import ParsedReading, parse_duration, parse_quantity
 from speedup_reader import configure_tesseract
 
 OCR_SCALES = (4, 6)
-OCR_PSMS = (8,)
+OCR_PRIMARY_PSM = 8
+OCR_FALLBACK_PSM = 7
 CROP_LEFT_INSET = 5
 CROP_RIGHT_INSET = 3
 BUTTON_OFFSET_CONSISTENCY_TOLERANCE = 1
@@ -72,12 +73,19 @@ def _ocr_digits(crop, scale, psm):
 
 
 def _read_quantity(crop, ocr_fn):
-    raw_reads = tuple(ocr_fn(crop, scale, psm) for scale in OCR_SCALES for psm in OCR_PSMS)
-    normalized = tuple(re.sub(r"\s+", "", raw) for raw in raw_reads)
-    raw_evidence = " / ".join(raw_reads)
-    if not normalized[0] or len(set(normalized)) != 1:
-        agreement = max(normalized.count(value) for value in set(normalized)) / len(normalized)
-        return ParsedReading(raw_evidence, None, agreement * 100, "ocr_disagreement" if any(normalized) else "unreadable")
+    primary_reads = tuple(ocr_fn(crop, scale, OCR_PRIMARY_PSM) for scale in OCR_SCALES)
+    primary_normalized = tuple(re.sub(r"\s+", "", raw) for raw in primary_reads)
+    raw_evidence = " / ".join(primary_reads)
+    if not primary_normalized[0] or len(set(primary_normalized)) != 1:
+        fallback_reads = tuple(ocr_fn(crop, scale, OCR_FALLBACK_PSM) for scale in OCR_SCALES)
+        normalized = tuple(re.sub(r"\s+", "", raw) for raw in fallback_reads)
+        raw_evidence += f"; psm{OCR_FALLBACK_PSM}: " + " / ".join(fallback_reads)
+        if not normalized[0] or len(set(normalized)) != 1:
+            agreement = max(normalized.count(value) for value in set(normalized)) / len(normalized)
+            status = "ocr_disagreement" if any(normalized) else "unreadable"
+            return ParsedReading(raw_evidence, None, agreement * 100, status)
+    else:
+        normalized = primary_normalized
 
     parsed = parse_quantity(normalized[0], 100.0)
     return ParsedReading(raw_evidence, parsed.value, parsed.confidence, parsed.status)

@@ -96,6 +96,29 @@ def test_target_duration_read_ocr_processes_only_one_quantity():
     assert [(item.duration_label, item.quantity.value) for item in reading.items] == [("1h", 5285)]
     assert len(ocr_calls) == 2
     assert [call[1] for call in ocr_calls] == [4, 6]
+    assert [call[2] for call in ocr_calls] == [8, 8]
+
+
+def test_falls_back_to_single_line_psm_only_after_primary_scale_disagreement():
+    checkpoint = next(entry for entry in MAP["checkpoints"] if entry["scroll_count"] == 3)
+    image = cv2.imread(str(FIXTURES / "checkpoint_003.png"))
+    ocr_calls = []
+
+    def ocr(crop, scale, psm):
+        ocr_calls.append((scale, psm))
+        if psm == 8:
+            return "4879" if scale == 4 else "487"
+        return "4879"
+
+    reading = read_checkpoint_viewport(
+        image, checkpoint, TEMPLATE, QUANTITY_REGION, USE_REGION,
+        ocr_fn=ocr, duration_seconds=900,
+    )
+
+    assert reading.status == "complete"
+    assert reading.items[0].quantity.value == 4879
+    assert reading.items[0].quantity.raw == "4879 / 487; psm7: 4879 / 4879"
+    assert ocr_calls == [(4, 8), (6, 8), (4, 7), (6, 7)]
 
 
 def test_verify_only_matches_buttons_without_running_quantity_ocr():
@@ -148,13 +171,12 @@ def test_repeated_duration_conflict_blocks_complete_inventory():
 
 
 def test_disagreeing_ocr_passes_are_not_accepted_as_a_quantity():
-    answers = iter(("233", "234"))
-    reading = _read(16, lambda *_: next(answers))
+    reading = _read(16, lambda _crop, scale, _psm: "233" if scale == 4 else "234")
 
     assert reading.status == "incomplete"
     assert reading.items == ()
     assert reading.reason == "quantity_unreadable:3d:ocr_disagreement"
-    assert reading.quantity_diagnostics[0]["raw_ocr"] == "233 / 234"
+    assert reading.quantity_diagnostics[0]["raw_ocr"] == "233 / 234; psm7: 233 / 234"
     assert reading.quantity_diagnostics[0]["status"] == "ocr_disagreement"
 
 
