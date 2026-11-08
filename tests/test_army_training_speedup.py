@@ -1,15 +1,18 @@
 from types import SimpleNamespace
 
 import numpy as np
+import pytest
 
 import army_training_speedup as army_speedup
 
 
-def test_army_adapter_clicks_verified_speedup_button_and_rechecks_idle(monkeypatch):
+@pytest.mark.parametrize("runner_status", ["FINISHED", "UNCERTAIN", "BLOCKED", "NOT_ENOUGH"])
+@pytest.mark.parametrize("observed_state", ["idle", "active", "unknown"])
+def test_army_adapter_reconciles_actual_state_after_every_runner_result(monkeypatch, runner_status, observed_state):
     image = np.zeros((1080, 1920, 3), dtype=np.uint8)
     states = iter((
         {"status": "active", "speedup_button_detected": True},
-        {"status": "idle", "speedup_button_detected": False},
+        {"status": observed_state, "speedup_button_detected": False},
     ))
     clicks = []
     speedup_calls = []
@@ -23,7 +26,7 @@ def test_army_adapter_clicks_verified_speedup_button_and_rechecks_idle(monkeypat
 
     def speedup_runner(**kwargs):
         speedup_calls.append(kwargs)
-        return SimpleNamespace(status="FINISHED")
+        return SimpleNamespace(status=runner_status, reason="dialog_closed_before_plan_end")
 
     result = army_speedup.finish_active_training_with_speedups(
         capture_fn=lambda: (image, (100, 200)),
@@ -32,7 +35,7 @@ def test_army_adapter_clicks_verified_speedup_button_and_rechecks_idle(monkeypat
         speedup_runner=speedup_runner,
     )
 
-    assert result == "idle"
+    assert result == observed_state
     assert clicks == [((25, 40), (100, 200))]
     assert speedup_calls == [{"execute": True}]
 

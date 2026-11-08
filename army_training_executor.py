@@ -1,7 +1,7 @@
 """One-goal, manager-owned army training executor with no automatic click retries."""
 
 import time
-from dataclasses import asdict
+from dataclasses import asdict, is_dataclass
 from datetime import datetime, timedelta, timezone
 
 from army_state import open_training_marker
@@ -27,6 +27,7 @@ from army_training_slot_time import read_slot_training_time
 from army_training_slots import STATUS_OK as LAYOUT_OK, locate_slots, slot_crop
 from task_controller import ACTIVE_STATUSES, DEFAULT_SPEEDUP_RETRY_SECONDS, _parse_time, mark_task_started
 from ui_variants import resolve_variant
+from workflow_trace import WorkflowTrace
 
 MIN_CONFIDENCE = 70
 
@@ -161,7 +162,7 @@ def execute_training_goal(
             "match_number": goal_slot.match_number,
         }, observation={
             "status": resolution.status, "reason": resolution.reason, "candidates": resolution.candidates,
-            "level_readings": [asdict(item) for item in level_readings],
+            "level_readings": [asdict(item) if is_dataclass(item) else vars(item).copy() for item in level_readings],
         }, decision="continue" if resolution.status == STATUS_OK else "block",
                      reason=None if resolution.status == STATUS_OK else resolution.reason)
         if resolution.status != STATUS_OK:
@@ -218,7 +219,8 @@ def execute_training_goal(
         result["actions_executed"] = True
         result["level_click_attempted"] = True
         trace.record("select_level", target=goal_slot.global_level,
-                     observation=asdict(level_reading), action={"point": click_point, "origin": origin},
+                     observation=asdict(level_reading) if is_dataclass(level_reading) else vars(level_reading).copy(),
+                     action={"point": click_point, "origin": origin},
                      decision="click")
         try:
             click_fn(click_point, origin)
@@ -428,6 +430,6 @@ def execute_training_goal(
         initial_time_reading=asdict(time_reading),
         blockers=[],
     )
-        trace.record("verify_speedup_state", observation=confirmed_state, decision="continue",
-                     verification="speedup_button_confirmed")
-        return finish(result)
+    trace.record("verify_speedup_state", observation=confirmed_state, decision="continue",
+                 verification="speedup_button_confirmed")
+    return finish(result)

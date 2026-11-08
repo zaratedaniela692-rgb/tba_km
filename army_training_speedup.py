@@ -1,6 +1,7 @@
 """Bridge the army training panel to the standalone desktop speedup finisher."""
 
 import time
+import logging
 
 from army_training_live_e2e import (
     EXPECTED_SIZE,
@@ -12,6 +13,8 @@ from army_training_live_e2e import (
     capture_primary_monitor,
 )
 from ui_variants import resolve_variant
+
+LOGGER = logging.getLogger(__name__)
 
 
 def finish_active_training_with_speedups(
@@ -52,7 +55,10 @@ def finish_active_training_with_speedups(
 
     result = speedup_runner(execute=True)
     if result.status != "FINISHED":
-        return "active"
+        LOGGER.warning(
+            "Speedup stopped: status=%s reason=%s; checking fresh army state before deciding completion",
+            result.status, getattr(result, "reason", "not_reported"),
+        )
 
     after_frame, after_origin = capture_fn()
     if (
@@ -61,4 +67,5 @@ def finish_active_training_with_speedups(
     ):
         return "unknown"
     after = _read_current_training_state(after_frame, variant, include_numeric=False)
+    LOGGER.info("Speedup result=%s; observed army state=%s", result.status, after["status"])
     return after["status"]

@@ -1,5 +1,13 @@
 # Army Training Slot Workflow
 
+## Speedup Completion Reconciliation (2026-11-08)
+
+The desktop speedup adapter now re-captures the army panel after every runner result, including `UNCERTAIN`, `BLOCKED`, and `NOT_ENOUGH`. It no longer treats all non-`FINISHED` results as evidence that training remains active. Only a recognized `idle` state allows `finish_open_training` to clear the open marker; `active` and `unknown` retain existing retry/error handling. A missing speedup dialog anchor alone is never proof of completed training. Failed runner status and reason are logged before reconciliation.
+
+The speedup runner finishes positive remaining time in residual batches: read the timer after a complete batch, require progress, re-read inventory at existing checkpoints, confirm submitted decrements, and plan the remainder. There is no timer or quantity OCR between individual clicks. Unreadable observations, no progress, changed layout, and emergency stop prevent further uses; shortfall preserves already submitted uses. See [Speedup Module Workflow](speedup_module_workflow.md).
+
+Offline tests cover residual minutes, successive residual batches, remaining-stock shortfall, unconfirmed decrements, unreadable timer/inventory, and adapter reconciliation of `idle`/`active`/`unknown` after every runner status. The completion path also required repairing an existing executor trace indentation/import and reading serialization defect. Real game completion, UI timing, sub-hour visual OCR, and checkpoint continuity after depleted rows still require a supervised user run; no live inputs were sent during implementation. Dynamic row remapping and browser actions remain deferred.
+
 **Status:** MVP behavior and decisions as of 2026-11-05. This document is the current source of truth for slot detection and the read-only stock-goal workflow. Historical implementation notes in other documents may be stale; follow this contract and the implementation-status table below.
 
 ## Purpose

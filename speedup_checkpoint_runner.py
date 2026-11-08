@@ -518,7 +518,69 @@ class _CheckpointRunner:
             planned_seconds=sum(duration for duration, _ in queue),
             initial_timer_seconds=latest_timer.value,
         )
-        while queue:
+        batch_timer = latest_timer.value
+        while True:
+            if not queue:
+                final_timer, self.final_timer_read_ms = _timed_call(self.timer, self.frame, "final")
+                self.last_observed_timer = final_timer.value
+                if final_timer.value == 0:
+                    self.record("execution_decision", action="finish_timer_zero", reason="final_timer_is_zero")
+                    return self.result(FINISHED, "timer_reached_zero", plan)
+                if final_timer.value >= batch_timer:
+                    self.abort("timer_not_decreased_after_batch", after_click=True)
+                self.record(
+                    "residual_scan_started", remaining_seconds=final_timer.value,
+                    previous_remaining_seconds=batch_timer, estimated_stock=tuple(sorted(self.stock.items())),
+                )
+                checkpoint_readings = []
+                for checkpoint_step in CHECKPOINT_ORDER:
+                    self.check_stop()
+                    frame = self._navigate_to(checkpoint_step)
+                    frame = self.capture()
+                    checkpoint_readings.append(self.read_checkpoint(frame, checkpoint_step))
+                combined = combine_checkpoint_readings(checkpoint_readings)
+                if combined.status != "complete":
+                    self.abort(f"residual_inventory_incomplete:{combined.reason}")
+                refreshed_stock = combined.inventory
+                inventory_confirmed = all(
+                    refreshed_stock.get(duration, 0) <= quantity for duration, quantity in self.stock.items()
+                )
+                self.record(
+                    "residual_inventory_verification", status="confirmed" if inventory_confirmed else "failed",
+                    expected_maximum_stock=tuple(sorted(self.stock.items())),
+                    observed_stock=tuple(sorted(refreshed_stock.items())),
+                    reason=None if inventory_confirmed else "submitted_uses_not_confirmed_by_inventory",
+                )
+                if not inventory_confirmed:
+                    self.abort("submitted_uses_not_confirmed_by_inventory", after_click=True)
+                self.stock = dict(refreshed_stock)
+                residual_timer = self.timer(self.frame, "post_residual_scan")
+                self.last_observed_timer = residual_timer.value
+                if residual_timer.value == 0:
+                    return self.result(FINISHED, "timer_reached_zero", plan)
+                if residual_timer.value > final_timer.value:
+                    self.abort("timer_increased_during_residual_scan", after_click=True)
+                self.replan = plan_speedups(residual_timer.value, self.stock)
+                plan_generation += 1
+                self.record(
+                    "plan_rebuilt", plan_generation=plan_generation, status=self.replan.status,
+                    remaining_seconds=residual_timer.value, inventory=tuple(sorted(self.stock.items())),
+                    uses=self.replan.uses, shortfall_seconds=self.replan.shortfall_seconds,
+                    breached_floors=self.replan.breached_floors,
+                    reason="positive_remaining_time_after_batch",
+                )
+                for residual_decision in self.replan.decisions:
+                    self.record("plan_choice", plan_generation=plan_generation, **residual_decision)
+                if self.replan.status == STATUS_SHORTFALL:
+                    return self.result(
+                        NOT_ENOUGH, "owned_items_do_not_cover_remaining_time_after_replan",
+                        plan, self.replan.shortfall_seconds,
+                    )
+                batch_timer = residual_timer.value
+                queue = _expanded_plan(self.replan)
+                plan_total = len(queue)
+                plan_step = 0
+                continue
             duration, decision = queue.pop(0)
             plan_step += 1
             label = next((name for name, value in self._duration_by_label().items() if value == duration), None)
@@ -540,20 +602,6 @@ class _CheckpointRunner:
             if after is None:
                 self.record("execution_decision", action="finish_dialog_closed", reason="last_planned_use_closed_dialog")
                 return self.result(FINISHED, "dialog_closed_after_last_use", plan)
-        final_timer, self.final_timer_read_ms = _timed_call(self.timer, self.frame, "final")
-        self.last_observed_timer = final_timer.value
-        if final_timer.value == 0:
-            self.record("execution_decision", action="finish_timer_zero", reason="final_timer_is_zero")
-            return self.result(FINISHED, "timer_reached_zero", plan)
-        self.record(
-            "execution_decision", action="plan_exhausted",
-            reason="planned_uses_consumed_but_timer_not_confirmed_zero",
-            final_observed_timer_seconds=final_timer.value,
-            initial_timer_seconds=latest_timer.value,
-            planned_seconds=sum(duration for duration, _ in _expanded_plan(plan)),
-            uses_submitted=tuple(sorted(self.used.items())),
-        )
-        return self.result(UNCERTAIN, "timer_not_zero_after_plan", plan)
 
     def result(self, status, reason, plan=None, shortfall=0):
         self.record(

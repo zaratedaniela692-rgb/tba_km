@@ -247,6 +247,118 @@ def test_insufficient_inventory_does_not_click():
     assert game.clicks == []
 
 
+def test_residual_minutes_are_finished_from_a_fresh_inventory_scan():
+    game = FakeGame(remaining=HOUR + 2488, inventory={HOUR: 12, 900: 12})
+    timer_clicks = []
+
+    def read_timer(frame):
+        timer_clicks.append(len(game.clicks))
+        value = HOUR if not game.clicks else frame.timer
+        return ParsedReading(str(value), value, 100.0, "ok")
+
+    result = game.run(dry_run=False, timer_reader_fn=read_timer)
+
+    assert result.status == FINISHED
+    assert game.remaining == 0
+    assert result.final_remaining_seconds == 0
+    assert result.replan is not None
+    assert len(game.quantity_read_requests) == 6
+    assert all(duration is None for _, duration in game.quantity_read_requests)
+    assert timer_clicks[:4] == [0, 0, 1, 1]
+    assert timer_clicks[-1] == len(game.clicks)
+    residual_plan = next(event for event in result.event_trace if event["event"] == "plan_rebuilt")
+    assert residual_plan["data"]["remaining_seconds"] == 2488
+    assert dict(residual_plan["data"]["inventory"])[HOUR] == 11
+    assert any(item["plan_generation"] == 2 for item in result.click_timings)
+
+
+def test_residual_shortfall_does_not_submit_more_clicks():
+    game = FakeGame(remaining=HOUR + 600, inventory={HOUR: 1})
+    result = game.run(
+        dry_run=False,
+        timer_reader_fn=lambda frame: ParsedReading(
+            "timer", HOUR if not game.clicks else frame.timer, 100.0, "ok",
+        ),
+    )
+
+    assert result.status == NOT_ENOUGH
+    assert result.shortfall_seconds == 600
+    assert len(game.clicks) == 1
+
+
+def test_further_residual_batches_require_new_progress_and_inventory():
+    game = FakeGame(remaining=HOUR + 2488, inventory={HOUR: 11, 900: 20})
+
+    def read_timer(frame):
+        if not game.clicks:
+            value = HOUR
+        elif len(game.clicks) == 1:
+            value = 1000
+        else:
+            value = frame.timer
+        return ParsedReading(str(value), value, 100.0, "ok")
+
+    result = game.run(dry_run=False, timer_reader_fn=read_timer)
+
+    assert result.status == FINISHED
+    assert game.remaining == 0
+    assert len(game.quantity_read_requests) == 9
+    generations = [event["data"]["plan_generation"] for event in result.event_trace if event["event"] == "plan_rebuilt"]
+    assert generations == [2, 3]
+
+
+def test_unreadable_residual_inventory_does_not_submit_more_clicks():
+    game = FakeGame(remaining=HOUR + 600, inventory={HOUR: 12})
+    original_click = game.click
+
+    def click_then_break_checkpoint(point):
+        original_click(point)
+        game.fail_checkpoint = 3
+
+    game.click = click_then_break_checkpoint
+    result = game.run(
+        dry_run=False,
+        timer_reader_fn=lambda frame: ParsedReading(
+            "timer", HOUR if not game.clicks else frame.timer, 100.0, "ok",
+        ),
+    )
+
+    assert result.status == UNCERTAIN
+    assert "inventory_incomplete:3" in result.reason
+    assert len(game.clicks) == 1
+
+
+def test_timer_progress_without_inventory_decrement_does_not_retry():
+    game = FakeGame(remaining=HOUR, inventory={HOUR: 12})
+
+    def click_without_spending(point):
+        game.clicks.append(point)
+        game.remaining = 600
+
+    game.click = click_without_spending
+    result = game.run(dry_run=False)
+
+    assert result.status == UNCERTAIN
+    assert result.reason == "submitted_uses_not_confirmed_by_inventory"
+    assert len(game.clicks) == 1
+
+
+def test_unreadable_final_timer_stops_without_a_residual_batch():
+    game = FakeGame(inventory={HOUR: 12})
+    result = game.run(
+        dry_run=False,
+        timer_reader_fn=lambda frame: ParsedReading(
+            "?" if game.clicks else "1h", None if game.clicks else HOUR,
+            None if game.clicks else 100.0, "unreadable" if game.clicks else "ok",
+        ),
+    )
+
+    assert result.status == UNCERTAIN
+    assert result.reason.startswith("timer_unreadable")
+    assert len(game.clicks) == 1
+    assert result.replan is None
+
+
 def test_unreadable_checkpoint_blocks_before_any_click():
     game = FakeGame(inventory={HOUR: 11}, fail_checkpoint=11)
 
@@ -272,7 +384,7 @@ def test_uncertain_click_is_not_retried():
     result = game.run(dry_run=False)
 
     assert result.status == UNCERTAIN
-    assert result.reason == "timer_not_zero_after_plan"
+    assert result.reason == "timer_not_decreased_after_batch"
     assert len(game.clicks) == 1
 
 
