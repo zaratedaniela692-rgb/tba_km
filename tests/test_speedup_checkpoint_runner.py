@@ -69,11 +69,6 @@ class FakeGame:
             self.remaining = max(0, self.remaining - self.clan_help)
 
     def read_checkpoint(self, _, checkpoint, *_args, **kwargs):
-        if checkpoint["scroll_count"] == self.fail_checkpoint:
-            return CheckpointInventoryReading(
-                "incomplete", (), "fixture_unreadable",
-                match_diagnostics=({"detected_rectangle": {"x": 384, "y": 62}},),
-            )
         diagnostics = tuple({
             "duration_label": button["duration_label"],
             "expected_rectangle": button["rectangle"],
@@ -87,6 +82,11 @@ class FakeGame:
             return CheckpointInventoryReading(
                 "complete", (), checkpoint_steps=(checkpoint["scroll_count"],),
                 match_diagnostics=diagnostics,
+            )
+        if checkpoint["scroll_count"] == self.fail_checkpoint:
+            return CheckpointInventoryReading(
+                "incomplete", (), "fixture_unreadable",
+                match_diagnostics=({"detected_rectangle": {"x": 384, "y": 62}},),
             )
         target_duration = kwargs.get("duration_seconds")
         self.quantity_read_requests.append((checkpoint["scroll_count"], target_duration))
@@ -267,7 +267,7 @@ def test_insufficient_inventory_does_not_click():
     assert game.clicks == []
 
 
-def test_residual_minutes_are_finished_from_a_fresh_inventory_scan():
+def test_residual_minutes_replan_without_rescanning_inventory():
     game = FakeGame(remaining=HOUR + 2488, inventory={HOUR: 12, 900: 12})
     timer_clicks = []
 
@@ -282,13 +282,15 @@ def test_residual_minutes_are_finished_from_a_fresh_inventory_scan():
     assert game.remaining == 0
     assert result.final_remaining_seconds == 0
     assert result.replan is not None
-    assert len(game.quantity_read_requests) == 6
+    assert len(game.quantity_read_requests) == 3
     assert all(duration is None for _, duration in game.quantity_read_requests)
-    assert timer_clicks[:4] == [0, 0, 1, 1]
+    assert timer_clicks == [0, 0, 1, 4]
     assert timer_clicks[-1] == len(game.clicks)
     residual_plan = next(event for event in result.event_trace if event["event"] == "plan_rebuilt")
     assert residual_plan["data"]["remaining_seconds"] == 2488
     assert dict(residual_plan["data"]["inventory"])[HOUR] == 11
+    assert residual_plan["data"]["stock_source"] == "initial_inventory_minus_submitted_clicks"
+    assert "residual_scan_started" not in [event["event"] for event in result.event_trace]
     assert any(item["plan_generation"] == 2 for item in result.click_timings)
 
 
@@ -306,7 +308,7 @@ def test_residual_shortfall_does_not_submit_more_clicks():
     assert len(game.clicks) == 1
 
 
-def test_further_residual_batches_require_new_progress_and_inventory():
+def test_further_residual_batches_require_new_progress_without_inventory_rescans():
     game = FakeGame(remaining=HOUR + 2488, inventory={HOUR: 11, 900: 20})
 
     def read_timer(frame):
@@ -322,12 +324,12 @@ def test_further_residual_batches_require_new_progress_and_inventory():
 
     assert result.status == FINISHED
     assert game.remaining == 0
-    assert len(game.quantity_read_requests) == 9
+    assert len(game.quantity_read_requests) == 3
     generations = [event["data"]["plan_generation"] for event in result.event_trace if event["event"] == "plan_rebuilt"]
     assert generations == [2, 3]
 
 
-def test_unreadable_residual_inventory_does_not_submit_more_clicks():
+def test_residual_replan_does_not_depend_on_another_inventory_read():
     game = FakeGame(remaining=HOUR + 600, inventory={HOUR: 12})
     original_click = game.click
 
@@ -343,12 +345,12 @@ def test_unreadable_residual_inventory_does_not_submit_more_clicks():
         ),
     )
 
-    assert result.status == UNCERTAIN
-    assert "inventory_incomplete:3" in result.reason
-    assert len(game.clicks) == 1
+    assert result.status == FINISHED
+    assert len(game.clicks) > 1
+    assert len(game.quantity_read_requests) == 3
 
 
-def test_timer_progress_without_inventory_decrement_does_not_retry():
+def test_timer_progress_replans_from_conservative_submitted_use_estimate():
     game = FakeGame(remaining=HOUR, inventory={HOUR: 12})
 
     def click_without_spending(point):
@@ -359,8 +361,9 @@ def test_timer_progress_without_inventory_decrement_does_not_retry():
     result = game.run(dry_run=False)
 
     assert result.status == UNCERTAIN
-    assert result.reason == "submitted_uses_not_confirmed_by_inventory"
-    assert len(game.clicks) == 1
+    assert result.reason == "timer_not_decreased_after_batch"
+    assert len(game.clicks) == 2
+    assert len(game.quantity_read_requests) == 3
 
 
 def test_unreadable_final_timer_stops_without_a_residual_batch():

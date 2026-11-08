@@ -1,5 +1,11 @@
 # Army Training Slot Workflow
 
+## Completed Training Claim (2026-11-08)
+
+The supplied screenshot `device_runs/DESKTOP-LFGLEFV/speedup_use/image.png` confirms a post-training panel state with the text `Szkolenie zakończone` and a `Zakończ` button. Replaying the existing desktop scanner on this image returns `status=unknown`, `has_active_training=null`, and a training-panel match score of 0.234; it does not confirm idle. Do not clear the open-training marker or start another order from this state.
+
+The completion action is not implemented yet. Before enabling it, annotate a dedicated completion-state/`Zakończ` target and stable button template from the supplied image with `tools/annotate.py`; do not derive click coordinates from visual inspection. The intended flow is: for a bot-owned open-training marker only, recognize the annotated completion state and button, check the emergency stop, move the cursor away from the target, click `Zakończ` once, capture a fresh frame, and clear the marker only after the existing empty-queue state is positively confirmed. A missing or incompatible button, uncertain click, or unconfirmed next state must stop without retry. Add the annotated screenshot as a regression fixture before enabling this click in live execution.
+
 ## Notification-Covered Controls (2026-11-08)
 
 Notifications may visually cover the configured central panel button without preventing clicks from reaching it. Immediately after a newly accepted Train action, the executor may click the annotated `speedup_panel` region for the expected Help action. The active-training finisher may click the same region for Speed Up only for a bot-managed training that has reached its finish step. Missing button-template evidence is tolerated in these expected stages, but an explicitly observed incompatible button state, inactive/unknown training, or missing region still blocks.
@@ -384,7 +390,7 @@ After a confirmed Train, the executor waits for the configured post-order delay,
 - **Help window:** per-order time before `expires_at` (default 30 minutes; per-task `help_window_seconds` or queue setting). It remains anchored at the confirmed Train plus the post-order delay; requesting Help does not complete the training task.
 - **Open training marker:** `open_training` in `profiles/<profile>/army_state.json` with `order_id`, `task_id`, `goal`, `started_at`, `expires_at`, `speedup_attempts`, `last_attempt_at`, `next_attempt_at`. It means the bot started a training whose end is not yet confirmed.
 - **Grace:** extra time after `expires_at` (default 10 minutes) before the fallback task is created.
-- **Finish step:** read the active-training state on the open Barracks screen. Idle clears the marker; active with an open marker runs the Speed Up adapter, waits for the view reset (about 5 s), re-observes, and clears the marker only when idle is confirmed.
+- **Finish step:** read the training state on the open Barracks screen. Confirmed idle clears the marker; active with an open marker runs the Speed Up adapter, waits for the view reset (about 5 s), re-observes, and clears the marker only when idle is confirmed. The newly observed `Szkolenie zakończone`/`Zakończ` state currently reads as `unknown`; it must not be treated as idle. Its annotated one-click completion and post-click idle confirmation are pending.
 - **Fallback task:** one army task `finish_training_v1` with id `army_finish:<order_id>`.
 
 ### Rules
