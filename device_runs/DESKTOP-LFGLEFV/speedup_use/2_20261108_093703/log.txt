@@ -1,4 +1,0 @@
-2026-11-08T09:37:03 [speedup_use] prepare: Speed Up dialog of an active training open, inventory list scrolled to the top.
-2026-11-08T09:37:03 [speedup_use] starting in 5 s
-2026-11-08T09:37:09 step 1 use_items: C:\Users\Konrad\AppData\Local\Programs\Python\Python311\python.exe speedup.py --execute --confirm USE OWNED SPEEDUPS FROM TOP
-2026-11-08T09:37:11 step 1 use_items: FAILED (rc=2, 1.67 s)
