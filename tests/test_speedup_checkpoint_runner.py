@@ -120,6 +120,13 @@ def test_dry_run_scans_exact_checkpoints_and_never_clicks():
     assert len(game.scrolls) == 16
     assert len(game.moves) == 16
     assert game.clicks == []
+    events = [entry["event"] for entry in result.event_trace]
+    assert events.count("scroll") == 16
+    assert events.count("viewport_check") == 16
+    assert events.count("checkpoint_read") == 3
+    assert "plan_built" in events
+    assert events[-1] == "run_finished"
+    assert result.event_trace[-1]["data"]["reason"] == "dry_run"
 
 
 def test_short_initial_timer_keeps_original_plan_after_twenty_percent_drop():
@@ -146,6 +153,10 @@ def test_live_run_clicks_once_and_requires_the_quantity_to_drop():
     assert result.used == ((HOUR, 1),)
     assert game.clicks == [(1122, 529)]
     assert game.inventory[HOUR] == 10
+    click_event = next(event for event in result.event_trace if event["event"] == "use_click")
+    assert click_event["data"] == {"status": "sent", "duration_seconds": HOUR, "screen_point": (1122, 529)}
+    verification = next(event for event in result.event_trace if event["event"] == "use_verification")
+    assert verification["data"]["observed_quantity"] == 10
     assert [request for request in game.quantity_read_requests if request[1] is not None] == [
         (3, HOUR), (3, HOUR),
     ]
@@ -195,6 +206,13 @@ def test_unreadable_checkpoint_blocks_before_any_click():
     assert "inventory_incomplete:11" in result.reason
     assert result.checkpoint_diagnostics[0]["scroll_count"] == 11
     assert result.checkpoint_diagnostics[0]["matches"][0]["detected_rectangle"] == {"x": 384, "y": 62}
+    assert result.event_trace[-2]["event"] == "run_aborted"
+    assert result.event_trace[-2]["data"]["reason"] == result.reason
+    checkpoint_event = next(
+        event for event in result.event_trace
+        if event["event"] == "checkpoint_read" and event["step"] == 11
+    )
+    assert checkpoint_event["data"]["reason"] == "fixture_unreadable"
     assert game.clicks == []
 
 

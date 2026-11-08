@@ -151,6 +151,7 @@ def main(argv=None):
             "checkpoint_steps": list(result.checkpoint_steps),
             "click_timings": list(result.click_timings),
             "checkpoint_diagnostics": list(result.checkpoint_diagnostics),
+            "event_trace": list(result.event_trace),
             "evidence_frames": evidence.saved,
         }
         if evidence.errors:
@@ -162,6 +163,13 @@ def main(argv=None):
             else:
                 report["debug_capture"] = debug_path.name
         report_path = run_dir / "report.json"
+        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        trace_path = run_dir / "event_trace.jsonl"
+        trace_path.write_text(
+            "".join(json.dumps(event, ensure_ascii=False) + "\n" for event in result.event_trace),
+            encoding="utf-8",
+        )
+        report["event_trace_file"] = trace_path.name
         report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(report, ensure_ascii=False, indent=2))
         print(f"report_path={report_path}")

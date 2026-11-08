@@ -32,6 +32,8 @@ Autorytatywny kontrakt odczytu, zakres, diagram i ograniczenia są w [docs/game/
 
 Regiony i wzorce są zweryfikowane na dostarczonych fixture'ach desktopowych. Czytnik przesuwa quantity crop względem wykrytego przycisku „Użyj” i zachowuje surowy tekst OCR oraz zgodność odczytów. `Automator.update()` wybiera pierwszy monitor, nie konkretne okno gry; live run blokuje się przy innym rozmiarze niż 1920x1080.
 
+Raport runu zawiera chronologiczny `event_trace` oraz plik `event_trace.jsonl`: każdy scroll, wynik zmiany viewportu, odczyt timera i ilości, decyzję planera, współrzędne kliknięcia, weryfikację licznika i przyczynę zatrzymania. Do diagnozy przebiegu tekst wystarcza; klatki są potrzebne tylko do niezależnego sprawdzenia obrazu.
+
 ## Regiony kandydackie (ekran `speedup` w `regions.json`, układ `speedup_view.png`)
 
 | Element | x, y, w, h | Uwagi |

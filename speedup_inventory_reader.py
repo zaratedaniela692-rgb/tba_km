@@ -39,6 +39,7 @@ class CheckpointInventoryReading:
     reason: str = ""
     checkpoint_steps: tuple = ()
     match_diagnostics: tuple = ()
+    quantity_diagnostics: tuple = ()
 
     @property
     def inventory(self):
@@ -192,25 +193,45 @@ def read_checkpoint_viewport(
                 match_diagnostics=match_diagnostics,
             )
     items = []
+    quantity_diagnostics = []
     for button in effective_buttons:
         duration = parse_duration(button.get("duration_label", ""), 100.0)
         if duration.value is None:
             return CheckpointInventoryReading(
                 "incomplete", tuple(items), "mapped_duration_invalid",
                 match_diagnostics=match_diagnostics,
+                quantity_diagnostics=tuple(quantity_diagnostics),
             )
         try:
             crop = _quantity_crop(viewport_image, button, quantity_region, use_region)
             quantity = _read_quantity(crop, ocr_fn)
         except (InventoryReadError, pytesseract.TesseractNotFoundError, OSError) as error:
+            quantity_diagnostics.append({
+                "duration_label": button["duration_label"],
+                "duration_seconds": duration.value,
+                "status": "error",
+                "reason": str(error),
+                "button_rectangle": dict(button["rectangle"]),
+            })
             return CheckpointInventoryReading(
                 "incomplete", tuple(items), f"quantity_ocr_failed:{error}",
                 match_diagnostics=match_diagnostics,
+                quantity_diagnostics=tuple(quantity_diagnostics),
             )
+        quantity_diagnostics.append({
+            "duration_label": button["duration_label"],
+            "duration_seconds": duration.value,
+            "raw_ocr": quantity.raw,
+            "quantity": quantity.value,
+            "confidence": quantity.confidence,
+            "status": quantity.status,
+            "button_rectangle": dict(button["rectangle"]),
+        })
         if quantity.value is None:
             return CheckpointInventoryReading(
                 "incomplete", tuple(items), f"quantity_unreadable:{button['duration_label']}:{quantity.status}",
                 match_diagnostics=match_diagnostics,
+                quantity_diagnostics=tuple(quantity_diagnostics),
             )
         items.append(InventoryItemReading(
             button["duration_label"],
@@ -224,6 +245,7 @@ def read_checkpoint_viewport(
     return CheckpointInventoryReading(
         "complete", tuple(items), checkpoint_steps=(int(step),),
         match_diagnostics=match_diagnostics,
+        quantity_diagnostics=tuple(quantity_diagnostics),
     )
 
 

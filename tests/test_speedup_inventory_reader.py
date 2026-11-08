@@ -140,6 +140,8 @@ def test_disagreeing_ocr_passes_are_not_accepted_as_a_quantity():
     assert reading.status == "incomplete"
     assert reading.items == ()
     assert reading.reason == "quantity_unreadable:3d:ocr_disagreement"
+    assert reading.quantity_diagnostics[0]["raw_ocr"] == "233 / 234"
+    assert reading.quantity_diagnostics[0]["status"] == "ocr_disagreement"
 
 
 def test_missing_or_misplaced_button_blocks_checkpoint_read():

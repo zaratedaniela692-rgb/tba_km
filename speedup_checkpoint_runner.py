@@ -39,6 +39,7 @@ class CheckpointRunResult:
     inventory_evidence: tuple = ()
     click_timings: tuple = ()
     checkpoint_diagnostics: tuple = ()
+    event_trace: tuple = ()
 
 
 class _Abort(Exception):
@@ -122,40 +123,71 @@ class _CheckpointRunner:
         self.checkpoint_steps = ()
         self.click_timings = []
         self.checkpoint_diagnostics = []
+        self.started_at = time.perf_counter()
+        self.event_trace = []
+
+    def record(self, event, **data):
+        self.event_trace.append({
+            "elapsed_ms": round((time.perf_counter() - self.started_at) * 1000, 1),
+            "event": event,
+            "step": self.current_step,
+            "data": data,
+        })
 
     def abort(self, reason, after_click=False):
         status = UNCERTAIN if after_click or self.clicks_issued else BLOCKED
+        self.record("run_aborted", status=status, reason=reason, clicks_issued=self.clicks_issued)
         raise _Abort(status, reason)
 
     def check_stop(self):
         try:
             self.stop_fn()
         except Exception as error:
+            self.record("emergency_stop_check", status="stopped", reason=str(error))
             self.abort(f"emergency_stop:{error}")
+        self.record("emergency_stop_check", status="clear")
 
     def capture(self, require_dialog=True):
         try:
             frame, origin = self.capture_fn()
         except Exception as error:
+            self.record("capture", status="failed", reason=str(error))
             self.abort(f"capture_failed:{error}")
         if tuple(self.frame_size_fn(frame)) != self.expected_frame_size:
+            self.record("capture", status="rejected", frame_size=self.frame_size_fn(frame))
             self.abort(f"unexpected_frame_size:{self.frame_size_fn(frame)}")
         if self.origin is not None and tuple(origin) != tuple(self.origin):
+            self.record("capture", status="rejected", reason="capture_origin_changed", origin=origin)
             self.abort("capture_origin_changed")
         if self.origin is None:
             self.origin = tuple(origin)
-        if require_dialog and not self.anchor_fn(frame):
+        dialog_recognized = self.anchor_fn(frame) if require_dialog else None
+        self.record(
+            "capture", status="ok", frame_size=self.frame_size_fn(frame), origin=tuple(origin),
+            dialog_required=require_dialog, dialog_recognized=bool(dialog_recognized),
+        )
+        if require_dialog and not dialog_recognized:
             self.abort("speedup_dialog_not_recognized")
         self.frame = frame
         return frame
 
-    def timer(self, frame):
+    def timer(self, frame, phase):
         try:
             reading = self.timer_reader_fn(frame)
         except Exception as error:
+            self.record("timer_read", phase=phase, status="error", reason=str(error))
             self.abort(f"timer_read_failed:{error}")
         if reading is None or reading.value is None:
+            self.record(
+                "timer_read", phase=phase, status=getattr(reading, "status", "unreadable"),
+                raw=getattr(reading, "raw", ""), value=None,
+                confidence=getattr(reading, "confidence", None),
+            )
             self.abort(f"timer_unreadable:{getattr(reading, 'status', 'unknown')}")
+        self.record(
+            "timer_read", phase=phase, status=reading.status, raw=reading.raw,
+            value_seconds=reading.value, confidence=reading.confidence,
+        )
         return reading
 
     def _pointer_point(self):
@@ -166,23 +198,38 @@ class _CheckpointRunner:
         )
 
     def _scroll_once(self, direction):
+        step_before = self.current_step
         self.check_stop()
         try:
-            self.move_fn(*self._pointer_point())
+            pointer = self._pointer_point()
+            self.move_fn(*pointer)
         except Exception as error:
+            self.record("pointer_move", status="failed", reason=str(error))
             self.abort(f"pointer_move_failed:{error}")
+        self.record("pointer_move", status="ok", point=pointer)
         self.check_stop()
         try:
             self.scroll_fn(direction)
         except Exception as error:
+            self.record("scroll", status="failed", direction=direction, reason=str(error))
             self.abort(f"scroll_failed:{error}")
+        self.record("scroll", status="sent", direction=direction, from_step=step_before)
         self.sleep_fn(SETTLE_SECONDS)
         following = self.capture()
         before = self.viewport_crop_fn(self.frame_before_scroll, self.regions["speedup_inventory_viewport"])
         after = self.viewport_crop_fn(following, self.regions["speedup_inventory_viewport"])
-        if self.viewport_change_fn(before, after) <= CHANGE_THRESHOLD:
+        change_score = float(self.viewport_change_fn(before, after))
+        if change_score <= CHANGE_THRESHOLD:
+            self.record(
+                "viewport_check", status="unchanged", direction=direction,
+                change_score=change_score, threshold=CHANGE_THRESHOLD,
+            )
             self.abort("viewport_unchanged")
         self.current_step += 1 if direction < 0 else -1
+        self.record(
+            "viewport_check", status="changed", direction=direction,
+            change_score=change_score, threshold=CHANGE_THRESHOLD, from_step=step_before,
+        )
         return following
 
     def scroll(self, direction):
@@ -208,21 +255,39 @@ class _CheckpointRunner:
                 duration_seconds=duration_seconds,
             )
         except Exception as error:
+            self.record("checkpoint_read", status="error", reason=str(error), requested_duration=duration_seconds)
             self.abort(f"inventory_read_failed:{error}")
+        row_evidence = tuple({
+            "duration_label": item.duration_label,
+            "duration_seconds": item.duration_seconds,
+            "raw_quantity": item.quantity.raw,
+            "quantity": item.quantity.value,
+            "confidence": item.quantity.confidence,
+            "status": item.quantity.status,
+            "button_rectangle": item.button_rectangle,
+            "button_center": item.button_center,
+        } for item in reading.items)
+        self.record(
+            "checkpoint_read", status=reading.status, reason=reading.reason,
+            requested_duration=duration_seconds, rows=row_evidence,
+            matches=reading.match_diagnostics, quantities=reading.quantity_diagnostics,
+        )
         if reading.match_diagnostics:
             self.checkpoint_diagnostics.append({
                 "scroll_count": step,
                 "status": reading.status,
                 "reason": reading.reason,
                 "matches": reading.match_diagnostics,
+                "quantities": reading.quantity_diagnostics,
             })
         if reading.status != "complete":
             self.abort(f"inventory_incomplete:{step}:{reading.reason}")
         return reading
 
     def scan(self):
+        self.record("scan_started", checkpoints=CHECKPOINT_ORDER, mode="execute" if not self.dry_run else "dry_run")
         frame = self.capture()
-        initial_timer = self.timer(frame)
+        initial_timer = self.timer(frame, "initial")
         self.initial_timer = initial_timer.value
         previous = self.viewport_crop_fn(frame, self.regions["speedup_inventory_viewport"])
         checkpoint_readings = []
@@ -234,14 +299,22 @@ class _CheckpointRunner:
 
         combined = combine_checkpoint_readings(checkpoint_readings)
         if combined.status != "complete":
+            self.record("inventory_combined", status=combined.status, reason=combined.reason)
             self.abort(f"inventory_incomplete:{combined.reason}")
-        latest_timer = self.timer(frame)
+        latest_timer = self.timer(frame, "post_scan")
         self.inventory = combined.inventory
         self.inventory_items = combined.items
         self.stock = dict(self.inventory)
         self.checkpoint_steps = combined.checkpoint_steps
         self.plan = plan_speedups(latest_timer.value, self.inventory)
         self.remaining_seconds = latest_timer.value
+        self.record(
+            "plan_built", status=self.plan.status,
+            remaining_seconds=latest_timer.value,
+            inventory=tuple(sorted(self.inventory.items())),
+            uses=self.plan.uses, breached_floors=self.plan.breached_floors,
+            shortfall_seconds=self.plan.shortfall_seconds,
+        )
         return latest_timer
 
     def _mapped_button(self, duration, step):
@@ -281,6 +354,11 @@ class _CheckpointRunner:
         reading = self.read_checkpoint(frame, step, duration_seconds=duration)
         item = next((item for item in reading.items if item.duration_seconds == duration), None)
         if item is None or item.quantity.value != self.stock[duration]:
+            self.record(
+                "use_precheck", status="failed", duration_seconds=duration,
+                expected_quantity=self.stock[duration],
+                observed_quantity=None if item is None else item.quantity.value,
+            )
             self.abort("inventory_changed_before_use")
         timing["pre_quantity_ocr_ms"] = round((time.perf_counter() - started) * 1000, 1)
         center = item.button_center
@@ -289,17 +367,34 @@ class _CheckpointRunner:
             self.origin[0] + int(viewport["x"]) + int(center["x"]),
             self.origin[1] + int(viewport["y"]) + int(center["y"]),
         )
+        self.record(
+            "use_precheck", status="ok", duration_seconds=duration,
+            duration_label=item.duration_label, quantity=item.quantity.value,
+            button_rectangle=item.button_rectangle, button_center=item.button_center,
+            screen_point=point,
+        )
         self.check_stop()
         self.clicks_issued += 1
         started = time.perf_counter()
         try:
             self.click_fn(point)
         except Exception as error:
+            self.record(
+                "use_click", status="failed", duration_seconds=duration,
+                screen_point=point, reason=str(error),
+            )
             self.abort(f"click_failed:{error}", after_click=True)
+        self.record("use_click", status="sent", duration_seconds=duration, screen_point=point)
         self.sleep_fn(SETTLE_SECONDS)
         after = self.capture(require_dialog=False)
         timing["click_settle_capture_ms"] = round((time.perf_counter() - started) * 1000, 1)
-        if not self.anchor_fn(after):
+        dialog_recognized = self.anchor_fn(after)
+        self.record(
+            "dialog_check", status="recognized" if dialog_recognized else "not_recognized",
+            phase="post_use", duration_seconds=duration,
+        )
+        if not dialog_recognized:
+            self.record("use_verification", status="dialog_closed", duration_seconds=duration)
             if last_use:
                 self.used[duration] = self.used.get(duration, 0) + 1
                 self.stock[duration] -= 1
@@ -314,15 +409,31 @@ class _CheckpointRunner:
         after_item = next((item for item in after_reading.items if item.duration_seconds == duration), None)
         expected_quantity = self.stock[duration] - 1
         if after_item is None or after_item.quantity.value != expected_quantity:
+            self.record(
+                "use_verification", status="failed", duration_seconds=duration,
+                expected_quantity=expected_quantity,
+                observed_quantity=None if after_item is None else after_item.quantity.value,
+            )
             self.abort("use_not_confirmed", after_click=True)
+        self.record(
+            "use_verification", status="confirmed", duration_seconds=duration,
+            expected_quantity=expected_quantity, observed_quantity=after_item.quantity.value,
+        )
         timing["post_quantity_ocr_ms"] = round((time.perf_counter() - started) * 1000, 1)
         self.stock[duration] = expected_quantity
         self.used[duration] = self.used.get(duration, 0) + 1
         started = time.perf_counter()
         try:
             timer_reading = self.timer_reader_fn(after)
-        except Exception:
+        except Exception as error:
+            self.record("timer_read", phase="post_use", status="error", reason=str(error))
             timer_reading = None
+        if timer_reading is not None:
+            self.record(
+                "timer_read", phase="post_use", status=timer_reading.status,
+                raw=timer_reading.raw, value_seconds=timer_reading.value,
+                confidence=timer_reading.confidence,
+            )
         timing["timer_ocr_ms"] = round((time.perf_counter() - started) * 1000, 1)
         self.click_timings.append(timing)
         return after, timer_reading
@@ -358,6 +469,13 @@ class _CheckpointRunner:
                 and timer_reading.value < initial_timer * REPLAN_BELOW_FRACTION
             ):
                 self.replan = plan_speedups(timer_reading.value, self.stock)
+                self.record(
+                    "plan_rebuilt", status=self.replan.status,
+                    remaining_seconds=timer_reading.value,
+                    inventory=tuple(sorted(self.stock.items())), uses=self.replan.uses,
+                    breached_floors=self.replan.breached_floors,
+                    shortfall_seconds=self.replan.shortfall_seconds,
+                )
                 if self.replan.status == STATUS_SHORTFALL:
                     return self.result(
                         NOT_ENOUGH,
@@ -369,6 +487,10 @@ class _CheckpointRunner:
         return self.result(UNCERTAIN, "timer_not_zero_after_plan", plan)
 
     def result(self, status, reason, plan=None, shortfall=0):
+        self.record(
+            "run_finished", status=status, reason=reason,
+            clicks_issued=self.clicks_issued, shortfall_seconds=shortfall,
+        )
         return CheckpointRunResult(
             status=status,
             reason=reason,
@@ -389,6 +511,7 @@ class _CheckpointRunner:
             } for item in self.inventory_items),
             click_timings=tuple(self.click_timings),
             checkpoint_diagnostics=tuple(self.checkpoint_diagnostics),
+            event_trace=tuple(self.event_trace),
         )
 
 
