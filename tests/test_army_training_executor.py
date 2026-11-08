@@ -57,6 +57,7 @@ def _setup(monkeypatch, level=6, click_error_at=None, post_state="active"):
 def test_execute_selects_target_level_then_train_once_and_marks_started(monkeypatch):
     queue, task, clicks, click, capture = _setup(monkeypatch)
     button_region = {"x": 1080, "y": 288, "w": 129, "h": 33}
+    monkeypatch.setattr(executor, "_load_regions", lambda _: {"army_training": {"speedup_panel": button_region}})
     states = iter((
         {"status": "idle"},
         {"status": "idle"},
@@ -124,6 +125,28 @@ def test_unconfirmed_help_button_pauses_without_clicking_help(monkeypatch):
     assert queue["paused"] is True
     assert queue["pause_reason"].startswith("uncertain_help_action:")
     assert len(clicks) == 2
+
+
+def test_help_uses_configured_panel_region_when_notification_hides_button(monkeypatch):
+    queue, task, clicks, click, capture = _setup(monkeypatch)
+    button_region = {"x": 1080, "y": 288, "w": 129, "h": 33}
+    monkeypatch.setattr(executor, "_load_regions", lambda _: {"army_training": {"speedup_panel": button_region}})
+    states = iter((
+        {"status": "idle"}, {"status": "idle"}, {"status": "active"},
+        {"status": "active", "button_state": "unknown", "training_button_region": None},
+        {"status": "active", "button_state": "speedup", "training_button_region": button_region},
+    ))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
+
+    result = executor.execute_training_goal(
+        queue, task["task_id"], NOW, execute=True,
+        confirmation=executor.CONFIRMATION_PHRASE,
+        capture_fn=capture, click_fn=click, sleep_fn=lambda _: None,
+    )
+
+    assert result["status"] == "START_CONFIRMED"
+    assert result["help_action"] == "confirmed"
+    assert clicks == [((110, 135), (0, 0)), ((425, 510), (0, 0)), ((1144, 304), (0, 0))]
 
 
 def test_train_click_failure_pauses_queue_and_is_not_retried(monkeypatch):

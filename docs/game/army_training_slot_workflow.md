@@ -1,5 +1,13 @@
 # Army Training Slot Workflow
 
+## Notification-Covered Controls (2026-11-08)
+
+Notifications may visually cover the configured central panel button without preventing clicks from reaching it. Immediately after a newly accepted Train action, the executor may click the annotated `speedup_panel` region for the expected Help action. The active-training finisher may click the same region for Speed Up only for a bot-managed training that has reached its finish step. Missing button-template evidence is tolerated in these expected stages, but an explicitly observed incompatible button state, inactive/unknown training, or missing region still blocks.
+
+Each action is sent once and confirmed from its next state. The executor requires the panel to show Speed Up after Help; the finisher requires the Speed Up dialog before it can plan or use any items. Failed postconditions do not trigger another click.
+
+This is a reusable rule for other modules, not a global bypass: use a known annotated or freshly resolved target only when the current screen/action context and expected control are established by the workflow, then verify that action's expected next state. If context is unknown, an incompatible control state is observed, the target region is missing, or a required screen reading is obscured, stop or defer that action. Do not infer coordinates from a screenshot or treat a hidden button as proof of state. The notification pass-through is user-confirmed; Help and Speed Up adapter paths are covered by mocked tests, not live clicks.
+
 ## Speedup Completion Reconciliation (2026-11-08)
 
 The desktop speedup adapter now re-captures the army panel after every runner result, including `UNCERTAIN`, `BLOCKED`, and `NOT_ENOUGH`. It no longer treats all non-`FINISHED` results as evidence that training remains active. Only a recognized `idle` state allows `finish_open_training` to clear the open marker; `active` and `unknown` retain existing retry/error handling. A missing speedup dialog anchor alone is never proof of completed training. Failed runner status and reason are logged before reconciliation.
@@ -106,7 +114,7 @@ The current workstation lacks `mss` and `pyautogui`. The preview was attempted a
 ### Operator Procedure
 
 1. From the repository root, install project runtime dependencies and install Tesseract OCR. Ensure `tesseract.exe` is on `PATH`.
-2. Launch the game manually, open Barracks, and leave the full game visible on the primary monitor at 1920x1080. Close overlays/notifications. Confirm there is no active training.
+2. Launch the game manually, open Barracks, and leave the full game visible on the primary monitor at 1920x1080. Confirm there is no active training. Notifications need not be dismissed for a known-region click; any screen values needed for preflight must still be readable.
 3. Run preview first. It captures the current monitor but performs no clicks and does not change the queue:
 
 ```powershell

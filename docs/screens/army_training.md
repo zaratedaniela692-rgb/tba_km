@@ -158,12 +158,12 @@ Retry counts and action-confirmation timeouts must be configurable and validated
 
 ### After the order starts
 
-- After confirmed acceptance, wait the configured 1-3 seconds, verify the `Help` button, click it once, wait about 0.2 seconds, and verify that the same control changes to `Speed Up`.
-- Automatic Speed Up is allowed only when the task has `quick_finish` enabled and the button is visually verified. If accelerations are unavailable, pause this profile's queue until manual resume; a click alone never confirms completion.
+- After confirmed acceptance, wait the configured 1-3 seconds. In the expected Help lifecycle stage, click the annotated central panel region once even if its template is covered; wait about 0.2 seconds and verify that the control changes to `Speed Up`.
+- In the manager lifecycle, a notification may hide the central panel button template. Immediately after a confirmed Train start, the executor may click the configured region for the expected Help action; during a bot-managed finish step it may click that region for the expected Speed Up action. Explicit incompatible button states still block. Each click is sent once and must pass its action-specific next-state check; no uncertain click is retried.
 - While training is active, do not configure or start another troop type. Clan help may change the remaining duration.
 - On a later check, freshly read the active-training panel and button state; 30-60 minutes is only a typical check interval, not a completion guarantee.
 - After training completes, wait at least 5 seconds for the view to reset, capture a fresh frame, and only then read values or change settings.
-- If a notification obscures the current-production panel, treat the state as unknown; wait for the screen to clear and classify again.
+- If a notification obscures the current-production evidence needed to classify training, treat the state as unknown and re-observe; visibility of a button is not a substitute for that evidence. A notification covering only a known action target does not by itself block the click when the workflow stage establishes the expected control.
 
 The plan may contain many unit goals, but the executor starts only one in-game order at a time. A goal can be satisfied by the existing city army without starting training. After each confirmed order completes, reread the city count and reconcile the same goal before planning any additional order.
 
@@ -183,6 +183,7 @@ The plan may contain many unit goals, but the executor starts only one in-game o
 - Nie klikaj „Wyszkol” ani „Przyspiesz” w fazie rozpoznania; przyszłe akcje wymagają dry-run, jawnego potwierdzenia i weryfikacji wyniku.
 
 ## Wiedza z poprawek
+- 2026-11-08: Notification overlay may cover the central button while the current-training unit image still confirms `active`. The manager executor and finisher use the configured `speedup_panel` region only in lifecycle stages that establish the expected Help or Speed Up action. Each clicks once; Help must transition to Speed Up and the finisher must recognize the opened dialog before using items. Missing postconditions are never retried. This pattern is not yet integrated into unrelated modules.
 - 2026-11-05: `army_training_levels.py` uses the largest badge as the presumed highest selector level, consistent with the default-highest-level assumption. It verifies that this badge is last in the selector, then OCRs its Roman numeral; the immediately preceding badge position yields the `max-1` candidate. Current fixtures consistently have the largest badge last (V on `pelny.png`, VII on the empty-queue frame; confidence 87-89). If the largest badge is not last or is not distinct, result is `unknown`. A manually selected lower level is an acknowledged edge case. Local I/II are ambiguous with global VIII/IX and remain unsupported.
 - 2026-11-05: When a reliable per-slot highest-unlocked reading is exactly one below the requested global target, `decide_training_goal` returns `satisfied` with reason `target_level_unavailable_for_slot`; reconciliation marks that goal `completed` and records the reason. No replacement task is created. If the slot is more than one level below, the decision remains blocked. The selector reader is not yet wired to this manager decision because locked-state verification remains open.
 - 2026-11-05: Domyślna ilość do wyszkolenia w panelu slotu to maksymalny limit kolejki (bez ruszania suwaka). Limit jest ten sam dla obu szkolonych poziomów (najwyższy i o jeden niższy) w obrębie jednego slotu, lecz każdy slot ma własny limit (na fixture: 31 310 / 31 310 / 15 655 oraz 1 565 / 31 310 / 31 310); różnią się tylko srebro i food. W stanach przejściowych widać też sloty niższego poziomu, więc sloty trzeba filtrować.

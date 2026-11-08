@@ -23,7 +23,7 @@ def finish_active_training_with_speedups(
     sleep_fn=time.sleep,
     speedup_runner=None,
 ):
-    """Use owned speedups only from a confirmed active army task and button."""
+    """Use owned speedups only for an active, bot-managed training task."""
     from speedup_run import run_open_dialog
 
     capture_fn = capture_fn or capture_primary_monitor
@@ -37,13 +37,21 @@ def finish_active_training_with_speedups(
     before = _read_current_training_state(frame, variant, include_numeric=False)
     if before["status"] == "idle":
         return "idle"
-    if before["status"] != "active" or not before.get("speedup_button_detected"):
+    if before["status"] != "active":
         return before["status"]
+    observed_button_state = before.get("button_state")
+    if observed_button_state in {"help", "absent"}:
+        LOGGER.info("Speedup skipped because the observed panel state is %s", observed_button_state)
+        return "active"
 
     regions = _load_regions(variant["regions"]).get("army_training", {})
     button = regions.get("speedup_panel")
     if not button:
         return "unknown"
+    if not before.get("speedup_button_detected"):
+        LOGGER.info(
+            "Speedup button template not visible; clicking its configured region in the active-training finish flow"
+        )
     _check_emergency_stop()
     _enable_live_failsafe(click_fn)
     point = (
