@@ -1,0 +1,33 @@
+{
+  "scenario": "preflight",
+  "device": "DESKTOP-LFGLEFV",
+  "status": "OK",
+  "run_number": 12,
+  "run_dir": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\preflight\\12_20261108_081638",
+  "execute": false,
+  "commit": "83a2245",
+  "code_commit": "10caac59573463f1f37ea5f31a8cbca9cce8a1c2",
+  "started_at": "2026-11-08T08:16:38",
+  "finished_at": "2026-11-08T08:16:45",
+  "python": "3.11.7",
+  "steps": [
+    {
+      "index": 1,
+      "name": "environment",
+      "command": [
+        "C:\\Users\\Konrad\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "tools/live_probes.py",
+        "preflight",
+        "--out",
+        "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\preflight\\12_20261108_081638"
+      ],
+      "screenshot_before_error": null,
+      "duration_seconds": 0.95,
+      "returncode": 0,
+      "output_tail": "{\n  \"libraries\": {\n    \"cv2\": \"4.12.0\",\n    \"numpy\": \"2.2.6\",\n    \"pytesseract\": \"0.3.13\",\n    \"pyautogui\": \"0.9.54\",\n    \"mss\": \"10.1.0\"\n  },\n  \"display_size\": [\n    1920,\n    1080\n  ],\n  \"tesseract\": \"C:\\\\Program Files\\\\Tesseract-OCR\\\\tesseract.EXE\",\n  \"capture_size\": [\n    1920,\n    1080\n  ],\n  \"monitor_origin\": [\n    0,\n    0\n  ],\n  \"problems\": []\n}\n",
+      "screenshot_after_error": null,
+      "status": "OK"
+    }
+  ],
+  "module_debug": []
+}
