@@ -105,27 +105,66 @@ def test_speedup_confirmed_idle_clears_marker_and_unconfirmed_counts_attempt(tmp
     assert open_training(load_army_state(path)) is None
 
 
-def test_unconfirmed_finish_button_click_is_persisted_and_never_retried(tmp_path):
+def test_unconfirmed_finish_button_clicks_are_capped_and_then_need_attention(tmp_path):
     path = marker(tmp_path)
+    calls = []
 
     def click_finish(on_finish_button_click):
+        calls.append(1)
         on_finish_button_click()
         return "unknown"
 
-    first = finish.finish_open_training(
-        path, "active", click_finish, NOW,
-        before_finish_button_click=lambda: record_finish_button_attempt(path, NOW),
-    )
-    second = finish.finish_open_training(
-        path, "active", lambda: pytest.fail("must not retry after an uncertain finish click"),
-        NOW + timedelta(hours=2),
+    results = [
+        finish.finish_open_training(path, "completed", click_finish, NOW + timedelta(hours=index))
+        for index in range(finish.MAX_FINISH_BUTTON_ATTEMPTS)
+    ]
+    exhausted = finish.finish_open_training(
+        path, "completed", lambda: pytest.fail("must not click again after the attempt cap"),
+        NOW + timedelta(hours=10),
     )
 
-    assert first["status"] == "failed"
-    assert second["reason"] == "finish_button_already_attempted"
-    assert second["actions_attempted"] is False
-    assert second["needs_attention"] is True
-    assert open_training(load_army_state(path))["finish_button_attempted_at"] == NOW.isoformat()
+    assert len(calls) == finish.MAX_FINISH_BUTTON_ATTEMPTS
+    assert all(item["status"] == "failed" for item in results)
+    assert exhausted["reason"] == "finish_button_attempts_exhausted"
+    assert exhausted["actions_attempted"] is False
+    assert exhausted["needs_attention"] is True
+    assert open_training(load_army_state(path))["finish_button_attempts"] == finish.MAX_FINISH_BUTTON_ATTEMPTS
+
+
+def test_completed_state_runs_the_finisher_and_clears_the_marker_when_idle(tmp_path):
+    path = marker(tmp_path)
+    seen = []
+
+    def adapter(on_finish_button_click):
+        seen.append(callable(on_finish_button_click))
+        return "idle"
+
+    result = finish.finish_open_training(path, "completed", adapter, NOW)
+
+    assert result["status"] == "finished"
+    assert seen == [True]
+    assert open_training(load_army_state(path)) is None
+
+
+def test_completed_screen_without_an_open_marker_is_foreign_and_not_clicked(tmp_path):
+    result = finish.finish_open_training(
+        army_state_path("other", tmp_path), "completed", lambda: pytest.fail("foreign completion"), NOW,
+    )
+
+    assert result["status"] == "blocked"
+
+
+def test_failed_attempts_retry_soon_then_fall_back_to_the_long_interval(tmp_path):
+    path = marker(tmp_path)
+
+    first = finish.finish_open_training(path, "active", lambda: "active", NOW)
+    second = finish.finish_open_training(path, "active", lambda: "active", NOW + timedelta(minutes=5))
+    third = finish.finish_open_training(path, "active", lambda: "active", NOW + timedelta(minutes=10))
+
+    assert first["next_attempt_at"] == (NOW + timedelta(seconds=finish.SHORT_RETRY_SECONDS)).isoformat()
+    assert second["next_attempt_at"] == (NOW + timedelta(minutes=5, seconds=finish.SHORT_RETRY_SECONDS)).isoformat()
+    assert third["next_attempt_at"] == (NOW + timedelta(minutes=10, hours=1)).isoformat()
+    assert third["needs_attention"] is True
 
 
 def test_execute_finish_task_passes_one_shot_recorder_to_speedup_adapter(tmp_path, monkeypatch):
@@ -137,7 +176,7 @@ def test_execute_finish_task_passes_one_shot_recorder_to_speedup_adapter(tmp_pat
     path = marker(tmp_path)
     image = np.zeros((1080, 1920, 3), dtype=np.uint8)
     adapter_calls = []
-    states = iter(("active", "unknown"))
+    states = iter(("active",) * 4)
     monkeypatch.setattr(finish, "resolve_variant", lambda: {"regions": "regions.json"})
     monkeypatch.setattr(finish, "_read_current_training_state", lambda *_: {"status": next(states)})
     monkeypatch.setattr(finish, "_check_emergency_stop", lambda: None)
@@ -147,25 +186,26 @@ def test_execute_finish_task_passes_one_shot_recorder_to_speedup_adapter(tmp_pat
         kwargs["on_finish_button_click"]()
         return "unknown"
 
-    first = finish.execute_finish_task(
-        queue, task["task_id"], path, NOW, execute=True,
-        confirmation=finish.CONFIRMATION_PHRASE,
-        capture_fn=lambda: (image, (0, 0)), speedup_fn=speedup_adapter, sleep_fn=lambda _: None,
-    )
-    second = finish.execute_finish_task(
-        queue, task["task_id"], path, NOW + timedelta(hours=2), execute=True,
-        confirmation=finish.CONFIRMATION_PHRASE,
-        capture_fn=lambda: (image, (0, 0)),
-        speedup_fn=lambda **_: pytest.fail("must not invoke the adapter after an uncertain finish click"),
-        sleep_fn=lambda _: None,
+    def run(at, adapter):
+        return finish.execute_finish_task(
+            queue, task["task_id"], path, at, execute=True,
+            confirmation=finish.CONFIRMATION_PHRASE,
+            capture_fn=lambda: (image, (0, 0)), speedup_fn=adapter, sleep_fn=lambda _: None,
+        )
+
+    first = run(NOW, speedup_adapter)
+    for hours in range(1, finish.MAX_FINISH_BUTTON_ATTEMPTS):
+        run(NOW + timedelta(hours=hours), speedup_adapter)
+    last = run(
+        NOW + timedelta(hours=10),
+        lambda **_: pytest.fail("must not invoke the adapter after the attempt cap"),
     )
 
     assert first["status"] == "FAILED"
     assert first["actions_executed"] is True
-    assert len(adapter_calls) == 1
-    assert set(adapter_calls[0]) == {"on_finish_button_click"}
-    assert callable(adapter_calls[0]["on_finish_button_click"])
-    assert second["finish"]["reason"] == "finish_button_already_attempted"
+    assert len(adapter_calls) == finish.MAX_FINISH_BUTTON_ATTEMPTS
+    assert all(set(call) == {"on_finish_button_click"} for call in adapter_calls)
+    assert last["finish"]["reason"] == "finish_button_attempts_exhausted"
 
 
 def test_speedup_exception_is_a_failed_attempt_not_a_crash(tmp_path):

@@ -3,6 +3,7 @@
 import json
 import os
 import tempfile
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -48,6 +49,18 @@ def load_army_state(path):
     return state
 
 
+def _replace_with_retry(source, target, attempts=8, delay=0.05):
+    # Windows scanners briefly lock freshly written files, which makes os.replace fail with PermissionError.
+    for attempt in range(attempts):
+        try:
+            os.replace(source, target)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(delay)
+
+
 def _write_state(path, state):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -55,7 +68,7 @@ def _write_state(path, state):
     try:
         with os.fdopen(handle, "w", encoding="utf-8") as stream:
             json.dump(state, stream, ensure_ascii=False, indent=2)
-        os.replace(temp_name, path)
+        _replace_with_retry(temp_name, path)
     except BaseException:
         Path(temp_name).unlink(missing_ok=True)
         raise
@@ -133,12 +146,13 @@ def record_speedup_attempt(path, now, retry_seconds):
 
 
 def record_finish_button_attempt(path, now):
-    """Persist the one-shot finish-button attempt before sending its click."""
+    """Persist a finish-button attempt before its click so an uncertain click is always counted."""
     state = load_army_state(path)
     marker = open_training(state)
     if marker is None:
         raise ArmyStateError("No open training to record a finish-button attempt for.")
-    marker.setdefault("finish_button_attempted_at", _iso(now))
+    marker["finish_button_attempts"] = int(marker.get("finish_button_attempts", 0)) + 1
+    marker["finish_button_attempted_at"] = _iso(now)
     _write_state(path, state)
     return marker
 

@@ -1,5 +1,6 @@
 """Finish step, expiry processing and fallback task for a training the bot has started."""
 
+import inspect
 import time
 from datetime import timedelta
 
@@ -32,6 +33,8 @@ CONFIRMATION_PHRASE = "EXECUTE ARMY TRAINING"
 FALLBACK_GOAL_KIND = "finish_training_v1"
 VIEW_RESET_SECONDS = 5
 NEEDS_ATTENTION_AFTER_ATTEMPTS = 3
+SHORT_RETRY_SECONDS = 120
+MAX_FINISH_BUTTON_ATTEMPTS = 3
 
 
 def fallback_task_id(order_id):
@@ -42,29 +45,41 @@ def _setting(queue, key, default):
     return queue["settings"].get(key) or default
 
 
+def _accepts_recorder(function):
+    try:
+        parameters = inspect.signature(function).parameters.values()
+    except (TypeError, ValueError):
+        return False
+    return any(
+        item.name == "on_finish_button_click" or item.kind is inspect.Parameter.VAR_KEYWORD
+        for item in parameters
+    )
+
+
 def finish_open_training(
     state_path, training_status, speedup_fn, now, retry_seconds=DEFAULT_SPEEDUP_RETRY_SECONDS,
     attention_after=NEEDS_ATTENTION_AFTER_ATTEMPTS, before_finish_button_click=None,
+    short_retry_seconds=SHORT_RETRY_SECONDS,
 ):
     """Decide the finish step from the observed state; `speedup_fn()` must return the observed state afterwards.
 
-    Never pauses the queue: a failed attempt keeps the marker and schedules the next attempt.
+    Never pauses the queue: a failed attempt keeps the marker and schedules the next attempt, soon at first.
     """
     marker = open_training(load_army_state(state_path))
     if training_status == "idle":
         return {"status": "idle", "marker_cleared": clear_open_training(state_path) if marker else False}
-    if marker is not None and marker.get("finish_button_attempted_at") is not None:
+    if marker is not None and int(marker.get("finish_button_attempts", 0)) >= MAX_FINISH_BUTTON_ATTEMPTS:
         return {
             "status": "failed",
-            "reason": "finish_button_already_attempted",
+            "reason": "finish_button_attempts_exhausted",
             "actions_attempted": False,
             "attempts": marker.get("speedup_attempts", 0),
             "needs_attention": True,
         }
-    if training_status != "active":
+    if training_status not in {"active", "completed"}:
         return {"status": "unknown", "reason": "training_state_unknown"}
     if marker is None:
-        return {"status": "blocked", "reason": "foreign_training_active"}
+        return {"status": "blocked", "reason": f"foreign_training_{training_status}"}
     next_attempt_at = parse_marker_time(marker, "next_attempt_at")
     if next_attempt_at is not None and now < next_attempt_at:
         return {"status": "waiting", "reason": "speedup_retry_not_due", "next_attempt_at": next_attempt_at.isoformat()}
@@ -72,11 +87,12 @@ def finish_open_training(
     attempted = speedup_fn is not None
     reason = "speedup_module_unavailable"
     if attempted:
+        recorder = before_finish_button_click or (lambda: record_finish_button_attempt(state_path, now))
         try:
-            if before_finish_button_click is None:
-                outcome = speedup_fn()
+            if _accepts_recorder(speedup_fn):
+                outcome = speedup_fn(on_finish_button_click=recorder)
             else:
-                outcome = speedup_fn(on_finish_button_click=before_finish_button_click)
+                outcome = speedup_fn()
         except Exception as error:
             outcome, reason = "unknown", f"speedup_error:{error}"
         else:
@@ -84,7 +100,9 @@ def finish_open_training(
         if outcome == "idle":
             clear_open_training(state_path)
             return {"status": "finished", "reason": "speedup_confirmed_idle", "actions_attempted": True}
-    updated = record_speedup_attempt(state_path, now, retry_seconds)
+    attempts_so_far = int(marker.get("speedup_attempts", 0)) + 1
+    soon = attempted and attempts_so_far < attention_after
+    updated = record_speedup_attempt(state_path, now, short_retry_seconds if soon else retry_seconds)
     return {
         "status": "failed",
         "reason": reason,

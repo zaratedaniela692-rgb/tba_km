@@ -64,6 +64,11 @@ def _finish_round(
     before = _read_current_training_state(frame, variant, include_numeric=False)
     if before["status"] == "idle":
         return "idle"
+    regions = _load_regions(variant["regions"]).get("army_training", {})
+    if before["status"] == "completed":
+        return _click_finish_button(
+            frame, origin, variant, regions, capture_fn, click_fn, sleep_fn, move_fn, on_finish_button_click,
+        )
     if before["status"] != "active":
         return before["status"]
     observed_button_state = before.get("button_state")
@@ -71,7 +76,6 @@ def _finish_round(
         LOGGER.info("Speedup skipped because the observed panel state is %s", observed_button_state)
         return "active"
 
-    regions = _load_regions(variant["regions"]).get("army_training", {})
     button = regions.get("speedup_panel")
     if not button:
         return "unknown"
@@ -105,32 +109,43 @@ def _finish_round(
         return "unknown"
     after = _read_current_training_state(after_frame, variant, include_numeric=False)
     LOGGER.info("Speedup result=%s; observed army state=%s", result.status, after["status"])
-    if after["status"] == "unknown":
-        score, finish_point = locate_finish_training_button(after_frame, variant)
-        if finish_point is not None:
-            if on_finish_button_click is None:
-                LOGGER.warning("Finish button is visible without an open-training attempt recorder; click blocked")
-                return "unknown"
-            finish_button = regions.get("finish_training_button")
-            _check_emergency_stop()
-            _enable_live_failsafe(click_fn)
-            move_fn = move_fn or _move_cursor_screen_point
-            move_fn(_cursor_away_point(after_frame, finish_button), after_origin)
-            _check_emergency_stop()
-            on_finish_button_click()
-            click_fn(finish_point, after_origin)
-            sleep_fn(0.35)
-            final_frame, final_origin = capture_fn()
-            if (
-                (final_frame.shape[1], final_frame.shape[0]) != EXPECTED_SIZE
-                or tuple(final_origin) != tuple(origin)
-            ):
-                LOGGER.warning("Finish button was clicked but the follow-up capture geometry changed")
-                return "unknown"
-            final = _read_current_training_state(final_frame, variant, include_numeric=False)
-            LOGGER.info("Finish button match=%.3f; post-click army state=%s", score, final["status"])
-            return "idle" if final["status"] == "idle" else "unknown"
+    if after["status"] in {"unknown", "completed"}:
+        return _click_finish_button(
+            after_frame, after_origin, variant, regions, capture_fn, click_fn, sleep_fn, move_fn,
+            on_finish_button_click,
+        )
     return after["status"]
+
+
+def _click_finish_button(
+    frame, origin, variant, regions, capture_fn, click_fn, sleep_fn, move_fn, on_finish_button_click,
+):
+    """Click the matched finish button once and report `idle` only from a fresh frame."""
+    score, finish_point = locate_finish_training_button(frame, variant)
+    if finish_point is None:
+        return "unknown"
+    if on_finish_button_click is None:
+        LOGGER.warning("Finish button is visible without an open-training attempt recorder; click blocked")
+        return "unknown"
+    finish_button = regions.get("finish_training_button")
+    _check_emergency_stop()
+    _enable_live_failsafe(click_fn)
+    move_fn = move_fn or _move_cursor_screen_point
+    move_fn(_cursor_away_point(frame, finish_button), origin)
+    _check_emergency_stop()
+    on_finish_button_click()
+    click_fn(finish_point, origin)
+    sleep_fn(0.35)
+    final_frame, final_origin = capture_fn()
+    if (
+        (final_frame.shape[1], final_frame.shape[0]) != EXPECTED_SIZE
+        or tuple(final_origin) != tuple(origin)
+    ):
+        LOGGER.warning("Finish button was clicked but the follow-up capture geometry changed")
+        return "unknown"
+    final = _read_current_training_state(final_frame, variant, include_numeric=False)
+    LOGGER.info("Finish button match=%.3f; post-click army state=%s", score, final["status"])
+    return "idle" if final["status"] == "idle" else "unknown"
 
 
 def _move_cursor_screen_point(point, origin):

@@ -182,6 +182,51 @@ def test_army_adapter_round_count_is_bounded(monkeypatch):
     assert len(runs) == 2
 
 
+def test_army_adapter_closes_an_already_completed_training_without_opening_speedups(monkeypatch):
+    image = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    states = iter(({"status": "completed"}, {"status": "idle"}))
+    actions = []
+    monkeypatch.setattr(army_speedup, "resolve_variant", lambda: {"regions": "regions.json"})
+    monkeypatch.setattr(army_speedup, "_read_current_training_state", lambda *_a, **_k: next(states))
+    monkeypatch.setattr(army_speedup, "_load_regions", lambda _: {"army_training": {
+        "finish_training_button": {"x": 1014, "y": 290, "w": 147, "h": 26, "type": "button"},
+    }})
+    monkeypatch.setattr(army_speedup, "locate_finish_training_button", lambda *_: (1.0, (1087, 303)))
+    monkeypatch.setattr(army_speedup, "_check_emergency_stop", lambda: None)
+    monkeypatch.setattr(army_speedup, "_enable_live_failsafe", lambda _: None)
+
+    result = army_speedup.finish_active_training_with_speedups(
+        capture_fn=lambda: (image, (0, 0)),
+        click_fn=lambda point, origin: actions.append(("click", point)),
+        move_fn=lambda point, origin: actions.append(("move", point)),
+        on_finish_button_click=lambda: actions.append(("record", None)),
+        sleep_fn=lambda _: None,
+        speedup_runner=lambda **_: pytest.fail("speedups must not open on a completed screen"),
+    )
+
+    assert result == "idle"
+    assert actions == [("move", (960, 540)), ("record", None), ("click", (1087, 303))]
+
+
+def test_army_adapter_never_clicks_finish_on_a_completed_screen_without_a_recorder(monkeypatch):
+    image = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    clicks = []
+    monkeypatch.setattr(army_speedup, "resolve_variant", lambda: {"regions": "regions.json"})
+    monkeypatch.setattr(army_speedup, "_read_current_training_state", lambda *_a, **_k: {"status": "completed"})
+    monkeypatch.setattr(army_speedup, "_load_regions", lambda _: {"army_training": {}})
+    monkeypatch.setattr(army_speedup, "locate_finish_training_button", lambda *_: (1.0, (1087, 303)))
+
+    result = army_speedup.finish_active_training_with_speedups(
+        capture_fn=lambda: (image, (0, 0)),
+        click_fn=lambda point, origin: clicks.append(point),
+        sleep_fn=lambda _: None,
+        speedup_runner=lambda **_: pytest.fail("no speedups on a completed screen"),
+    )
+
+    assert result == "unknown"
+    assert clicks == []
+
+
 def test_army_adapter_clicks_only_matched_finish_button_and_requires_idle(monkeypatch):
     image = np.zeros((1080, 1920, 3), dtype=np.uint8)
     states = iter((
