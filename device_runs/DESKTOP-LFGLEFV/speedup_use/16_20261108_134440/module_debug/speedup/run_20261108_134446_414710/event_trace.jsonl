@@ -1,0 +1,102 @@
+{"elapsed_ms": 0.0, "event": "scan_started", "step": 0, "data": {"checkpoints": [3, 11, 16], "mode": "execute"}}
+{"elapsed_ms": 341.0, "event": "capture", "step": 0, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 2717.4, "event": "timer_read", "step": 0, "data": {"phase": "initial", "status": "ok", "raw": "1d.:10g.", "value_seconds": 122400, "confidence": 100.0}}
+{"elapsed_ms": 2717.5, "event": "emergency_stop_check", "step": 0, "data": {"status": "clear"}}
+{"elapsed_ms": 2817.9, "event": "pointer_move", "step": 0, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 2818.1, "event": "emergency_stop_check", "step": 0, "data": {"status": "clear"}}
+{"elapsed_ms": 2918.8, "event": "scroll", "step": 0, "data": {"status": "sent", "direction": -1, "from_step": 0}}
+{"elapsed_ms": 3327.4, "event": "capture", "step": 0, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 3343.1, "event": "viewport_check", "step": 1, "data": {"status": "changed", "direction": -1, "change_score": 0.643464046723084, "threshold": 0.003, "from_step": 0}}
+{"elapsed_ms": 3344.0, "event": "emergency_stop_check", "step": 1, "data": {"status": "clear"}}
+{"elapsed_ms": 3444.5, "event": "pointer_move", "step": 1, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 3444.7, "event": "emergency_stop_check", "step": 1, "data": {"status": "clear"}}
+{"elapsed_ms": 3545.1, "event": "scroll", "step": 1, "data": {"status": "sent", "direction": -1, "from_step": 1}}
+{"elapsed_ms": 3940.0, "event": "capture", "step": 1, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 3953.4, "event": "viewport_check", "step": 2, "data": {"status": "changed", "direction": -1, "change_score": 0.6443750106421019, "threshold": 0.003, "from_step": 1}}
+{"elapsed_ms": 3954.7, "event": "emergency_stop_check", "step": 2, "data": {"status": "clear"}}
+{"elapsed_ms": 4055.6, "event": "pointer_move", "step": 2, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 4055.9, "event": "emergency_stop_check", "step": 2, "data": {"status": "clear"}}
+{"elapsed_ms": 4156.8, "event": "scroll", "step": 2, "data": {"status": "sent", "direction": -1, "from_step": 2}}
+{"elapsed_ms": 4711.8, "event": "capture", "step": 2, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 4727.3, "event": "viewport_check", "step": 3, "data": {"status": "changed", "direction": -1, "change_score": 0.6468993172027449, "threshold": 0.003, "from_step": 2}}
+{"elapsed_ms": 7779.0, "event": "checkpoint_read", "step": 3, "data": {"status": "complete", "reason": "", "requested_duration": null, "rows": [{"duration_label": "15m", "duration_seconds": 900, "raw_quantity": "4879 / 4879", "quantity": 4879, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 30, "width": 145, "height": 27}, "button_center": {"x": 444, "y": 43}}, {"duration_label": "1h", "duration_seconds": 3600, "raw_quantity": "5279 / 5279", "quantity": 5279, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 140, "width": 145, "height": 27}, "button_center": {"x": 444, "y": 153}}, {"duration_label": "3h", "duration_seconds": 10800, "raw_quantity": "3422 / 3422", "quantity": 3422, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 250, "width": 145, "height": 27}, "button_center": {"x": 444, "y": 263}}, {"duration_label": "8h", "duration_seconds": 28800, "raw_quantity": "487 / 487", "quantity": 487, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 360, "width": 145, "height": 27}, "button_center": {"x": 444, "y": 373}}], "matches": [{"duration_label": "15m", "expected_rectangle": {"x": 372, "y": 30, "width": 145, "height": 27}, "detected_rectangle": {"x": 372, "y": 30, "width": 145, "height": 27}, "offset": {"x": 0, "y": 0}, "confidence": 1.0}, {"duration_label": "1h", "expected_rectangle": {"x": 372, "y": 140, "width": 145, "height": 27}, "detected_rectangle": {"x": 372, "y": 140, "width": 145, "height": 27}, "offset": {"x": 0, "y": 0}, "confidence": 0.9999998211860657}, {"duration_label": "3h", "expected_rectangle": {"x": 372, "y": 250, "width": 145, "height": 27}, "detected_rectangle": {"x": 372, "y": 250, "width": 145, "height": 27}, "offset": {"x": 0, "y": 0}, "confidence": 0.9999998211860657}, {"duration_label": "8h", "expected_rectangle": {"x": 372, "y": 360, "width": 145, "height": 27}, "detected_rectangle": {"x": 372, "y": 360, "width": 145, "height": 27}, "offset": {"x": 0, "y": 0}, "confidence": 0.999999463558197}], "quantities": [{"duration_label": "15m", "duration_seconds": 900, "raw_ocr": "4879 / 4879", "quantity": 4879, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 30, "width": 145, "height": 27}}, {"duration_label": "1h", "duration_seconds": 3600, "raw_ocr": "5279 / 5279", "quantity": 5279, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 140, "width": 145, "height": 27}}, {"duration_label": "3h", "duration_seconds": 10800, "raw_ocr": "3422 / 3422", "quantity": 3422, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 250, "width": 145, "height": 27}}, {"duration_label": "8h", "duration_seconds": 28800, "raw_ocr": "487 / 487", "quantity": 487, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 360, "width": 145, "height": 27}}]}}
+{"elapsed_ms": 7780.1, "event": "emergency_stop_check", "step": 3, "data": {"status": "clear"}}
+{"elapsed_ms": 7880.9, "event": "pointer_move", "step": 3, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 7881.0, "event": "emergency_stop_check", "step": 3, "data": {"status": "clear"}}
+{"elapsed_ms": 7982.4, "event": "scroll", "step": 3, "data": {"status": "sent", "direction": -1, "from_step": 3}}
+{"elapsed_ms": 8395.8, "event": "capture", "step": 3, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 8419.7, "event": "viewport_check", "step": 4, "data": {"status": "changed", "direction": -1, "change_score": 0.6467801256619388, "threshold": 0.003, "from_step": 3}}
+{"elapsed_ms": 8420.7, "event": "emergency_stop_check", "step": 4, "data": {"status": "clear"}}
+{"elapsed_ms": 8521.5, "event": "pointer_move", "step": 4, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 8521.6, "event": "emergency_stop_check", "step": 4, "data": {"status": "clear"}}
+{"elapsed_ms": 8622.7, "event": "scroll", "step": 4, "data": {"status": "sent", "direction": -1, "from_step": 4}}
+{"elapsed_ms": 9029.4, "event": "capture", "step": 4, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 9050.7, "event": "viewport_check", "step": 5, "data": {"status": "changed", "direction": -1, "change_score": 0.643698172963953, "threshold": 0.003, "from_step": 4}}
+{"elapsed_ms": 9051.7, "event": "emergency_stop_check", "step": 5, "data": {"status": "clear"}}
+{"elapsed_ms": 9152.9, "event": "pointer_move", "step": 5, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 9153.1, "event": "emergency_stop_check", "step": 5, "data": {"status": "clear"}}
+{"elapsed_ms": 9254.2, "event": "scroll", "step": 5, "data": {"status": "sent", "direction": -1, "from_step": 5}}
+{"elapsed_ms": 9653.3, "event": "capture", "step": 5, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 9668.7, "event": "viewport_check", "step": 6, "data": {"status": "changed", "direction": -1, "change_score": 0.6458265933354901, "threshold": 0.003, "from_step": 5}}
+{"elapsed_ms": 9669.9, "event": "emergency_stop_check", "step": 6, "data": {"status": "clear"}}
+{"elapsed_ms": 9770.8, "event": "pointer_move", "step": 6, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 9770.9, "event": "emergency_stop_check", "step": 6, "data": {"status": "clear"}}
+{"elapsed_ms": 9871.5, "event": "scroll", "step": 6, "data": {"status": "sent", "direction": -1, "from_step": 6}}
+{"elapsed_ms": 10275.0, "event": "capture", "step": 6, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 10295.3, "event": "viewport_check", "step": 7, "data": {"status": "changed", "direction": -1, "change_score": 0.6356442302780568, "threshold": 0.003, "from_step": 6}}
+{"elapsed_ms": 10296.3, "event": "emergency_stop_check", "step": 7, "data": {"status": "clear"}}
+{"elapsed_ms": 10396.9, "event": "pointer_move", "step": 7, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 10397.0, "event": "emergency_stop_check", "step": 7, "data": {"status": "clear"}}
+{"elapsed_ms": 10497.6, "event": "scroll", "step": 7, "data": {"status": "sent", "direction": -1, "from_step": 7}}
+{"elapsed_ms": 10903.6, "event": "capture", "step": 7, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 10917.5, "event": "viewport_check", "step": 8, "data": {"status": "changed", "direction": -1, "change_score": 0.6386921282500979, "threshold": 0.003, "from_step": 7}}
+{"elapsed_ms": 10918.2, "event": "emergency_stop_check", "step": 8, "data": {"status": "clear"}}
+{"elapsed_ms": 11018.7, "event": "pointer_move", "step": 8, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 11019.2, "event": "emergency_stop_check", "step": 8, "data": {"status": "clear"}}
+{"elapsed_ms": 11119.9, "event": "scroll", "step": 8, "data": {"status": "sent", "direction": -1, "from_step": 8}}
+{"elapsed_ms": 11519.6, "event": "capture", "step": 8, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 11533.5, "event": "viewport_check", "step": 9, "data": {"status": "changed", "direction": -1, "change_score": 0.6376108907013571, "threshold": 0.003, "from_step": 8}}
+{"elapsed_ms": 11534.6, "event": "emergency_stop_check", "step": 9, "data": {"status": "clear"}}
+{"elapsed_ms": 11635.6, "event": "pointer_move", "step": 9, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 11635.8, "event": "emergency_stop_check", "step": 9, "data": {"status": "clear"}}
+{"elapsed_ms": 11736.5, "event": "scroll", "step": 9, "data": {"status": "sent", "direction": -1, "from_step": 9}}
+{"elapsed_ms": 12135.7, "event": "capture", "step": 9, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 12149.6, "event": "viewport_check", "step": 10, "data": {"status": "changed", "direction": -1, "change_score": 0.6366360741711931, "threshold": 0.003, "from_step": 9}}
+{"elapsed_ms": 12150.5, "event": "emergency_stop_check", "step": 10, "data": {"status": "clear"}}
+{"elapsed_ms": 12250.9, "event": "pointer_move", "step": 10, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 12251.1, "event": "emergency_stop_check", "step": 10, "data": {"status": "clear"}}
+{"elapsed_ms": 12352.4, "event": "scroll", "step": 10, "data": {"status": "sent", "direction": -1, "from_step": 10}}
+{"elapsed_ms": 12906.2, "event": "capture", "step": 10, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 12918.8, "event": "viewport_check", "step": 11, "data": {"status": "changed", "direction": -1, "change_score": 0.6432682320489026, "threshold": 0.003, "from_step": 10}}
+{"elapsed_ms": 15678.3, "event": "checkpoint_read", "step": 11, "data": {"status": "complete", "reason": "", "requested_duration": null, "rows": [{"duration_label": "15h", "duration_seconds": 54000, "raw_quantity": "637 / 637", "quantity": 637, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 70, "width": 145, "height": 27}, "button_center": {"x": 444, "y": 83}}, {"duration_label": "1d", "duration_seconds": 86400, "raw_quantity": "467 / 467", "quantity": 467, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 180, "width": 145, "height": 27}, "button_center": {"x": 444, "y": 193}}, {"duration_label": "3d", "duration_seconds": 259200, "raw_quantity": "533 / 533", "quantity": 533, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 290, "width": 145, "height": 27}, "button_center": {"x": 444, "y": 303}}], "matches": [{"duration_label": "15h", "expected_rectangle": {"x": 372, "y": 70, "width": 145, "height": 27}, "detected_rectangle": {"x": 372, "y": 70, "width": 145, "height": 27}, "offset": {"x": 0, "y": 0}, "confidence": 1.0}, {"duration_label": "1d", "expected_rectangle": {"x": 372, "y": 180, "width": 145, "height": 27}, "detected_rectangle": {"x": 372, "y": 180, "width": 145, "height": 27}, "offset": {"x": 0, "y": 0}, "confidence": 1.0}, {"duration_label": "3d", "expected_rectangle": {"x": 372, "y": 290, "width": 145, "height": 27}, "detected_rectangle": {"x": 372, "y": 290, "width": 145, "height": 27}, "offset": {"x": 0, "y": 0}, "confidence": 1.0}], "quantities": [{"duration_label": "15h", "duration_seconds": 54000, "raw_ocr": "637 / 637", "quantity": 637, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 70, "width": 145, "height": 27}}, {"duration_label": "1d", "duration_seconds": 86400, "raw_ocr": "467 / 467", "quantity": 467, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 180, "width": 145, "height": 27}}, {"duration_label": "3d", "duration_seconds": 259200, "raw_ocr": "533 / 533", "quantity": 533, "confidence": 100.0, "status": "ok", "button_rectangle": {"x": 372, "y": 290, "width": 145, "height": 27}}]}}
+{"elapsed_ms": 15679.6, "event": "emergency_stop_check", "step": 11, "data": {"status": "clear"}}
+{"elapsed_ms": 15780.7, "event": "pointer_move", "step": 11, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 15780.9, "event": "emergency_stop_check", "step": 11, "data": {"status": "clear"}}
+{"elapsed_ms": 15881.5, "event": "scroll", "step": 11, "data": {"status": "sent", "direction": -1, "from_step": 11}}
+{"elapsed_ms": 16284.7, "event": "capture", "step": 11, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 16299.0, "event": "viewport_check", "step": 12, "data": {"status": "changed", "direction": -1, "change_score": 0.6438216213455022, "threshold": 0.003, "from_step": 11}}
+{"elapsed_ms": 16299.7, "event": "emergency_stop_check", "step": 12, "data": {"status": "clear"}}
+{"elapsed_ms": 16400.5, "event": "pointer_move", "step": 12, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 16400.7, "event": "emergency_stop_check", "step": 12, "data": {"status": "clear"}}
+{"elapsed_ms": 16501.1, "event": "scroll", "step": 12, "data": {"status": "sent", "direction": -1, "from_step": 12}}
+{"elapsed_ms": 16898.6, "event": "capture", "step": 12, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 16911.5, "event": "viewport_check", "step": 13, "data": {"status": "changed", "direction": -1, "change_score": 0.6445240000681095, "threshold": 0.003, "from_step": 12}}
+{"elapsed_ms": 16912.3, "event": "emergency_stop_check", "step": 13, "data": {"status": "clear"}}
+{"elapsed_ms": 17013.0, "event": "pointer_move", "step": 13, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 17013.5, "event": "emergency_stop_check", "step": 13, "data": {"status": "clear"}}
+{"elapsed_ms": 17114.4, "event": "scroll", "step": 13, "data": {"status": "sent", "direction": -1, "from_step": 13}}
+{"elapsed_ms": 17514.2, "event": "capture", "step": 13, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 17526.2, "event": "viewport_check", "step": 14, "data": {"status": "changed", "direction": -1, "change_score": 0.6068381889696742, "threshold": 0.003, "from_step": 13}}
+{"elapsed_ms": 17527.2, "event": "emergency_stop_check", "step": 14, "data": {"status": "clear"}}
+{"elapsed_ms": 17628.0, "event": "pointer_move", "step": 14, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 17628.1, "event": "emergency_stop_check", "step": 14, "data": {"status": "clear"}}
+{"elapsed_ms": 17728.8, "event": "scroll", "step": 14, "data": {"status": "sent", "direction": -1, "from_step": 14}}
+{"elapsed_ms": 18130.5, "event": "capture", "step": 14, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": true}}
+{"elapsed_ms": 18143.5, "event": "viewport_check", "step": 15, "data": {"status": "changed", "direction": -1, "change_score": 0.6732023361541998, "threshold": 0.003, "from_step": 14}}
+{"elapsed_ms": 18144.2, "event": "emergency_stop_check", "step": 15, "data": {"status": "clear"}}
+{"elapsed_ms": 18244.6, "event": "pointer_move", "step": 15, "data": {"status": "ok", "point": [959, 585]}}
+{"elapsed_ms": 18244.7, "event": "emergency_stop_check", "step": 15, "data": {"status": "clear"}}
+{"elapsed_ms": 18345.9, "event": "scroll", "step": 15, "data": {"status": "sent", "direction": -1, "from_step": 15}}
+{"elapsed_ms": 18903.8, "event": "capture", "step": 15, "data": {"status": "ok", "frame_size": [1920, 1080], "origin": [0, 0], "dialog_required": true, "dialog_recognized": false}}
+{"elapsed_ms": 18903.8, "event": "run_aborted", "step": 15, "data": {"status": "BLOCKED", "reason": "speedup_dialog_not_recognized", "clicks_issued": 0}}
+{"elapsed_ms": 18903.8, "event": "run_finished", "step": 15, "data": {"status": "BLOCKED", "reason": "speedup_dialog_not_recognized", "clicks_issued": 0, "shortfall_seconds": 0, "initial_timer_seconds": null, "final_observed_timer_seconds": null, "submitted_uses": []}}
