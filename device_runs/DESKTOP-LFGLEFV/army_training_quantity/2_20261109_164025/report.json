@@ -1,0 +1,66 @@
+{
+  "status": "BLOCKED_TASK_STARTUP",
+  "actions_executed": true,
+  "queue_modified": false,
+  "navigation": {
+    "steps": [
+      "press_escape_three_times",
+      "click_army",
+      "confirm_barracks_slots"
+    ],
+    "actions_executed": true,
+    "queue_modified": false,
+    "armia_match_confidence": 61.131131649017334,
+    "armia_match_threshold": 94.6,
+    "armia_match_candidate_point": [
+      937,
+      940
+    ],
+    "search_region": {
+      "x": 911,
+      "y": 916,
+      "w": 57,
+      "h": 50
+    },
+    "status": "BLOCKED_ARMY_BUTTON_UNCONFIRMED",
+    "blockers": [
+      "world_map.armia confidence 61.13% is below 94.60%"
+    ]
+  },
+  "housekeeping": {
+    "expired": [],
+    "fallback_created": null
+  },
+  "queue_path": "C:\\Users\\Konrad\\tba\\profiles\\test_9f86d08188\\tasks.json",
+  "test_profile": "test",
+  "expected_quantity": 100,
+  "test_task_id": "army_stock:unit_guardsmen:level_7:match_1",
+  "run_dir": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\army_training_quantity\\2_20261109_164025",
+  "screen_before": {
+    "file": "screen_before.png",
+    "captured_at": "2026-11-09T15:40:25.498071+00:00",
+    "status": "saved",
+    "frame_size": [
+      1920,
+      1080
+    ],
+    "monitor_origin": [
+      0,
+      0
+    ]
+  },
+  "screen_after": {
+    "file": "screen_after.png",
+    "captured_at": "2026-11-09T15:40:28.150868+00:00",
+    "status": "saved",
+    "frame_size": [
+      1920,
+      1080
+    ],
+    "monitor_origin": [
+      0,
+      0
+    ]
+  },
+  "live_test_status": "FAILED_OR_UNCERTAIN"
+}

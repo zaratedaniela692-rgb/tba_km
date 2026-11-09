@@ -1,0 +1,61 @@
+{
+  "status": "NO_EXECUTABLE_GOAL",
+  "actions_executed": false,
+  "queue_modified": false,
+  "evaluation": {
+    "status": "ok",
+    "dry_run": false,
+    "goals": [
+      {
+        "task_id": "army_stock:unit_guardsmen:level_7:match_1",
+        "unit_type": "guardsmen",
+        "level": 7,
+        "match_number": 1,
+        "resolution": "ok",
+        "reason": "training_state_unknown",
+        "frame_index": 0,
+        "state": "blocked",
+        "training_count": 0,
+        "next_action": "none"
+      }
+    ]
+  },
+  "housekeeping": {
+    "expired": [],
+    "fallback_created": null
+  },
+  "navigation": {
+    "steps": [
+      "press_escape_three_times",
+      "click_army",
+      "confirm_barracks_slots"
+    ],
+    "actions_executed": true,
+    "queue_modified": false,
+    "armia_match_confidence": 100.0,
+    "armia_match_threshold": 94.6,
+    "armia_match_candidate_point": [
+      939,
+      943
+    ],
+    "search_region": {
+      "x": 911,
+      "y": 916,
+      "w": 57,
+      "h": 50
+    },
+    "armia_click_point": [
+      939,
+      943
+    ],
+    "status": "BARRACKS_OPENED",
+    "layout_status": "ok",
+    "visible_slots": 3
+  },
+  "category_selection": {
+    "status": "DEFAULT_CATEGORY_ASSUMED",
+    "unit_type": "guardsmen",
+    "selection_confirmed": false,
+    "actions_executed": false
+  }
+}
