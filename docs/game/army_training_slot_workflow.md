@@ -1,5 +1,11 @@
 # Army Training Slot Workflow
 
+## Prepared Army E2E Wrapper (2026-11-09)
+
+Run the configured sequence with `python .\tools\run_army_e2e.py`; edit the constants at the top of that script rather than passing scenario arguments. The wrapper first observes the foreground client/profile through `client_router.py` and stops unless exactly one registered desktop profile is routed. It always disables device-test Git publication/push and forces a fresh run. The default `EXECUTE_GAME_ACTIONS = False` performs preflight and a navigation preview, then stops before reading Barracks because the game is still on the world map. To continue from the world map, explicitly set the single live-input flag to `True`; this sends the existing Escape/Armia navigation action and then runs the read-only `army_slots` probe. `RUN_ARMY_SCROLL` and `RUN_SPECIALIST_TRAIN` remain off by default. Scrolling only inspects an already-open Barracks list and may change its position. Specialist training can consume resources and leave a persisted active order/marker, so enable it only for a supervised one-order test after reviewing queue/profile and game state. Speed Up item use is not part of this wrapper.
+
+No live wrapper run has been performed. Mocked tests cover desktop-profile routing, rejection of browser/unresolved profiles before device scenarios, default preview behavior, and the explicit navigation gate. Run `python -m pytest -q tests\test_run_army_e2e.py` for that offline safety check.
+
 ## Persisted Workflow Trace (2026-11-08)
 
 The manager's `execute` command now aggregates the structured event traces returned by navigation, category selection, executor, and finish steps into `workflow_trace.jsonl` when `TBA_WORKFLOW_TRACE_PATH` is set by the device-test harness. The run log appends each workflow event once, and `report.json` includes `workflow_trace_events`. Direct CLI runs keep the existing JSON result and do not create an extra trace file unless the environment variable is provided. Finish-task decisions, Speed Up adapter observations/actions/postconditions, and the shared Escape reset now emit structured events. Existing nested `event_trace` result fields remain available. Speed Up runner traces continue to be ingested from their own `event_trace.jsonl`, not copied into the army workflow trace.
