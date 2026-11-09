@@ -97,7 +97,7 @@ def _latest_training_state(device=None):
 def run_e2e(runner=subprocess.run, training_state_reader=_latest_training_state):
     print("Army E2E: keep the desktop game foregrounded on the world map with the player name visible.")
     print(f"Game input enabled: {EXECUTE_GAME_ACTIONS}")
-    route_result = _run([PYTHON, CLIENT_ROUTER, "--once"], runner)
+    route_result = _run([PYTHON, CLIENT_ROUTER, "--once", "--register-missing"], runner)
     profile_id = resolve_desktop_profile(route_result.stdout)
     print(f"Using registered profile: {profile_id}")
 

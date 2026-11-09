@@ -173,6 +173,14 @@ def _new_profile(player_name, registry, now=None, suffix_factory=None):
     return ProfileResolution(profile_id, player_name, "created")
 
 
+def _matching_profiles(player_name, registry):
+    normalized_name = _normalize_name(player_name)
+    return [
+        profile for profile in registry["profiles"]
+        if _normalize_name(profile["player_name"]).casefold() == normalized_name.casefold()
+    ]
+
+
 def resolve_profile(
     player_name,
     registry_path,
@@ -186,10 +194,7 @@ def resolve_profile(
     if not player_name:
         raise ProfileIdentityError("Player name is empty.")
     registry = load_profile_registry(registry_path)
-    matches = [
-        profile for profile in registry["profiles"]
-        if _normalize_name(profile["player_name"]).casefold() == player_name.casefold()
-    ]
+    matches = _matching_profiles(player_name, registry)
 
     if new_profile or not matches:
         result = _new_profile(player_name, registry, now, suffix_factory)
@@ -226,15 +231,28 @@ def resolve_registered_profile(player_name, registry_path):
     if not normalized_name:
         raise ProfileIdentityError("Player name is empty.")
     registry = load_profile_registry(registry_path)
-    matches = [
-        profile for profile in registry["profiles"]
-        if _normalize_name(profile["player_name"]).casefold() == normalized_name.casefold()
-    ]
+    matches = _matching_profiles(normalized_name, registry)
     if not matches:
         raise ProfileIdentityError("No registered profile matches the visible player name.")
     if len(matches) != 1:
         raise ProfileIdentityError("Multiple profiles match the visible player name; routing is ambiguous.")
     return ProfileResolution(matches[0]["profile_id"], matches[0]["player_name"], "routed")
+
+
+def resolve_registered_profile_or_create(player_name, registry_path):
+    """Route one existing match or register a profile when the visible name is new."""
+    normalized_name = _normalize_name(player_name)
+    if not normalized_name:
+        raise ProfileIdentityError("Player name is empty.")
+    registry = load_profile_registry(registry_path)
+    matches = _matching_profiles(normalized_name, registry)
+    if len(matches) > 1:
+        raise ProfileIdentityError("Multiple profiles match the visible player name; routing is ambiguous.")
+    if not matches:
+        return resolve_profile(normalized_name, registry_path)
+
+    selected = matches[0]
+    return ProfileResolution(selected["profile_id"], selected["player_name"], "routed")
 
 
 def resolve_profile_from_game(capture_fn=None, profiles_dir=None, new_profile=False, choose_fn=input, tesseract_cmd=None):

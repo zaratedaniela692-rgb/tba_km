@@ -24,11 +24,12 @@ def test_profile_router_blocks_before_any_device_scenario(route):
         calls.append(command)
         return SimpleNamespace(returncode=0, stdout=json.dumps(route), stderr="")
 
-    with pytest.raises(wrapper.E2EError, match="No profile was created"):
+    with pytest.raises(wrapper.E2EError, match="A unique registered desktop profile is required"):
         wrapper.run_e2e(runner=runner)
 
     assert len(calls) == 1
     assert calls[0][1].endswith("client_router.py")
+    assert "--register-missing" in calls[0]
 
 
 def test_default_wrapper_previews_navigation_and_does_not_read_barracks(monkeypatch):
@@ -47,6 +48,7 @@ def test_default_wrapper_previews_navigation_and_does_not_read_barracks(monkeypa
 
     assert wrapper.run_e2e(runner=runner) == 0
 
+    assert "--register-missing" in calls[0]
     scenario_commands = [command for command in calls if command[1].endswith("device_test.py")]
     assert [command[2] for command in scenario_commands] == ["preflight", "army_navigate"]
     assert all("--no-git" in command and "--no-push" in command for command in scenario_commands)

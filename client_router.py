@@ -14,6 +14,7 @@ from profile_identity import (
     profile_registry_path,
     read_player_name,
     resolve_registered_profile,
+    resolve_registered_profile_or_create,
 )
 from task_controller import PROFILES_DIR, task_queue_path
 from ui_variants import resolve_variant
@@ -119,6 +120,7 @@ def observe_foreground_profile(
     capture_fn=None,
     profiles_dir=PROFILES_DIR,
     name_reader=read_player_name,
+    register_missing=False,
 ):
     """Observe client and account. A result is routable only for a unique configured profile."""
     window = get_foreground_window() if window is None else window
@@ -154,7 +156,8 @@ def observe_foreground_profile(
         )
 
     try:
-        profile = resolve_registered_profile(reading.player_name, profile_registry_path(profiles_dir))
+        resolve = resolve_registered_profile_or_create if register_missing else resolve_registered_profile
+        profile = resolve(reading.player_name, profile_registry_path(profiles_dir))
     except ProfileIdentityError as error:
         return RouteObservation(
             "blocked", client_id, reading.player_name, None, None,
@@ -162,7 +165,8 @@ def observe_foreground_profile(
         )
     return RouteObservation(
         "routed", client_id, reading.player_name, profile.profile_id,
-        str(task_queue_path(profile.profile_id, profiles_dir)), "unique_registered_profile",
+        str(task_queue_path(profile.profile_id, profiles_dir)),
+        "profile_registered" if profile.action == "created" else "unique_registered_profile",
         title, process_name,
     )
 
@@ -198,12 +202,18 @@ def main(argv=None):
         description="Observe the foreground game client and its registered profile; no actions are run."
     )
     parser.add_argument("--once", action="store_true", help="report one foreground observation and exit")
+    parser.add_argument(
+        "--register-missing", action="store_true",
+        help="with --once, create a profile when the visible desktop player name is not registered",
+    )
     parser.add_argument("--interval", type=float, default=1.0, help="watch polling interval in seconds")
     args = parser.parse_args(argv)
     if args.interval <= 0:
         parser.error("--interval must be positive")
+    if args.register_missing and not args.once:
+        parser.error("--register-missing requires --once")
     if args.once:
-        print(json.dumps(asdict(observe_foreground_profile()), ensure_ascii=False, indent=2))
+        print(json.dumps(asdict(observe_foreground_profile(register_missing=args.register_missing)), ensure_ascii=False, indent=2))
         return 0
     try:
         watch_foreground(interval_seconds=args.interval)

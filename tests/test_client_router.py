@@ -79,6 +79,32 @@ def test_desktop_routes_only_to_one_registered_profile_queue(tmp_path):
     assert observation.queue_path == str(task_queue_path(profile_id, tmp_path))
 
 
+def test_desktop_auto_registration_creates_missing_profile_once(tmp_path):
+    registry_path = profile_registry_path(tmp_path)
+    reader = lambda *_args, **_kwargs: SimpleNamespace(
+        status="ok", player_name="Snoweye", candidates=("Snoweye",) * 4,
+    )
+
+    created = observe_foreground_profile(
+        ForegroundWindow("Total Battle", "TotalBattle.exe"),
+        capture_fn=lambda: (object(), (0, 0)),
+        profiles_dir=tmp_path,
+        name_reader=reader,
+        register_missing=True,
+    )
+    routed = observe_foreground_profile(
+        ForegroundWindow("Total Battle", "TotalBattle.exe"),
+        capture_fn=lambda: (object(), (0, 0)),
+        profiles_dir=tmp_path,
+        name_reader=reader,
+    )
+
+    assert created.status == "routed"
+    assert created.reason == "profile_registered"
+    assert created.profile_id == routed.profile_id
+    assert routed.status == "routed"
+
+
 @pytest.mark.parametrize("duplicate", (False, True))
 def test_unregistered_or_duplicate_player_name_never_returns_a_queue(tmp_path, duplicate):
     registry_path = profile_registry_path(tmp_path)
@@ -99,6 +125,26 @@ def test_unregistered_or_duplicate_player_name_never_returns_a_queue(tmp_path, d
     assert observation.profile_id is None
     assert observation.queue_path is None
     assert observation.reason.startswith("profile_unresolved:")
+
+
+def test_auto_registration_does_not_choose_between_duplicate_profiles(tmp_path):
+    registry_path = profile_registry_path(tmp_path)
+    resolve_profile("Snoweye", registry_path, now=NOW)
+    resolve_profile("Snoweye", registry_path, new_profile=True, now=NOW)
+
+    observation = observe_foreground_profile(
+        ForegroundWindow("Total Battle", "TotalBattle.exe"),
+        capture_fn=lambda: (object(), (0, 0)),
+        profiles_dir=tmp_path,
+        name_reader=lambda *_args, **_kwargs: SimpleNamespace(
+            status="ok", player_name="Snoweye", candidates=("Snoweye",) * 4,
+        ),
+        register_missing=True,
+    )
+
+    assert observation.status == "blocked"
+    assert observation.profile_id is None
+    assert observation.reason.startswith("profile_unresolved:Multiple profiles match")
 
 
 def test_unknown_name_ocr_blocks_profile_routing(tmp_path):
