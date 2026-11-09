@@ -15,7 +15,7 @@ from army_training_process import (
     goal_task_id,
     rearm_training_goal,
 )
-from army_unit_types import DEFAULT_UNIT_TYPE, SUPPORTED_TRAINING_UNIT_TYPES, validate_unit_type
+from army_unit_types import DEFAULT_UNIT_TYPE, validate_unit_type
 from task_controller import PROFILES_DIR, task_queue_path
 
 POLICY_KINDS = ("max", "max_minus_1", "fixed")
@@ -96,7 +96,7 @@ def expand_goals(queue, unit_type, level, now: datetime, priority=None):
         validate_unit_type(unit_type)
     except ValueError as error:
         raise CampaignError(str(error)) from error
-    if unit_type not in SUPPORTED_TRAINING_UNIT_TYPES:
+    if unit_type != DEFAULT_UNIT_TYPE:
         raise CampaignError("campaign_unit_type_slot_map_unverified")
     if level not in MATCH_COUNTS_BY_LEVEL:
         raise CampaignError("campaign_level_out_of_range")

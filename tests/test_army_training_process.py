@@ -111,11 +111,45 @@ def test_goal_is_idempotent_and_dry_run_does_not_change_queue():
 def test_goal_identity_includes_unit_type_and_non_guard_decisions_block():
     queue = create_task_queue(GOAL.profile_id)
     guard_goal = enqueue_training_goal(queue, GOAL, NOW)
-    specialist_goal = TrainingGoal("account-a", Slot("dragons", 5, 1))
+    specialist_goal = TrainingGoal("account-a", Slot("specialists", 5, 1))
     specialist_task = enqueue_training_goal(queue, specialist_goal, NOW)
 
     assert guard_goal["task_id"] == "army_stock:unit_guardsmen:level_5:match_1"
-    assert specialist_task["task_id"] == "army_stock:unit_dragons:level_5:match_1"
+    assert specialist_task["task_id"] == "army_stock:unit_specialists:level_5:match_1"
+    assert goal_task_id(GOAL.slot) != goal_task_id(specialist_goal.slot)
+    decision = decide_training_goal(specialist_goal, observation(), NOW)
+    assert (decision.state, decision.reason) == (ProcessState.BLOCKED, "unit_type_not_supported_for_training")
+
+
+def test_legacy_goal_migrates_to_guardsmen_without_changing_lifecycle_identity():
+    queue = create_task_queue(GOAL.profile_id)
+    enqueue_training_goal(queue, GOAL, NOW)
+    task = queue["tasks"][0]
+    task["task_id"] = "army_stock:level_5:match_1"
+    task["payload"]["slot"].pop("unit_type")
+    task["status"] = "waiting_completion"
+    history = deepcopy(task["payload"]["process"]["history"])
+
+    assert migrate_legacy_training_goals(queue) is True
+    assert task["payload"]["slot"] == {"unit_type": "guardsmen", "global_level": 5, "match_number": 1}
+    assert task["task_id"] == "army_stock:level_5:match_1"
+    assert task["status"] == "waiting_completion"
+    assert task["payload"]["process"]["history"] == history
+    assert enqueue_training_goal(queue, GOAL, NOW) == task
+    assert len(queue["tasks"]) == 1
+task_id"], observation(1600), NOW)
+    assert result.state == ProcessState.SATISFIED
+    assert queue == original
+
+
+def test_goal_identity_includes_unit_type_and_non_guard_decisions_block():
+    queue = create_task_queue(GOAL.profile_id)
+    guard_goal = enqueue_training_goal(queue, GOAL, NOW)
+    specialist_goal = TrainingGoal("account-a", Slot("specialists", 5, 1))
+    specialist_task = enqueue_training_goal(queue, specialist_goal, NOW)
+
+    assert guard_goal["task_id"] == "army_stock:unit_guardsmen:level_5:match_1"
+    assert specialist_task["task_id"] == "army_stock:unit_specialists:level_5:match_1"
     assert goal_task_id(GOAL.slot) != goal_task_id(specialist_goal.slot)
     decision = decide_training_goal(specialist_goal, observation(), NOW)
     assert (decision.state, decision.reason) == (ProcessState.BLOCKED, "unit_type_not_supported_for_training")

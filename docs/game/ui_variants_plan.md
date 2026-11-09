@@ -98,6 +98,44 @@ Run one observation with `python .\\client_router.py --once`; observe foreground
 - Observe-only mode performs no game input and no queue mutation; tests use injected window, capture, and OCR providers.
 - The existing desktop workflow and default `legacy` behavior remain unchanged.
 
+## Army E2E Default Profile Fallback (Approved 2026-11-09)
+
+### Goal and scope
+
+Allow the configured army E2E workflow to continue when desktop client detection succeeds but player-name/profile resolution does not. This is a temporary operator-approved fallback to the shared profile ID `default`; it does not change `client_router.py` routing semantics or make browser assets available.
+
+### Contract and algorithm
+
+1. Run the existing one-shot foreground router with `--register-missing`.
+2. If the router returns `status=routed`, `client_id=desktop`, and a non-empty profile ID, use that registered profile as before.
+3. If the router identifies `client_id=desktop` but cannot route the player/profile, continue with profile ID `default` and report why fallback was selected.
+4. If the client is `browser`, `not_game`, `unknown`, or the router output is invalid, stop before any device scenario. Default profile is not a fallback for an unsupported or unverified client.
+5. Pass the selected profile ID to profile-scoped device scenarios. The preflight scenario remains unscoped.
+
+```mermaid
+flowchart TD
+  A[Run foreground router] --> B{Valid JSON?}
+  B -->|No| X[Stop before device scenarios]
+  B -->|Yes| C{Client is desktop?}
+  C -->|No| X
+  C -->|Yes| D{Unique registered profile returned?}
+  D -->|Yes| E[Use registered profile]
+  D -->|No| F[Use shared profile default]
+  E --> G[Run configured E2E scenarios]
+  F --> G
+```
+
+### Confirmed facts, assumptions, and deferred cases
+
+- Confirmed: the wrapper currently raises unless the router returns both `status=routed` and `client_id=desktop`; the manager treats `default` as an ordinary profile ID and stores its queue separately.
+- Confirmed: the router remains observe-only and may report a blocked desktop route when OCR or profile resolution fails.
+- Assumption: using a shared `default` queue is acceptable for the current single-operator workflow; tasks and state from different accounts may be mixed.
+- Deferred: reliable account identity, browser routing, multiple concurrent profiles, and automatic migration/merging of existing queues.
+
+### Implementation status and expected tests
+
+Status: implemented in `tools/run_army_e2e.py`. Desktop player-name/profile resolution failures use `--profile default`; other clients and capture failures remain blocked. `tests/test_run_army_e2e.py` covers the fallback and retained blockers.
+
 ## Documentation Model
 
 - Keep screen documentation centered on logical purpose, state transitions, and behavior.

@@ -86,18 +86,8 @@ def test_legacy_campaign_defaults_to_guardsmen_and_unverified_type_cannot_expand
 
     queue = create_task_queue("p")
     with pytest.raises(CampaignError, match="slot_map_unverified"):
-        expand_campaign(queue, Campaign("dragons", "fixed", 5), None, NOW)
+        expand_campaign(queue, Campaign("specialists", "fixed", 5), None, NOW)
     assert queue["tasks"] == []
-
-
-def test_specialists_expand_into_typed_goals_with_the_assumed_slot_map():
-    queue = create_task_queue("p")
-
-    goals = expand_campaign(queue, Campaign("specialists", "fixed", 6), None, NOW)
-
-    assert [goal["match_number"] for goal in goals] == [1, 2, 3, 4]
-    assert {task["payload"]["slot"]["unit_type"] for task in queue["tasks"]} == {"specialists"}
-    assert queue["tasks"][0]["task_id"] == "army_stock:unit_specialists:level_6:match_1"
 
 
 def test_max_level_fresh_wins_cache_only_within_ttl(tmp_path):

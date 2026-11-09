@@ -1,69 +1,10 @@
-**Implementation update (2026-11-08):** The checkpoint reader now accepts a coherent global translation of matched `Use` buttons rather than rejecting positions solely for exceeding a fixed calibration distance. It still requires the exact button count, rectangles within the viewport, top-to-bottom mapping, and offsets consistent within 1 px. Fresh match geometry drives quantity OCR and click centers; reports preserve expected/detected rectangles, offsets, confidence, and failure reason. A checkpoint-16 fixture shifted by (+12,+9) px passes. All 155 offline Speed Up tests pass. The observed live run `5_20261108_113617` stopped at checkpoint 16 before planning or clicking; no live rerun was performed during this implementation. Full manager execution remains blocked by pre-existing import errors: `task_controller.py` lacks `DEFAULT_FINISH_GRACE_SECONDS`, and `army_training_process.py` lacks `goal_task_id` imported by campaign code.
-
-**Dialog-anchor update (2026-11-08):** Run `16_20261108_134440` reached scroll step 16 with the dialog still open, but a notification obscured the lower part of the title template. The full-template score was 0.8911 at (900,251), below the existing 0.95 threshold; run 15 scored 0.9973. Recognition now keeps the original full-template check and, only when it fails, checks the top 16 template rows at the same threshold. The fallback is accepted only when both matches have the same maximum location. The run-16 crop fixture scores 0.9864 on those rows at the same point, while the existing Academy negative fixture scores 0.2506. No region, search margin, or general threshold was changed. Full and partial scores, locations, threshold, and fallback use are included in capture and post-use trace events. This offline regression does not replace a supervised live confirmation.
-
-**Debug trace update (2026-11-08):** Each run now records a chronological `event_trace` in `report.json` and `event_trace.jsonl`: captures and dialog recognition, timer OCR raw/value/confidence, each pointer move and scroll, viewport-change score, checkpoint button matches, raw initial quantity OCR evidence (including failed/disagreeing reads), plan decisions, click coordinates, button-only checks before use, dialog checks after use, abort cause, and final result. Events carry elapsed milliseconds and the current list step so a text-only report can explain both successful actions and where/why a run stopped.
-
-**Quantity OCR update (2026-11-08):** Run `21_20261108_143410` did reach checkpoint 3: its initial viewport showed 1m/15m/1h and part of 3h; after three wheel steps, the saved frame showed 15m/1h/3h/8h and all four mapped `Use` buttons matched their expected positions. The run stopped before planning or clicking because 8h OCR returned `477 / 77`. Replaying that saved viewport showed PSM 8 gives `477` at scale 4 and `77` at scale 6, while PSM 7 gives `477` at both scales; all four mapped quantities then read consistently. PSM 8 remains the primary OCR mode. Only when its two scales disagree, PSM 7 is tried at both scales; the fallback is accepted only when those readings agree. Raw readings from both passes are retained. This keeps checkpoint 16's `30d` reading on the proven primary mode and preserves fail-closed behavior. This is offline evidence only; live use remains operator-supervised.
-
-**Timer format update (2026-11-08):** Run `24_20261108_144709` stopped before scrolling because the positional reader treated the visible `14g 56m` timer as `14d 56g`, which the parser correctly rejected as an invalid hour count. Timer digit groups now retain their adjacent unit glyphs and read those glyphs independently; the parser accepts ordered day/hour/minute/second units, including `14g 56m` and `30m 05s`. Replaying run 24's saved frame now returns `14g.:56m.` (`53760` seconds). Unit or digit disagreement remains unreadable and blocks the run. The seconds-format path is covered by offline tests; a saved live `m/s` screenshot is still needed for visual confirmation.
-
-**Timer OCR artifact update (2026-11-08):** Run 29's final timer was visibly `12m 18s`, but full-crop OCR alternated between `12m18s` and `H12m18s`; the leading `H` is the timer's hourglass icon, not a time unit. The minute fallback now ignores only a leading `H` immediately before a digit when parsing, while retaining the unmodified OCR text in the reading. All OCR variants must still resolve to the same valid duration; genuine disagreements remain unreadable and stop execution. Offline replay of run 29's exact `uncertain.png` now returns `738` seconds, raw `12m18s`, confidence `100`, status `ok` in the configured Python 3.13 environment. This validates the parser against that saved frame, not future live OCR conditions.
-
-**Timer OCR icon-crop update (2026-11-08):** Run 32 stopped before scrolling because the segmented minute digits disagreed and full-crop OCR alternated between `17g39m` and `217g39m`; the extra leading `2` came from the adjacent hourglass icon. The run 32 frame replays as `digit_unverified` with the full region, but cropping fallback OCR to the already detected timer glyph bounds yields unanimous `17g39m` (`63540` seconds, confidence `100`). The fallback crop is applied only when the timer layout and glyph components were detected; unknown layouts remain fail-closed. The initial dialog OCR also observed a transient player-help notification, but it does not cover the timer digits in the saved frame.
-
-**Minutes/seconds layout update (2026-11-08):** Run 37 issued all 11 planned clicks (9x8h + 2x3h = exactly the displayed `3d.:6g.`) and then aborted with `timer_unreadable:minute_ocr_disagreement`. The hours-only display hides sub-hour time, so about `36m 55s` remained, and the timer switched to the `36m.:55s` layout, which has no dot after the last unit. `_split_label` required that dot, so segmentation returned no layout and full-crop OCR disagreed (`36m555` vs `36mM255S`). Segmentation now accepts the layout without the trailing dot, limits day/first-group digits to glyphs adjacent to their unit (the hourglass sits about 14 px further left), and infers `s` only when the first unit is a verified `m` and the second unit glyph is unreadable. The run 37 frame replays as `36m.:55s.`, `2215` seconds, confidence `100` (fixture `tests/data/speedup/timer_36m55s.png`). The clicks themselves were correct; live OCR of other minute/second values is not yet verified.
-
-**Final-phase persistence update (2026-11-08):** The final phase no longer aborts on the first unusable timer read. After the planned clicks it re-reads up to 6 times, 1 s apart, each from a fresh capture, and accepts a value only when it is `0` or lower than the batch's timer (a stale or unreadable frame is retried, not treated as failure). If the dialog closes during these retries the run finishes as `dialog_closed_before_final_timer`. If the timer stays unreadable and the last readable display ended in a unit that hides at most 1 hour (`g`/`h`, or `m`, not `d`), the plan already covered everything displayed, so one extra plan is built for that hidden bound from the remaining estimated stock (`unreadable_final_timer_cover_hidden_remainder`); it is used at most once per run and is never repeated. Any other unreadable case still stops as `UNCERTAIN`. The planner returns an executable plan for every remainder below 1 hour (for example 2215 s = 2x15m + 1h; 59 s = 1h). The army adapter now repeats the finish round (at most 3) only when the previous round clicked at least one speedup and the panel still reads `active`; no clicks or an unknown state end the loop. Offline tests cover retries, stale reads, the once-only hidden-remainder cover, dialog closing mid-retry and the round bound. No live run has verified these paths.
-
-**Batch finishing update (2026-11-08):** Execution builds one plan per batch, not per click. No quantity or timer OCR runs between individual clicks. After a batch, a zero timer returns `FINISHED`; a positive timer can start a residual batch only when it decreased. Residual plans use the initial inventory minus each submitted click; the runner no longer revisits checkpoints 3/11/16 to re-read quantities after every batch. Each run therefore performs one full inventory scan, while still re-checking button geometry before every click and requiring timer progress before each residual plan. Submitted clicks are counted conservatively as spent; residual stock is an estimate, not a visual decrement confirmation. Shortfall reports `NOT_ENOUGH` with already submitted uses retained. A missing dialog before the final use remains `UNCERTAIN`; the army adapter rechecks the actual training state regardless of runner status and confirms completion only from `idle`. No purchases or new coordinates are introduced. A fresh CLI invocation still performs a full scan because no account/profile identity is currently available to safely persist inventory across runs or accounts. `final_timer_read_ms` describes the latest end-of-batch read; the event trace preserves every batch timer and residual plan. Help arriving during a batch may still make part of that batch unnecessary.
-
-**Decision trace update (2026-11-08):** Every greedy planner choice now records remaining time before/after, the preferred duration bucket, stock and reserve floor, eligible candidates, selected strategy/item, and resulting stock. The execution trace links each submitted click to its use number, plan position, selected duration, target checkpoint, decision rationale, screen coordinate, and whether post-click quantity OCR was intentionally skipped. `tools/device_test.py` expands module `event_trace.jsonl` into the parent run's `log.txt`, so the main text log describes scan, plan, each action and its result instead of only reporting subprocess success/failure. The original JSONL remains alongside the evidence frames.
-
-Earlier status snapshots and pending notes
 # Speedup Module Workflow
 
-**Current status (2026-11-08):** `speedup.py` launches the supervised checkpoint workflow. `speedup_inventory_reader.py` reads all nine supported owned-item counts from checkpoints 3/11/16 with OCR consensus. The runner performs one inventory scan per invocation, builds residual plans from the initial counts minus submitted clicks, and checks button geometry before each use without per-click quantity OCR. A positive residual plan still requires a reduced timer. The army bridge rechecks actual training state after every runner outcome; only recognized idle confirms completion. Live scrolling/item use and real sub-hour timer recognition still require supervised verification. Earlier import-blocker notes are historical, not the current test result. The 1m item, browser UI, dynamic row remapping, and other task types remain out of scope.
-
-Earlier status snapshots and pending notes in this document are historical; the current behavior and remaining limits are summarized above and in the approved workflow section below.
+**Status:** Standalone speedup function approved 2026-11-06. Calibration-only live scrolling is implemented in `speedup_calibration.py` and covered by fake-adapter tests; it has not been run against the live game. The full direct-run finisher remains blocked on the inventory row reader. Implemented: `speedup_readings.py` (parsers), `speedup_planner.py` (pure use planner), `speedup_reader.py` (timer reader) and `speedup.py` (orchestrator over injected screen functions, tested on a fake dialog). Not implemented: the inventory row reader (duration labels and quantities), the full direct-run finisher, the army adapter and live item-use integration. Bounded wheel scrolling over the annotated inventory list is approved. The live polling cadence needed to detect timer milestones remains undecided.
+**Status:** Standalone speedup function approved 2026-11-06. Checkpoint-only live scrolling ran successfully on 2026-11-07. The three resulting captures were visually reviewed. The approved next implementation is a static checkpoint button map generated by matching the existing `Use` button template and associating top-to-bottom detections with the user-confirmed duration labels. The map records viewport-relative button rectangles and centers for checkpoints 3, 11, and 16; it does not OCR quantities or click buttons. The shop `Buy` row is excluded. Implemented: `speedup_readings.py` (pure parsers), `speedup_planner.py` (pure use planner), `speedup_reader.py` (timer reader), `speedup.py` (fake-adapter orchestrator), `speedup_calibration.py` (supervised calibration), and, after approval, the checkpoint button-map reader and fixture tests. Not implemented: general inventory OCR, dynamic complete-list scanning, live item-use integration, or army adapter.
+**Status:** Standalone speedup function approved 2026-11-06. Checkpoint-only live scrolling ran successfully on 2026-11-07. The three resulting captures were visually reviewed. The checkpoint button-map reader and fixture tests are approved and pending implementation. The map will match the existing `Use` button template and associate complete top-to-bottom detections with the checkpoint duration labels. It will record viewport-relative button rectangles and centers for checkpoints 3, 11, and 16; it will not OCR quantities or click buttons. The shop `Buy` row is excluded. Implemented: `speedup_readings.py` (pure parsers), `speedup_planner.py` (pure use planner), `speedup_reader.py` (timer reader), `speedup.py` (fake-adapter orchestrator), and `speedup_calibration.py` (supervised calibration). Not implemented: general inventory OCR, dynamic complete-list scanning, live item-use integration, or army adapter.
+**Status:** Standalone speedup function approved 2026-11-06. Checkpoint-only live scrolling ran successfully on 2026-11-07 and its three captures were visually reviewed. `speedup_button_map.py` now detects complete `Use` buttons and builds a viewport-relative JSON map from those captures. It does not OCR quantities or click buttons; the shop `Buy` row is excluded. Implemented: `speedup_readings.py` (pure parsers), `speedup_planner.py` (pure use planner), `speedup_reader.py` (timer reader), `speedup.py` (fake-adapter orchestrator), `speedup_calibration.py` (supervised calibration), and `speedup_button_map.py` (offline checkpoint map). Not implemented: general inventory OCR, dynamic complete-list scanning, live item-use integration, or army adapter.
 At each checkpoint, detect the existing `speedup_use_button` template inside the inventory viewport, sort complete matches top-to-bottom, and associate them with the known duration labels for that checkpoint. Save every complete button occurrence, including the repeated 3d entry, with button rectangles and centers relative to the viewport. The 7d button at step 11 is clipped and omitted; its complete step-16 location is used. The similar-looking shop row is excluded by the `Use`-template match and must never be added as owned inventory.
-
-## Approved Checkpoint Inventory and Use Strategy (2026-11-07)
-## Approved Checkpoint Inventory and Use Strategy (2026-11-07)
-
-### Goal and scope
-
-Complete the standalone speedup flow for the already-open desktop speedup dialog: read the remaining time and owned quantities, use the existing planner, and use only owned items needed by its plan. Do not buy items, spend gold, open the dialog, or mutate the task queue. The current user approval covers implementation and tests; an actual game run still requires the operator to start the explicit live command while the intended army-training dialog is open.
-
-### Algorithm
-
-1. Require the speedup dialog anchor and a 1920x1080 capture. Match the full title template at threshold 0.95 within an 8 px margin. If the full match fails, the top 16 template rows may confirm the anchor only at the same threshold and exact same peak location. Record both scores and locations. The list must start at its top. Read the initial timer, then move the pointer to the center of the annotated inventory viewport before each individual wheel step.
-2. Capture and validate the known checkpoints after cumulative steps 3, 11, and 16. Every intervening step must keep the dialog recognized and change the viewport. Stop on any unchanged/uncertain frame; do not infer that a checkpoint was reached.
-3. At each checkpoint, verify the expected complete `Use` button matches from `speedup_button_map.json`, in top-to-bottom order. Require the exact mapped count, keep every detected rectangle inside the viewport, and require offsets from the map to be uniform within 1 px across rows. Do not reject a coherent global translation solely because it exceeds a fixed distance from the calibration coordinates. The map binds row order to known duration; fresh matched button geometry, not stale map coordinates, anchors both the quantity crop and any eventual click. Record expected and detected rectangles, offsets, and match confidence in checkpoint diagnostics, including blocked reads. Read each quantity from the annotated quantity region translated by the detected button's offset, inset 5 px on the left and 3 px on the right. Run OCR at scales 4 and 6 with PSM 8; only if they disagree, retry both scales with PSM 7. Accept a quantity only when the two readings in the successful pass agree and `parse_quantity` accepts it. Preserve raw readings and consensus status. Empty, conflicting, malformed, out-of-viewport, or non-uniform OCR/layout blocks the complete scan; it never becomes zero.
-4. The 3d item appears at checkpoints 11 and 16. Require equal quantities for repeated durations; disagreement blocks the scan. The 30d shop offer has no mapped `Use` button and is excluded. The 1m item is intentionally omitted per the user's accepted precision tradeoff.
-5. Build the initial batch plan against the latest readable timer and complete supported inventory with `plan_speedups`, retaining existing soft preferences and floors. Initial shortfall uses nothing; a zero timer returns already-finished. After each complete batch, a positive decreased timer triggers a residual plan from the initial inventory minus submitted clicks; do not rescan inventory checkpoints in the same run. A new invocation performs a fresh initial scan. No-progress or uncertain results are not retried.
-6. Explicit scan mode remains available as a dry-run, but the committed device-test default runs `speedup_use` with its exact execute confirmation. Before every scroll and click, check the emergency stop. For a planned item, navigate to its earliest mapped checkpoint and re-capture; verify the complete button layout by image matching without quantity OCR. After each click, capture again and check dialog presence only. Do not OCR between clicks. After the whole plan, perform one timer OCR if the dialog remains open. Any uncertain transition or click result stops immediately without retry; the caller confirms task completion on its own screen.
-7. Record monotonic timings for navigation, button matching, click/settle, and batch timer OCR. Inventory OCR occurs only in the initial scan; per-use timing does not include quantity or timer OCR. Each residual plan records that its stock source is the initial inventory minus submitted clicks.
-
-### Confirmed facts, assumptions, and deferred cases
-
-- Confirmed from reviewed checkpoint screenshots: 3/11/16 scroll landmarks and duration labels; complete `Use` button positions; 7d is clipped at checkpoint 11; the final 30d shop row says `Kup`; owned counts are printed at the annotated icon quantity region. Tesseract 5.4.0 is installed at the standard Windows path on this workstation, although it is not currently on the activated environment's `PATH`.
-- Confirmed in run `16_20261108_134440`: the list reached the bottom checkpoint while the Speed Up dialog remained open. The title region was partially covered by an on-screen notification, reducing the full-template match below threshold without moving its maximum location. An offline crop regression verifies the constrained partial-template fallback; the saved full-frame evidence still needs supervised confirmation on a later run.
-- Assumption to verify by fixtures: the relative quantity-to-button offset remains stable across the desktop UI and the two scale-diverse OCR reads provide sufficient agreement for every visible quantity. A disagreement remains unreadable.
-- Timer formats: segmented digits are combined with independently recognized unit glyphs; the parser accepts ordered day/hour/minute/second units, including minute-only and `m/s` countdowns. When segmentation or unit recognition is uncertain, full-crop OCR retries at two scales and two PSM modes; all four parses must agree. Disagreement or unknown layout remains unreadable. There is not yet a real `m/s` screenshot fixture, so that visual format still needs confirmation on a supervised run.
-- Each batch uses one fixed plan. A reduced positive timer and the locally tracked remaining stock allow residual batches, not retries of uncertain clicks. Submitted clicks are conservatively counted as spent; stock depletion is not visually confirmed between batches. Mid-batch timer changes are not observed; a batch may consume more items than needed if Help arrives. Integer timer progress bounds repeated batches without imposing an arbitrary time range or blocking allowed planner overshoot.
-- Confirmed in run `7_20261107_200245`: at checkpoint 3 all four Use templates matched at confidence 1.0, with a uniform viewport translation of (+2,+4) px relative to the calibration map. The previous exact/two-pixel geometry check falsely blocked this otherwise matching view. Fixture regression now replays that offset and requires OCR values and button centers to follow live matches.
-- Assumption to verify by fixtures: the relative quantity-to-button offset remains stable across the desktop UI and the two scale-diverse OCR reads provide sufficient agreement for every visible quantity. A disagreement remains unreadable.
-- Deferred: 1m inventory, other task types, browser UI, alternate resolutions/scales, automatic opening of the dialog, and live execution by the assistant. The user must supervise any live run.
-- Deferred safety edge: if consuming the last item in a row changes list layout such that its identity cannot be re-established from the mapped checkpoint, stop uncertain rather than infer the new row identity.
-
-### Implementation status and expected tests
-
-The checkpoint inventory reader is implemented in `speedup_inventory_reader.py`; its fixture suite covers the nine supported owned entries, repeated `3d` quantity agreement, the `30d` quantity, OCR disagreement, coherent viewport translations, inconsistent button offsets, wrong match counts, and incomplete frames. The checkpoint use orchestrator is implemented in `speedup.py` and covered with a fake dialog by `tests/test_speedup.py`. Blocked run reports retain detected checkpoint geometry and confidence. The committed device-test default now executes the item-use scenario after preflight. The operator must leave the intended Speed Up dialog open with the list at the top; each run can consume items. No live execution is performed by automated tests.
-
-The desktop adapter starts with an open speedup dialog, checks the annotated dialog anchor and 1920x1080 display geometry, scans the known 3/11/16 wheel-step checkpoints, and reads mapped owned `Use` buttons. It uses one-notch navigation and the existing viewport map; it never clicks `Buy`. The default device-test scenario runs live `--execute` using the exact confirmation phrase stored in its scenario registry; the standalone CLI still defaults to scan-only. Before each click, the full button layout is verified by image matching without quantity OCR. After each click, only dialog presence is checked. Batch-end timer OCR allows a residual plan only after progress, using initial inventory minus submitted clicks; uncertain clicks or unreadable states are not retried.
-
-Tests cover mapped quantities, checkpoint progression, full and partially obscured dialog-anchor matching, rejected non-dialog fixtures, anchor score/location trace diagnostics, button-only matching without OCR, no quantity or timer OCR between individual clicks, residual batches without inventory re-scans, no-progress stops, shortfall after a batch, per-click timing fields, emergency stop, and actual army-state reconciliation after every runner status. A live run must be supervised because the default device-test command now uses items.
 
 ## Goal and scope
 
@@ -141,22 +82,21 @@ python .\speedup_button_map.py --input-dir .\debug\speedup\calibration_20261107_
 
 The output contains one entry per complete visible owned-item `Use` button. Coordinates are relative to the annotated inventory viewport; each entry includes its rectangle, center, duration in seconds, and template-match confidence. `preferred_scroll_count_by_duration` selects the earliest complete button location. The checked-in map from the reviewed run is `speedup_button_map.json`. Tests validate 4/3/3 complete detections at steps 3/11/16, the duration associations, viewport-relative geometry, repeated 3d, and rejection of unexpected match counts.
 
-The checkpoint finisher is implemented and fixture-backed. `army_training_speedup.py` wires it to the existing army finish callback, but manager commands currently cannot import their queue/campaign dependencies (see the current status above). No live item-use run has been performed.
+The full standalone finisher remains separate: the future `--execute` path must not be added until the inventory reader and use verification are fixture-backed.
 
-## Direct-run finishing workflow (implemented; live test pending)
+## Direct-run finishing workflow (deferred)
 
 The user wants to be able to launch the speedup module directly, with the speedup dialog already open. Opening the dialog, choosing the active task, and preparing the game state are outside this module; another process or the user owns those steps. The module operates only on the currently open dialog and does not read or mutate task queues, task markers, or profiles.
 
-The user opens the intended speedup dialog and sets its list to the top before running the standalone module. The first implementation supports the desktop client at 1920x1080 and the known checkpoints only:
+The earlier proposed command interface is deferred until image-based inventory reading is verified:
 
-- Preview and plan (scrolls the list but never clicks): `python .\speedup.py --confirm "SCAN SPEEDUP LIST FROM TOP"`
-- Use owned items from the plan (requires this exact phrase): `python .\speedup.py --execute --confirm "USE OWNED SPEEDUPS FROM TOP"`
-- `--tesseract "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"` is optional when auto-detection via `PATH` or the standard Windows location is unavailable.
-- Both modes require the game on the primary monitor at 1920x1080, the intended dialog already open, and the inventory list at the top. The scan stops if any of the 16 wheel steps does not change the viewport or a checkpoint is not recognized. It captures fresh frames after navigation and item use, writes a timestamped JSON report to `debug/speedup/run_<timestamp>/`, and saves the latest frame on `BLOCKED` or `UNCERTAIN`.
-- Dry-run does move the list by scrolling, so the exact scan confirmation is required; it never clicks `Use` or `Kup`. `--execute` requires a separate exact confirmation and checks the emergency-stop file before every pointer move, scroll, and click. PyAutoGUI fail-safe remains enabled.
-- The plan uses the existing soft duration preferences and stock floors. If the supported owned items cannot cover the remaining time, return `NOT_ENOUGH` and click nothing. Each item use is one click and must be confirmed by a fresh quantity reading; uncertain results are never retried. The caller still confirms task completion on its own screen.
+- `python speedup.py` runs in dry-run mode: recognize the open dialog, scan the complete inventory, and report the plan. It may perform bounded list-navigation actions needed to inspect every row, but it never clicks `Use`, `Buy`, or any task control.
+- `python speedup.py --execute` performs the planned uses. No task-type, queue, or permission flags are added. This is the single explicit switch from planning to item use.
+- Both modes capture a fresh frame after every navigation input and every `Use` click. Save ordered, timestamped captures and recognition evidence under a run-specific directory in `debug/speedup/`. The report identifies the action and recognized list position for each capture. Do not save credentials or profile secrets.
+- After each navigation input, continue only if the dialog remains recognized and the visible rows/list position match an expected transition. If the transition is unknown, rows do not overlap as expected, the dialog changes, or any owned row cannot be read, stop with an incomplete/uncertain result; never guess a click coordinate or skip a row.
+- After each `Use`, verify the inventory count from a fresh capture. Never retry an uncertain use. The module does not open the dialog or verify completion on the caller's task screen.
 
-Navigation uses one downward notch per step, always with the pointer at the center of the annotated inventory viewport. The checkpoint map is validated at steps 3, 11, and 16; the 30d shop `Kup` row is excluded. No scrollbar dragging or item-row navigation clicks are used.
+Navigation details remain evidence-dependent. The existing contract approves bounded wheel scrolling over the annotated inventory viewport. Place the pointer over the first visible owned speedup icon (for example, the 1m entry), inside the list and away from the game navigation bar and Use/Buy controls. Send one bounded wheel step, capture and inspect the resulting screen, then continue only if the expected list transition is confirmed. Stop at the first confirmed no-change view; do not force a fixed number of steps. The proposed 3-4 navigation clicks to expose groups of about four speedups are not verified; use them only if supplied captures establish the control, its effect, and safe annotated click region. Do not click an item row to navigate. The Buy offer remains a terminal recognition cue only if its position is confirmed; it is never clicked or counted as inventory.
 
 ### Confirmed facts, assumptions, and deferred cases
 
@@ -164,25 +104,26 @@ Navigation uses one downward notch per step, always with the pointer at the cent
 - Confirmed: current captures and candidate regions describe the desktop client at 1920x1080. `Automator.update()` captures the primary monitor, not a selected game window.
 - Assumption to verify: the open dialog is visible on the primary monitor and the capture dimensions/scale match the annotated desktop fixtures. If not, stop; window selection and coordinate conversion are a separate capability.
 - Deferred: exact navigation clicks and their expected row groups until transition screenshots are supplied and annotated. Browser-client behavior remains unsupported.
-- Deferred: actual live execution until the user starts a supervised run; browser behavior, 1m inventory, and additional unit/task categories remain unsupported. Manager-driven execution is blocked by the current queue/campaign import mismatches.
+- Deferred: live item use until the inventory reader, regions, and post-click count verification pass fixture tests and the user explicitly starts a supervised execution.
 
 ### Calibration implementation and validation
 
 1. Implemented: bounded dialog-anchor search based on bot captures, display-geometry preflight, pointer reposition before each wheel step, per-step screenshots and manifest, first-no-change stop, up to 20 steps, and emergency-stop handling.
 2. Implemented: tests for bot-capture and fixture anchor recognition, non-dialog rejection, action order, pointer coordinates, captures, preflight failures, step limits and emergency stop.
-3. Implemented: checkpoint inventory OCR with two-scale consensus, count consistency for repeated 3d, and a fail-closed direct-run executor with exact confirmation gates.
-4. Deferred: dynamic scanning outside the reviewed checkpoints; manager execution awaits repair of the existing queue/campaign imports.
+3. Pending: the user opens the desktop dialog, runs the confirmed calibration command, then shares or confirms the generated captures for review.
+4. Deferred: full image-based inventory reader, completeness/overlap scanner, direct-run item-use mode and army adapter.
 5. Validation: run focused and full tests; run `tools/verify.py` if screen recognition assets or regions change. Live validation remains a supervised user-run operation.
 
-The direct-run CLI is approved and implemented. Its first actual live execution remains a supervised operator action; the assistant has not sent game input.
+The calibration behavior above is approved; the deferred item-use CLI remains unapproved for implementation until its reader and verification requirements are satisfied.
 
 ### Rules
 
 1. Dry-run is the default and never clicks `Use` or `Buy`; it may scroll to read the complete inventory. Live calls check the emergency stop before every navigation input and click.
-2. Recognize the dialog, read the timer, and scan supported owned inventory at checkpoints 3/11/16 over the annotated viewport only. Every wheel step must change the viewport; the final checkpoint is not followed by a 17th scroll. Never drag the scrollbar thumb. The Buy offer and omitted 1m item are not inventory. An unreadable timer, unrecognized button, quantity disagreement, or incomplete checkpoint returns `BLOCKED`; nothing is guessed or treated as zero.
+2. Recognize the dialog, read the timer, and scan the complete owned inventory with bounded wheel scrolling over the annotated viewport only; no viewport change confirms the end of the list. Never drag the scrollbar thumb. The Buy offer is not inventory. An unreadable timer, unrecognized row or incomplete scan returns `BLOCKED`; nothing is guessed or treated as zero.
 3. Build the plan with `plan_speedups`. If owned items cannot cover the remaining time, return `NOT_ENOUGH` with the shortfall and use nothing.
-4. For each planned use: stop check, verify the fresh button layout by image matching, click Use once, and capture a fresh frame to check dialog presence. Do not OCR quantity or timer between uses. If the dialog closes before the last planned use, return `UNCERTAIN` (`dialog_closed_before_plan_end`); if it closes after the last use, return `FINISHED`.
-5. If the dialog remains open after a batch, read the timer once. Zero returns `FINISHED`; a positive decreased timer allows a residual plan from the initial inventory minus submitted clicks, while unreadable or non-decreased time returns `UNCERTAIN`. Do not traverse inventory checkpoints between batches. The `used` count reflects submitted clicks, and residual stock is estimated rather than visually re-confirmed. The caller verifies completion on its own screen even after an uncertain runner result.
+4. For each planned use: stop check, click Use once, capture a fresh frame, and require the item count to drop by one. An uncertain result returns `UNCERTAIN` and is never retried. A zero timer after a use, or a closed dialog after the last planned use, ends the run as `FINISHED` and skips the rest of the plan. A dialog that closes earlier is `UNCERTAIN` (`dialog_closed_before_plan_end`) because a closed dialog cannot be told apart from an accidental close; the caller confirms on its own screen.
+4a. Re-planning (approved 2026-11-06): the first time a readable timer after a use is below 20% of the timer at the start of the call, the plan is rebuilt once with `plan_speedups` from that timer and the remaining stock (scan quantities minus confirmed uses). This corrects deviations such as clan Help or day/hour rounding. If the rebuilt plan cannot be covered, return `NOT_ENOUGH` with the uses already made. An unreadable timer never triggers or cancels a re-plan.
+5. `FINISHED` means the dialog closed or shows a zero timer after the last planned use. The exact look of a finished dialog is not yet confirmed; any other state after the plan is `UNCERTAIN`. The timer has only day/hour resolution, so a use is verified by the item count dropping by one (a vanished row counts as zero), not by the timer. The caller still verifies completion on its own screen.
 6. Known limits: dry-run scrolls the list (it must, to read the whole inventory) but never clicks; scanning is bounded by `max_scrolls`; if an item runs out and the list shortens, the module returns `UNCERTAIN` (`list_changed`) rather than guessing the position. A stop requested after a click reports `UNCERTAIN`; before any click it reports `BLOCKED`.
 7. The result carries a reason; debug captures on uncertainty are a caller responsibility for now.
 6. The result carries evidence (timer and inventory readings, planned and performed uses, reason) and a timestamped debug capture on uncertainty.
@@ -263,7 +204,7 @@ Preserve-stock floors are also soft preferences:
 - Prefer a recommendation that stays above these floors. If no such combination can finish the task, a reserve-breaking alternative may be recommended only if it is sufficient to finish the task; label it clearly and report which floors it breaches.
 - If even using the reserve-breaking inventory cannot finish the task, stop and report the remaining shortfall. Do not imply that the task can be completed.
 
-The observation stage scrolls the supported inventory during dry-run to read checkpoints 3, 11, and 16; the 1m item is omitted by agreement. It never uses or buys items. Item use requires `--execute` and its separate exact confirmation. The emergency stop is checked before every pointer move, scroll, and click.
+The observation stage may scroll the speedup list during dry-run to read the complete inventory, but it never uses or buys items. The `--execute` mode is required for item use. The emergency stop is checked before every scroll and click.
 
 ## Screen reader contract
 
@@ -274,72 +215,72 @@ The screen card is [docs/screens/speedup.md](../screens/speedup.md). The scanner
 - For each visible inventory row: raw label/duration and quantity text, normalized duration (where parsed), integer quantity (where parsed), confidence, and whether the row is owned inventory or a purchase offer.
 - Scan completeness status and reason if blocked/uncertain, including any unrecognized row.
 
-An unrecognized or unreadable mapped owned quantity means the inventory scan is incomplete. Do not silently omit it or report a complete inventory. The Buy offer is never owned inventory. `Use` is clicked only by the explicitly confirmed execution path; `Buy`, `Help`, and task controls are never clicked by this module.
+An unrecognized or unreadable owned row means the inventory scan is incomplete. Do not silently omit it or report a complete inventory. The Buy offer is never owned inventory. Do not click any Use, Buy, Help, or task control.
 
 ### Implemented parsing foundation
 
 `speedup_readings.py` provides geometry-independent, confidence-gated parsers for remaining day/hour text, duration labels, and integer quantities. It accepts the Polish hour abbreviation `g` seen in the supplied screenshots as well as `h`, and preserves raw OCR text and an explicit status. Low-confidence, malformed, and out-of-range values return `value=None`; quantities never default to zero. This module does not perform OCR, classify inventory ownership, scan images, or claim scan completeness.
 
-`speedup_inventory_reader.py` implements fixture-backed quantity OCR using the annotated crop translated from the mapped `Use` button position. Tesseract reads at 4x and 6x must agree. The map supplies the known duration labels, so the reader does not OCR similar-looking duration glyphs. The verified checkpoint template excludes the shop's `Buy` row.
+Fixture-backed image reading is still pending. Before implementing it, annotate and verify the dialog anchor, army-task context, timer, inventory viewport/rows, purchase offer, and any required row controls with `tools/annotate.py`; do not infer coordinates from screenshots or reuse desktop regions for browser assets.
 
 ### Offline fixture scan
 
-The three viewport-only checkpoint fixtures in `tests/data/speedup/` verify button locations and all nine supported owned quantities. `tests/test_speedup_inventory_reader.py` covers OCR consensus, repeated 3d consistency, shop exclusion by the button map, unreadable values, and mismatched button positions.
+1. Read the supplied screenshot without interacting with the game.
+2. Recognize the speedup dialog and active-task context, then read the current remaining timer.
+3. Extract each visible inventory row's duration and count; distinguish an owned item row from the purchase offer.
+4. Return explicit confidence and incomplete/unknown status rather than guessing.
 
-### Live checkpoint scan and use (implemented; supervised run pending)
+### Optional live list scan — implementation approval pending
 
-1. The user opens the intended dialog and sets the inventory list to the top. The command captures the primary monitor and refuses dimensions other than 1920x1080.
-2. The runner moves to the center of the annotated viewport before each individual wheel step, checks the emergency stop before pointer and wheel input, and requires a changed viewport and recognized dialog after each step.
-3. It reads only the known checkpoints 3, 11, and 16. The exact complete button matches and two-scale quantity consensus are mandatory; repeated 3d quantities must agree.
-4. The dry-run command reports the timer, inventory, and plan without clicking. The execution command requires a separate exact phrase, validates button geometry before each use, and checks dialog presence after each click without OCR.
-5. After each batch, timer OCR is performed if the dialog remains open. Positive reduced time allows a residual plan from initial stock minus submitted clicks; unchanged/increased or unreadable time stops. The runner does not re-read quantities or traverse inventory checkpoints between batches. Unknown geometry, unreadable initial inventory, missing controls, unexpected movement, or emergency stop blocks or returns uncertain. The runner never retries an uncertain click. It does not open the dialog or verify completion on the caller's task screen.
+The user approved mouse-wheel scrolling over the recognized list area as the preferred interaction, but code and live operation have not been approved. If implemented later:
 
-The runner uses the primary monitor, not selected-window capture. The user must keep the game foregrounded on the primary 1920x1080 display; other window selection, resolutions/scales, and browser behavior remain unsupported.
+1. Offline fixture scanning performs no game interaction. A live dry-run may perform bounded scrolling to read the inventory, but never clicks Use or Buy; all scrolling is emergency-stop aware.
+2. Require the speedup dialog, timer, list viewport, and scrollbar track to be recognized with sufficient confidence before a scroll.
+3. Capture the list viewport and scrollbar thumb position before scrolling. Scroll down by a bounded wheel step over the annotated list viewport only; never drag the thumb and never click item controls.
+4. Capture again and verify the list/scrollbar changed. Parse visible rows and retain their raw evidence. If the state is uncertain, stop rather than continuing to scroll blindly.
+5. Detect the end of the list by comparing the list viewport before and after a scroll. If it does not change, stop; use thumb position as supporting evidence, not as a substitute for the no-change check.
+6. Prevent an endless loop with a configured maximum number of consecutive scroll attempts without progress. Report the scan as incomplete if the limit is reached before end-of-list is confirmed.
+7. Continue only while the same dialog/task context remains visible. Do not infer completion of a task from list movement.
+
+**Live interaction blocker:** `Automator.update()` currently captures the primary monitor, not a selected game window, and project coordinates are not yet window-relative. Therefore the wheel method must not be executed against guessed desktop coordinates. Live scrolling remains blocked until the capture/window and coordinate contract is separately resolved and approved. Offline fixture scanning can proceed independently.
 
 ## Deferred recommendation and execution policy
 
-The agreed duration preferences and stock floors are implemented in `speedup_planner.py` (see the planning algorithm above). The runner builds one plan per batch and does not re-read the timer or rebuild the plan between individual uses. Positive remaining time after a batch is finished from the in-memory estimate (initial stock minus submitted clicks), and only after confirmed timer progress. Overshoot is allowed; no hard-coded extra-hour buffer is applied to an uncertain display precision.
+The agreed duration preferences and stock floors are implemented in `speedup_planner.py` (see the planning algorithm above). The single 20% re-plan is implemented in `speedup.py` (rule 4a); the 50% checkpoint remains deferred. The timer may change due to clan Help, so the module re-reads it before planning and after every use.
 
 ## Reader state and failure handling
 
 ```mermaid
 flowchart TD
-    A[Capture primary monitor] --> B{Speedup dialog anchor recognized?}
+    A[Load screenshot or approved live frame] --> B{Speedup dialog and army task context recognized?}
     B -- No / uncertain --> X[Stop: report blocked or uncertain]
-    B -- Yes --> C[Read timer and scan checkpoints 3, 11, 16]
-    C --> D{All buttons, counts, and repeated 3d agree?}
-    D -- No --> X
-    D -- Yes --> E[Apply default planner]
-    E --> F{Dry-run or shortfall?}
-    F -- Yes --> G[Report plan; no item click]
-    F -- No --> H[Exact execute confirmation]
-    H --> I[Use once; check dialog presence only]
-    I --> J{More planned uses?}
-    J -- Yes --> I
-    J -- No --> K[Read batch timer if dialog remains open]
-    K --> L{Zero timer or dialog closed after final use?}
-    L -- No --> N{Positive reduced timer?}
-    N -- No --> X
-    N -- Yes --> O[Refresh checkpoint inventory and verify decrements]
-    O --> P{Inventory reliable and sufficient?}
-    P -- No --> X
-    P -- Yes --> E
-    L -- Yes --> M[Return FINISHED; caller confirms on its screen]
+    B -- Yes --> C[Read timer and visible inventory rows]
+    C --> D{Offline fixture scan?}
+    D -- Yes --> G[Report observations and evidence]
+    D -- No --> E{Live scroll explicitly enabled and safe window capture available?}
+    E -- No --> X
+    E -- Yes --> F[Wheel over annotated list; capture and compare]
+    F --> H{List changed?}
+    H -- Yes --> C
+    H -- No --> I[End confirmed; report collected observations]
+    G --> J[No game items used]
+    I --> J
 ```
 
-- A missing dialog, unexpected frame size, unreadable timer, unmatched button, quantity disagreement, or incomplete checkpoint blocks the run; no value is guessed or defaulted to zero.
-- `speedup_run.py` writes a timestamped JSON report. On `BLOCKED` or `UNCERTAIN`, it saves the latest captured frame to the same run directory.
-- The standalone reader has no profile or task-queue dependency; callers own profile isolation and task completion.
-- Dry-run scrolls to inspect the supported checkpoints, so it is read-only with respect to item inventory, not screen navigation. It is bounded to 16 downward steps and emergency-stop aware.
-- The use loop is dry-run by default, requires a different exact phrase for item use, stops on uncertainty, and never retries a click.
+- A missing dialog, mismatched task, ambiguous row, unreadable timer, stale frame, or low-confidence quantity blocks a complete observation; never substitute a guessed value or a success-shaped default.
+- Any uncertain result should be timestamped and saved to `debug/` with a description when the reader is implemented.
+- The reader and planner must remain profile-isolated; they must not mix frames, OCR, inventory, or recommendations across game windows/accounts.
+- Dry-run may scroll to inspect the full list, so it is read-only with respect to inventory use, not screen navigation. Scrolling still changes the visible game screen and must remain bounded and emergency-stop aware.
+- The use loop is dry-run by default, stops safely on uncertainty, and never retries a click.
 
 ## Confirmed facts, assumptions, and deferred work
 
 ### Assumptions to verify
 
-- Quantity-to-button offsets and 4x/6x OCR consensus match the nine supplied checkpoint rows; other UI scales and unseen quantities remain unverified.
-- The operator has opened the intended task dialog and positioned the list at the top; the runner validates the checkpoint sequence but does not recognize task type.
-- The static button map remains valid only for the annotated desktop layout at 1920x1080.
+- The visible timer can be reliably parsed into seconds for all relevant formats.
+- Inventory row labels and quantities can be read consistently across list positions and scroll states.
+- The scrollbar thumb can be reliably distinguished from its track across the captured scroll positions.
+- The speedup dialog may be shared across task types, but only the army-training flow is in scope until verified.
 
 ### Deferred
 
@@ -347,21 +288,25 @@ flowchart TD
 - Academy/building game-flow integration.
 - Queue updates after use (the caller owns them).
 - Purchase, gold, or other paid actions.
-- The 1m item, dynamic inventory rows outside the reviewed checkpoints, other resolutions/scales, and browser support.
-- Army-manager integration and other task types; the caller owns task markers and completion verification.
-- Per-click timer and quantity verification remains intentionally disabled; OCR is performed between complete batches only.
-- A supervised live run. The assistant has not sent game input.
+- Recommendation planner using duration preferences and preserve-stock floors.
+- Live polling cadence for reliably detecting the 50% and below-20% remaining-time milestones.
+- Live scrolling until the inventory region is annotated and fixture-tested; wheel scrolling is approved only over that region. Selected-window capture and game-window-relative coordinates remain a separate unresolved capability.
 
 ## Current implementation status
 
-- The task queue remains independent and does not read screenshots or inventory.
-- `speedup_readings.py` provides pure timer/duration/quantity parsing; `speedup_reader.py` reads the timer and resolves Tesseract from `PATH` or its standard Windows install path.
-- Timer digit verification ledger: `1, 3, 4, 6, 7` are confirmed by the original supplied fixtures. Other digits are no longer blocked by this list; a digit is accepted only when both OCR scales agree. The live-run timer `5 d. 20 g.` is now a regression fixture and reads as 504000 seconds. The ledger is informational, not an OCR acceptance whitelist.
-- `speedup_button_map.py` maps verified `Use` button positions for the reviewed checkpoints and excludes `Buy`.
-- `speedup_inventory_reader.py` reads nine supported counts with two-scale OCR consensus and rejects disagreement; `tests/test_speedup_inventory_reader.py` covers the real checkpoint fixtures.
-- `speedup_checkpoint_runner.py` scans checkpoints once per invocation, applies `speedup_planner.py` once per batch from initial stock minus submitted clicks, validates button geometry without per-click quantity OCR, and checks timer progress between batches; `tests/test_speedup_checkpoint_runner.py` uses injected fake-game adapters. `speedup_run.py` provides the supervised CLI behind `python speedup.py` and enforces separate scan/use confirmation phrases.
-- `speedup.py`'s generic fake-dialog orchestrator remains available and is still covered by `tests/test_speedup.py`. `army_training_speedup.py` routes its verified panel action to `speedup_run.run_open_dialog`; current manager commands remain blocked by the import errors noted above.
+- The task queue records remaining time and speedup lifecycle state, but it does not read screenshots or inventory.
+- `speedup_readings.py` implements pure timer/duration/quantity parsing with confidence gates; `tests/test_speedup_readings.py` covers supplied Polish formats, grouping separators, malformed input, and low confidence.
+- The speedup screen card and reader contract are documented. Dialog regions and templates are candidates (see the screen card). `speedup_reader.py` reads the remaining time on all four fixtures with digits 1, 3, 4, 6, 7 verified and others rejected; `tests/test_speedup_reader.py` covers it.
+- `speedup.py` implements the orchestrator (scan with wheel scrolling, plan, one verified use at a time, stop checks); `tests/test_speedup.py` covers it on a fake dialog. Reading duration labels and quantities from item icons is not implemented: icon digits are about 8 px high and raw OCR was unstable, and neighbouring labels (3d, 7d, 30d) are too similar for plain template matching, so this needs verified expected values from the user.
+- `speedup_planner.py` implements the pure use planner; `tests/test_speedup_planner.py` covers it. The army adapter is not wired.
 
 ## Expected tests before implementation is considered complete
 
-Implementation acceptance checks now covered: mapped OCR values and repeated-duration agreement; malformed/disagreeing OCR and button mismatch block; dry-run has no clicks; initial shortfall has no clicks; residual shortfall retains already submitted uses; no per-click OCR; residual plans require timer progress and use initial stock minus submitted clicks without inventory re-scans; emergency stop and uncertain clicks do not retry; actual army idle is checked after every runner outcome. No regions/templates changed, so fixture readers were exercised through tests without a separate asset-verification run. Full `pytest` was not run; live verification remains supervised.
+- Parsing tests for timer formats, duration labels, and quantities, including malformed, clipped, unknown, and low-confidence values.
+- Fixture regressions for timer, inventory rows, purchase-offer exclusion, and scrollbar/viewport states from the supplied desktop screenshots; expected annotated regions must be created with the project annotator, not guessed.
+- Tests that an unrecognized owned row makes the inventory scan incomplete rather than silently disappearing.
+- Scroll simulation tests proving wheel steps occur only inside the list, rows are collected across views, no-change ends the scan, and safety limits prevent endless scrolling.
+- Tests that direct execution defaults to dry-run, never uses items without `--execute`, and refuses navigation when the dialog or annotated display geometry is not confidently recognized.
+- Isolation tests proving one profile's frame and inventory cannot affect another profile's observation.
+- 50% re-planning tests remain deferred with that checkpoint. The 20% re-plan is covered in `tests/test_speedup.py` (single re-plan after clan Help, no re-plan above 20%).
+- Run the focused tests, full test suite when feasible, and `tools/verify.py` for any screen recognition changes; report unavailable tooling explicitly.

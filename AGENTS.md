@@ -1,20 +1,20 @@
 # Zasady pracy nad botem Total Battle
 
 ## Zasady stałe
-1. Zmiany kodu wprowadzaj od razu, bez wcześniejszej zgody; pytaj tylko, gdy zmiana klika w grze, kasuje dane albo zużywa zasoby. Błędy poprawiamy po próbie użytkowniczki.
+1. Przed zmianą kodu przeczytaj kartę ekranu, zaproponuj plan i zadaj pytania. Kod zmieniaj dopiero po akceptacji użytkowniczki.
 2. Jedno zadanie naraz, małe zmiany. Nie przepisuj działającego kodu przy okazji.
 3. Nie zgaduj współrzędnych na podstawie oglądania obrazu. Korzystaj z `regions.json` i szablonów. Jeśli brakuje zaznaczenia, poproś o jego przygotowanie w `tools/annotate.py`.
 4. Współrzędne zapisuj względem obszaru okna gry, nie całego ekranu. Rozdzielczość, DPI i rozmiar okna powinny być zapisane w `docs/game/konfiguracja.md`.
 5. Stałe symbole rozpoznawaj szablonami, kadrując stabilny środek ikony/przycisku bez nadmiarowego, zmiennego tła. Jeśli kolor tła jest sygnałem stanu, obejmij szablonem tylko ten potrzebny obszar. OCR stosuj do zmiennych liczb i tekstów; przygotuj obraz i waliduj wynik.
 6. Koniec listy wykrywaj po braku zmiany obrazu po przewinięciu, nie po stałej liczbie przewinięć.
 7. Każdy flow modeluj jako maszynę stanów: stan, warunek rozpoznania, akcja, oczekiwany następny stan, limit czasu i obsługa błędu.
-8. Dry-run i awaryjne zatrzymanie klawiszem są wymagane tylko dla akcji klikających w grze, i to jako jedna flaga bez osobnych fraz potwierdzających. Odczyty i narzędzia pomocnicze nie potrzebują trybu podglądu.
+8. Każdy flow powinien mieć tryb dry-run (loguje planowane kliknięcia bez ich wykonywania) i awaryjne zatrzymanie klawiszem.
 9. Loguj datę i godzinę. Przy pewności poniżej progu zapisz screen w `debug/` z opisem.
-10. Po zmianie uruchom tylko testy dotkniętego modułu i pokaż wynik; pełny zestaw uruchamiaj na koniec sesji lub na prośbę. Jeśli test lub narzędzie nie jest dostępne, zgłoś to.
+10. Po zmianie uruchom testy dotkniętego modułu (np. `pytest -q tests/test_speedup*.py`); `verify.py` uruchamiaj, gdy zmieniają się rozpoznawanie ekranu, regiony lub szablony. Pełne `pytest` uruchamiaj po zmianach przekrojowych (wiele modułów, wspólny kod, `regions.json`) oraz przed commitem kończącym większy etap. Pokaż wynik. Jeśli test lub narzędzie nie jest dostępne, zgłoś to.
 11. Wiedzę z poprawek użytkowniczki dopisz do karty ekranu w sekcji „Wiedza z poprawek” lub do `docs/game/mechaniki.md`.
 12. Nie czytaj całych folderów `debug/` ani `screenshots/`. Poproś o konkretne pliki.
 13. Po zakończonym kroku zaproponuj commit z opisem. Nie rób push bez zgody.
-14. Dokument workflow zmienianego zachowania aktualizuj po zmianie kodu, w tym samym kroku: ustalenia, fakty a założenia, przypadki odroczone, stan kodu i testy. Nie oznaczaj niezweryfikowanego kandydata wizualnego jako potwierdzonego stanu gry.
+14. Before implementing a behavior or algorithm change, update its authoritative workflow document with the agreed terms, algorithm/diagram, confirmed facts versus assumptions, uncertain/deferred cases, current code status, and expected tests. Keep that document synchronized with code and tests as behavior changes. Present the contract and implementation plan for explicit user approval before changing code; do not promote an assumed visual candidate to verified game state.
 
 ## Założenia techniczne
 - Plan obsługi klienta desktopowego i przeglądarkowego znajduje się w `docs/game/ui_variants_plan.md`. Obecna aplikacja desktopowa ma zachować działający UI bez zmian; nowy UI przeglądarkowy wymaga osobnych screenów, regionów i szablonów. Traktuj plan jako niezaimplementowane wymaganie; przed wdrożeniem obsługi przeglądarki uzyskaj zgodę użytkowniczki i nie kopiuj współrzędnych ani wzorców desktopowych.
@@ -58,6 +58,7 @@ python .\mines.py --help
 python .\watchtower_mines.py --help
 python .\tools\verify.py --screen world_map --input .\tests\data\world_map
 python .\tools\resource_ocr.py --screen world_map --input .\tests\data\world_map
+python -m pytest -q .\tests\test_speedup_calibration.py
 python -m pytest
 python .\login.py .\credentials.json
 python .\troops.py .\troops.json

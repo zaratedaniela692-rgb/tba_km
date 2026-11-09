@@ -9,7 +9,6 @@ import cv2
 from army_training_slots import STATUS_OK, locate_slots
 from game_screen import GameScreenError, clear_game_screen
 from ui_variants import resolve_asset_path, resolve_variant
-from workflow_trace import WorkflowTrace
 
 ROOT_DIR = Path(__file__).resolve().parent
 EXPECTED_SIZE = (1920, 1080)
@@ -88,20 +87,13 @@ def open_army_training_screen(
     variant=None,
 ):
     """Reset the game UI, open Armia, and confirm Barracks slots before task work."""
-    trace = WorkflowTrace("army_training_navigation")
-
-    def finish(result):
-        result["event_trace"] = trace.events
-        return result
-
     plan = {
         "steps": ["press_escape_three_times", "click_army", "confirm_barracks_slots"],
         "actions_executed": False,
         "queue_modified": False,
     }
     if not execute:
-        trace.record("navigation_plan", observation={"steps": plan["steps"]}, decision="preview_only")
-        return finish({**plan, "status": "PREVIEW_ONLY"})
+        return {**plan, "status": "PREVIEW_ONLY"}
 
     from army_training_live_e2e import (
         _check_emergency_stop,
@@ -114,51 +106,38 @@ def open_army_training_screen(
     capture_fn = capture_fn or capture_primary_monitor
     click_fn = click_fn or _click_screen_point
     variant = variant or resolve_variant()
-    if variant["id"] != "legacy":  # the only ready UI variant is the current desktop client
-        trace.record("validate_variant", observation={"variant": variant["id"]}, decision="block",
-                     reason="unsupported_variant")
-        return finish({**plan, "status": "BLOCKED_UNSUPPORTED_VARIANT", "blockers": [variant["id"]]})
+    if variant["id"] != "desktop":
+        return {**plan, "status": "BLOCKED_UNSUPPORTED_VARIANT", "blockers": [variant["id"]]}
 
     try:
-        reset = clear_game_screen(
-            execute=True, press_key=press_key_fn, stop_file=stop_file or Path.home() / ".tba_stop", trace=trace,
-        )
+        reset = clear_game_screen(execute=True, press_key=press_key_fn, stop_file=stop_file or Path.home() / ".tba_stop")
     except GameScreenError as error:
-        return finish({**plan, "status": "BLOCKED_SCREEN_RESET", "blockers": [str(error)]})
+        return {**plan, "status": "BLOCKED_SCREEN_RESET", "blockers": [str(error)]}
 
     result = {**plan, "actions_executed": reset["actions_executed"]}
     try:
         frame, origin = _capture(capture_fn)
-        trace.record("capture_world_map", observation={"frame_size": (frame.shape[1], frame.shape[0]),
-                     "origin": origin})
         regions = _read_regions(variant["regions"])
         world_map = regions.get("world_map", {})
         army_region = world_map.get("armia")
         if not isinstance(army_region, dict):
-            trace.record("match_army_button", target="world_map.armia", decision="block",
-                         reason="region_missing")
-            return finish({**result, "status": "BLOCKED_ARMY_BUTTON_REGION_MISSING", "blockers": ["world_map.armia"]})
+            return {**result, "status": "BLOCKED_ARMY_BUTTON_REGION_MISSING", "blockers": ["world_map.armia"]}
         template_path = resolve_asset_path(variant, army_region["template"])
         template = cv2.imread(str(template_path), cv2.IMREAD_COLOR)
         if template is None:
-            trace.record("match_army_button", target="world_map.armia", decision="block",
-                         reason="template_missing", evidence_ref=str(template_path))
-            return finish({**result, "status": "BLOCKED_ARMY_BUTTON_TEMPLATE_MISSING", "blockers": [str(template_path)]})
+            return {**result, "status": "BLOCKED_ARMY_BUTTON_TEMPLATE_MISSING", "blockers": [str(template_path)]}
         config = json.loads((ROOT_DIR / "config.json").read_text(encoding="utf-8"))
         threshold = get_threshold(config, "world_map", "armia")
         search_region = _army_search_region(frame, army_region)
         match = _match_army_button(frame, army_region, template, threshold)
         if match is None:
-            trace.record("match_army_button", target="world_map.armia", observation={
-                "threshold": float(threshold), "search_region": search_region,
-            }, decision="block", reason="outside_frame_or_unmatchable")
-            return finish({
+            return {
                 **result,
                 "status": "BLOCKED_ARMY_BUTTON_OUTSIDE_FRAME",
                 "armia_match_threshold": float(threshold),
                 "search_region": search_region,
                 "blockers": ["world_map.armia search region is outside the captured frame"],
-            })
+            }
         match_x, match_y, match_confidence, match_threshold, search_region = match
         result.update(
             armia_match_confidence=match_confidence,
@@ -166,38 +145,29 @@ def open_army_training_screen(
             armia_match_candidate_point=(match_x, match_y),
             search_region=search_region,
         )
-        trace.record("match_army_button", target="world_map.armia", observation={
-            "confidence": match_confidence, "threshold": match_threshold, "candidate_point": (match_x, match_y),
-            "search_region": search_region,
-        }, decision="click" if match_confidence >= match_threshold else "block",
-                     reason=None if match_confidence >= match_threshold else "below_confidence_threshold")
         if match_confidence < match_threshold:
-            return finish({
+            return {
                 **result,
                 "status": "BLOCKED_ARMY_BUTTON_UNCONFIRMED",
                 "blockers": [
                     f"world_map.armia confidence {match_confidence:.2f}% is below {match_threshold:.2f}%"
                 ],
-            })
+            }
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
-        trace.record("prepare_army_click", decision="block", reason=str(error))
-        return finish({**result, "status": "BLOCKED_BEFORE_ARMY_CLICK", "blockers": [str(error)]})
+        return {**result, "status": "BLOCKED_BEFORE_ARMY_CLICK", "blockers": [str(error)]}
 
     try:
         _check_emergency_stop()
         _enable_live_failsafe(click_fn)
-        trace.record("click_army", target="world_map.armia", action={"point": (match_x, match_y),
-                     "origin": origin}, decision="click")
         click_fn((match_x, match_y), origin)
     except Exception as error:
-        trace.record("click_army_result", action="click", verification="unknown", reason=str(error))
-        return finish({
+        return {
             **result,
             "status": "UNKNOWN_AFTER_ARMY_CLICK_ATTEMPT",
             "actions_executed": True,
             "armia_match_confidence": match_confidence,
             "blockers": [f"armia_click_result_uncertain_no_retry:{error}"],
-        })
+        }
 
     result.update(
         actions_executed=True,
@@ -211,21 +181,15 @@ def open_army_training_screen(
             raise ValueError("Primary-monitor capture origin changed after opening Armia.")
         layout = locate_slots(frame, _read_regions(variant["regions"]).get("army_training", {}), variant)
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
-        trace.record("verify_barracks", decision="block", verification="unknown", reason=str(error))
-        return finish({**result, "status": "BLOCKED_AFTER_ARMY_CLICK", "blockers": [str(error)]})
+        return {**result, "status": "BLOCKED_AFTER_ARMY_CLICK", "blockers": [str(error)]}
 
     if layout.status != STATUS_OK or not layout.slots:
-        trace.record("verify_barracks", observation={"layout_status": layout.status,
-                     "visible_slots": len(layout.slots), "layout_reason": layout.reason}, decision="block",
-                     verification="failed", reason="barracks_not_confirmed")
-        return finish({
+        return {
             **result,
             "status": "BLOCKED_BARRACKS_NOT_CONFIRMED",
             "layout_status": layout.status,
             "blockers": [layout.reason or "No training slots detected."],
-        })
+        }
 
     result.update(status="BARRACKS_OPENED", layout_status=layout.status, visible_slots=len(layout.slots))
-    trace.record("verify_barracks", observation={"layout_status": layout.status,
-                 "visible_slots": len(layout.slots)}, decision="continue", verification="confirmed")
-    return finish(result)
+    return result

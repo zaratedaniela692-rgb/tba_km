@@ -39,11 +39,11 @@ class Slot:
             raise TrainingProcessError("Invalid global level.")
         if type(self.match_number) is not int or self.match_number < 1:
             raise TrainingProcessError("Invalid matching slot number.")
-        if self.unit_type in SUPPORTED_TRAINING_UNIT_TYPES and (
+        if self.unit_type == DEFAULT_UNIT_TYPE and (
             self.global_level not in MATCH_COUNTS_BY_LEVEL
             or self.match_number > MATCH_COUNTS_BY_LEVEL[self.global_level]
         ):
-            raise TrainingProcessError("Invalid level or matching slot number for this category.")
+            raise TrainingProcessError("Invalid Gwardzists level or matching slot number.")
 
 
 @dataclass(frozen=True)

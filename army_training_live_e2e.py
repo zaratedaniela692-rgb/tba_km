@@ -123,10 +123,13 @@ def _reading_is_reliable(reading):
     )
 
 
-def _build_selected_slot_plan(frame, variant, slot):
+def _build_selected_slot_plan(
+    frame, variant, slot, requested_quantity=None, goal_queue_limit=None, check_silver=True,
+):
     readings = read_slot_readings(frame, slot)
     resources = _resource_readings(frame, _load_regions(variant["regions"])["world_map"])
     training = _read_current_training_state(frame, variant)
+    queue_limit = goal_queue_limit if goal_queue_limit is not None else readings.queue_limit.value
     blockers = []
     if training["status"] != "idle":
         blockers.append("training_state_not_idle")
@@ -136,23 +139,30 @@ def _build_selected_slot_plan(frame, variant, slot):
         blockers.append("resource_reading_uncertain")
     if resources["food"]["color"] != "white" or resources["food"]["value"] is None or resources["food"]["value"] <= 0:
         blockers.append("food_not_positive_white")
-    if readings.queue_limit.value is None or readings.city_count.value is None:
+    if queue_limit is None or readings.city_count.value is None:
         target_count = completion_count = order_count = None
     else:
-        target_count = readings.queue_limit.value * TARGET_QUEUE_LIMIT_MULTIPLIER
+        target_count = queue_limit * TARGET_QUEUE_LIMIT_MULTIPLIER
         completion_count = (target_count * TARGET_COMPLETION_PERCENT + 99) // 100
-        order_count = min(max(0, target_count - readings.city_count.value), readings.queue_limit.value)
+        order_count = min(max(0, target_count - readings.city_count.value), queue_limit)
         if readings.city_count.value >= completion_count:
             blockers.append("stock_goal_already_satisfied")
         if order_count <= 0:
             blockers.append("no_training_quantity_needed")
-    if (
+    if requested_quantity is not None:
+        if isinstance(requested_quantity, bool) or not isinstance(requested_quantity, int) or requested_quantity <= 0:
+            blockers.append("requested_quantity_must_be_positive_integer")
+        elif queue_limit is not None and requested_quantity > queue_limit:
+            blockers.append("requested_quantity_exceeds_queue_limit")
+        else:
+            order_count = requested_quantity
+    if check_silver and (
         readings.silver_cost.value is None
         or resources["silver"]["value"] is None
         or resources["silver"]["value"] < readings.silver_cost.value
     ):
         blockers.append("silver_insufficient_or_uncertain")
-    if readings.queue_limit.value is not None and order_count is not None and order_count != readings.queue_limit.value:
+    if requested_quantity is None and readings.queue_limit.value is not None and order_count is not None and order_count != readings.queue_limit.value:
         blockers.append("planned_quantity_is_not_full_queue")
     return {
         "training": training,

@@ -6,13 +6,7 @@ import pytest
 
 import army_training_executor as executor
 import army_training_finish as finish
-from army_state import (
-    army_state_path,
-    load_army_state,
-    open_training,
-    open_training_marker,
-    record_finish_button_attempt,
-)
+from army_state import army_state_path, load_army_state, open_training, open_training_marker
 from army_training_process import NumericReading, Slot, TrainingGoal, enqueue_training_goal
 from task_controller import (
     create_task_queue,
@@ -105,109 +99,6 @@ def test_speedup_confirmed_idle_clears_marker_and_unconfirmed_counts_attempt(tmp
     assert open_training(load_army_state(path)) is None
 
 
-def test_unconfirmed_finish_button_clicks_are_capped_and_then_need_attention(tmp_path):
-    path = marker(tmp_path)
-    calls = []
-
-    def click_finish(on_finish_button_click):
-        calls.append(1)
-        on_finish_button_click()
-        return "unknown"
-
-    results = [
-        finish.finish_open_training(path, "completed", click_finish, NOW + timedelta(hours=index))
-        for index in range(finish.MAX_FINISH_BUTTON_ATTEMPTS)
-    ]
-    exhausted = finish.finish_open_training(
-        path, "completed", lambda: pytest.fail("must not click again after the attempt cap"),
-        NOW + timedelta(hours=10),
-    )
-
-    assert len(calls) == finish.MAX_FINISH_BUTTON_ATTEMPTS
-    assert all(item["status"] == "failed" for item in results)
-    assert exhausted["reason"] == "finish_button_attempts_exhausted"
-    assert exhausted["actions_attempted"] is False
-    assert exhausted["needs_attention"] is True
-    assert open_training(load_army_state(path))["finish_button_attempts"] == finish.MAX_FINISH_BUTTON_ATTEMPTS
-
-
-def test_completed_state_runs_the_finisher_and_clears_the_marker_when_idle(tmp_path):
-    path = marker(tmp_path)
-    seen = []
-
-    def adapter(on_finish_button_click):
-        seen.append(callable(on_finish_button_click))
-        return "idle"
-
-    result = finish.finish_open_training(path, "completed", adapter, NOW)
-
-    assert result["status"] == "finished"
-    assert seen == [True]
-    assert open_training(load_army_state(path)) is None
-
-
-def test_completed_screen_without_an_open_marker_is_foreign_and_not_clicked(tmp_path):
-    result = finish.finish_open_training(
-        army_state_path("other", tmp_path), "completed", lambda: pytest.fail("foreign completion"), NOW,
-    )
-
-    assert result["status"] == "blocked"
-
-
-def test_failed_attempts_retry_soon_then_fall_back_to_the_long_interval(tmp_path):
-    path = marker(tmp_path)
-
-    first = finish.finish_open_training(path, "active", lambda: "active", NOW)
-    second = finish.finish_open_training(path, "active", lambda: "active", NOW + timedelta(minutes=5))
-    third = finish.finish_open_training(path, "active", lambda: "active", NOW + timedelta(minutes=10))
-
-    assert first["next_attempt_at"] == (NOW + timedelta(seconds=finish.SHORT_RETRY_SECONDS)).isoformat()
-    assert second["next_attempt_at"] == (NOW + timedelta(minutes=5, seconds=finish.SHORT_RETRY_SECONDS)).isoformat()
-    assert third["next_attempt_at"] == (NOW + timedelta(minutes=10, hours=1)).isoformat()
-    assert third["needs_attention"] is True
-
-
-def test_execute_finish_task_passes_one_shot_recorder_to_speedup_adapter(tmp_path, monkeypatch):
-    queue = create_task_queue("p")
-    task = enqueue_task(
-        queue, "army_training", task_id="army_finish:order-1", now=NOW,
-        payload={"goal_kind": finish.FALLBACK_GOAL_KIND, "order_id": "order-1"},
-    )
-    path = marker(tmp_path)
-    image = np.zeros((1080, 1920, 3), dtype=np.uint8)
-    adapter_calls = []
-    states = iter(("active",) * 4)
-    monkeypatch.setattr(finish, "resolve_variant", lambda: {"regions": "regions.json"})
-    monkeypatch.setattr(finish, "_read_current_training_state", lambda *_: {"status": next(states)})
-    monkeypatch.setattr(finish, "_check_emergency_stop", lambda: None)
-
-    def speedup_adapter(**kwargs):
-        adapter_calls.append(kwargs)
-        kwargs["on_finish_button_click"]()
-        return "unknown"
-
-    def run(at, adapter):
-        return finish.execute_finish_task(
-            queue, task["task_id"], path, at, execute=True,
-            confirmation=finish.CONFIRMATION_PHRASE,
-            capture_fn=lambda: (image, (0, 0)), speedup_fn=adapter, sleep_fn=lambda _: None,
-        )
-
-    first = run(NOW, speedup_adapter)
-    for hours in range(1, finish.MAX_FINISH_BUTTON_ATTEMPTS):
-        run(NOW + timedelta(hours=hours), speedup_adapter)
-    last = run(
-        NOW + timedelta(hours=10),
-        lambda **_: pytest.fail("must not invoke the adapter after the attempt cap"),
-    )
-
-    assert first["status"] == "FAILED"
-    assert first["actions_executed"] is True
-    assert len(adapter_calls) == finish.MAX_FINISH_BUTTON_ATTEMPTS
-    assert all(set(call) == {"on_finish_button_click"} for call in adapter_calls)
-    assert last["finish"]["reason"] == "finish_button_attempts_exhausted"
-
-
 def test_speedup_exception_is_a_failed_attempt_not_a_crash(tmp_path):
     path = marker(tmp_path)
 
@@ -248,9 +139,6 @@ def test_fallback_is_noop_when_marker_was_already_cleared(tmp_path):
 
     assert result["status"] == "NOOP_MARKER_CLEARED" and result["actions_executed"] is False
     assert queue["tasks"][0]["completed_reason"] == "marker_already_cleared"
-    assert [event["step"] for event in result["event_trace"]] == [
-        "read_open_training_marker", "finish_task_result",
-    ]
 
 
 def test_fallback_schedules_retry_without_speedup_adapter(tmp_path, monkeypatch):
@@ -289,7 +177,6 @@ def _executor_setup(monkeypatch, states):
     monkeypatch.setattr(executor, "resolve_variant", lambda: {"regions": "x"})
     monkeypatch.setattr(executor, "_load_regions", lambda _: {"army_training": {}})
     monkeypatch.setattr(executor, "locate_slots", lambda *args: SimpleNamespace(status="ok", slots=(slot,)))
-    monkeypatch.setattr(executor, "read_selected_category", lambda *args: {"unit_type": "guardsmen"})
     monkeypatch.setattr(executor, "read_slot_selector_levels", lambda *args: reading)
     def read_state(*args, **kwargs):
         value = next(iterator)

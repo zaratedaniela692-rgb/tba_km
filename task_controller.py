@@ -14,6 +14,7 @@ from uuid import uuid4
 
 ROOT_DIR = Path(__file__).resolve().parent
 PROFILES_DIR = ROOT_DIR / "profiles"
+DEFAULT_PROFILE_ID = "test"
 TASK_QUEUE_SCHEMA_VERSION = 1
 TASK_TYPES = {"army_training", "building_upgrade", "academy_research"}
 TASK_STATUSES = {

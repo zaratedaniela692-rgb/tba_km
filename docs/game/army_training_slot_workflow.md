@@ -1,40 +1,14 @@
 # Army Training Slot Workflow
 
-## Prepared Army E2E Wrapper (2026-11-09)
+## Default Test Profile (2026-11-09)
 
-Run the configured sequence with `python .\tools\run_army_e2e.py`; edit the constants at the top of that script rather than passing scenario arguments. The wrapper observes the foreground client/profile through `client_router.py`. If the native desktop game's player name is read confidently and has no profile yet, the wrapper registers one automatically; exactly one existing match is reused, while duplicate matches, uncertain OCR, browser clients, and non-game windows remain blocked. It always disables device-test Git publication/push and forces a fresh run. The default `EXECUTE_GAME_ACTIONS = False` performs preflight and a navigation preview, then stops before reading Barracks because the game is still on the world map. To continue from the world map, explicitly set the single live-input flag to `True`; this sends the existing Escape/Armia navigation action and then runs the read-only `army_slots` probe. `RUN_ARMY_SCROLL` and `RUN_SPECIALIST_TRAIN` remain off by default. Scrolling only inspects an already-open Barracks list and may change its position. Specialist training can consume resources and leave a persisted active order/marker, so enable it only for a supervised one-order test after reviewing queue/profile and game state. Speed Up item use is not part of this wrapper.
+Army manager commands no longer require `--profile`: when omitted they use the local `test` profile. Passing `--profile <id>` still selects an explicit profile. The E2E wrapper uses that same `test` profile directly and does not depend on foreground-window classification, player-name OCR, or profile registration. Queue and marker data are created lazily under the ignored `profiles/` directory. This profile isolates bot-side task state only; it is not a separate game account and does not isolate in-game resources. Do not start a live order if the visible game account is not the intended test account. The profile router remains available as a separate observer but is not a prerequisite for manager commands or this wrapper.
 
-No live wrapper run has been performed. Mocked tests cover automatic registration of a confidently read new desktop player, duplicate-profile rejection, browser/unresolved routing before device scenarios, default preview behavior, and the explicit navigation gate. Run `python -m pytest -q tests\test_run_army_e2e.py tests\test_client_router.py` for that offline safety check.
+## Optional Training Quantity (Approved 2026-11-09)
 
-## Persisted Workflow Trace (2026-11-08)
+The manager `execute` command accepts an optional positive `--quantity`. When omitted, retain the existing full-queue behavior. When supplied, require the requested count not to exceed the freshly read queue maximum; then, before Train, click the detected `unit_troop_count_to_train` field, press Backspace six times, type the requested digits, capture a fresh frame, confirm the same slot and idle state, and require OCR of that field to equal the requested count. Re-run the resource/cost/time preflight on that frame while retaining the original maximum for the stock-goal threshold. Any input exception, changed geometry/slot/state, weak OCR, or mismatch stops before Train; do not retry an uncertain input sequence. The E2E training test uses `100` to limit resource consumption. This is an execution parameter, not a change to campaign goals or task-controller scheduling.
 
-The manager's `execute` command now aggregates the structured event traces returned by navigation, category selection, executor, and finish steps into `workflow_trace.jsonl` when `TBA_WORKFLOW_TRACE_PATH` is set by the device-test harness. The run log appends each workflow event once, and `report.json` includes `workflow_trace_events`. Direct CLI runs keep the existing JSON result and do not create an extra trace file unless the environment variable is provided. Finish-task decisions, Speed Up adapter observations/actions/postconditions, and the shared Escape reset now emit structured events. Existing nested `event_trace` result fields remain available. Speed Up runner traces continue to be ingested from their own `event_trace.jsonl`, not copied into the army workflow trace.
-
-Offline regressions cover manager persistence, duplicate prevention for aliased navigation results, finish trace return, reset events, and device-run log ingestion. The focused run passed 131 tests across device harness, reset, navigation, manager, finish, executor, and Speed Up adapter. No live game input was performed. The trace records decisions and calls; it does not claim that a click succeeded until its existing post-action verification says so.
-
-## Completed Training Claim (2026-11-08)
-
-The supplied screenshot `device_runs/DESKTOP-LFGLEFV/speedup_use/image.png` confirms a post-training panel state with a `Zakończ` button. The desktop scanner returns `status=unknown` on this state and does not confirm idle. The annotated button template matches this screenshot at score 1.0 at `(1014, 290)`; no title text or separate completion-panel anchor is required. The clean screenshot is stored as `tests/data/army_training/training_complete_finish_button.png` for regression coverage.
-
-For a bot-owned open-training marker only, the speedup finish flow may recognize `finish_training_button` when its local template match reaches 0.95 within the annotated region plus a 2 px margin. It checks the emergency stop, moves the cursor outside the button region, persists that a one-shot finish click is being attempted, checks the emergency stop again, and clicks the matched button center once. A fresh same-geometry frame must then classify as `idle` from the existing empty-unit template before the open-training marker is cleared. A missing button, uncertain click, changed capture geometry, or unconfirmed idle state blocks completion; the persisted attempt prevents another finish-button click and requires operator attention. No text OCR is used to trigger this action. Offline tests cover the annotated match, the empty-queue postcondition and the attempt cap; live behavior remains unverified and no live click was performed during implementation.
-
-**Closing guarantee (2026-11-08):** `_read_current_training_state` now reports a visible, matched `Zakończ` button as status `completed` instead of `unknown` (the scanner itself still returns `unknown`; the status is added on top). `finish_open_training` treats `completed` like `active` for a bot-owned marker, so a completion screen left behind by an earlier run is closed on the next finish step without reopening Speed Up; a `completed` screen without a marker is blocked as foreign. Each click is recorded in the marker (`finish_button_attempts`) before it is sent. After 3 recorded clicks that did not end in a confirmed `idle` the finisher stops with `finish_button_attempts_exhausted` and `needs_attention`. A failed finish attempt now schedules the next one in 120 s while fewer than 3 attempts have been made, then falls back to the configured long interval (1 h); an unavailable speedup module still uses the long interval. State-file replacement retries briefly on `PermissionError`, because a locked temp file would otherwise lose an attempt record. The finish click is still never retried within one step, the marker is cleared only from a fresh `idle` frame, and live behavior of this path has not been verified.
-
-## Notification-Covered Controls (2026-11-08)
-
-Notifications may visually cover the configured central panel button without preventing clicks from reaching it. Immediately after a newly accepted Train action, the executor may click the annotated `speedup_panel` region for the expected Help action. The active-training finisher may click the same region for Speed Up only for a bot-managed training that has reached its finish step. Missing button-template evidence is tolerated in these expected stages, but an explicitly observed incompatible button state, inactive/unknown training, or missing region still blocks.
-
-Each action is sent once and confirmed from its next state. The executor requires the panel to show Speed Up after Help; the finisher requires the Speed Up dialog before it can plan or use any items. Failed postconditions do not trigger another click.
-
-This is a reusable rule for other modules, not a global bypass: use a known annotated or freshly resolved target only when the current screen/action context and expected control are established by the workflow, then verify that action's expected next state. If context is unknown, an incompatible control state is observed, the target region is missing, or a required screen reading is obscured, stop or defer that action. Do not infer coordinates from a screenshot or treat a hidden button as proof of state. The notification pass-through is user-confirmed; Help and Speed Up adapter paths are covered by mocked tests, not live clicks.
-
-## Speedup Completion Reconciliation (2026-11-08)
-
-The desktop speedup adapter now re-captures the army panel after every runner result, including `UNCERTAIN`, `BLOCKED`, and `NOT_ENOUGH`. It no longer treats all non-`FINISHED` results as evidence that training remains active. Only a recognized `idle` state allows `finish_open_training` to clear the open marker; `active` and `unknown` retain existing retry/error handling. A missing speedup dialog anchor alone is never proof of completed training. Failed runner status and reason are logged before reconciliation.
-
-The speedup runner finishes positive remaining time in residual batches: read the timer after a complete batch, require progress, re-read inventory at existing checkpoints, confirm submitted decrements, and plan the remainder. There is no timer or quantity OCR between individual clicks. Unreadable observations, no progress, changed layout, and emergency stop prevent further uses; shortfall preserves already submitted uses. See [Speedup Module Workflow](speedup_module_workflow.md).
-
-Offline tests cover residual minutes, successive residual batches, remaining-stock shortfall, unconfirmed decrements, unreadable timer/inventory, and adapter reconciliation of `idle`/`active`/`unknown` after every runner status. The completion path also required repairing an existing executor trace indentation/import and reading serialization defect. Real game completion, UI timing, sub-hour visual OCR, and checkpoint continuity after depleted rows still require a supervised user run; no live inputs were sent during implementation. Dynamic row remapping and browser actions remain deferred.
+Implementation status: code and focused executor regressions are added; manager CLI forwards the optional value, and the prepared wrapper has an opt-in queued-goal stage with `TRAINING_QUANTITY = 100`. The wrapper refuses to run that stage unless live actions are enabled and the profile has exactly one pending army stock goal, no open-training marker, no active tasks, and an unpaused queue. It writes the command/report through the device-test harness with Git publication disabled. No live input has been performed. Wrapper command construction was previously validated; executor tests have not been rerun after repairing malformed local edits in `army_training_process.py` and `army_training_plan.py`. The manager CLI now starts and `list` without `--profile` returns the empty local `test` profile. The browser remains unsupported for this action.
 
 **Status:** MVP behavior and decisions as of 2026-11-05. This document is the current source of truth for slot detection and the read-only stock-goal workflow. Historical implementation notes in other documents may be stale; follow this contract and the implementation-status table below.
 
@@ -82,7 +56,7 @@ The eight-step batch size and center-of-frame pointer placement are user-confirm
 
 ### Current Code Status
 
-The injectable primitives in `army_training_scroll.py` now calculate the current frame center, move the cursor there, issue eight individual wheel steps, choose direction using the target level and requested ordinal match, capture after each batch, and distinguish an unchanged-image endpoint from uncertain observations and a safety-limit stop. Unit tests cover these behaviors without sending real input. These primitives are not yet wired into the manager/executor or a live PyAutoGUI adapter. `resolve_goal_slot` still handles one frame and returns `match_not_visible_without_scrolling` when the requested match is beyond its visible candidates. Cross-frame slot identity and match-number accumulation remain unimplemented; do not use a frame-local result as a verified full-list match.
+Not implemented yet. `resolve_goal_slot` handles one frame and returns `match_not_visible_without_scrolling` when the requested match is beyond its visible candidates. No Barracks list-scroll adapter, cross-frame accumulator, or endpoint comparison is currently connected. Existing tests only synthesize a second row in one image; they do not exercise actual scrolling.
 
 ### Expected Tests
 
@@ -93,7 +67,6 @@ The injectable primitives in `army_training_scroll.py` now calculate the current
 - Downward search finds a later unseen target, and upward search finds an earlier target such as level 5 when level 6 is visible.
 - A skipped/ambiguous target or unreliable slot layout prevents selector and Train clicks and never marks the goal complete.
 - Existing visible-target resolution and manager/executor safety gates remain unchanged.
-- `tests/test_army_training_scroll.py` covers the current pure traversal primitives; mocked live-action adapter and end-to-end resolver tests remain pending.
 - Run focused tests for slots, levels, manager, and executor; run the full suite if the shared resolver or execution flow changes. Live validation is a separate supervised step and is not authorized by this contract alone.
 
 ## Running the Read-Only Dry-Run
@@ -134,7 +107,7 @@ The current workstation lacks `mss` and `pyautogui`. The preview was attempted a
 ### Operator Procedure
 
 1. From the repository root, install project runtime dependencies and install Tesseract OCR. Ensure `tesseract.exe` is on `PATH`.
-2. Launch the game manually, open Barracks, and leave the full game visible on the primary monitor at 1920x1080. Confirm there is no active training. Notifications need not be dismissed for a known-region click; any screen values needed for preflight must still be readable.
+2. Launch the game manually, open Barracks, and leave the full game visible on the primary monitor at 1920x1080. Close overlays/notifications. Confirm there is no active training.
 3. Run preview first. It captures the current monitor but performs no clicks and does not change the queue:
 
 ```powershell
@@ -404,7 +377,7 @@ After a confirmed Train, the executor waits for the configured post-order delay,
 - **Help window:** per-order time before `expires_at` (default 30 minutes; per-task `help_window_seconds` or queue setting). It remains anchored at the confirmed Train plus the post-order delay; requesting Help does not complete the training task.
 - **Open training marker:** `open_training` in `profiles/<profile>/army_state.json` with `order_id`, `task_id`, `goal`, `started_at`, `expires_at`, `speedup_attempts`, `last_attempt_at`, `next_attempt_at`. It means the bot started a training whose end is not yet confirmed.
 - **Grace:** extra time after `expires_at` (default 10 minutes) before the fallback task is created.
-- **Finish step:** read the training state on the open Barracks screen. Confirmed idle clears the marker; active with an open marker runs the Speed Up adapter, waits for the view reset (about 5 s), re-observes, and clears the marker only when idle is confirmed. The newly observed `Szkolenie zakończone`/`Zakończ` state currently reads as `unknown`; it must not be treated as idle. Its annotated one-click completion and post-click idle confirmation are pending.
+- **Finish step:** read the active-training state on the open Barracks screen. Idle clears the marker; active with an open marker runs the Speed Up adapter, waits for the view reset (about 5 s), re-observes, and clears the marker only when idle is confirmed.
 - **Fallback task:** one army task `finish_training_v1` with id `army_finish:<order_id>`.
 
 ### Rules
@@ -668,46 +641,3 @@ browser capture + desktop templates as search references
 ### Current Code Status
 
 Implemented in `army_unit_types.py`, `army_training_category.py`, `army_training_manager.py`, `army_training_executor.py`, `army_training_resolver.py`, `army_campaign.py`, `army_training_process.py`, `army_training_plan.py` and `army_training_scanner.py`. Covered by `tests/test_army_training_category.py` (fixtures, one click, no retry, blocked cases) and updated manager, executor, campaign and process tests.
-
-## One-Command Specialists Live Test (Implemented 2026-11-07; Supervised Live Run Pending)
-
-### Goal and Command
-
-Provide one supervised command for a single Specialists goal, defaulting to global level 5, match 1. It must use the existing manager navigation, category selection, resolver, preflight, and executor rather than a parallel click path.
-
-```powershell
-python .\tools\device_test.py army_specialist_train --profile auto --execute
-```
-
-The device-test scenario requires `--execute`; its manager command also requires the exact phrase `TRAIN ONE SPECIALIST`. A direct manager invocation can preview with `--profile auto test-specialist --level 5 --match 1`, or execute with `--execute --confirm "TRAIN ONE SPECIALIST"`.
-
-### Contract
-
-1. Resolve `--profile auto` from the currently visible player name. The game must be open on the primary 1920x1080 monitor. Existing-name collisions use the local profile registry prompt; do not silently select another account's queue.
-2. The test is limited to Specialists and one visible slot. No campaign expansion or scrolling. Default goal is `(specialists, level 5, match 1)`; level and match may be overridden for a separately reviewed visible target.
-3. Before any game action, refuse if the profile queue is paused, has an active lifecycle task, or has another pending army stock goal. Do not clear, overwrite, or reprioritize unrelated tasks. Create or reuse only the exact requested goal; rearm an existing completed goal through the existing rearm transition.
-4. Preview is read-only and sends no keys/clicks, persists no goal, and reports the requested target and required live confirmation.
-5. Live execution requires both `--execute` and exact `TRAIN ONE SPECIALIST`. Use the existing three-Escape/map/Barracks startup, verified category click, visible-slot resolver, target-level selection, fresh same-slot check, resource/food/silver/time preflight, one Train click, and post-click active-state confirmation. Every existing emergency-stop and PyAutoGUI fail-safe gate remains in force.
-6. This is a one-order training test, not a finish/Speed Up test. After active training is visually confirmed, persist the normal queue task and open-training marker and return `TEST_TRAINING_STARTED_CONFIRMED` before the unverified Help button step. Do not click Help or Speed Up as part of this test.
-7. Any uncertain category, slot, OCR/resource, or post-click result stops without retrying Train. If Train may have been clicked, preserve the normal blocked/uncertain lifecycle state and report that the operator must inspect the game before retrying.
-
-### Queue and Outcome
-
-- The helper refuses if a different pending army stock goal could be selected; it does not delete or reorder that goal.
-- A matching queued goal is reused; a completed goal is rearmed and audited; an active matching goal is refused.
-- On confirmed start, the task remains in its ordinary `waiting_help_delay` lifecycle, with the usual profile state marker. This test does not click Help; later manager runs may continue the normal lifecycle.
-- The device-test report captures the before/after screenshots, manager JSON, and module debug artifacts; the existing device-test retention and publication rules apply.
-
-### Expected Tests
-
-- Preview reports the one target without queue/file mutation or live input.
-- Live command rejects missing/wrong confirmation before capture or actions.
-- Paused queue, active tasks, another pending army goal, unsupported Specialist slot, and wrong profile/category all block without Train.
-- Matching queued goal reuse and completed-goal rearm preserve task identity/history rules.
-- Successful mocked executor flow clicks Train once, confirms active, records the marker, and returns before Help. Manager/queue tests cover the test goal guards and routing; a single composed full-flow unit test remains a gap.
-- Uncertain post-Train results never retry and remain visible for operator recovery.
-- Device-test scenario defaults to no live actions and routes `--execute` only through the exact confirmation-gated manager command.
-
-### Current Status
-
-Implemented in `army_training_manager.py` (`test-specialist`), `army_training_executor.py` (`stop_after_train_confirmed`), and `tools/device_test_scenarios.json` (`army_specialist_train`). A real game run remains an operator-supervised action and has not been executed during coding validation.

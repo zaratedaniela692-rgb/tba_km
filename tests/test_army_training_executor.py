@@ -6,6 +6,7 @@ import pytest
 
 import army_training_executor as executor
 from army_training_process import NumericReading, Slot, TrainingGoal, enqueue_training_goal
+from army_training_slot_reader import SlotReadings
 from task_controller import create_task_queue
 
 NOW = datetime(2026, 11, 6, 12, 0, tzinfo=timezone.utc)
@@ -22,6 +23,7 @@ def _setup(monkeypatch, level=6, click_error_at=None, post_state="active"):
     slot = SimpleNamespace(
         index=0, dx=0, dy=0, regions={
             "unit_troop_level": {"x": 100, "y": 100, "w": 30, "h": 120},
+            "unit_troop_count_to_train": {"x": 300, "y": 400, "w": 80, "h": 24},
             "unit_troop_train_button": {"x": 400, "y": 500, "w": 50, "h": 20},
         },
     )
@@ -34,9 +36,11 @@ def _setup(monkeypatch, level=6, click_error_at=None, post_state="active"):
     monkeypatch.setattr(executor, "resolve_variant", lambda: variant)
     monkeypatch.setattr(executor, "_load_regions", lambda _: {"army_training": {}})
     monkeypatch.setattr(executor, "locate_slots", lambda *args: layout)
-    monkeypatch.setattr(executor, "read_selected_category", lambda *args: {"unit_type": "guardsmen"})
     monkeypatch.setattr(executor, "read_slot_selector_levels", lambda *args: selector_reading)
-    monkeypatch.setattr(executor, "_build_selected_slot_plan", lambda *args: {"blockers": [], "planned_quantity": 100})
+    monkeypatch.setattr(
+        executor, "_build_selected_slot_plan",
+        lambda *args, **kwargs: {"blockers": [], "planned_quantity": kwargs.get("requested_quantity", 1565)},
+    )
     monkeypatch.setattr(executor, "read_slot_training_time", lambda *args: NumericReading(3600, 100, "1d.0g."))
     monkeypatch.setattr(executor, "_find_same_slot", lambda *args: slot)
     monkeypatch.setattr(executor, "_check_emergency_stop", lambda: None)
@@ -57,7 +61,6 @@ def _setup(monkeypatch, level=6, click_error_at=None, post_state="active"):
 def test_execute_selects_target_level_then_train_once_and_marks_started(monkeypatch):
     queue, task, clicks, click, capture = _setup(monkeypatch)
     button_region = {"x": 1080, "y": 288, "w": 129, "h": 33}
-    monkeypatch.setattr(executor, "_load_regions", lambda _: {"army_training": {"speedup_panel": button_region}})
     states = iter((
         {"status": "idle"},
         {"status": "idle"},
@@ -83,28 +86,89 @@ def test_execute_selects_target_level_then_train_once_and_marks_started(monkeypa
     assert queue["tasks"][0]["initial_remaining_seconds"] == 3600
 
 
-def test_specialist_test_stops_after_confirmed_train_without_clicking_help(monkeypatch, tmp_path):
-    queue, task, clicks, click, capture = _setup(monkeypatch, level=5)
+def test_requested_quantity_is_typed_and_confirmed_before_train(monkeypatch):
+    queue, task, clicks, click, capture = _setup(monkeypatch, level=7)
     states = iter((
-        {"status": "idle"},
-        {"status": "idle"},
-        {"status": "active"},
+        {"status": "idle"}, {"status": "idle"}, {"status": "idle"}, {"status": "active"},
+        {"status": "active", "button_state": "help", "training_button_region": {"x": 1080, "y": 288, "w": 129, "h": 33}},
+        {"status": "active", "button_state": "speedup", "training_button_region": {"x": 1080, "y": 288, "w": 129, "h": 33}},
+    ))
+    queue_readings = iter((
+        NumericReading(1565, 90, "+1,565"), NumericReading(100, 95, "100"),
     ))
     monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
-    state_path = tmp_path / "army_state.json"
+    monkeypatch.setattr(executor, "read_slot_readings", lambda *args: SlotReadings(
+        0, next(queue_readings), NumericReading(0, 90, "0"), NumericReading(500, 90, "500"),
+    ))
+    events = []
+
+    def press_key(key, presses=1):
+        events.append(("press", key, presses))
+
+    def write_text(text):
+        events.append(("write", text))
+
+    original_click = click
+
+    def record_click(point, origin):
+        events.append(("click", point))
+        original_click(point, origin)
 
     result = executor.execute_training_goal(
         queue, task["task_id"], NOW, execute=True,
         confirmation=executor.CONFIRMATION_PHRASE,
-        capture_fn=capture, click_fn=click, sleep_fn=lambda _: None, state_path=state_path,
-        stop_after_train_confirmed=True,
+        capture_fn=capture, click_fn=record_click, sleep_fn=lambda _: None,
+        quantity=100, press_key_fn=press_key, write_text_fn=write_text,
     )
 
-    assert result["status"] == "TEST_TRAINING_STARTED_CONFIRMED"
-    assert result["help_action"] == "not_attempted_by_test_mode"
-    assert result["post_click_training_state"] == "active"
-    assert len(clicks) == 2
-    assert queue["tasks"][0]["status"] == "waiting_help_delay"
+    assert result["status"] == "START_CONFIRMED"
+    assert result["quantity_confirmed"] == 100
+    assert result["preflight"]["planned_quantity"] == 100
+    assert events[:4] == [
+        ("click", (340, 412)), ("press", "backspace", 6), ("write", "100"), ("click", (425, 510)),
+    ]
+
+
+def test_quantity_ocr_mismatch_blocks_before_train(monkeypatch):
+    queue, task, clicks, click, capture = _setup(monkeypatch, level=7)
+    states = iter(({"status": "idle"}, {"status": "idle"}, {"status": "idle"}))
+    readings = iter((NumericReading(1565, 90, "+1,565"), NumericReading(99, 90, "99")))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
+    monkeypatch.setattr(executor, "read_slot_readings", lambda *args: SlotReadings(
+        0, next(readings), NumericReading(0, 90, "0"), NumericReading(500, 90, "500"),
+    ))
+
+    result = executor.execute_training_goal(
+        queue, task["task_id"], NOW, execute=True,
+        confirmation=executor.CONFIRMATION_PHRASE,
+        capture_fn=capture, click_fn=click, sleep_fn=lambda _: None,
+        quantity=100, press_key_fn=lambda *args, **kwargs: None, write_text_fn=lambda _: None,
+    )
+
+    assert result["status"] == "BLOCKED_QUANTITY_UNCONFIRMED"
+    assert "quantity_confirmed" not in result
+    assert "train_click_attempted" not in result
+    assert clicks == [((340, 412), (0, 0))]
+
+
+def test_requested_quantity_above_queue_maximum_blocks_before_field_click(monkeypatch):
+    queue, task, clicks, click, capture = _setup(monkeypatch, level=7)
+    states = iter(({"status": "idle"}, {"status": "idle"}))
+    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
+    monkeypatch.setattr(executor, "read_slot_readings", lambda *args: SlotReadings(
+        0, NumericReading(99, 90, "99"), NumericReading(0, 90, "0"), NumericReading(500, 90, "500"),
+    ))
+
+    result = executor.execute_training_goal(
+        queue, task["task_id"], NOW, execute=True,
+        confirmation=executor.CONFIRMATION_PHRASE,
+        capture_fn=capture, click_fn=click, sleep_fn=lambda _: None,
+        quantity=100, press_key_fn=lambda *args, **kwargs: None, write_text_fn=lambda _: None,
+    )
+
+    assert result["status"] == "BLOCKED_BEFORE_TRAIN"
+    assert result["blockers"] == ["Requested quantity 100 exceeds the visible queue maximum 99."]
+    assert clicks == []
 
 
 def test_unconfirmed_help_button_pauses_without_clicking_help(monkeypatch):
@@ -125,28 +189,6 @@ def test_unconfirmed_help_button_pauses_without_clicking_help(monkeypatch):
     assert queue["paused"] is True
     assert queue["pause_reason"].startswith("uncertain_help_action:")
     assert len(clicks) == 2
-
-
-def test_help_uses_configured_panel_region_when_notification_hides_button(monkeypatch):
-    queue, task, clicks, click, capture = _setup(monkeypatch)
-    button_region = {"x": 1080, "y": 288, "w": 129, "h": 33}
-    monkeypatch.setattr(executor, "_load_regions", lambda _: {"army_training": {"speedup_panel": button_region}})
-    states = iter((
-        {"status": "idle"}, {"status": "idle"}, {"status": "active"},
-        {"status": "active", "button_state": "unknown", "training_button_region": None},
-        {"status": "active", "button_state": "speedup", "training_button_region": button_region},
-    ))
-    monkeypatch.setattr(executor, "_read_current_training_state", lambda *args, **kwargs: next(states))
-
-    result = executor.execute_training_goal(
-        queue, task["task_id"], NOW, execute=True,
-        confirmation=executor.CONFIRMATION_PHRASE,
-        capture_fn=capture, click_fn=click, sleep_fn=lambda _: None,
-    )
-
-    assert result["status"] == "START_CONFIRMED"
-    assert result["help_action"] == "confirmed"
-    assert clicks == [((110, 135), (0, 0)), ((425, 510), (0, 0)), ((1144, 304), (0, 0))]
 
 
 def test_train_click_failure_pauses_queue_and_is_not_retried(monkeypatch):

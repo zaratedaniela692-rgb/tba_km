@@ -1,9 +1,6 @@
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
-
-import pytest
 
 import army_training_live_e2e as live
 import army_training_manager as manager
@@ -46,10 +43,6 @@ def queue_with(*slots):
     return queue
 
 
-def isolate_specialist_test_state(monkeypatch, tmp_path):
-    monkeypatch.setattr(manager, "army_state_path", lambda *_: tmp_path / "army_state.json")
-
-
 def test_resolver_picks_mth_slot_containing_the_level():
     assert resolve_goal_slot(LEVELS, "guardsmen", 5, 1).frame_index == 0
     assert resolve_goal_slot(LEVELS, "guardsmen", 6, 1).frame_index == 0
@@ -60,7 +53,7 @@ def test_resolver_picks_mth_slot_containing_the_level():
 def test_resolver_reports_unsupported_and_blocked_cases():
     assert resolve_goal_slot(LEVELS, "guardsmen", 6, 4).reason == "match_not_visible_without_scrolling"
     assert resolve_goal_slot(LEVELS, "guardsmen", 3, 1).reason == "level_not_in_visible_slots"
-    assert resolve_goal_slot(LEVELS, "dragons", 6, 1).reason == "unit_type_slot_map_unverified"
+    assert resolve_goal_slot(LEVELS, "specialists", 6, 1).reason == "unit_type_slot_map_unverified"
     uncertain = (level(5, 7), SelectorLevelReading("unknown", "x", (), None))
     assert resolve_goal_slot(uncertain, "guardsmen", 6, 1).status == "blocked"
     gap = (SelectorLevelReading("candidate", "ok", (), None, 7, 6, 90, None),)
@@ -222,54 +215,6 @@ def test_execute_preview_only_reports_navigation_without_capturing_screen(monkey
     assert result["queue_modified"] is False
 
 
-def test_execute_persists_nested_workflow_trace(monkeypatch, tmp_path):
-    queue = create_task_queue("p")
-    queue_path = tmp_path / "tasks.json"
-    trace_path = tmp_path / "run" / "workflow_trace.jsonl"
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
-    monkeypatch.setattr(manager, "army_state_path", lambda *_: tmp_path / "army_state.json")
-    monkeypatch.setattr(
-        navigation,
-        "open_army_training_screen",
-        lambda execute: {
-            "status": "PREVIEW_ONLY", "actions_executed": False,
-            "event_trace": [{"workflow": "army_training_navigation", "step": "navigation_plan"}],
-        },
-    )
-    monkeypatch.setenv("TBA_WORKFLOW_TRACE_PATH", str(trace_path))
-    args = SimpleNamespace(profile="p", execute=False, confirm="", navigate_only=False)
-
-    result = manager._command_execute(args, tmp_path, NOW)
-
-    events = [json.loads(line) for line in trace_path.read_text(encoding="utf-8").splitlines()]
-    assert result["status"] == "PREVIEW_ONLY"
-    assert result["workflow_trace_events"] == 2
-    assert [event["step"] for event in events] == ["navigation_plan", "workflow_result"]
-
-
-def test_execute_does_not_duplicate_flattened_navigation_trace(monkeypatch, tmp_path):
-    queue = create_task_queue("p")
-    queue_path = tmp_path / "tasks.json"
-    trace_path = tmp_path / "run" / "workflow_trace.jsonl"
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
-    monkeypatch.setattr(manager, "army_state_path", lambda *_: tmp_path / "army_state.json")
-    monkeypatch.setattr(
-        navigation,
-        "open_army_training_screen",
-        lambda execute: {
-            "status": "PREVIEW_ONLY", "actions_executed": False,
-            "event_trace": [{"workflow": "army_training_navigation", "step": "navigation_plan"}],
-        },
-    )
-    monkeypatch.setenv("TBA_WORKFLOW_TRACE_PATH", str(trace_path))
-    args = SimpleNamespace(profile="p", execute=True, confirm=manager.CONFIRMATION_PHRASE, navigate_only=True)
-
-    manager._command_execute(args, tmp_path, NOW)
-
-    events = [json.loads(line) for line in trace_path.read_text(encoding="utf-8").splitlines()]
-    assert [event["step"] for event in events].count("navigation_plan") == 1
-
-
 def test_remove_command_removes_only_the_requested_inactive_task(monkeypatch, tmp_path):
     queue = queue_with((7, 1), (7, 2))
     queue_path = tmp_path / "tasks.json"
@@ -409,8 +354,8 @@ def test_category_hook_runs_after_barracks_and_before_capture(monkeypatch, tmp_p
     monkeypatch.setattr(navigation, "open_army_training_screen", lambda **_: {"status": "BARRACKS_OPENED"})
     monkeypatch.setattr(
         manager, "select_army_type",
-        lambda unit_type, execute=False: events.append(("select", unit_type)) or {
-            "status": "CATEGORY_CONFIRMED", "unit_type": unit_type,
+        lambda unit_type: events.append(("select", unit_type)) or {
+            "status": "DEFAULT_CATEGORY_ASSUMED", "unit_type": unit_type,
         },
     )
     monkeypatch.setattr(live, "capture_primary_monitor", lambda: events.append(("capture",)) or (object(), (0, 0)))
@@ -430,7 +375,7 @@ def test_category_hook_runs_after_barracks_and_before_capture(monkeypatch, tmp_p
 
 def test_category_hook_blocks_unverified_type_before_capture(monkeypatch, tmp_path):
     queue = create_task_queue("p")
-    enqueue_training_goal(queue, TrainingGoal("p", Slot("dragons", 5, 1)), NOW)
+    enqueue_training_goal(queue, TrainingGoal("p", Slot("specialists", 5, 1)), NOW)
     monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, tmp_path / "tasks.json"))
     monkeypatch.setattr(manager, "process_expirations", lambda *_: {})
     monkeypatch.setattr(manager, "save_task_queue", lambda *_: None)
@@ -445,217 +390,9 @@ def test_category_hook_blocks_unverified_type_before_capture(monkeypatch, tmp_pa
     result = manager._command_execute(args, tmp_path, NOW)
 
     assert result["status"] == "BLOCKED_CATEGORY_SELECTION_UNIMPLEMENTED"
-    assert result["category_selection"]["unit_type"] == "dragons"
+    assert result["category_selection"]["unit_type"] == "specialists"
     assert result["actions_executed"] is False
     assert result["queue_modified"] is False
-
-
-@pytest.mark.parametrize("status", ["CATEGORY_WOULD_SELECT", "BLOCKED_CATEGORY_NOT_CONFIRMED", "BLOCKED_BARRACKS_NOT_CONFIRMED"])
-def test_unconfirmed_category_blocks_before_capture(monkeypatch, tmp_path, status):
-    queue = create_task_queue("p")
-    enqueue_training_goal(queue, TrainingGoal("p", Slot("specialists", 5, 1)), NOW)
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, tmp_path / "tasks.json"))
-    monkeypatch.setattr(manager, "process_expirations", lambda *_: {})
-    monkeypatch.setattr(manager, "save_task_queue", lambda *_: None)
-    monkeypatch.setattr(manager, "army_state_path", lambda *_: tmp_path / "army_state.json")
-    monkeypatch.setattr(navigation, "open_army_training_screen", lambda **_: {"status": "BARRACKS_OPENED"})
-    monkeypatch.setattr(
-        manager, "select_army_type",
-        lambda unit_type, execute=False: {"status": status, "unit_type": unit_type, "actions_executed": True},
-    )
-    monkeypatch.setattr(
-        live, "capture_primary_monitor",
-        lambda: (_ for _ in ()).throw(AssertionError("unconfirmed category must not scan slots")),
-    )
-    args = SimpleNamespace(profile="p", execute=True, confirm=manager.CONFIRMATION_PHRASE, navigate_only=False)
-
-    result = manager._command_execute(args, tmp_path, NOW)
-
-    assert result["status"] == status
-    assert result["actions_executed"] is True
-    assert result["queue_modified"] is False
-
-
-def test_specialist_test_preview_is_read_only_and_reports_live_confirmation(tmp_path):
-    args = SimpleNamespace(level=5, match=1, execute=False, confirm="", profile="p")
-
-    result = manager._command_test_specialist(args, tmp_path, NOW)
-
-    assert result["status"] == "PREVIEW_ONLY"
-    assert result["goal"] == {"unit_type": "specialists", "global_level": 5, "match_number": 1}
-    assert result["live_confirmation_required"] == "TRAIN ONE SPECIALIST"
-    assert result["queue_modified"] is False
-    assert not manager.task_queue_path("p", tmp_path).exists()
-
-
-def test_specialist_test_requires_exact_confirmation_before_queue_or_game(monkeypatch, tmp_path):
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: pytest.fail("must block before queue load"))
-    args = SimpleNamespace(level=5, match=1, execute=True, confirm="wrong", profile="p")
-
-    result = manager._command_test_specialist(args, tmp_path, NOW)
-
-    assert result["status"] == "BLOCKED_CONFIRMATION"
-    assert result["queue_modified"] is False
-
-
-def test_specialist_test_refuses_other_pending_army_goals(monkeypatch, tmp_path):
-    queue = create_task_queue("p")
-    enqueue_training_goal(queue, TrainingGoal("p", Slot("guardsmen", 7, 1)), NOW)
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, tmp_path / "tasks.json"))
-    isolate_specialist_test_state(monkeypatch, tmp_path)
-    args = SimpleNamespace(
-        level=5, match=1, execute=True, confirm=manager.SPECIALIST_TEST_CONFIRMATION, profile="p",
-    )
-
-    result = manager._command_test_specialist(args, tmp_path, NOW)
-
-    assert result["status"] == "BLOCKED_OTHER_PENDING_ARMY_GOALS"
-    assert len(queue["tasks"]) == 1
-    assert result["actions_executed"] is False
-
-
-@pytest.mark.parametrize("paused, active", [(True, False), (False, True)])
-def test_specialist_test_refuses_paused_or_active_queue(monkeypatch, tmp_path, paused, active):
-    queue = create_task_queue("p")
-    queue["paused"] = paused
-    if active:
-        enqueue_training_goal(queue, TrainingGoal("p", Slot("specialists", 5, 1)), NOW)
-        queue["tasks"][0]["status"] = "waiting_completion"
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, tmp_path / "tasks.json"))
-    isolate_specialist_test_state(monkeypatch, tmp_path)
-    args = SimpleNamespace(
-        level=5, match=1, execute=True, confirm=manager.SPECIALIST_TEST_CONFIRMATION, profile="p",
-    )
-
-    result = manager._command_test_specialist(args, tmp_path, NOW)
-
-    assert result["status"] in {"BLOCKED_QUEUE_PAUSED", "BLOCKED_ACTIVE_TASKS"}
-    assert result["actions_executed"] is False
-
-
-def test_specialist_test_executes_one_goal_through_manager_and_keeps_confirmed_start(monkeypatch, tmp_path):
-    queue = create_task_queue("p")
-    queue_path = tmp_path / "tasks.json"
-    saves = []
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
-    monkeypatch.setattr(manager, "save_task_queue", lambda saved, path: saves.append((saved, path)))
-    isolate_specialist_test_state(monkeypatch, tmp_path)
-    calls = []
-
-    def execute(args, profiles_dir, now):
-        calls.append((args, profiles_dir, now))
-        return {"status": "TEST_TRAINING_STARTED_CONFIRMED", "train_click_attempted": True, "queue_modified": True}
-
-    monkeypatch.setattr(manager, "_command_execute", execute)
-    args = SimpleNamespace(
-        level=5, match=1, execute=True, confirm=manager.SPECIALIST_TEST_CONFIRMATION, profile="p",
-    )
-
-    result = manager._command_test_specialist(args, tmp_path, NOW)
-
-    assert result["status"] == "TEST_TRAINING_STARTED_CONFIRMED"
-    assert result["test_goal_action"] == "created"
-    assert result["test_goal"]["unit_type"] == "specialists"
-    assert calls[0][0].stop_after_train_confirmed is True
-    assert calls[0][0].confirm == manager.CONFIRMATION_PHRASE
-    assert len(queue["tasks"]) == 1 and len(saves) == 1
-
-
-def test_specialist_test_removes_only_its_new_goal_when_blocked_before_train(monkeypatch, tmp_path):
-    queue = create_task_queue("p")
-    queue_path = tmp_path / "tasks.json"
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
-    monkeypatch.setattr(manager, "save_task_queue", lambda *_: None)
-    monkeypatch.setattr(manager, "load_task_queue", lambda *_args, **_kwargs: queue)
-    monkeypatch.setattr(manager, "_command_execute", lambda *_: {
-        "status": "BLOCKED_BEFORE_TRAIN", "train_click_attempted": False,
-        "actions_executed": False, "queue_modified": False,
-    })
-    args = SimpleNamespace(
-        level=5, match=1, execute=True, confirm=manager.SPECIALIST_TEST_CONFIRMATION, profile="p",
-    )
-
-    result = manager._command_test_specialist(args, tmp_path, NOW)
-
-    assert result["status"] == "TEST_BLOCKED_BEFORE_TRAIN"
-    assert result["test_goal_removed_after_block"] is True
-    assert queue["tasks"] == []
-
-
-def test_specialist_test_parser_has_safe_default_and_explicit_execute():
-    parser = manager.build_parser()
-    preview = parser.parse_args(["--profile", "p", "test-specialist"])
-    live = parser.parse_args([
-        "--profile", "p", "test-specialist", "--execute", "--confirm", manager.SPECIALIST_TEST_CONFIRMATION,
-    ])
-
-    assert (preview.level, preview.match, preview.execute) == (5, 1, False)
-    assert live.execute is True
-
-
-def test_specialist_test_refuses_pending_finish_fallback(monkeypatch, tmp_path):
-    queue = create_task_queue("p")
-    queue["tasks"].append({
-        "task_id": "army_finish:old", "task_type": "army_training", "status": "queued",
-        "payload": {"goal_kind": manager.FALLBACK_GOAL_KIND},
-    })
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, tmp_path / "tasks.json"))
-    args = SimpleNamespace(
-        level=5, match=1, execute=True, confirm=manager.SPECIALIST_TEST_CONFIRMATION, profile="p",
-    )
-
-    result = manager._command_test_specialist(args, tmp_path, NOW)
-
-    assert result["status"] == "BLOCKED_PENDING_FINISH_TASKS"
-    assert len(queue["tasks"]) == 1
-
-
-def test_specialist_test_restores_completed_goal_when_blocked_before_train(monkeypatch, tmp_path):
-    import copy
-
-    queue = create_task_queue("p")
-    enqueue_training_goal(queue, TrainingGoal("p", Slot("specialists", 5, 1)), NOW)
-    queue["tasks"][0]["status"] = "completed"
-    queue["tasks"][0]["payload"]["process"]["state"] = "satisfied"
-    original = copy.deepcopy(queue["tasks"][0])
-    queue_path = tmp_path / "tasks.json"
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, queue_path))
-    monkeypatch.setattr(manager, "save_task_queue", lambda *_: None)
-    isolate_specialist_test_state(monkeypatch, tmp_path)
-    isolate_specialist_test_state(monkeypatch, tmp_path)
-    monkeypatch.setattr(manager, "_command_execute", lambda *_: {
-        "status": "BLOCKED_BEFORE_TRAIN", "train_click_attempted": False,
-        "actions_executed": False, "queue_modified": False,
-    })
-    monkeypatch.setattr(manager, "load_task_queue", lambda *_args, **_kwargs: queue)
-    args = SimpleNamespace(
-        level=5, match=1, execute=True, confirm=manager.SPECIALIST_TEST_CONFIRMATION, profile="p",
-    )
-
-    result = manager._command_test_specialist(args, tmp_path, NOW)
-
-    assert result["status"] == "TEST_BLOCKED_BEFORE_TRAIN"
-    assert result["completed_test_goal_restored"] is True
-    assert queue["tasks"][0] == original
-
-
-def test_specialist_test_preserves_created_goal_if_train_click_was_attempted(monkeypatch, tmp_path):
-    queue = create_task_queue("p")
-    monkeypatch.setattr(manager, "_load_or_create_queue", lambda *_: (queue, tmp_path / "tasks.json"))
-    monkeypatch.setattr(manager, "save_task_queue", lambda *_: None)
-    isolate_specialist_test_state(monkeypatch, tmp_path)
-    monkeypatch.setattr(manager, "_command_execute", lambda *_: {
-        "status": "UNKNOWN_AFTER_TRAIN_CLICK_ATTEMPT", "train_click_attempted": True,
-        "actions_executed": True, "queue_modified": "unknown",
-    })
-    args = SimpleNamespace(
-        level=5, match=1, execute=True, confirm=manager.SPECIALIST_TEST_CONFIRMATION, profile="p",
-    )
-
-    result = manager._command_test_specialist(args, tmp_path, NOW)
-
-    assert result["status"] == "UNKNOWN_AFTER_TRAIN_CLICK_ATTEMPT"
-    assert len(queue["tasks"]) == 1
 
 
 def test_enqueue_cli_requires_and_persists_unit_type(tmp_path):

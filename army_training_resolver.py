@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from army_unit_types import SUPPORTED_TRAINING_UNIT_TYPES, validate_unit_type
+from army_unit_types import DEFAULT_UNIT_TYPE, validate_unit_type
 
 STATUS_OK = "ok"
 STATUS_UNSUPPORTED = "unsupported"
@@ -26,7 +26,7 @@ def resolve_goal_slot(level_readings, unit_type, level, match_number):
         validate_unit_type(unit_type)
     except ValueError:
         return SlotResolution(STATUS_BLOCKED, "unit_type_unknown")
-    if unit_type not in SUPPORTED_TRAINING_UNIT_TYPES:
+    if unit_type != DEFAULT_UNIT_TYPE:
         return SlotResolution(STATUS_BLOCKED, "unit_type_slot_map_unverified")
     candidates = []
     for index, reading in enumerate(level_readings):
