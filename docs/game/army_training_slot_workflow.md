@@ -1,5 +1,17 @@
 # Army Training Slot Workflow
 
+## One-Command Live Barracks Test (2026-11-09)
+
+Run the complete configured live case from the project root with:
+
+```powershell
+.\.venv\Scripts\python.exe .\tools\run_army_e2e.py
+```
+
+The script uses the local `test` profile, clears its prior task list, creates exactly one Guardsmen stock goal, then runs the manager from the world map with `--quantity 100`. Before clearing, it refuses to proceed if that profile has an open-training marker, an active task, or a paused queue; in those cases it leaves the queue untouched. Completed and pending inactive test tasks are cleared. Evidence is written under `device_runs/<device>/army_training_quantity/<timestamp>/` as `log.txt` and `report.json`. The script returns success only when the manager reports `START_CONFIRMED` and OCR confirms quantity 100. It does not use or publish through Git.
+
+Before running, log into the intended desktop game account, leave the game on the world map, ensure there is no active training, and ensure the Barracks remembers the Guardsmen category. Category selection is not implemented or verified by the current manager, so this test does not attempt to switch it. The live test can click Armia, selector, quantity field, Train, and Help; it spends the game resources for 100 Guardsmen and records an open-training marker. It stops before Speed Up. After a successful start, do not rerun until that training has been completed and the marker/task state reconciled. The script intentionally refuses to delete active state.
+
 ## Default Test Profile (2026-11-09)
 
 Army manager commands no longer require `--profile`: when omitted they use the local `test` profile. Passing `--profile <id>` still selects an explicit profile. The E2E wrapper uses that same `test` profile directly and does not depend on foreground-window classification, player-name OCR, or profile registration. Queue and marker data are created lazily under the ignored `profiles/` directory. This profile isolates bot-side task state only; it is not a separate game account and does not isolate in-game resources. Do not start a live order if the visible game account is not the intended test account. The profile router remains available as a separate observer but is not a prerequisite for manager commands or this wrapper.
@@ -8,7 +20,7 @@ Army manager commands no longer require `--profile`: when omitted they use the l
 
 The manager `execute` command accepts an optional positive `--quantity`. When omitted, retain the existing full-queue behavior. When supplied, require the requested count not to exceed the freshly read queue maximum; then, before Train, click the detected `unit_troop_count_to_train` field, press Backspace six times, type the requested digits, capture a fresh frame, confirm the same slot and idle state, and require OCR of that field to equal the requested count. Re-run the resource/cost/time preflight on that frame while retaining the original maximum for the stock-goal threshold. Any input exception, changed geometry/slot/state, weak OCR, or mismatch stops before Train; do not retry an uncertain input sequence. The E2E training test uses `100` to limit resource consumption. This is an execution parameter, not a change to campaign goals or task-controller scheduling.
 
-Implementation status: code and focused executor regressions are added; manager CLI forwards the optional value, and the prepared wrapper has an opt-in queued-goal stage with `TRAINING_QUANTITY = 100`. The wrapper refuses to run that stage unless live actions are enabled and the profile has exactly one pending army stock goal, no open-training marker, no active tasks, and an unpaused queue. It writes the command/report through the device-test harness with Git publication disabled. No live input has been performed. Wrapper command construction was previously validated; executor tests have not been rerun after repairing malformed local edits in `army_training_process.py` and `army_training_plan.py`. The manager CLI now starts and `list` without `--profile` returns the empty local `test` profile. The browser remains unsupported for this action.
+Implementation status: manager CLI forwards the optional value, and `tools/run_army_e2e.py` is the one-command live test case. It prepares the inactive `test` profile queue and writes each run's manager output/report locally. No live input has been performed. The manager CLI starts and `list` without `--profile` returns the empty local `test` profile. The browser remains unsupported for this action.
 
 **Status:** MVP behavior and decisions as of 2026-11-05. This document is the current source of truth for slot detection and the read-only stock-goal workflow. Historical implementation notes in other documents may be stale; follow this contract and the implementation-status table below.
 
