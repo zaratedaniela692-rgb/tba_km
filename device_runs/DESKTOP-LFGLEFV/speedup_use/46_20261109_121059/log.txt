@@ -1,0 +1,10 @@
+2026-11-09T12:10:59 [speedup_use] prepare: Speed Up dialog of an active training open, inventory list scrolled to the top.
+2026-11-09T12:10:59 [speedup_use] starting in 5 s
+2026-11-09T12:11:04 step 1 use_items: C:\Users\Konrad\AppData\Local\Programs\Python\Python311\python.exe speedup.py --execute --confirm USE OWNED SPEEDUPS FROM TOP
+2026-11-09T11:11:05.824+00:00 [module +0.0ms step=0] scan_started: {"checkpoints":[3,11,16],"mode":"execute"}
+2026-11-09T11:11:06.128+00:00 [module +304.5ms step=0] capture: {"dialog_match":{"fallback_used":false,"location":{"x":902,"y":255},"partial_location":{"x":902,"y":255},"partial_score":0.9995934963226318,"recognized":true,"score":0.9972743988037109,"threshold":0.95},"dialog_recognized":true,"dialog_required":true,"frame_size":[1920,1080],"origin":[0,0],"status":"ok"}
+2026-11-09T11:11:08.257+00:00 [module +2433.9ms step=0] timer_read: {"confidence":100.0,"phase":"initial","raw":"422931m / 222031m / 422931m / 222031m","status":"minute_ocr_disagreement","value":null}
+2026-11-09T11:11:08.257+00:00 [module +2433.9ms step=0] run_aborted: {"clicks_issued":0,"reason":"timer_unreadable:minute_ocr_disagreement","status":"BLOCKED"}
+2026-11-09T11:11:08.257+00:00 [module +2433.9ms step=0] run_finished: {"clicks_issued":0,"final_observed_timer_seconds":null,"initial_timer_seconds":null,"reason":"timer_unreadable:minute_ocr_disagreement","shortfall_seconds":0,"status":"BLOCKED","submitted_uses":[]}
+2026-11-09T12:11:09 module trace: appended 5 events from event_trace.jsonl
+2026-11-09T12:11:09 step 1 use_items: FAILED (rc=2, 3.83 s)
