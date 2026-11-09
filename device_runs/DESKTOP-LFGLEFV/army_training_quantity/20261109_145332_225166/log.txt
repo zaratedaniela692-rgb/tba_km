@@ -1,0 +1,35 @@
+{
+  "status": "BLOCKED_TASK_STARTUP",
+  "actions_executed": true,
+  "queue_modified": false,
+  "navigation": {
+    "steps": [
+      "press_escape_three_times",
+      "click_army",
+      "confirm_barracks_slots"
+    ],
+    "actions_executed": true,
+    "queue_modified": false,
+    "armia_match_confidence": 61.07248663902283,
+    "armia_match_threshold": 94.6,
+    "armia_match_candidate_point": [
+      937,
+      940
+    ],
+    "search_region": {
+      "x": 911,
+      "y": 916,
+      "w": 57,
+      "h": 50
+    },
+    "status": "BLOCKED_ARMY_BUTTON_UNCONFIRMED",
+    "blockers": [
+      "world_map.armia confidence 61.07% is below 94.60%"
+    ]
+  },
+  "housekeeping": {
+    "expired": [],
+    "fallback_created": null
+  },
+  "queue_path": "C:\\Users\\Konrad\\tba\\profiles\\test_9f86d08188\\tasks.json"
+}

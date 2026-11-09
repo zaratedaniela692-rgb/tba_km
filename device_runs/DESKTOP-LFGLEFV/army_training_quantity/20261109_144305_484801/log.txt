@@ -1,0 +1,23 @@
+{
+  "status": "BLOCKED_TASK_STARTUP",
+  "actions_executed": false,
+  "queue_modified": false,
+  "navigation": {
+    "steps": [
+      "press_escape_three_times",
+      "click_army",
+      "confirm_barracks_slots"
+    ],
+    "actions_executed": false,
+    "queue_modified": false,
+    "status": "BLOCKED_UNSUPPORTED_VARIANT",
+    "blockers": [
+      "legacy"
+    ]
+  },
+  "housekeeping": {
+    "expired": [],
+    "fallback_created": null
+  },
+  "queue_path": "C:\\Users\\Konrad\\tba\\profiles\\test_9f86d08188\\tasks.json"
+}
