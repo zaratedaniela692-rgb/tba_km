@@ -2,6 +2,8 @@
 
 ## One-Command Live Barracks Test (2026-11-09)
 
+Navigation accepts the ready `legacy` registry ID as the current desktop client, as well as the transitional `desktop` ID. Browser and unavailable variants remain blocked. This fixes `BLOCKED_UNSUPPORTED_VARIANT` when the default registry resolves to `legacy`.
+
 Run the complete configured live case from the project root with:
 
 ```powershell

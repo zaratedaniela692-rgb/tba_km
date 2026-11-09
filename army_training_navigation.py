@@ -106,7 +106,7 @@ def open_army_training_screen(
     capture_fn = capture_fn or capture_primary_monitor
     click_fn = click_fn or _click_screen_point
     variant = variant or resolve_variant()
-    if variant["id"] != "desktop":
+    if variant["id"] not in {"desktop", "legacy"}:
         return {**plan, "status": "BLOCKED_UNSUPPORTED_VARIANT", "blockers": [variant["id"]]}
 
     try:
