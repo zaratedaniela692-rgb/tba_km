@@ -5,6 +5,7 @@ import json
 import os
 import re
 import sys
+from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from pathlib import Path
 
@@ -19,12 +20,15 @@ if __name__ == "__main__" and len(sys.argv) == 1:
     GIT_SYNC_RESULT = prepare_live_checkout(ROOT_DIR, Path(__file__))
 
 from army_training_inspector import EXPECTED_SIZE, inspect_image
+from army_training_navigation import ensure_army_training_screen
 from army_training_live_e2e import capture_primary_monitor
 from army_training_scanner import ArmyTrainingScannerError
 from ui_variants import UIVariantError, resolve_variant
+from client_router import observe_foreground_profile
 
 RUNS_DIR = ROOT_DIR / "device_runs"
 EXPECTED_UNIT_TYPE = None
+OPEN_BARRACKS_IF_NEEDED = True
 
 
 def _device_name():
@@ -51,27 +55,78 @@ def _write_report(run_dir, report, output):
         publish_failure_reports(ROOT_DIR, run_dir, output)
 
 
-def run_live_inspection(capture_fn=None, run_dir_factory=None, output=print):
-    """Capture one current desktop frame and produce a read-only inspection report."""
+def _route_dict(route):
+    if is_dataclass(route):
+        return asdict(route)
+    if isinstance(route, dict):
+        return route
+    return vars(route)
+
+
+def run_live_inspection(capture_fn=None, run_dir_factory=None, output=print, route_fn=None, ensure_fn=None):
+    """Navigate to Barracks if needed, then inspect one frame without category or training input."""
     capture_fn = capture_fn or capture_primary_monitor
     run_dir_factory = run_dir_factory or _create_run_dir
+    route_fn = route_fn or observe_foreground_profile
+    ensure_fn = ensure_fn or ensure_army_training_screen
     run_dir = run_dir_factory()
     report = {
-        "mode": "army_category_inspector_live",
-        "status": "BLOCKED_CAPTURE",
+        "mode": "army_category_inspector_navigation_live",
+        "status": "BLOCKED_ROUTE",
         "actions_executed": False,
         "queue_modified": False,
         "expected_unit_type": EXPECTED_UNIT_TYPE,
         "git_sync": GIT_SYNC_RESULT,
     }
     try:
-        frame, origin = capture_fn()
+        route = _route_dict(route_fn(register_missing=False))
+        report["route"] = route
+        profile_id = route.get("profile_id")
+        if (
+            route.get("status") != "routed"
+            or route.get("client_id") != "desktop"
+            or not isinstance(profile_id, str)
+            or not profile_id.strip()
+        ):
+            report["reason"] = "foreground_route_must_resolve_one_desktop_profile"
+            _write_report(run_dir, report, output)
+            return 2
+
+        env_keys = ("TBA_RUN_DIR", "TBA_PROFILE_ID")
+        previous = {key: os.environ.get(key) for key in env_keys}
+        os.environ["TBA_RUN_DIR"] = str(run_dir)
+        os.environ["TBA_PROFILE_ID"] = profile_id
+        try:
+            screen = ensure_fn(
+                execute=OPEN_BARRACKS_IF_NEEDED,
+                capture_fn=capture_fn,
+                variant=resolve_variant(),
+            )
+        finally:
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+        report["navigation"] = screen.get("navigation")
+        report["actions_executed"] = bool(screen.get("actions_executed", False))
+        report["queue_modified"] = False
+        if screen.get("status") != "BARRACKS_READY":
+            report["status"] = screen.get("status", "BLOCKED_BARRACKS")
+            report["reason"] = screen.get("layout_reason") or screen.get("reason") or report["status"]
+            _write_report(run_dir, report, output)
+            return 2
+
+        frame, origin = screen["frame"], screen["origin"]
         report["frame_size"] = [int(frame.shape[1]), int(frame.shape[0])]
         report["monitor_origin"] = list(origin)
         if (frame.shape[1], frame.shape[0]) != EXPECTED_SIZE:
             report.update(status="BLOCKED_FRAME_SIZE", reason=f"expected_{EXPECTED_SIZE[0]}x{EXPECTED_SIZE[1]}")
         else:
-            report.update(inspect_image(frame, expected_unit_type=EXPECTED_UNIT_TYPE, variant=resolve_variant()))
+            inspection = inspect_image(frame, expected_unit_type=EXPECTED_UNIT_TYPE, variant=resolve_variant())
+            inspection["actions_executed"] = bool(report["actions_executed"] or inspection.get("actions_executed", False))
+            report.update(inspection)
     except Exception as error:
         report["reason"] = f"inspection_failed:{type(error).__name__}:{error}"
     _write_report(run_dir, report, output)

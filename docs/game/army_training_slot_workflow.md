@@ -17,7 +17,7 @@ Executed 2026-11-10 with the workspace Python 3.13 venv, installed Tesseract tem
 - [Parameterless live navigation check](#parameterless-live-navigation-check-2026-11-10)
 - [One-command live Barracks test](#one-command-live-barracks-test-2026-11-09)
 - [One-shot live E2E](#one-shot-live-e2e-contract-implemented-supervised-live-run-pending)
-- [Read-only army category inspector](#read-only-army-category-inspector-implemented-live-capture-pending)
+- [Army category inspector](#army-category-inspector-implemented-detect-or-navigate-integration-pending)
 - [Optional training quantity](#optional-training-quantity-approved-2026-11-09)
 - [Implementation status](#implementation-status) - legacy cross-feature table; not a replacement for the pilot's scoped status.
 
@@ -418,32 +418,32 @@ Replace `--input` with the screenshot to inspect and `--tesseract` with the loca
 
 For another computer, copy/clone the repository with its `regions.json`, `templates/`, and screenshot fixtures. Install Python and the runtime packages used by the scanner (`opencv-python`, `numpy`, `pytesseract`) plus the Tesseract OCR executable. `requirements-dev.txt` currently lists only `pytest`, not these runtime dependencies, so provision them separately. Verify local paths and run the command above before using another screenshot.
 
-## One-Shot Live E2E Contract (Implemented; Supervised Live Run Pending)
+## One-Shot Live E2E Contract (Implemented; Live Run Pending)
 
 The first live E2E is a one-shot experiment, not a persistent stock goal and not a permanent `match_number` assignment:
 
-1. The user launches the game and places the Barracks screen fully visible on the primary monitor. Capture the primary monitor at the configured 1920x1080 size. Do not select or attach to another process/window. Require the highlighted category to be uniquely recognized as Guardsmen before any click, and verify it again after selector input and immediately before Train.
+1. The user launches the game with the desktop client foreground on the primary monitor at 1920x1080. Detect Barracks slots first. If Barracks is already open, do not navigate. If no slots are detected, preview reports that navigation is required; explicit live execution may invoke the existing one-shot world-map-to-Barracks navigator. That navigator resets overlays with Escape, recognizes the Armia control, clicks it once, and must confirm visible Barracks slots. Recapture and confirm slots before continuing. Do not select or attach to another process/window. Require the highlighted category to be uniquely recognized as Guardsmen before selector input, and verify it again after selector input and immediately before Train.
 2. Detect all visible slots in the fresh frame. Choose the first visible slot in top-left-to-bottom-right order. If no slot is detected or geometry is ambiguous, stop.
 3. Accept the requested global level as an explicit positive CLI argument. Resolve it only when the slot's visible selector range is confidently consecutive and contains that level. Click the corresponding badge once; do not infer a target from `max-1`.
 4. Require the current training state to be idle. If active or unknown, stop without clicking Train.
 5. Read this slot's city count, displayed training amount/limit, selected-level silver cost, and global food/silver. Require reliable OCR, white positive food, and sufficient silver.
 6. Use the stock planner math for this one-shot goal: `target=2*slot_limit`, completion threshold `ceil(0.8*target)`, order amount `min(target-city_count, slot_limit)`. The UI quantity must equal the planned amount. If it differs, stop; quantity-slider manipulation is not part of this first executor.
-7. Default execution is preview-only. Real execution requires explicit `--execute` and the exact confirmation phrase `TRAIN FIRST SLOT LEVEL <level>`. After the level click, capture a fresh frame and require the enlarged selected badge to be at the requested badge position. If selection is not positively confirmed, stop before preflight/Train; never retry the selector click. Immediately before Train, capture and recheck idle state, the same slot, the same selected-level marker, resources, and displayed amount. Then issue exactly one click at the Train button's position detected in that fresh primary-monitor frame.
+7. Default execution is preview-only. Real execution requires explicit `--execute` and the exact confirmation phrase `NAVIGATE IF NEEDED AND TRAIN FIRST SLOT LEVEL <level>`. After the level click, capture a fresh frame and require the enlarged selected badge to be at the requested badge position. If selection is not positively confirmed, stop before preflight/Train; never retry the selector click. Immediately before Train, capture and recheck idle state, the same slot, the same selected-level marker, resources, and displayed amount. Then issue exactly one click at the Train button's position detected in that fresh primary-monitor frame.
 8. Capture after the click and classify training. Only a fresh `active` result confirms acceptance. `idle` or `unknown` is reported as uncertain; never retry the click automatically.
 9. Keep queue/goal state in memory for this one-shot test; do not persist a frame index as `{global_level, match_number}`. No Help/Speed Up clicks, scrolling, or additional training orders.
 10. Honor PyAutoGUI's fail-safe and check the project's emergency-stop file before selector and Train clicks. Uncertain outcomes are printed in the JSON report and require manual inspection.
 
 ## Live E2E Implementation Status
 
-Implemented in `army_training_live_e2e.py`: Guardsmen-only category verification, arbitrary visible-level targeting in the first slot, and fresh category/selected-marker checks after selection and immediately before Train. Preview remains the default; execution remains opt-in, one-shot, 1920x1080 primary-monitor only, and does not persist queue state. Focused offline validation on 2026-11-12 passed **14 tests** in `tests/test_army_training_live_e2e.py`, including requested-level mapping and no-Train gates for category or selector uncertainty. The fixture harness uses mocked callbacks. No live run was performed.
+Implemented in `army_training_live_e2e.py` and `army_training_navigation.py`: Guardsmen-only category verification, arbitrary visible-level targeting in the first slot, and fresh category/selected-marker checks after selection and immediately before Train. Preview never navigates; confirmed execution first checks for Barracks slots, navigates only when absent, then verifies a fresh Barracks frame before any training click. Live training also requires an unambiguous desktop foreground profile. The confirmation phrase explicitly authorizes navigation if needed and one training attempt. On 2026-11-11, **57 focused tests passed** across one-shot, navigation, inspector, slot detection, and Git report handling. Tests cover already-open, navigation-required, route-failure, navigation-failure and post-navigation re-detection cases. No live run was performed.
 
 The earlier implementation lacked selected-marker verification and targeted the second visible slot's presumed max-1. This task replaces that behavior. Primary-monitor capture and physical clicks have not been exercised as part of this change. The planned order must equal the currently displayed amount; slider manipulation is deliberately not implemented. The executor does not create a persistent manager goal or `match_number`.
 
 ### Operator Procedure
 
 1. From the repository root, install project runtime dependencies and install Tesseract OCR. Ensure `tesseract.exe` is on `PATH`.
-2. Launch the game manually, open Barracks, and leave the full game visible on the primary monitor at 1920x1080. Close overlays/notifications. Confirm there is no active training.
-3. Run preview first. It captures the current monitor but performs no clicks and does not change the queue:
+2. Launch the desktop game with the intended player visible in the foreground on the primary monitor at 1920x1080. The game may be on the world map or already in Barracks. The live route gate must resolve exactly one registered desktop profile.
+3. Run preview first. If Barracks is already open, it reads that screen. Otherwise it reports `NAVIGATION_REQUIRED` without sending input:
 
 ```powershell
 python -m pip install -r .\requirements-dev.txt
@@ -451,10 +451,10 @@ python .\army_training_live_e2e.py --level 6
 ```
 
 4. Review the JSON. Confirm `unit_type` is `guardsmen`, `slot_frame_index` is 0, `requested_level` equals the requested level, the visible selector range contains it, `preflight.blockers` is empty, the game is idle, resources are sufficient, and `planned_quantity` equals the full displayed queue amount. Do not execute if any value is uncertain or the preview is blocked.
-5. To execute one Guardsmen training attempt, enter the explicit command and matching level confirmation. The program verifies the selected marker on fresh frames before it can click Train once:
+5. To execute one Guardsmen training attempt, enter the explicit command and matching confirmation. The program will navigate from the world map only if Barracks slots are not visible, verify the newly opened screen, then verify the selected marker before it can click Train once:
 
 ```powershell
-python .\army_training_live_e2e.py --level 6 --execute --confirm "TRAIN FIRST SLOT LEVEL 6"
+python .\army_training_live_e2e.py --level 6 --execute --confirm "NAVIGATE IF NEEDED AND TRAIN FIRST SLOT LEVEL 6"
 ```
 
 6. Interpret `START_CONFIRMED` as confirmation that training started after the requested selection was visually confirmed. `BLOCKED_AFTER_LEVEL_CLICK` means Train was not submitted, though the selector may already have been clicked. `UNKNOWN_AFTER_CLICK` means Train may have been submitted: inspect the game manually and do not rerun automatically.
@@ -462,13 +462,13 @@ python .\army_training_live_e2e.py --level 6 --execute --confirm "TRAIN FIRST SL
 
 This test uses the first visible slot in one frame; it does not establish a persistent global `match_number`. It does not persist a manager goal, scroll the list, click Help, or automatically retry.
 
-## Read-Only Army Category Inspector (Implemented; Live Capture Pending)
+## Army Category Inspector (Implemented; Detect-or-Navigate Live Wrapper)
 
-The inspector recognizes the highlighted Barracks category and reports visible slot geometry, selector-level readings, and per-slot numeric readings. The initial recognized categories are Guardsmen and Specialists, using existing selected-state templates. It is an inspection tool only: it never clicks, changes category, starts training, or mutates a queue. The operator opens Barracks and selects the category before capture. An optional expected `--unit-type` asserts the highlighted category; mismatch or ambiguous recognition blocks the slot report.
+The inspector recognizes the highlighted Barracks category and reports visible slot geometry, selector-level readings, and per-slot numeric readings. The initial recognized categories are Guardsmen and Specialists, using existing selected-state templates. Inspection never changes category, starts training, or mutates a queue. Its explicitly named live wrapper resolves the foreground desktop profile and may navigate from the world map when Barracks slots are not visible; it does not switch categories. If Barracks is already open, navigation is skipped. An optional expected `--unit-type` asserts the highlighted category; mismatch or ambiguous recognition blocks the slot report.
 
 Category recognition requires exactly one selected-state template to match at score >= 0.95 inside the annotated `troops_types` region. Slot and OCR readings preserve `unknown`; a successful label does not prove a verified campaign slot map or enable manager/executor support. Browser assets/actions are rejected. Adding a category requires its own selected-state evidence/template and slot-layout validation; Engineers and monster categories remain unsupported.
 
-Implementation: [inspector](../../army_training_inspector.py), [fixture tests](../../tests/test_army_training_inspector.py), and the parameterless [live wrapper](../../tools/run_army_category_inspector_live.py). The wrapper performs best-effort `git pull --ff-only` before capture and publishes only textual failure reports; it sends no game input. On 2026-11-12, offline tests passed **5 tests**. Fixture recognition scored 1.0 and found three slots for both `pelny.png` (Guardsmen) and `specialist_view.png` (Specialists). Tesseract was unavailable in the local environment, so OCR values were correctly reported as unknown. No live capture was performed.
+Implementation: [inspector](../../army_training_inspector.py), [fixture tests](../../tests/test_army_training_inspector.py), and the parameterless [navigation-enabled live wrapper](../../tools/run_army_category_inspector_live.py). The wrapper performs best-effort `git pull --ff-only`, requires a routed desktop profile, skips navigation if Barracks is already open, and otherwise navigates once before inspecting a fresh confirmed frame. It publishes only textual failure reports. Its only possible input is opening Barracks; it never changes category or starts training. Offline tests cover existing Barracks, navigation, and profile/capture gates. No live capture was performed.
 
 ## Manager-Driven Replenishment Contract (Phases B-D Implemented; Supervised Run Pending)
 
@@ -916,7 +916,7 @@ flowchart TD
 | Help and speed-up click flow | Not implemented | Follow-up after supervised executor run |
 | Primary-monitor capture in isolated one-shot executor | Implemented; requires `mss`, fixed 1920x1080 frame | `army_training_live_e2e.py` |
 | Opt-in explicit-level selector click in first visible slot, same-slot re-detection, selected-marker confirmation, preflight, one Train click, post-click confirmation | Implemented; mocked callbacks/fixtures only, no supervised live validation | `army_training_live_e2e.py`, `tests/test_army_training_live_e2e.py` |
-| Read-only Guardsmen/Specialists category and slot inspection | Implemented for desktop fixtures; live capture not run; OCR remains unknown when Tesseract is unavailable | `army_training_inspector.py`, `tests/test_army_training_inspector.py`, `tools/run_army_category_inspector_live.py` |
+| Guardsmen/Specialists category and slot inspection | Fixture inspection is read-only; live wrapper may navigate once to Barracks after desktop profile routing; no live capture run | `army_training_inspector.py`, `army_training_navigation.py`, `tests/test_army_training_inspector.py`, `tools/run_army_category_inspector_live.py` |
 | Window selection and scroll workflow | Not implemented | Out of MVP scope |
 
 ## Contract Checks
@@ -941,7 +941,7 @@ For a future change that connects components, add an integration test that start
 
 ## Next Integration Step
 
-For supervised validation, install runtime dependencies including Tesseract, keep the intended Barracks fully visible at 1920x1080 on the primary monitor, and review the preview before separately authorizing one exact `--level` execution. The one-shot uses the first visible slot and does not persist a manager goal. If preview blocks because stock is already at target, a queue is active, resources are insufficient, or the planned order is not exactly one full queue, do not bypass the blocker. The category inspector is independently runnable against fixtures or one read-only live capture. Persistent queue identity and scrolling remain separate work.
+For supervised validation, install runtime dependencies including Tesseract and keep the intended desktop game foreground at 1920x1080 on the primary monitor. The one-shot and category-inspector wrapper detect Barracks first and navigate only when needed; training additionally requires a successful profile route and an explicit level-specific confirmation. The one-shot uses the first visible slot and does not persist a manager goal. If preview or preflight blocks, do not bypass the blocker. The category inspector never selects a category or trains. Persistent queue identity and scrolling remain separate work.
 
 ## Browser client: first-screen recognition contract
 

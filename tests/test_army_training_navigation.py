@@ -107,3 +107,97 @@ def test_navigation_stops_if_barracks_layout_is_not_detected(monkeypatch, tmp_pa
     assert result["status"] == "BLOCKED_BARRACKS_NOT_CONFIRMED"
     assert events == ["key", "click"]
     assert result["actions_executed"] is True
+
+
+def test_ensure_screen_skips_navigation_when_barracks_is_already_open():
+    barracks = cv2.imread(str(ROOT / "screenshots/army_training/pelny.png"))
+    captures = []
+
+    result = navigation.ensure_army_training_screen(
+        execute=True,
+        capture_fn=lambda: (captures.append(True) or barracks.copy(), (0, 0)),
+        navigate_fn=lambda **kwargs: (_ for _ in ()).throw(AssertionError("navigation must be skipped")),
+    )
+
+    assert result["status"] == "BARRACKS_READY"
+    assert result["navigation"]["status"] == "SKIPPED_ALREADY_OPEN"
+    assert result["actions_executed"] is False
+    assert len(result["layout"].slots) == 3
+    assert len(captures) == 1
+
+
+def test_ensure_screen_preview_reports_navigation_required_without_input():
+    world_map = _live_map_fixture()
+    captures = []
+    navigations = []
+
+    result = navigation.ensure_army_training_screen(
+        execute=False,
+        capture_fn=lambda: (captures.append(True) or world_map, (0, 0)),
+        navigate_fn=lambda **kwargs: navigations.append(kwargs),
+    )
+
+    assert result["status"] == "NAVIGATION_REQUIRED"
+    assert result["actions_executed"] is False
+    assert len(captures) == 1
+    assert navigations == []
+
+
+def test_ensure_screen_navigates_once_and_uses_a_fresh_verified_frame():
+    world_map = _live_map_fixture()
+    barracks = cv2.imread(str(ROOT / "screenshots/army_training/pelny.png"))
+    frames = iter(((world_map, (0, 0)), (barracks, (0, 0))))
+    navigations = []
+
+    def navigate(**kwargs):
+        navigations.append(kwargs)
+        return {"status": "BARRACKS_OPENED", "actions_executed": True, "visible_slots": 3}
+
+    result = navigation.ensure_army_training_screen(
+        execute=True,
+        capture_fn=lambda: next(frames),
+        navigate_fn=navigate,
+    )
+
+    assert result["status"] == "BARRACKS_READY"
+    assert result["actions_executed"] is True
+    assert result["navigation"]["status"] == "BARRACKS_OPENED"
+    assert len(result["layout"].slots) == 3
+    assert len(navigations) == 1
+    assert navigations[0]["execute"] is True
+
+
+def test_ensure_screen_stops_after_navigation_failure_without_retry():
+    world_map = _live_map_fixture()
+    captures = []
+    navigations = []
+
+    def navigate(**kwargs):
+        navigations.append(kwargs)
+        return {"status": "BLOCKED_ARMY_BUTTON_UNCONFIRMED", "actions_executed": True}
+
+    result = navigation.ensure_army_training_screen(
+        execute=True,
+        capture_fn=lambda: (captures.append(True) or world_map, (0, 0)),
+        navigate_fn=navigate,
+    )
+
+    assert result["status"] == "NAVIGATION_FAILED"
+    assert result["actions_executed"] is True
+    assert len(captures) == 1
+    assert len(navigations) == 1
+
+
+def test_ensure_screen_requires_slots_on_fresh_post_navigation_frame():
+    world_map = _live_map_fixture()
+    blank = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    frames = iter(((world_map, (0, 0)), (blank, (0, 0))))
+
+    result = navigation.ensure_army_training_screen(
+        execute=True,
+        capture_fn=lambda: next(frames),
+        navigate_fn=lambda **kwargs: {"status": "BARRACKS_OPENED", "actions_executed": True},
+    )
+
+    assert result["status"] == "BLOCKED_POST_NAVIGATION_VERIFICATION"
+    assert result["actions_executed"] is True

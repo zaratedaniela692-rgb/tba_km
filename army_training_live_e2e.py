@@ -14,6 +14,7 @@ import pytesseract
 
 from army_training_inspector import read_selected_category
 from army_training_levels import detect_selector_badges, read_slot_selector_levels
+from army_training_navigation import ensure_army_training_screen
 from army_training_scanner import (
     ArmyTrainingScannerError,
     _load_regions,
@@ -22,6 +23,7 @@ from army_training_scanner import (
 from army_training_slot_reader import read_slot_readings
 from army_training_slots import STATUS_OK, locate_slots, slot_crop
 from army_training_plan import TARGET_COMPLETION_PERCENT, TARGET_QUEUE_LIMIT_MULTIPLIER
+from client_router import observe_foreground_profile
 from tools.resource_ocr import ResourceReadError, read_resource_region
 from ui_variants import UIVariantError, resolve_variant
 
@@ -31,7 +33,7 @@ WORLD_MAP_FRAME_OFFSET_Y = 39
 MIN_CONFIDENCE = 70
 EXPECTED_SIZE = (1920, 1080)
 DEFAULT_LEVEL = 6
-CONFIRMATION_PHRASE = "TRAIN FIRST SLOT LEVEL {level}"
+CONFIRMATION_PHRASE = "NAVIGATE IF NEEDED AND TRAIN FIRST SLOT LEVEL {level}"
 STOP_FILE = Path.home() / ".tba_stop"
 
 
@@ -207,7 +209,8 @@ def _enable_live_failsafe(click_fn):
 
 
 def run_one_shot(
-    capture_fn=None, click_fn=None, execute=False, confirmation="", level=DEFAULT_LEVEL, sleep_fn=time.sleep,
+    capture_fn=None, click_fn=None, execute=False, confirmation="", level=DEFAULT_LEVEL,
+    sleep_fn=time.sleep, ensure_screen_fn=None, route_fn=None,
 ):
     """Prepare or execute one training attempt for an explicit level in the first visible slot."""
     capture_fn = capture_fn or capture_primary_monitor
@@ -217,27 +220,97 @@ def run_one_shot(
     required_confirmation = CONFIRMATION_PHRASE.format(level=level)
     if execute and confirmation != required_confirmation:
         raise LiveTrainingError(f"Live execution requires confirmation phrase: {required_confirmation}")
+    route = None
+    if execute:
+        route_fn = route_fn or observe_foreground_profile
+        try:
+            observation = route_fn(capture_fn=capture_fn, register_missing=False)
+            route = observation if isinstance(observation, dict) else asdict(observation)
+        except Exception as error:
+            return {
+                "mode": "live_one_shot",
+                "status": "BLOCKED_ROUTE",
+                "actions_executed": False,
+                "queue_modified": False,
+                "blockers": [f"foreground_route_failed:{type(error).__name__}:{error}"],
+            }
+        profile_id = route.get("profile_id")
+        if (
+            route.get("status") != "routed"
+            or route.get("client_id") != "desktop"
+            or not isinstance(profile_id, str)
+            or not profile_id.strip()
+        ):
+            return {
+                "mode": "live_one_shot",
+                "status": "BLOCKED_ROUTE",
+                "actions_executed": False,
+                "queue_modified": False,
+                "route": route,
+                "blockers": ["foreground_route_must_resolve_one_desktop_profile"],
+            }
     variant = resolve_variant()
-    regions = _load_regions(variant["regions"])
-    frame, origin = capture_fn()
-    if (frame.shape[1], frame.shape[0]) != EXPECTED_SIZE:
-        raise LiveTrainingError(f"Expected primary-monitor frame {EXPECTED_SIZE}, got {(frame.shape[1], frame.shape[0])}.")
-    layout = locate_slots(frame, regions.get(SCREEN, {}), variant)
-    if layout.status != STATUS_OK or not layout.slots:
-        raise LiveTrainingError("Could not confidently detect a visible training slot.")
+    ensure_screen_fn = ensure_screen_fn or ensure_army_training_screen
+    screen = ensure_screen_fn(
+        execute=execute,
+        capture_fn=capture_fn,
+        click_fn=click_fn,
+        sleep_fn=sleep_fn,
+        variant=variant,
+    )
+    if screen.get("status") != "BARRACKS_READY":
+        return {
+            "mode": "live_one_shot",
+            "status": screen.get("status", "BLOCKED_BARRACKS"),
+            "actions_executed": bool(screen.get("actions_executed", False)),
+            "queue_modified": False,
+            "route": route,
+            "navigation": screen.get("navigation"),
+            "blockers": [screen.get("layout_reason") or screen.get("reason") or screen.get("status", "barracks_not_ready")],
+        }
+    frame, origin, layout = screen["frame"], screen["origin"], screen["layout"]
     category = read_selected_category(frame, variant)
     if category.get("status") != "confirmed" or category.get("unit_type") != "guardsmen":
-        raise LiveTrainingError("The highlighted Barracks category is not confidently confirmed as Guardsmen.")
+        return {
+            "mode": "live_one_shot",
+            "status": "BLOCKED_CATEGORY_RECOGNITION",
+            "actions_executed": bool(screen.get("actions_executed", False)),
+            "queue_modified": False,
+            "route": route,
+            "navigation": screen.get("navigation"),
+            "blockers": ["The highlighted Barracks category is not confidently confirmed as Guardsmen."],
+        }
     first_slot = layout.slots[0]
     before_state = _read_current_training_state(frame, variant)
     if before_state["status"] != "idle":
-        raise LiveTrainingError(f"Training is not confirmed idle ({before_state['status']}); no selector or Train click performed.")
+        return {
+            "mode": "live_one_shot",
+            "status": "BLOCKED_TRAINING_NOT_IDLE",
+            "actions_executed": bool(screen.get("actions_executed", False)),
+            "queue_modified": False,
+            "route": route,
+            "navigation": screen.get("navigation"),
+            "blockers": [f"Training is not confirmed idle ({before_state['status']})."],
+        }
 
-    selection = _select_requested_level(frame, first_slot, level)
+    try:
+        selection = _select_requested_level(frame, first_slot, level)
+    except LiveTrainingError as error:
+        return {
+            "mode": "live_one_shot",
+            "status": "BLOCKED_LEVEL_NOT_RESOLVED",
+            "actions_executed": bool(screen.get("actions_executed", False)),
+            "queue_modified": False,
+            "route": route,
+            "navigation": screen.get("navigation"),
+            "blockers": [str(error)],
+        }
     result = {
         "mode": "live_one_shot",
-        "actions_executed": False,
+        "actions_executed": bool(screen.get("actions_executed", False)),
         "queue_modified": False,
+        "route": route,
+        "navigation": screen.get("navigation"),
         "slot_frame_index": first_slot.index,
         "slot_row": first_slot.row,
         "slot_column": first_slot.column,
@@ -381,7 +454,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="One-shot E2E for an explicit level in the first visible slot.")
     parser.add_argument("--level", type=int, required=True, help="visible Guardsmen level to select (1-9)")
     parser.add_argument("--execute", action="store_true", help="allow live selector and at most one Train click")
-    parser.add_argument("--confirm", default="", help="type the exact level-specific confirmation phrase")
+    parser.add_argument("--confirm", default="", help="type the exact phrase authorizing navigation if needed and one training attempt")
     args = parser.parse_args(argv)
     try:
         result = run_one_shot(execute=args.execute, confirmation=args.confirm, level=args.level)

@@ -22,6 +22,9 @@ def _live_fixtures(monkeypatch, post_status="active"):
     captured = []
 
     monkeypatch.setattr(live, "capture_primary_monitor", lambda: (image.copy(), (0, 0)))
+    monkeypatch.setattr(live, "observe_foreground_profile", lambda **kwargs: {
+        "status": "routed", "client_id": "desktop", "profile_id": "player_12345",
+    })
     monkeypatch.setattr(live, "_read_current_training_state", lambda frame, selected_variant: {"status": "idle"})
     monkeypatch.setattr(live, "_slot_position_is_same", lambda frame, selected_variant, expected: (True, layout.slots[0]))
     monkeypatch.setattr(live, "_select_requested_level", lambda frame, slot, requested_level: {
@@ -70,12 +73,74 @@ def test_execute_requires_exact_confirmation(monkeypatch):
         live.run_one_shot(execute=True, confirmation="yes", click_fn=click)
 
 
+def test_preview_reports_navigation_required_without_sending_input(monkeypatch):
+    clicked = []
+    _, _, image, layout, click = _live_fixtures(monkeypatch)
+
+    result = live.run_one_shot(
+        execute=False,
+        click_fn=click,
+        ensure_screen_fn=lambda **kwargs: {
+            "status": "NAVIGATION_REQUIRED", "actions_executed": False,
+            "layout_status": "none", "layout_reason": "no Train button found",
+        },
+    )
+
+    assert result["status"] == "NAVIGATION_REQUIRED"
+    assert result["actions_executed"] is False
+    assert result["queue_modified"] is False
+    assert clicked == []
+
+
+def test_live_one_shot_reports_navigation_side_effect_and_route(monkeypatch):
+    clicked, _, image, layout, click = _live_fixtures(monkeypatch)
+    navigation = {"status": "BARRACKS_OPENED", "actions_executed": True, "visible_slots": 3}
+
+    result = live.run_one_shot(
+        execute=True,
+        confirmation=live.CONFIRMATION_PHRASE.format(level=6),
+        click_fn=click,
+        sleep_fn=lambda _: None,
+        ensure_screen_fn=lambda **kwargs: {
+            "status": "BARRACKS_READY", "actions_executed": True,
+            "navigation": navigation, "frame": image.copy(), "origin": (0, 0), "layout": layout,
+        },
+    )
+
+    assert result["status"] == "START_CONFIRMED"
+    assert result["actions_executed"] is True
+    assert result["route"]["profile_id"] == "player_12345"
+    assert result["navigation"] == navigation
+    assert len(clicked) == 2
+
+
+def test_unresolved_foreground_route_blocks_navigation_and_training(monkeypatch):
+    clicked, _, _, _, click = _live_fixtures(monkeypatch)
+    navigation_calls = []
+    monkeypatch.setattr(live, "observe_foreground_profile", lambda **kwargs: {
+        "status": "blocked", "client_id": "desktop", "profile_id": None,
+    })
+
+    result = live.run_one_shot(
+        execute=True,
+        confirmation=live.CONFIRMATION_PHRASE.format(level=6),
+        click_fn=click,
+        ensure_screen_fn=lambda **kwargs: navigation_calls.append(kwargs),
+    )
+
+    assert result["status"] == "BLOCKED_ROUTE"
+    assert result["actions_executed"] is False
+    assert clicked == []
+    assert navigation_calls == []
+
+
 def test_non_1920_capture_is_rejected_before_actions(monkeypatch):
     clicked, _, _, _, click = _live_fixtures(monkeypatch)
     monkeypatch.setattr(live, "capture_primary_monitor", lambda: (np.zeros((720, 1280, 3), dtype=np.uint8), (0, 0)))
 
-    with pytest.raises(live.LiveTrainingError, match="Expected primary-monitor frame"):
-        live.run_one_shot(click_fn=click)
+    result = live.run_one_shot(click_fn=click)
+    assert result["status"] == "BLOCKED_INITIAL_CAPTURE"
+    assert "Expected primary-monitor frame" in result["blockers"][0]
     assert clicked == []
 
 
@@ -85,8 +150,10 @@ def test_non_guardsmen_category_is_rejected_before_any_click(monkeypatch):
         "status": "confirmed", "unit_type": "specialists",
     })
 
-    with pytest.raises(live.LiveTrainingError, match="confirmed as Guardsmen"):
-        live.run_one_shot(execute=True, confirmation=live.CONFIRMATION_PHRASE.format(level=6), click_fn=click)
+    result = live.run_one_shot(execute=True, confirmation=live.CONFIRMATION_PHRASE.format(level=6), click_fn=click)
+
+    assert result["status"] == "BLOCKED_CATEGORY_RECOGNITION"
+    assert result["actions_executed"] is False
 
     assert clicked == []
 

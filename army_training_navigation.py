@@ -249,3 +249,104 @@ def open_army_training_screen(
         verification="barracks_slots_detected", frame=frame, monitor_origin=new_origin,
     )
     return result
+
+
+def ensure_army_training_screen(
+    execute=False,
+    capture_fn=None,
+    press_key_fn=None,
+    click_fn=None,
+    sleep_fn=time.sleep,
+    stop_file=None,
+    variant=None,
+    navigate_fn=None,
+):
+    """Use the current Barracks frame when available; otherwise navigate once and verify again."""
+    from army_training_live_e2e import capture_primary_monitor
+
+    capture_fn = capture_fn or capture_primary_monitor
+    variant = variant or resolve_variant()
+    regions = _read_regions(variant["regions"])
+
+    try:
+        frame, origin = _capture(capture_fn)
+    except (OSError, ValueError) as error:
+        return {"status": "BLOCKED_INITIAL_CAPTURE", "actions_executed": False, "queue_modified": False, "reason": str(error)}
+
+    layout = locate_slots(frame, regions.get("army_training", {}), variant)
+    if layout.status == STATUS_OK and layout.slots:
+        return {
+            "status": "BARRACKS_READY",
+            "actions_executed": False,
+            "queue_modified": False,
+            "navigation": {"status": "SKIPPED_ALREADY_OPEN", "actions_executed": False},
+            "frame": frame,
+            "origin": origin,
+            "layout": layout,
+        }
+
+    if not execute:
+        return {
+            "status": "NAVIGATION_REQUIRED",
+            "actions_executed": False,
+            "queue_modified": False,
+            "layout_status": layout.status,
+            "layout_reason": layout.reason,
+        }
+
+    navigator = navigate_fn or open_army_training_screen
+    navigation = navigator(
+        execute=True,
+        capture_fn=capture_fn,
+        press_key_fn=press_key_fn,
+        click_fn=click_fn,
+        sleep_fn=sleep_fn,
+        stop_file=stop_file,
+        variant=variant,
+    )
+    actions_executed = bool(navigation.get("actions_executed", False))
+    if navigation.get("status") != "BARRACKS_OPENED":
+        return {
+            "status": "NAVIGATION_FAILED",
+            "actions_executed": actions_executed,
+            "queue_modified": False,
+            "navigation": navigation,
+        }
+
+    try:
+        frame, new_origin = _capture(capture_fn)
+    except (OSError, ValueError) as error:
+        return {
+            "status": "BLOCKED_POST_NAVIGATION_CAPTURE",
+            "actions_executed": actions_executed,
+            "queue_modified": False,
+            "navigation": navigation,
+            "reason": str(error),
+        }
+    if new_origin != origin:
+        return {
+            "status": "BLOCKED_CAPTURE_ORIGIN_CHANGED",
+            "actions_executed": actions_executed,
+            "queue_modified": False,
+            "navigation": navigation,
+        }
+
+    layout = locate_slots(frame, regions.get("army_training", {}), variant)
+    if layout.status != STATUS_OK or not layout.slots:
+        return {
+            "status": "BLOCKED_POST_NAVIGATION_VERIFICATION",
+            "actions_executed": actions_executed,
+            "queue_modified": False,
+            "navigation": navigation,
+            "layout_status": layout.status,
+            "layout_reason": layout.reason,
+        }
+    return {
+        "status": "BARRACKS_READY",
+        "actions_executed": actions_executed,
+        "queue_modified": False,
+        "navigation": navigation,
+        "frame": frame,
+        "origin": new_origin,
+        "layout": layout,
+    }
