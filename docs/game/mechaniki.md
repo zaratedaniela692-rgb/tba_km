@@ -1,5 +1,47 @@
 # Mechaniki gry
 
+## Documentation Ownership
+
+This document owns shared game facts. Bot algorithms, inputs, implementation status, and planned behavior belong in the relevant area workflow; screen cards own visual recognition evidence. The historical notes below preserve earlier decisions and context, not a second current implementation contract.
+
+For army-level detection and the proposed manual maximum, use [Maximum unlocked army level](army_training_slot_workflow.md#maximum-unlocked-army-level). For the feature-description format and maintenance rules, see [Workflow documentation instructions](../../.github/instructions/workflow-docs.instructions.md#feature-contract-format).
+
+## Shared Game Facts
+
+- Map and army are contexts containing multiple screens, not names for a single universal screen layout.
+- Resource suffixes K/M/B/T represent successive factors of 1000. Resource readings and action permission are separate: each feature defines its preconditions.
+- Training occupies one active training queue. Clan Help can shorten remaining time; elapsed wall-clock time alone is not confirmation of completion.
+- Help and Speed Up are different actions. Speed Up can consume owned items; a shop Buy offer is not owned inventory.
+- Local Roman I/II can denote global VIII/IX in later unit groups. A Roman numeral or frame position alone is not a persistent unit identity.
+- An enlarged selector badge indicates selection, not independently verified unlocking. The current maximum heuristic and its limitations belong to the army workflow.
+- Watchtower red/blue backgrounds distinguish unavailable/available premium access in the documented samples. Sample recognition does not prove that legacy input paths implement a premium gate.
+
+## Current Behavior Owners
+
+| Question | Authoritative contract |
+| --- | --- |
+| Maximum, slot identity, stock goals, resources, quantity, Train/Help/finish | [Army training](army_training_slot_workflow.md#feature-contents) |
+| Priority, readiness, lifecycle, persistence and profile isolation | [Task manager](task_manager.md#feature-contents) |
+| Inventory, planning, callable runners, CLI gaps and item-use verification | [Speedups](speedup_module_workflow.md#feature-contents) |
+| Client detection, profile registration, duplicate names and browser readiness | [Routing and profiles](ui_variants_plan.md#feature-contents) |
+| OCR values, confidence, colors and consumer responsibilities | [Resource reading](resource_reading_workflow.md#feature-contents) |
+| Mine/crypt live inputs, premium-gate gaps and diagnostic writes | [Legacy automation](legacy_automation_workflow.md#feature-contents) |
+
+## Historical Notes and Decisions
+
+The remaining original headings are retained for existing links and decision history. Their claims about implementation, `quick_finish`, profile routing, screenshot opt-in, or scheduler integration must not override the current contracts above. In particular, the old claim that all Crypt ROI diagnostics are opt-in is incorrect for the inspected progress-capture path; the legacy workflow records the unconditional write. Requirements for future behavior remain requirements, not proof of implementation. No game behavior was changed by this migration.
+
+## Polityka dowodów obrazu w modułach legacy
+
+Nowa zasada dla wszystkich przepływów live: logować istotne decyzje i akcje, ale zapisywać screen tylko przy nieudanym dopasowaniu/odczycie, `blocked`, `uncertain`, wyjątku lub niepotwierdzonym postcondition. Sukcesy i powtarzalne scroll/kliknięcia zostają w logu zdarzeń bez PNG. Obrazy kalibracji, annotatora i jawnych trybów diagnostycznych są wynikiem tych narzędzi i pozostają dozwolone.
+
+Audyt 2026-11-10:
+- Do dostosowania: `mines.py` i `watchtower_mines.py` bezwarunkowo zapisują pełny ekran po otwarciu zakładki oraz przed kontrolą `busy`. To są zwykłe kroki live, nie jawny tryb diagnostyczny; przy następnym wdrożeniu tych legacy flow przenieść zapis za warunek błędu/niepewności.
+- Pozostawić: zrzuty ROI w `mines.py`, `watchtower_mines.py` i `crypt.py`, gdy wywołano je z jawnym `--debug` / `--player-label-debug`; są opt-in diagnostyką.
+- Ryzyko, obecnie nieaktywne: `Automator.cut(show=True)` zapisuje generyczne `test.png`, ale wszystkie znalezione call-site’y przekazują `show=False`. Jeśli pojawi się nowy diagnostyczny caller, wymagać ścieżki run-scoped zamiast domyślnego pliku.
+- Pozostawić: `speedup_calibration.py` checkpoint captures, annotator i verifier output; obrazy są ich podstawowym wynikiem, a nie screenshotami udanego kroku live.
+- Nie zmieniono legacy Mines/Watchtower ani `Automator.cut` w audycie tej polityki.
+
 ## Potwierdzone informacje
 - Gra ma dwa podstawowe tryby/konteksty: mapę oraz armię.
 - Każdy tryb pokazuje inne ekrany i udostępnia inne opcje.

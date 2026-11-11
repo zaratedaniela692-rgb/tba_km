@@ -76,6 +76,35 @@ def detect_selector_badges(selector):
     return tuple(sorted(found, key=lambda badge: badge[1]))
 
 
+def _read_consensus_roman_label(prepared, psms):
+    readings = []
+    for psm in psms:
+        try:
+            data = pytesseract.image_to_data(
+                prepared,
+                config=f"--psm {psm} -c tessedit_char_whitelist=IVXivx",
+                output_type=Output.DICT,
+            )
+        except pytesseract.TesseractNotFoundError as error:
+            raise ArmyTrainingScannerError("Tesseract OCR was not found.") from error
+        accepted = []
+        for token, confidence in zip(data["text"], data["conf"]):
+            token = token.strip().upper()
+            try:
+                confidence = float(confidence)
+            except (TypeError, ValueError):
+                continue
+            if token in ROMAN_LEVELS and confidence >= BADGE_LABEL_OCR_MIN_CONFIDENCE:
+                accepted.append((token, confidence))
+        if len(accepted) != 1:
+            return None
+        readings.append(accepted[0])
+
+    if not readings or len({label for label, _ in readings}) != 1:
+        return None
+    return readings[0][0], min(confidence for _, confidence in readings)
+
+
 def _read_badge_label(selector, badge):
     x, y, radius = (int(value) for value in badge)
     readings = []
@@ -97,26 +126,9 @@ def _read_badge_label(selector, badge):
             prepared = cv2.copyMakeBorder(255 - mask, BADGE_LABEL_PADDING, BADGE_LABEL_PADDING, BADGE_LABEL_PADDING, BADGE_LABEL_PADDING, cv2.BORDER_CONSTANT, value=255)
         else:
             prepared = enlarged
-        mode_readings = []
-        for psm in psms:
-            try:
-                data = pytesseract.image_to_data(
-                    prepared,
-                    config=f"--psm {psm} -c tessedit_char_whitelist=IVXivx",
-                    output_type=Output.DICT,
-                )
-            except pytesseract.TesseractNotFoundError as error:
-                raise ArmyTrainingScannerError("Tesseract OCR was not found.") from error
-            for token, confidence in zip(data["text"], data["conf"]):
-                token = token.strip().upper()
-                try:
-                    confidence = float(confidence)
-                except (TypeError, ValueError):
-                    continue
-                if token in ROMAN_LEVELS and confidence >= BADGE_LABEL_OCR_MIN_CONFIDENCE:
-                    mode_readings.append((token, confidence))
-        if len(mode_readings) == len(psms) and mode_readings[0][0] == mode_readings[1][0]:
-            readings.append((mode_readings[0][0], min(mode_readings[0][1], mode_readings[1][1])))
+        consensus = _read_consensus_roman_label(prepared, psms)
+        if consensus is not None:
+            readings.append(consensus)
 
     if not readings or len({label for label, _ in readings}) != 1:
         return None

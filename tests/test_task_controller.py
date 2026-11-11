@@ -1,4 +1,7 @@
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
+
+import pytest
 
 from army_training_plan import create_guard_training_plan
 from task_controller import (
@@ -20,10 +23,130 @@ from task_controller import (
     enqueue_next_training_run,
     start_training_task,
     complete_training_task,
+    task_parallelism_blocker,
 )
 
 
 BASE_TIME = datetime(2026, 11, 3, 12, 0, tzinfo=timezone.utc)
+
+
+@pytest.mark.parametrize("invalid_archive", ("hold", "retry"))
+def test_resume_rejects_invalid_archives_without_mutating_tasks(invalid_archive):
+    from task_controller import resume_army_training
+
+    queue = create_task_queue("account-a")
+    enqueue_task(queue, "army_training", task_id="first", now=BASE_TIME)
+    second = enqueue_task(queue, "army_training", task_id="second", now=BASE_TIME)
+    queue["army_training_hold"] = {
+        "at": BASE_TIME.isoformat(), "task_id": "first", "reason": "silver_insufficient",
+    }
+    if invalid_archive == "hold":
+        queue["army_training_hold_history"] = {}
+    else:
+        second["resource_retry_history"] = {}
+    before = deepcopy(queue)
+
+    with pytest.raises(TaskQueueError, match="must be a list"):
+        resume_army_training(queue, BASE_TIME)
+    assert queue == before
+
+
+def test_three_silver_failures_hold_only_new_army_and_resume_retains_history(tmp_path):
+    from task_controller import record_resource_retry_failure, resume_army_training, complete_task
+
+    queue = create_task_queue("account-a", resource_retry_seconds=60)
+    task = enqueue_task(queue, "army_training", task_id="silver", now=BASE_TIME)
+    other_army = enqueue_task(queue, "army_training", task_id="other-army", now=BASE_TIME)
+    building = enqueue_task(queue, "building_upgrade", task_id="building", now=BASE_TIME)
+    fallback = enqueue_task(queue, "army_training", task_id="finish", now=BASE_TIME,
+                            payload={"goal_kind": "finish_training_v1"})
+    for attempt in range(3):
+        now = BASE_TIME + timedelta(seconds=attempt * 60)
+        record_resource_retry_failure(queue, "silver", "silver_insufficient", "not_implemented", now)
+        assert task["status"] == "waiting_resources"
+        if attempt < 2:
+            before = deepcopy(queue)
+            with pytest.raises(TaskQueueError, match="not due"):
+                record_resource_retry_failure(queue, "silver", "silver_insufficient", "not_implemented", now)
+            assert queue == before
+    assert task["resource_retry"]["attempts"] == 3
+    assert "3/3" in queue["army_training_hold"]["reason"]
+    assert "not_implemented" in queue["army_training_hold"]["reason"]
+    assert other_army["status"] == "queued"
+    assert queue["paused"] is False
+    assert get_next_task(queue, {}, now=now)["task_id"] == fallback["task_id"]
+    complete_task(queue, fallback["task_id"], "finished", now)
+    assert get_next_task(queue, {}, now=now)["task_id"] == building["task_id"]
+    with pytest.raises(TaskQueueError, match="held"):
+        mark_task_started(queue, other_army["task_id"], 100, now)
+    path = save_task_queue(queue, tmp_path / "tasks.json")
+    assert load_task_queue(path) == queue
+    history = deepcopy(task["resource_retry"]["history"])
+    queue.update(paused=True, pause_reason="operator_pause")
+    assert resume_army_training(queue, now) is True
+    assert queue["paused"] is True
+    assert task["resource_retry"]["attempts"] == 0
+    assert task["resource_retry_history"][0]["history"] == history
+    assert queue["army_training_hold_history"][0]["hold"]["task_id"] == "silver"
+    before = deepcopy(queue)
+    assert resume_army_training(queue, now) is False
+    assert queue == before
+    record_resource_retry_failure(queue, "silver", "silver_insufficient", "not_implemented", now)
+    assert task["resource_retry"]["attempts"] == 1
+    assert "army_training_hold" not in queue
+
+
+def test_army_resume_does_not_modify_active_task_or_marker(tmp_path):
+    from army_state import open_training_marker
+    from task_controller import resume_army_training
+
+    queue = create_task_queue("account-a")
+    active = enqueue_task(queue, "army_training", task_id="active", now=BASE_TIME)
+    mark_task_started(queue, "active", 1000, BASE_TIME)
+    queue["army_training_hold"] = {"at": BASE_TIME.isoformat(), "task_id": "old", "reason": "silver_insufficient"}
+    marker = tmp_path / "army_state.json"
+    open_training_marker(marker, "order", "active", {}, BASE_TIME, BASE_TIME + timedelta(hours=1))
+    before, marker_before = deepcopy(active), marker.read_bytes()
+    assert resume_army_training(queue, BASE_TIME) is True
+    assert active == before
+    assert marker.read_bytes() == marker_before
+
+
+@pytest.mark.parametrize(("active_type", "active_status", "remaining", "expected"), (
+    ("building_upgrade", "waiting_completion", 61, None),
+    ("building_upgrade", "waiting_completion", 60, "parallel_wait_not_ready"),
+    ("building_upgrade", "waiting_completion", None, "parallel_wait_not_ready"),
+    ("building_upgrade", "waiting_help_delay", 300, "parallel_wait_not_ready"),
+    ("army_training", "waiting_completion", 300, "same_type_active"),
+    ("army_training", "waiting_help_delay", None, "same_type_active"),
+))
+def test_parallelism_rule_agrees_with_selection_and_confirmed_start(active_type, active_status, remaining, expected):
+    queue = create_task_queue("account-a")
+    pending = enqueue_task(queue, "army_training", task_id="pending", now=BASE_TIME)
+    active = enqueue_task(queue, active_type, task_id="active", now=BASE_TIME)
+    active.update(status=active_status, last_remaining_seconds=remaining)
+    before = deepcopy(queue)
+
+    assert task_parallelism_blocker(pending, [active], 60) == expected
+    assert queue == before
+    selected = get_next_task(queue, {}, now=BASE_TIME)
+    if expected is None:
+        assert selected["task_id"] == pending["task_id"]
+        mark_task_started(queue, pending["task_id"], 100, now=BASE_TIME)
+        assert pending["status"] == "waiting_help_delay"
+    else:
+        assert selected is None
+        with pytest.raises(TaskQueueError):
+            mark_task_started(queue, pending["task_id"], 100, now=BASE_TIME)
+        assert queue == before
+
+
+def test_parallelism_rule_requires_every_active_task_to_allow_start():
+    task = {"task_type": "army_training"}
+    ready = {"task_type": "building_upgrade", "status": "waiting_completion", "last_remaining_seconds": 61}
+    not_ready = {"task_type": "academy_research", "status": "waiting_completion", "last_remaining_seconds": 60}
+    assert task_parallelism_blocker(task, [], 60) is None
+    assert task_parallelism_blocker(task, [ready, not_ready], 60) == "parallel_wait_not_ready"
 
 
 def test_task_types_are_explicit_and_queue_is_profile_scoped():

@@ -14,7 +14,7 @@ def _live_map_fixture():
 
 
 def test_armia_match_finds_template_shifted_one_pixel_within_search_margin():
-    variant = navigation.resolve_variant("desktop")
+    variant = navigation.resolve_variant("legacy")
     regions = navigation._read_regions(variant["regions"])
     region = regions["world_map"]["armia"]
     template = cv2.imread(str(navigation.resolve_asset_path(variant, region["template"])))

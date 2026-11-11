@@ -101,7 +101,7 @@ def _locate_template(image, template_path):
 
 
 def read_training_button_state_from_image(image, variant=None):
-    """Recognize Help or Speed Up in the current-training panel without OCR."""
+    """Read the shared Help, Speed Up or Finish control without OCR."""
     variant = variant or resolve_variant()
     if variant["id"] == "browser":
         return {
@@ -109,6 +109,8 @@ def read_training_button_state_from_image(image, variant=None):
             "help_score": None,
             "speedup_score": None,
             "button_region": None,
+            "finish_score": None,
+            "finish_point": None,
         }
 
     regions = _load_regions(variant["regions"]).get("army_training", {})
@@ -140,18 +142,29 @@ def read_training_button_state_from_image(image, variant=None):
     speedup_score, speedup_region = max(speedup_matches, key=lambda match: match[0])
     help_detected = help_score >= BUTTON_MATCH_THRESHOLD
     speedup_detected = speedup_score >= BUTTON_MATCH_THRESHOLD
-    if help_detected == speedup_detected:
-        button_state = "unknown" if help_detected else "absent"
+    finish_score, finish_point = locate_finish_training_button(image, variant)
+    finish_detected = finish_point is not None
+    if sum((help_detected, speedup_detected, finish_detected)) > 1:
+        button_state = "ambiguous"
+    elif help_detected:
+        button_state = "help"
+    elif speedup_detected:
+        button_state = "speedup"
+    elif finish_detected:
+        button_state = "finish"
     else:
-        button_state = "help" if help_detected else "speedup"
-    matched_region = help_region if button_state == "help" else speedup_region
+        button_state = "absent"
+    matched_region = help_region if button_state == "help" else speedup_region if button_state == "speedup" else None
     return {
         "button_state": button_state,
         "help_score": help_score,
         "speedup_score": speedup_score,
+        "finish_score": finish_score,
+        "finish_point": finish_point if button_state == "finish" else None,
+        "panel_score": panel_score,
         "button_region": {
             key: int(matched_region[key]) for key in ("x", "y", "w", "h")
-        },
+        } if matched_region is not None else None,
     }
 
 
@@ -160,7 +173,7 @@ def locate_finish_training_button(image, variant=None, threshold=0.95, search_ma
     variant = variant or resolve_variant()
     regions = _load_regions(variant["regions"]).get("army_training", {})
     button = regions.get("finish_training_button")
-    if not isinstance(button, dict) or button.get("type") != "button":
+    if not isinstance(button, dict) or button.get("type") not in {"button", "anchor"}:
         return None, None
 
     template_path = button.get("template")
@@ -315,59 +328,26 @@ def read_army_training_snapshot_from_image(
         return _read_browser_training_snapshot(image, screen, regions, variant)
 
     current_panel_region = regions.get("current_trainin_army")
-    training_unit_region = regions.get("current_training_unit")
     speedup_region = regions.get("speedup_panel")
     trained_unit_count_region = regions.get("current_unit_troop_count")
 
     if current_panel_region is None:
         raise ArmyTrainingScannerError("Brak regionu 'current_trainin_army' w regions.json.")
-    if training_unit_region is None:
-        raise ArmyTrainingScannerError("Brak regionu 'current_training_unit' w regions.json.")
     if speedup_region is None:
         raise ArmyTrainingScannerError("Brak regionu 'speedup_panel' w regions.json.")
     if trained_unit_count_region is None:
         raise ArmyTrainingScannerError("Brak regionu 'current_unit_troop_count' w regions.json.")
 
-    panel_template_path = current_panel_region.get("template")
-    empty_unit_template_path = training_unit_region.get("template")
-    if not panel_template_path or not empty_unit_template_path:
-        raise ArmyTrainingScannerError("Brak szablonu panelu lub pustego obrazu jednostki.")
-    panel_template_path = resolve_asset_path(variant, panel_template_path)
-    empty_unit_template_path = resolve_asset_path(variant, empty_unit_template_path)
-    empty_unit_template = cv2.imread(str(empty_unit_template_path), cv2.IMREAD_COLOR)
-    if empty_unit_template is None:
-        raise ArmyTrainingScannerError(f"Nie można odczytać wzorca: {empty_unit_template_path}")
-
-    panel_score, panel_location = _locate_template(image, panel_template_path)
-    panel_x, panel_y = (int(current_panel_region[key]) for key in ("x", "y"))
-    unit_x, unit_y = (int(training_unit_region[key]) for key in ("x", "y"))
-    unit_w, unit_h = (int(training_unit_region[key]) for key in ("w", "h"))
-    unit_offset_x = unit_x - panel_x
-    unit_offset_y = unit_y - panel_y
-    empty_unit_score = None
-
-    if panel_score >= 0.35:
-        unit_crop = _region_crop(image, {
-            "x": panel_location[0] + unit_offset_x,
-            "y": panel_location[1] + unit_offset_y,
-            "w": unit_w,
-            "h": unit_h,
-        })
-        queue_state, detail_score = _classify_training_unit_image(unit_crop)
-        if queue_state != "active":
-            queue_state = "unknown"
-    else:
-        unit_crop = _region_crop(image, training_unit_region)
-        empty_unit_score = float(
-            cv2.matchTemplate(unit_crop, empty_unit_template, cv2.TM_CCOEFF_NORMED)[0, 0]
-        )
-        detail_score = float(cv2.cvtColor(unit_crop, cv2.COLOR_BGR2GRAY).std())
-        queue_state = "idle" if empty_unit_score >= 0.90 else "unknown"
-
     button_reading = read_training_button_state_from_image(image, variant)
+    queue_state = (
+        "active" if button_reading["button_state"] in {"help", "speedup"}
+        else "completed" if button_reading["button_state"] == "finish"
+        else "idle" if button_reading["button_state"] == "absent"
+        else "unknown"
+    )
     trained_unit_count_crop = _region_crop(image, trained_unit_count_region) if include_numeric else None
 
-    speedup_button_detected = button_reading["button_state"] == "speedup"
+    speedup_button_detected = button_reading["speedup_score"] >= BUTTON_MATCH_THRESHOLD
     trained_unit_count_error = None
     if include_numeric:
         try:
@@ -382,9 +362,12 @@ def read_army_training_snapshot_from_image(
 
     return {
         "screen": screen,
-        "has_active_training": True if queue_state == "active" else False if queue_state == "idle" else None,
+        "has_active_training": True if queue_state == "active" else False if queue_state in {"idle", "completed"} else None,
+        "finish_button_detected": button_reading["button_state"] == "finish",
+        "finish_button_point": button_reading.get("finish_point"),
+        "finish_button_score": button_reading.get("finish_score"),
         "speedup_button_detected": bool(speedup_button_detected),
-        "help_button_detected": button_reading["button_state"] == "help",
+        "help_button_detected": button_reading["help_score"] >= BUTTON_MATCH_THRESHOLD,
         "button_state": button_reading["button_state"],
         "training_button_region": button_reading["button_region"],
         "help_button_score": button_reading["help_score"],
@@ -393,9 +376,9 @@ def read_army_training_snapshot_from_image(
         "trained_unit_count_raw": trained_unit_count_reading["raw"],
         "trained_unit_count_confidence": trained_unit_count_reading["confidence"],
         "trained_unit_count_error": trained_unit_count_error,
-        "training_unit_image_detail": detail_score,
-        "empty_unit_template_score": empty_unit_score,
-        "training_panel_match_score": panel_score,
+        "training_unit_image_detail": None,
+        "empty_unit_template_score": None,
+        "training_panel_match_score": button_reading["panel_score"],
         "status": queue_state,
     }
 

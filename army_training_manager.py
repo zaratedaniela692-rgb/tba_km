@@ -29,7 +29,7 @@ from army_training_process import (
 from army_training_resolver import STATUS_OK, resolve_goal_slot
 from army_training_category import select_army_type
 from army_unit_types import DEFAULT_UNIT_TYPE, UNIT_TYPES
-from army_training_executor import execute_training_goal
+from army_training_executor import execute_training_goal, finish_active_training_for_test
 from army_training_finish import CONFIRMATION_PHRASE, FALLBACK_GOAL_KIND, execute_finish_task, process_expirations
 from task_controller import (
     ACTIVE_STATUSES,
@@ -42,6 +42,9 @@ from task_controller import (
     load_task_queue,
     save_task_queue,
     task_queue_path,
+    validate_task_queue,
+    army_training_start_is_held,
+    resume_army_training,
 )
 
 SOURCE = "army_training_manager"
@@ -101,7 +104,7 @@ def _next_action(decision):
     return "none"
 
 
-def evaluate_goals(queue, frame, now, dry_run=True, max_age_seconds=30, unit_type=DEFAULT_UNIT_TYPE):
+def evaluate_goals(queue, frame, now, dry_run=True, max_age_seconds=30, unit_type=DEFAULT_UNIT_TYPE, respect_next_check=False):
     """Resolve and decide every open stock goal against one frame; dry_run leaves the queue unchanged."""
     if queue["paused"]:
         return {"status": "paused", "goals": []}
@@ -121,6 +124,13 @@ def evaluate_goals(queue, frame, now, dry_run=True, max_age_seconds=30, unit_typ
             "task_id": task["task_id"], "unit_type": slot.unit_type,
             "level": slot.global_level, "match_number": slot.match_number,
         }
+        if respect_next_check and not _task_check_is_due(task, now):
+            entry.update(
+                resolution="deferred", reason="next_check_not_due", next_action="none",
+                next_check_at=task["next_check_at"],
+            )
+            goals.append(entry)
+            continue
         if frame.layout_status != "ok" or frame.levels is None:
             entry.update(resolution="blocked", reason=f"slot_layout_{frame.layout_status}", next_action="none")
             goals.append(entry)
@@ -172,6 +182,22 @@ def _command_enqueue(args, profiles_dir, now):
     return {"status": "ok", "task_id": task["task_id"], "unit_type": args.unit_type, "queue": str(path)}
 
 
+def _command_resume_army(args, profiles_dir, now):
+    if args.confirm != "RESUME ARMY TRAINING":
+        return {"status": "BLOCKED_CONFIRMATION", "queue_modified": False}
+    path = task_queue_path(args.profile, profiles_dir)
+    if not path.exists():
+        return {"status": "NO_ARMY_TRAINING_HOLD", "queue_modified": False}
+    queue = load_task_queue(path, expected_profile_id=args.profile)
+    changed = resume_army_training(queue, now)
+    if changed:
+        save_task_queue(queue, path)
+    return {
+        "status": "ARMY_TRAINING_RESUMED" if changed else "NO_ARMY_TRAINING_HOLD",
+        "queue_modified": changed, "profile_id": args.profile, "paused": queue["paused"],
+    }
+
+
 def _command_list(args, profiles_dir, now):
     path = task_queue_path(args.profile, profiles_dir)
     queue_exists = path.exists()
@@ -187,6 +213,9 @@ def _command_list(args, profiles_dir, now):
             "created_at": task.get("created_at"),
             "next_check_at": task.get("next_check_at"),
             "completed_reason": task.get("completed_reason"),
+            "resource_retry": task.get("resource_retry"),
+            "resource_retry_history": task.get("resource_retry_history", []),
+            "training_start_held": army_training_start_is_held(queue, task),
         }
         slot = payload.get("slot")
         if payload.get("goal_kind") == "slot_stock_v1" and isinstance(slot, dict):
@@ -205,6 +234,7 @@ def _command_list(args, profiles_dir, now):
         "queue_exists": queue_exists,
         "paused": queue["paused"] if queue is not None else False,
         "pause_reason": queue["pause_reason"] if queue is not None else None,
+        "army_training_hold": queue.get("army_training_hold") if queue is not None else None,
         "task_count": len(tasks),
         "tasks": tasks,
         "queue_modified": False,
@@ -322,15 +352,98 @@ def _parse_next_check(task):
     return _parse_time(task.get("next_check_at"))
 
 
-def _next_pending_goal_unit_type(queue):
+def _task_check_is_due(task, now):
+    next_check = _parse_next_check(task)
+    return next_check is None or next_check <= now
+
+
+def _next_pending_goal_unit_type(queue, now=None):
     candidates = [
         task for task in queue["tasks"]
         if task["task_type"] == "army_training"
         and task["payload"].get("goal_kind") == "slot_stock_v1"
         and task["status"] in {"queued", "waiting_resources"}
+        and (now is None or _task_check_is_due(task, now))
     ]
     candidates.sort(key=lambda task: (effective_priority(queue, task), _parse_time(task["created_at"])))
     return Slot(**candidates[0]["payload"]["slot"]).unit_type if candidates else None
+
+
+def _next_due_finish_task(queue, now):
+    return next((
+        task for task in queue["tasks"]
+        if task["payload"].get("goal_kind") == FALLBACK_GOAL_KIND
+        and task["status"] in {"queued", "waiting_resources"}
+        and (_parse_next_check(task) is None or _parse_next_check(task) <= now)
+    ), None)
+
+
+def _select_executable_goal(queue, report, test_task_id=None):
+    if queue.get("army_training_hold") is not None:
+        return None
+    eligible = [
+        item for item in report.get("goals", [])
+        if item.get("state") == "needs_preflight"
+        or item.get("reason") == "selection_unverified"
+    ]
+    if test_task_id:
+        eligible = [item for item in eligible if item["task_id"] == test_task_id]
+    eligible.sort(key=lambda item: (
+        effective_priority(queue, next(task for task in queue["tasks"] if task["task_id"] == item["task_id"])),
+        next(task["created_at"] for task in queue["tasks"] if task["task_id"] == item["task_id"]),
+    ))
+    return eligible[0]["task_id"] if eligible else None
+
+
+def _finish_test_training(queue, path, state_path, profile_id, now, navigation, capture_fn):
+    from army_state import clear_open_training, open_training
+
+    if navigation.get("status") != "BARRACKS_OPENED":
+        return {
+            "status": "BLOCKED_TASK_STARTUP",
+            "actions_executed": navigation.get("actions_executed", False),
+            "queue_modified": False,
+            "navigation": navigation,
+            "queue_path": str(path),
+        }
+    try:
+        image, origin = capture_fn()
+        finish_result = finish_active_training_for_test(
+            image, origin, profile_id, capture_fn,
+        )
+        if finish_result["status"] not in {"IDLE", "FINISHED"}:
+            raise ValueError("Test finisher did not confirm idle.")
+    except Exception as error:
+        return {
+            "status": "BLOCKED_ACTIVE_TRAINING_FINISH",
+            "actions_executed": "unknown",
+            "queue_modified": False,
+            "reason": f"{type(error).__name__}: {error}",
+            "navigation": navigation,
+            "queue_path": str(path),
+        }
+    marker = open_training(load_army_state(state_path))
+    if marker is not None:
+        for item in queue["tasks"]:
+            owned = item["task_id"] == marker.get("task_id")
+            fallback = (
+                item["payload"].get("goal_kind") == FALLBACK_GOAL_KIND
+                and item["payload"].get("order_id") == marker.get("order_id")
+            )
+            if item["task_type"] == "army_training" and (owned or fallback) and item["status"] != "completed":
+                item.update(status="completed", completed_at=now.isoformat(), completed_reason="e2e_idle_confirmed")
+        validate_task_queue(queue, expected_profile_id=profile_id)
+    save_task_queue(queue, path)
+    if marker is not None:
+        clear_open_training(state_path)
+    return {
+        "status": "TRAINING_FINISHED_FOR_TEST" if finish_result["status"] == "FINISHED" else "TRAINING_IDLE_FOR_TEST",
+        "actions_executed": navigation.get("actions_executed", False) or finish_result["actions_executed"],
+        "queue_modified": marker is not None,
+        "finish": finish_result,
+        "navigation": navigation,
+        "queue_path": str(path),
+    }
 
 
 def _command_execute(args, profiles_dir, now):
@@ -345,10 +458,41 @@ def _command_execute(args, profiles_dir, now):
             "blockers": [f"Live execution requires confirmation phrase: {CONFIRMATION_PHRASE}"],
         }
 
-    queue, path = _load_or_create_queue(args.profile, profiles_dir)
+    test_finish = args.execute and getattr(args, "finish_active_for_test", False)
+    test_task_id = getattr(args, "test_task_id", None)
+    if test_task_id and (args.profile != "test" or args.navigate_only):
+        return {"status": "BLOCKED_TEST_TASK_MODE", "actions_executed": False, "queue_modified": False}
+    if test_finish and (args.profile != "test" or not args.navigate_only):
+        return {
+            "status": "BLOCKED_TEST_PROFILE_REQUIRED" if args.profile != "test" else "BLOCKED_TEST_FINISH_MODE",
+            "actions_executed": False, "queue_modified": False,
+        }
+    if test_finish:
+        path = task_queue_path(args.profile, profiles_dir)
+        queue = load_task_queue(path, expected_profile_id=args.profile) if path.exists() else create_task_queue(args.profile)
+    else:
+        queue, path = _load_or_create_queue(args.profile, profiles_dir)
     state_path = army_state_path(args.profile, profiles_dir)
+    test_task = None
+    if test_task_id:
+        test_task = next((task for task in queue["tasks"] if task["task_id"] == test_task_id), None)
+        if (
+            test_task is None or test_task["task_type"] != "army_training"
+            or test_task["payload"].get("goal_kind") != "slot_stock_v1"
+            or test_task["status"] not in {"queued", "waiting_resources"}
+        ):
+            return {"status": "BLOCKED_TEST_TASK", "actions_executed": False, "queue_modified": False}
+    if args.execute and queue["paused"]:
+        return {
+            "status": "BLOCKED_PAUSED_QUEUE", "actions_executed": False, "queue_modified": False,
+            "reason": queue["pause_reason"], "queue_path": str(path),
+        }
     if args.navigate_only:
         navigation = open_army_training_screen(execute=args.execute)
+        if test_finish:
+            return _finish_test_training(
+                queue, path, state_path, args.profile, now, navigation, capture_primary_monitor,
+            )
         return {
             **navigation,
             "navigation": navigation,
@@ -378,12 +522,7 @@ def _command_execute(args, profiles_dir, now):
             "housekeeping": housekeeping,
             "queue_path": str(path),
         }
-    due_finish = next((
-        task for task in queue["tasks"]
-        if task["payload"].get("goal_kind") == FALLBACK_GOAL_KIND
-        and task["status"] in {"queued", "waiting_resources"}
-        and (_parse_next_check(task) is None or _parse_next_check(task) <= now)
-    ), None)
+    due_finish = _next_due_finish_task(queue, now)
     if due_finish is not None:
         result = execute_finish_task(
             queue, due_finish["task_id"], state_path, now,
@@ -396,7 +535,16 @@ def _command_execute(args, profiles_dir, now):
             navigation=navigation, queue_path=str(path),
         )
         return result
-    unit_type = _next_pending_goal_unit_type(queue)
+    if queue.get("army_training_hold") is not None:
+        return {
+            "status": "ARMY_TRAINING_HELD", "army_training_hold": queue["army_training_hold"],
+            "actions_executed": navigation.get("actions_executed", False), "queue_modified": False,
+            "navigation": navigation, "housekeeping": housekeeping, "queue_path": str(path),
+        }
+    if test_task is not None:
+        unit_type = Slot(**test_task["payload"]["slot"]).unit_type if _task_check_is_due(test_task, now) else None
+    else:
+        unit_type = _next_pending_goal_unit_type(queue, now)
     if unit_type is not None:
         category = select_army_type(unit_type)
         if category["status"] != "DEFAULT_CATEGORY_ASSUMED":
@@ -409,19 +557,13 @@ def _command_execute(args, profiles_dir, now):
     else:
         unit_type = DEFAULT_UNIT_TYPE
         category = None
-    image, _ = capture_primary_monitor()
+    image, _origin = capture_primary_monitor()
     frame = observe_image(image, now, unit_type=unit_type)
-    report = evaluate_goals(queue, frame, now, dry_run=not args.execute, unit_type=unit_type)
-    eligible = [
-        item for item in report.get("goals", [])
-        if item.get("state") == "needs_preflight"
-        or item.get("reason") == "selection_unverified"
-    ]
-    eligible.sort(key=lambda item: (
-        effective_priority(queue, next(task for task in queue["tasks"] if task["task_id"] == item["task_id"])),
-        next(task["created_at"] for task in queue["tasks"] if task["task_id"] == item["task_id"]),
-    ))
-    if not eligible:
+    report = evaluate_goals(
+        queue, frame, now, dry_run=not args.execute, unit_type=unit_type, respect_next_check=True,
+    )
+    task_id = _select_executable_goal(queue, report, test_task_id)
+    if task_id is None:
         if args.execute:
             save_task_queue(queue, path)
         return {
@@ -429,7 +571,6 @@ def _command_execute(args, profiles_dir, now):
             "evaluation": report, "housekeeping": housekeeping, "navigation": navigation,
             **({"category_selection": category} if category is not None else {}),
         }
-    task_id = eligible[0]["task_id"]
     result = execute_training_goal(
         queue,
         task_id,
@@ -501,6 +642,10 @@ def build_parser():
     expand.add_argument("--image", help="Barracks screenshot to read the max level from; else the cache is used")
     expand.set_defaults(handler=_command_expand)
 
+    resume = commands.add_parser("resume-army", help="clear the army resource hold and require fresh observation; no game input")
+    resume.add_argument("--confirm", default="", help="type exactly: RESUME ARMY TRAINING")
+    resume.set_defaults(handler=_command_resume_army)
+
     run = commands.add_parser("run", help="decide open goals from a screenshot; dry-run unless --save")
     run.add_argument("--unit-type", choices=UNIT_TYPES, required=True)
     run.add_argument("--image", required=True)
@@ -518,6 +663,11 @@ def build_parser():
         "--navigate-only", action="store_true",
         help="run or preview the army-training startup navigation without evaluating or training a goal",
     )
+    execute.add_argument(
+        "--finish-active-for-test", action="store_true",
+        help="finish current Barracks training before the queued goal; test profile only",
+    )
+    execute.add_argument("--test-task-id", help="execute only this stock goal in the test profile; no alternate goal")
     execute.set_defaults(handler=_command_execute)
     return parser
 

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
@@ -19,6 +20,32 @@ from task_controller import (
 
 NOW = datetime(2026, 11, 6, 12, 0, tzinfo=timezone.utc)
 WINDOW = 30 * 60
+
+
+@pytest.mark.parametrize("marker_present", (False, True))
+def test_global_pause_blocks_direct_fallback_before_marker_read(monkeypatch, tmp_path, marker_present):
+    queue = create_task_queue("p")
+    task = enqueue_task(queue, "army_training", task_id="finish-old", now=NOW,
+                        payload={"goal_kind": finish.FALLBACK_GOAL_KIND, "order_id": "order-1"})
+    queue.update(paused=True, pause_reason="operator_pause")
+    path = marker(tmp_path) if marker_present else army_state_path("p", tmp_path)
+    before = deepcopy(queue)
+    marker_before = path.read_bytes() if marker_present else None
+    monkeypatch.setattr(finish, "load_army_state", lambda *_: pytest.fail("must not read marker"))
+    result = finish.execute_finish_task(
+        queue, task["task_id"], path, NOW, execute=True, confirmation=finish.CONFIRMATION_PHRASE,
+        capture_fn=lambda: pytest.fail("must not capture"),
+        speedup_fn=lambda: pytest.fail("must not use speedups"),
+    )
+    assert result == {
+        "status": "BLOCKED_PAUSED_QUEUE", "reason": "operator_pause",
+        "actions_executed": False, "queue_modified": False,
+    }
+    assert queue == before
+    if marker_present:
+        assert path.read_bytes() == marker_before
+    else:
+        assert not path.exists()
 
 
 def started_task(queue, window=None):
@@ -195,7 +222,7 @@ def _executor_setup(monkeypatch, states):
         return {"status": value}
 
     monkeypatch.setattr(executor, "_read_current_training_state", read_state)
-    monkeypatch.setattr(executor, "_build_selected_slot_plan", lambda *args: {"blockers": []})
+    monkeypatch.setattr(executor, "_build_selected_slot_plan", lambda *args, **kwargs: {"blockers": []})
     monkeypatch.setattr(executor, "read_slot_training_time", lambda *args: NumericReading(3600, 100, "1d.0g."))
     monkeypatch.setattr(executor, "_check_emergency_stop", lambda: None)
     monkeypatch.setattr(executor, "_enable_live_failsafe", lambda _: None)

@@ -1,5 +1,9 @@
 # Ekran: world_map
 
+## Behavior Ownership
+
+This card owns visual regions and historical recognition evidence. For current behavior use the [resource reading workflow](../game/resource_reading_workflow.md), [client/profile routing contract](../game/ui_variants_plan.md), [army training workflow](../game/army_training_slot_workflow.md), and [legacy Watchtower/mines/crypt contract](../game/legacy_automation_workflow.md). Older action requirements and CLI descriptions below are retained as context, not evidence that the game flow implements them. In particular, locked/unlocked templates do not constitute an integrated premium-access safety gate.
+
 ## Jak rozpoznać
 - Status: wstępne rozpoznanie z referencyjnego zrzutu; niezweryfikowane jeszcze przez template matching.
 - Kandydat na kotwicę: stały pasek ikon nad minimapą w lewym dolnym rogu. Nie używać zmiennej zawartości minimapy jako całego szablonu.

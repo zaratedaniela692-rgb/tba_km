@@ -1,83 +1,94 @@
+# Evidence Policy Note (2026-11-09)
+
+Retained historical anchor. The current [evidence policy and implementation limits](../game/speedup_module_workflow.md#calibration-mapping-and-evidence) belong to the workflow: failure-only game screenshots, with explicit calibration/annotation outputs excepted. This card does not define action or persistence behavior.
+
 # Ekran: speedup
 
-Status (2026-11-07): timer i ilości są czytane przez OCR, a pozycje „Użyj” są weryfikowane checkpointową mapą. `speedup.py` domyślnie wykonuje potwierdzony skan i plan, bez kliknięć. `speedup.py --execute` może używać wyłącznie posiadanych przyspieszeń i wymaga osobnej dokładnej frazy. Pełny live run nie był jeszcze wykonany przez asystenta; uruchomienie wymaga nadzoru użytkownika.
+Visual recognition card for the desktop speedup dialog. Legacy Polish headings are retained for existing anchors; repository prose below is English.
 
-Autorytatywny kontrakt odczytu, zakres, diagram i ograniczenia są w [docs/game/speedup_module_workflow.md](../game/speedup_module_workflow.md).
+**Evidence baseline: source inspection 2026-11-10.** No tests were run here, no live game actions were performed and historical images were not re-reviewed in this migration. Recognition rules below describe inspected sources, not newly passing fixture or live results.
+
+Behavior owner: [speedup feature contents](../game/speedup_module_workflow.md#feature-contents). In particular, see [callable runner versus CLI](../game/speedup_module_workflow.md#scope-and-entry-points), [reader contract](../game/speedup_module_workflow.md#timer-and-checkpoint-inventory-reading) and [runner-specific use verification](../game/speedup_module_workflow.md#use-verification-and-result-semantics). The former commands advertised by this card were not an implemented finishing CLI.
 
 ## Jak rozpoznać
 
-- Referencyjne zrzuty desktopowego klienta (1920x1080):
-  - `screenshots/speedup_module/speedup_view.png` – lista od góry, widoczne m.in. 1m, 15m, 1h i początek kolejnych wierszy.
-  - `screenshots/speedup_module/speedup_view2.png` – środkowa część listy, m.in. 8h, 15h, 1d i 3d.
-  - `screenshots/speedup_module/speedup_view3.png` – dolna część listy, m.in. 3d, 7d, posiadany 30d i osobna oferta zakupu 30d.
-  - `screenshots/speedup_module/after_click_7days_speedup.png` – inny timer i licznik 7d; nazwa pliku sugeruje wcześniejszą akcję, ale sam obraz nie potwierdza jej mechaniki ani związku przyczynowego.
-  - `screenshots/speedup_module/academy_speeduo_button.png` oraz `screenshots/speedup_module/build_in_city_speedup_button.png` – przyciski wejścia w speedup na innych ekranach. Nie potwierdzają wspólnego panelu listy dla tych kontekstów.
-- Kotwica dialogu jest rozpoznawana szablonem w ograniczonym obszarze; operacja wymaga dialogu otwartego wcześniej przez użytkownika.
-- Typ zadania nie jest automatycznie rozpoznawany. Przed live run użytkownik musi upewnić się, że otwarte jest właściwe szkolenie.
-- Zrzuty i mapa dotyczą klienta desktopowego 1920x1080 na monitorze głównym. Nie kopiuj regionów ani wzorców do wariantu browser.
-- Run `7_20261107_200245`: dialog/timer wejściowy rozpoznano poprawnie (`10d.:23g.`, confidence 100); lista startowała u góry. Skan zatrzymał się na checkpointcie 3, bo cztery pełne przyciski Use dopasowały się z confidence 1.0, ale ich jednolity offset od mapy wynosił `(+2,+4)` px i stary limit pozycji wynosił 2 px.
-- Korekta: checkpoint nadal mapuje rzędy top-to-bottom, ale pozycje OCR i klików pochodzą ze świeżych dopasowań. Wymagana jest dokładna liczba trafień, prostokąty w granicach viewportu i wspólny offset z tolerancją 1 px między rzędami; jednolite przesunięcie całego widoku nie jest samo w sobie błędem. Raport zapisuje pozycje oczekiwane i wykryte, offsety oraz confidence także przy blokadzie. Powtórny odczyt `frame_003.png` przechodzi i odczytuje 15m=4853, 1h=5257, 3h=3383, 8h=475. Run 7 był dry-run; nie użyto przedmiotów.
+Reference desktop captures (1920x1080), retained as visual references rather than fresh validation:
+
+| Capture | Visual evidence |
+| --- | --- |
+| [screenshots/speedup_module/speedup_view.png](../../screenshots/speedup_module/speedup_view.png) | Top of list: 1m, 15m, 1h and following rows |
+| [screenshots/speedup_module/speedup_view2.png](../../screenshots/speedup_module/speedup_view2.png) | Middle: 8h, 15h, 1d, 3d |
+| [screenshots/speedup_module/speedup_view3.png](../../screenshots/speedup_module/speedup_view3.png) | Lower list: owned 3d/7d/30d and separate 30d Buy offer |
+| [screenshots/speedup_module/after_click_7days_speedup.png](../../screenshots/speedup_module/after_click_7days_speedup.png) | Different timer/7d count; filename alone proves neither action mechanics nor causality |
+| [screenshots/speedup_module/academy_speeduo_button.png](../../screenshots/speedup_module/academy_speeduo_button.png) | Academy entry button only, not shared-dialog equivalence |
+| [screenshots/speedup_module/build_in_city_speedup_button.png](../../screenshots/speedup_module/build_in_city_speedup_button.png) | Building entry button only, not shared-dialog equivalence |
+
+The dialog title template is searched within 8 px of its annotated region at normalized score >=0.95. Current recognition also checks the first 16 template rows; fallback requires score >=0.95 and the same best location as the full template. A title match is not task/account classification. The task-context region is reference geometry, not an implemented task-type detector.
+
+Use buttons are matched inside the inventory viewport at >=0.95. Complete detections are sorted top-to-bottom and paired with checkpoint labels; their fresh rectangles drive quantity crops and click points. Exact mapped count, in-bounds rectangles and offsets consistent within 1 px across rows are required. Uniform translation is accepted; the former absolute 2 px limit is not current recognition behavior. A Buy offer can share a duration label with owned stock; duration alone does not classify ownership.
+
+The sources use desktop 1920x1080 annotations. They do not establish browser recognition or selected-window capture. Capture/input assumptions belong to the [workflow](../game/speedup_module_workflow.md#scope-and-entry-points).
 
 ## Elementy
 
-1. `speedup_dialog_anchor` – nagłówek „Przyspieszenia” i kontekst dialogu; kotwica do oznaczenia.
-2. `speedup_task_context` – nazwa/ikona aktywnego zadania w górnej części panelu; zachowana jako region referencyjny, ale nie jest automatycznym dowodem typu zadania.
-3. `speedup_remaining_time` – wartość obok etykiety „Pozostało” i ikony zegara; OCR zmiennego czasu, zwracający tekst surowy, sekundy, pewność i czas odczytu.
-4. `speedup_inventory_viewport` – widoczny obszar wierszy przedmiotów; region do OCR, bez przycisków „Użyj”.
-5. `speedup_item_duration` – nominał widoczny na ikonie lub wierszu, m.in. 1m, 15m, 1h, 3h, 8h, 15h, 1d, 3d, 7d, 30d; OCR/normalizacja. Nieznany nominał pozostaje jawnie nieznany.
-6. `speedup_item_quantity` – licznik na ikonie posiadanego przyspieszenia; dwa odczyty Tesseracta przy skali 4x i 6x muszą być zgodne. Nieczytelny lub sprzeczny licznik blokuje plan i nie może być zastąpiony zerem.
-7. `speedup_purchase_offer` – osobny wiersz z ofertą i przyciskiem „Kup”; nie jest posiadanym przedmiotem i nie wchodzi do inwentarza.
-8. `speedup_scroll_track` i `speedup_scroll_thumb` – pionowy tor oraz uchwyt po prawej stronie listy. Położenie uchwytu jest sygnałem pomocniczym postępu; nie rozpoznano jeszcze wszystkich stanów ani progu pewności.
-9. `speedup_use_button` – przycisk „Użyj” przy wierszu. Template matching weryfikuje liczbę i pozycję przy checkpointach; klik jest możliwy wyłącznie w trybie `--execute`.
+1. `speedup_dialog_anchor`: title "Przyspieszenia"; template recognition, not task identity.
+2. `speedup_task_context`: task name/icon and "Pozostalo" area; reference only, no automatic task classification.
+3. `speedup_remaining_time`: day/hour timer beside the hourglass. Segmented digit OCR at 6x/10x requires agreement and the verified digit set `1,3,4,6,7`; the taller hourglass is excluded. Other digits/layouts remain uncertain. Pure parser support is broader than image recognition.
+4. `speedup_inventory_viewport`: scrolling row area, **including** Use controls; the matcher searches for buttons inside it.
+5. `speedup_item_duration`: nominal text on the icon; general duration OCR is unverified. Current duration identity is assigned from checkpoint labels, not read from these tiny glyphs.
+6. `speedup_item_quantity`: crop positioned relative to a freshly matched Use button, with 5 px left and 3 px right insets. OCR at 4x/6x using PSM 8 must agree; empty/disagreeing reads fall back to PSM 7 at both scales. Raw readings/status are retained; disagreement is not zero stock.
+7. `speedup_purchase_offer`: separate lower row with "Kup"; visually distinct from owned "Uzyj" rows even when both show 30d.
+8. `speedup_scroll_track` / `speedup_scroll_thumb`: supporting reference regions. Full thumb-state recognition/threshold is not established; current scrolling uses viewport-image differences instead.
+9. `speedup_use_button`: complete "Uzyj" control. Layout verification does not by itself prove a successful use or a decreased quantity; see [verification semantics](../game/speedup_module_workflow.md#use-verification-and-result-semantics).
 
-Regiony i wzorce są zweryfikowane na dostarczonych fixture'ach desktopowych. Czytnik przesuwa quantity crop względem wykrytego przycisku „Użyj” i zachowuje surowy tekst OCR oraz zgodność odczytów. `Automator.update()` wybiera pierwszy monitor, nie konkretne okno gry; live run blokuje się przy innym rozmiarze niż 1920x1080.
-
-Raport runu zawiera chronologiczny `event_trace` oraz plik `event_trace.jsonl`: każdy scroll, wynik zmiany viewportu, odczyt timera i ilości, decyzję planera, współrzędne kliknięcia, weryfikację licznika i przyczynę zatrzymania. Do diagnozy przebiegu tekst wystarcza; klatki są potrzebne tylko do niezależnego sprawdzenia obrazu.
+Implemented recognition and fixture assertions are in [speedup_reader.py](../../speedup_reader.py), [speedup_inventory_reader.py](../../speedup_inventory_reader.py), [speedup_calibration.py](../../speedup_calibration.py), [tests/test_speedup_reader.py](../../tests/test_speedup_reader.py), [tests/test_speedup_inventory_reader.py](../../tests/test_speedup_inventory_reader.py) and [tests/test_speedup_calibration.py](../../tests/test_speedup_calibration.py). Existence of those assertions is not a test result.
 
 ## Regiony kandydackie (ekran `speedup` w `regions.json`, układ `speedup_view.png`)
 
-| Element | x, y, w, h | Uwagi |
-| --- | --- | --- |
-| `speedup_dialog_anchor` | 900, 250, 120, 24 | nagłówek „Przyspieszenia”; ten sam punkt na 4 zrzutach (>=0,997) |
-| `speedup_task_context` | 716, 278, 232, 70 | ikona, nazwa zadania i „Pozostało”; nazwa zależy od zadania, więc nie dowodzi rodzaju |
-| `speedup_remaining_time` | 1064, 322, 110, 22 | klepsydra (największy glif, odfiltrowywana) i tekst `13 d.:7 g.`; czytnik `speedup_reader.py` segmentuje cyfry, zweryfikowane cyfry: 1, 3, 4, 6, 7 |
-| `speedup_inventory_viewport` | 678, 376, 562, 418 | obszar wierszy |
-| `speedup_use_button` | 1050, 445, 145, 27 | wiersze co 110 px (wzorzec 1,0 w widokach); wzorzec „Kup” daje ok. 0,6 |
-| `speedup_item_icon` | 723, 396, 72, 72 | ikona przedmiotu, 49 px nad przyciskiem |
-| `speedup_item_duration` | 723, 402, 40, 20 | nominał w lewym górnym rogu ikony; OCR niepotwierdzony |
-| `speedup_item_quantity` | 755, 446, 42, 22 | ilość na ikonie; crop z insetem 5 px z lewej i 3 px z prawej, zgodne OCR 4x/6x |
-| `speedup_purchase_offer` | 1050, 746, 145, 27 | z `speedup_view3.png`; przycisk „Kup” |
-| `speedup_scroll_track` / `speedup_scroll_thumb` | 1218, 380, 12, 414 / 1218, 392, 12, 62 | uchwyt podąża za listą (y=392, 603, 716); granice toru niepotwierdzone |
+Retained heading anchor. These are annotated reference regions in [regions.json](../../regions.json), not newly measured coordinates. Geometry is in 1920x1080 capture-frame pixels, not selected-window coordinates. Row positions vary with scrolling; static first-row reference geometry is not a reusable absolute click point.
 
-Położenia wierszy zależą od przewinięcia, dlatego używana jest mapa kompletnych dopasowań `speedup_use_button` dla checkpointów 3/11/16, a nie stała pozycja przycisku. Nominały przypisano z przejrzanych checkpointów; 1m jest pominięte. Ilość 3d musi zgadzać się w obu checkpointach, w których występuje.
+| Element | x, y, w, h | Recognition notes |
+| --- | --- | --- |
+| `speedup_dialog_anchor` | 900, 250, 120, 24 | Title; historical captures reported scores >=0.997, not rerun here |
+| `speedup_task_context` | 716, 278, 232, 70 | Task-dependent name/icon; not a classifier |
+| `speedup_remaining_time` | 1064, 322, 110, 22 | Hourglass plus day/hour text such as `13 d.:7 g.` |
+| `speedup_inventory_viewport` | 678, 376, 562, 418 | Includes row Use controls |
+| `speedup_use_button` | 1050, 445, 145, 27 | First-row reference; historical row spacing 110 px and Buy score about 0.6 |
+| `speedup_item_icon` | 723, 396, 72, 72 | Icon begins 49 px above button |
+| `speedup_item_duration` | 723, 402, 40, 20 | Tiny duration glyphs; OCR unverified |
+| `speedup_item_quantity` | 755, 446, 42, 22 | Reference crop shifted with detected button and inset before OCR |
+| `speedup_purchase_offer` | 1050, 746, 145, 27 | Buy reference from lower-list capture |
+| `speedup_scroll_track` / `speedup_scroll_thumb` | 1218, 380, 12, 414 / 1218, 392, 12, 62 | Historical thumb y=392/603/716; track bounds/full-state recognition unconfirmed |
+
+Checkpoint map: [speedup_button_map.json](../../speedup_button_map.json). Map rectangles/centers are **viewport-relative**, unlike the frame-relative table above. Recognition validates fresh complete matches rather than blindly reusing stored centers.
 
 ## Przejścia
 
-- Live scan, domyślny bez klikania: `python .\speedup.py --confirm "SCAN SPEEDUP LIST FROM TOP"`. Wymaga otwartego dialogu, listy ustawionej na górze i 1920x1080; skanuje checkpointy 3/11/16, planuje zużycie i zapisuje raport JSON.
-- Live use: `python .\speedup.py --execute --confirm "USE OWNED SPEEDUPS FROM TOP"`. Przed każdym kliknięciem sprawdza stop-file; po każdym użyciu wymaga spadku licznika dokładnie o jeden. Wynik niepewny zatrzymuje proces bez retry.
-- Kalibracja live: przy otwartym dialogu uruchom `python .\speedup_calibration.py --calibrate-scroll --confirm "SCROLL SPEEDUP LIST"`. Polecenie zapisuje widok początkowy, przed każdym pojedynczym przewinięciem ustawia kursor na środku oznaczonego panelu (959, 585), a potem zapisuje kolejny screen. Domyślny limit to 20 kroków; pierwszy niezmieniony widok jest zapisany i kończy kalibrację. Zrzuty i manifest trafiają do `debug/speedup/calibration_<timestamp>/`.
-- Test checkpointowy: po ustawieniu listy na górze uruchom `python .\speedup_calibration.py --checkpoint-scan --confirm "SCROLL SPEEDUP LIST"`. Kursor jest ustawiany na środku panelu przed każdym scroll-em; każda klatka jest sprawdzana w pamięci, ale zapisują się tylko screeny po 3, 11 i 16 scrollach. Nie wykonuje się 17. scrolla. Wynik należy potem ręcznie sprawdzić pod kątem widocznych nominałów i czytelności przycisków „Użyj”.
-- Test checkpointowy zakończony: manifest `debug/speedup/calibration_20261107_010155_371887/manifest.json` potwierdza 16 scrolli i zapis tylko checkpointów 3, 11, 16. Screeny pokazują odpowiednio przyspieszenia 15m/1h/3h/8h, 15h/1d/3d/7d oraz posiadane 3d/7d/30d z przyciskami „Użyj”. Ostatni sklepowy wiersz 30d ma „Kup” i jest wykluczony; nie mylić go z posiadanym 30d nad nim.
-- Mapa `speedup_button_map.json` jest generowana offline z pełnych dopasowań `speedup_use_button` i przypisuje znane nominały do pozycji viewport-relative. Po 11 scrollach przycisk 7d jest ucięty, więc używana jest pełna pozycja po 16 scrollach; 3d występuje w checkpointach 11 i 16 i musi mieć tę samą odczytaną ilość.
-- Skan obejmuje checkpointowe przyspieszenia od 15m do 30d; 1m jest pominięte, a końcowa sklepowa oferta 30d z `Kup` jest wykluczona. Żaden tryb nie kupuje przedmiotów ani nie przeciąga uchwytu paska.
-- Brak zmiany viewportu po przewinięciu oznacza koniec listy. Uchwyt paska może wspierać, ale nie zastępować porównania obrazu. Osiągnięcie limitu przewinięć bez potwierdzenia końca oznacza skan niekompletny.
-- Moduł nie klika „Pomoc”, nie zmienia kolejki i nie potwierdza ukończenia na ekranie treningu. To pozostaje odpowiedzialnością wywołującego.
+Visual landmarks from the historically reviewed checkpoint set:
+
+| Cumulative step | Visible labels | Complete mapped Use buttons |
+| --- | --- | --- |
+| 3 | 15m, 1h, 3h, 8h | 4 |
+| 11 | 15h, 1d, 3d, clipped 7d row | 3; clipped 7d control omitted |
+| 16 | Owned 3d, 7d, 30d and lower Buy offer | 3; Buy excluded |
+
+The repeated 3d row is visible at steps 11 and 16. The complete 7d position is from step 16, not both views. The 1m row is not in this map. Standalone viewport fixture references are [tests/data/speedup/checkpoint_003.png](../../tests/data/speedup/checkpoint_003.png), [tests/data/speedup/checkpoint_011.png](../../tests/data/speedup/checkpoint_011.png) and [tests/data/speedup/checkpoint_016.png](../../tests/data/speedup/checkpoint_016.png).
+
+Viewport change is a recognition signal; whether unchanged means endpoint or landmark mismatch depends on the [runner/calibration contract](../game/speedup_module_workflow.md#scope-and-entry-points). This card does not define navigation commands, execution permission, planning or completion rules. Calibration interfaces and historical capture scope are owned by [calibration and evidence](../game/speedup_module_workflow.md#calibration-mapping-and-evidence).
 
 ## Przypadki szczególne
 
-- Oferta „Kup” może mieć ten sam nominał co posiadany przedmiot; odróżniaj wiersz po typie oferty, nie po samym nominale.
-- Lista jest przewijana; odczyt tylko pierwszego widoku nie jest kompletnym inwentarzem.
-- Timer może zmieniać się w trakcie skanowania. Zachowuj czas każdego odczytu; nie zakładaj, że timer z początku jest aktualny po przewinięciu.
-- Niski OCR, zasłonięty wiersz, nieznany nominał lub nieczytelny licznik oznacza niekompletny odczyt, a nie brak przyspieszeń.
-- Scroll, który nie zmienia widoku, kończy skan. Po niepewnym stanie, zmianie dialogu/kontekstu lub awaryjnym zatrzymaniu przerwij skan.
-- Live runner przechwytuje monitor główny i wymaga rozdzielczości 1920x1080 zgodnej z adnotacjami. Nie wybiera ani nie aktywuje okna; użytkownik musi mieć grę na wierzchu. Inne rozdzielczości, skala i UI przeglądarkowy są blokowane lub odroczone.
-- Zrzuty wejścia z Akademii i budynku nie zatwierdzają integracji tych flow. Pierwszy zakres gry pozostaje army training.
+- Owned 30d and a shop 30d can be simultaneously visible; classify the control/layout, not the label alone.
+- One viewport does not show all mapped rows. Clipped controls cannot become complete matches by assigning the expected label.
+- Quantity crops follow fresh button detections; common translation is different from inconsistent row displacement.
+- Matching buttons with `verify_only` provides no observed quantity. General duration OCR is not supplied by that mode or by checkpoint label association.
+- Day/hour OCR may reject otherwise valid timers containing digits outside `1,3,4,6,7`; no zero-timer or minute/second fixture support is established by this reader.
+- Title recognition does not verify active task, profile, account or the foreground window. Academy/building entry screenshots are insufficient evidence of compatible dialogs.
 
 ## Wiedza z poprawek
 
-- 2026-11-06 – The user approved mouse-wheel calibration over the annotated inventory list (not dragging the thumb). Before every wheel step, move the pointer to a safe point inside the list (the panel center is used), away from the game navigation bar and Use/Buy controls; capture after each step and stop at the first unchanged view. Item use and purchases remain out of scope for calibration.
-- 2026-11-07 – User-reported cumulative list landmarks from a run starting at the top: after 3 scrolls 15m/1h/3h/8h; after 11 scrolls 15h/1d/3d/7d; after 16 scrolls 3d/7d/30d and reported end-of-list. The 1m item may be omitted from required coverage. These are observations pending screenshot verification, not OCR-confirmed facts.
-- 2026-11-07 – The user approved checkpoint-only calibration: save screenshots only after scrolls 3, 11 and 16; validate each intermediate frame in memory; stop before a checkpoint if the viewport does not change; never send scroll 17. The next review checks the item labels and readability of the visible Use buttons; it does not yet execute item use.
-- 2026-11-07 – The user approved offline Use-button mapping only: map button positions to known durations at cumulative scrolls 3/11/16, preserve duplicate duration locations, ignore 1m and exclude the final shop row with `Kup`. No item use or click integration is part of this step.
-- 2026-11-07 – The user approved offline Use-button mapping only: map complete button positions to known durations at cumulative scrolls 3/11/16, preserve the repeated 3d location, omit the clipped 7d button at step 11, ignore 1m and exclude the final shop row with `Kup`. No item use or click integration is part of this step.
-- 2026-11-07 – The user approved the default planner strategy for a direct supervised finish. Inventory OCR reads the known durations at checkpoints 3/11/16, applies existing soft stock floors and duration preferences, and only clicks under the separate exact `--execute` confirmation. No live item use has yet been performed.
+- 2026-11-06: earlier bot captures reported title detection at (902,255), offset (+2,+5) from annotation (900,250), score 0.9973. This motivated bounded anchor search, not an annotation shift. Historical calibration approval is preserved in the [workflow](../game/speedup_module_workflow.md#scroll-calibration-workflow-approved-2026-11-06).
+- 2026-11-07: user-reported 3/11/16 landmarks were subsequently recorded as visually reviewed in existing documentation. Complete-button mapping clarified that step-11 7d is clipped, step-16 7d is complete, 3d repeats, 1m is omitted and the final Buy row is excluded. This correction supersedes the duplicate earlier note implying complete 7d at both checkpoints.
+- 2026-11-07: historical dry-run report `7_20261107_200245` recorded timer `10d.:23g.` and four step-3 Use matches at confidence 1.0, but uniform (+2,+4) offset exceeded the old 2 px limit. A later source change uses fresh positions with cross-row offset consistency. Existing notes reported a reread yielding 15m=4853, 1h=5257, 3h=3383, 8h=475; that reread was not repeated here, and the historical run was not an item-use run.
+- 2026-11-09: evidence-policy correction moved successful action frames to memory-only processing except explicit calibration outputs; current policy and persistence limits are in the [workflow](../game/speedup_module_workflow.md#calibration-mapping-and-evidence).
+- 2026-11-10: source-only migration removed stale finishing CLI claims, distinguished button layout checks from quantity confirmation and retained visual evidence without asserting fresh test success. Planner/authorization history is preserved under [historical workflow anchors](../game/speedup_module_workflow.md#historical-decisions-and-retained-anchors), not maintained as a second screen-card contract.

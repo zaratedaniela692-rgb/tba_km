@@ -7,10 +7,32 @@
 Total Battle is a terrible game that manipulates its players into spending as much money and time on it as possible.
 This project contains some scripts intended to reduce the amount of time spent.
 
-To maximise cross-platform applicability, the scripts are tailored to operate on the web version of the game, running in a browser such as Firefox.
-Note that some browsers do not allow number inputs when for example selecting troops.
-Sadly the web version of the game will crash relatively often.
-To counter this, the scripts will try to refresh the game whenever they feel they got stuck.
+The current automation uses the existing desktop-client assets and captures the primary monitor; it does not yet select a game window. Browser support is planned separately and is not implemented. See the [UI variants plan](docs/game/ui_variants_plan.md); browser screenshots, regions, and templates must be verified independently before use.
+
+## Development and Tests
+
+Use the repository root as the working directory. In PowerShell, create/configure the project environment and install the declared Python dependencies with:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r .\requirements-dev.txt
+```
+
+Screen-reading features also require the Tesseract OCR executable. Install it separately and make sure it is on `PATH`, or pass its path through the relevant tool option when available.
+
+Run the focused tests for the code being changed, for example:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q .\tests\test_client_router.py
+.\.venv\Scripts\python.exe -m pytest -q .\tests\test_speedup_planner.py .\tests\test_speedup_browser.py
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+For visual recognition, use the relevant screen fixtures and `tools/verify.py` as described by the area's workflow. A test file or documented command is not evidence that the current code passes; report the command and its actual result. See [AGENTS.md](AGENTS.md) for repository-wide collaboration rules, the applicable [automation instructions](.github/instructions/game-automation.instructions.md) and [test instructions](.github/instructions/game-tests.instructions.md), then the area workflow in [docs/game](docs/game/).
+
+For the AI-agent workflow audit and planned organization improvements, see [Agent Workflow Refactor](docs/agent_workflow_refactor.md). For completed code refactor slices, reasons, and validation results, see the [Project Refactor Log](docs/game/project_refactor_log.md).
+
+The live wrappers are not test-suite commands. `tools/run_army_navigation_live.py` sends Escape and a detected Armia click; `tools/run_army_e2e.py` can modify the local test queue, submit training for 100 Guardsmen, and spend in-game resources. Run a live wrapper only for its documented scope, with the game prepared and explicit authorization for that run. Automated tests must use fixtures or mocked callbacks and must never launch these live wrappers.
 
 ## Crypting
 

@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+import army_training_levels
 from army_training_levels import detect_selector_badges, read_layout_selector_levels, read_slot_selector_levels
 from army_training_scanner import _read_image
 from army_training_slots import find_slots, slot_crop
@@ -92,3 +93,27 @@ def test_largest_badge_not_at_end_is_unknown(monkeypatch):
 
     assert reading.status == "unknown"
     assert reading.reason == "largest_badge_not_last_level"
+
+
+def test_roman_label_consensus_uses_the_minimum_accepted_confidence(monkeypatch):
+    outputs = iter((
+        {"text": ["V"], "conf": ["91.0"]},
+        {"text": ["v"], "conf": ["76.0"]},
+    ))
+    monkeypatch.setattr(army_training_levels.pytesseract, "image_to_data", lambda *args, **kwargs: next(outputs))
+
+    reading = army_training_levels._read_consensus_roman_label(np.zeros((4, 4), dtype=np.uint8), (7, 10))
+
+    assert reading == ("V", 76.0)
+
+
+def test_roman_label_consensus_rejects_disagreement(monkeypatch):
+    outputs = iter((
+        {"text": ["V"], "conf": ["91.0"]},
+        {"text": ["VII"], "conf": ["88.0"]},
+    ))
+    monkeypatch.setattr(army_training_levels.pytesseract, "image_to_data", lambda *args, **kwargs: next(outputs))
+
+    reading = army_training_levels._read_consensus_roman_label(np.zeros((4, 4), dtype=np.uint8), (7, 10))
+
+    assert reading is None

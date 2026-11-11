@@ -9,6 +9,7 @@ import cv2
 from army_training_slots import STATUS_OK, locate_slots
 from game_screen import GameScreenError, clear_game_screen
 from ui_variants import resolve_asset_path, resolve_variant
+from workflow_trace import record_live_checkpoint
 
 ROOT_DIR = Path(__file__).resolve().parent
 EXPECTED_SIZE = (1920, 1080)
@@ -107,30 +108,51 @@ def open_army_training_screen(
     click_fn = click_fn or _click_screen_point
     variant = variant or resolve_variant()
     if variant["id"] not in {"desktop", "legacy"}:
+        record_live_checkpoint(
+            "navigation_variant_gate", decision="blocked", reason="unsupported_variant",
+            observation={"variant": variant["id"]},
+        )
         return {**plan, "status": "BLOCKED_UNSUPPORTED_VARIANT", "blockers": [variant["id"]]}
 
     try:
         reset = clear_game_screen(execute=True, press_key=press_key_fn, stop_file=stop_file or Path.home() / ".tba_stop")
     except GameScreenError as error:
+        record_live_checkpoint("screen_reset", decision="blocked", action="press_escape_three_times", reason=str(error))
         return {**plan, "status": "BLOCKED_SCREEN_RESET", "blockers": [str(error)]}
 
     result = {**plan, "actions_executed": reset["actions_executed"]}
+    record_live_checkpoint(
+        "screen_reset", decision="sent", action="press_escape_three_times", verification="completed",
+    )
     try:
         frame, origin = _capture(capture_fn)
         regions = _read_regions(variant["regions"])
         world_map = regions.get("world_map", {})
         army_region = world_map.get("armia")
         if not isinstance(army_region, dict):
+            record_live_checkpoint(
+                "armia_region_lookup", decision="blocked", reason="region_missing",
+                observation={"region": "world_map.armia"}, frame=frame, monitor_origin=origin,
+            )
             return {**result, "status": "BLOCKED_ARMY_BUTTON_REGION_MISSING", "blockers": ["world_map.armia"]}
         template_path = resolve_asset_path(variant, army_region["template"])
         template = cv2.imread(str(template_path), cv2.IMREAD_COLOR)
         if template is None:
+            record_live_checkpoint(
+                "armia_template_load", decision="blocked", reason="template_missing",
+                observation={"template": str(template_path)}, frame=frame, monitor_origin=origin,
+            )
             return {**result, "status": "BLOCKED_ARMY_BUTTON_TEMPLATE_MISSING", "blockers": [str(template_path)]}
         config = json.loads((ROOT_DIR / "config.json").read_text(encoding="utf-8"))
         threshold = get_threshold(config, "world_map", "armia")
         search_region = _army_search_region(frame, army_region)
         match = _match_army_button(frame, army_region, template, threshold)
         if match is None:
+            record_live_checkpoint(
+                "armia_template_match", decision="blocked", reason="outside_frame_or_unmatchable",
+                observation={"threshold": float(threshold), "search_region": search_region},
+                frame=frame, monitor_origin=origin,
+            )
             return {
                 **result,
                 "status": "BLOCKED_ARMY_BUTTON_OUTSIDE_FRAME",
@@ -146,6 +168,12 @@ def open_army_training_screen(
             search_region=search_region,
         )
         if match_confidence < match_threshold:
+            record_live_checkpoint(
+                "armia_button_match", decision="blocked", observation={
+                    "confidence": match_confidence, "threshold": match_threshold,
+                    "candidate_point": (match_x, match_y),
+                }, reason="below_confidence_threshold", frame=frame, monitor_origin=origin,
+            )
             return {
                 **result,
                 "status": "BLOCKED_ARMY_BUTTON_UNCONFIRMED",
@@ -154,6 +182,11 @@ def open_army_training_screen(
                 ],
             }
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        record_live_checkpoint(
+            "armia_match_setup", decision="error", reason=str(error),
+            frame=frame if "frame" in locals() else None,
+            monitor_origin=origin if "origin" in locals() else None,
+        )
         return {**result, "status": "BLOCKED_BEFORE_ARMY_CLICK", "blockers": [str(error)]}
 
     try:
@@ -161,6 +194,15 @@ def open_army_training_screen(
         _enable_live_failsafe(click_fn)
         click_fn((match_x, match_y), origin)
     except Exception as error:
+        evidence_frame, evidence_origin = frame, origin
+        try:
+            evidence_frame, evidence_origin = capture_fn()
+        except Exception:
+            pass
+        record_live_checkpoint(
+            "armia_click", decision="uncertain", action="click_armia", reason=str(error),
+            frame=evidence_frame, monitor_origin=evidence_origin,
+        )
         return {
             **result,
             "status": "UNKNOWN_AFTER_ARMY_CLICK_ATTEMPT",
@@ -181,9 +223,18 @@ def open_army_training_screen(
             raise ValueError("Primary-monitor capture origin changed after opening Armia.")
         layout = locate_slots(frame, _read_regions(variant["regions"]).get("army_training", {}), variant)
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        record_live_checkpoint(
+            "barracks_transition", decision="uncertain", action="click_armia", reason=str(error),
+            frame=frame if "frame" in locals() else None,
+            monitor_origin=new_origin if "new_origin" in locals() else origin,
+        )
         return {**result, "status": "BLOCKED_AFTER_ARMY_CLICK", "blockers": [str(error)]}
 
     if layout.status != STATUS_OK or not layout.slots:
+        record_live_checkpoint(
+            "barracks_transition", decision="blocked", observation={"layout_status": layout.status},
+            reason=layout.reason or "no_training_slots_detected", frame=frame, monitor_origin=new_origin,
+        )
         return {
             **result,
             "status": "BLOCKED_BARRACKS_NOT_CONFIRMED",
@@ -192,4 +243,9 @@ def open_army_training_screen(
         }
 
     result.update(status="BARRACKS_OPENED", layout_status=layout.status, visible_slots=len(layout.slots))
+    record_live_checkpoint(
+        "barracks_opened", decision="continue", action="click_armia",
+        observation={"layout_status": layout.status, "visible_slots": len(layout.slots), "origin": origin},
+        verification="barracks_slots_detected", frame=frame, monitor_origin=new_origin,
+    )
     return result

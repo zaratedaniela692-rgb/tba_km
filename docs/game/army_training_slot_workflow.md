@@ -1,6 +1,321 @@
 # Army Training Slot Workflow
 
+## Migration Validation Run
+
+Executed 2026-11-10 with the workspace Python 3.13 venv, installed Tesseract temporarily on PATH, plugin autoload disabled, and `--continue-on-collection-errors`: army/queue group **161 passed, 8 failed, 1 collection error**; full repository **345 passed, 19 failed, 8 errors**. Failures cover missing `read_selected_category`, two finish/executor start-confirmation assertions, navigation's unsupported `desktop` variant, and four older portrait-classifier assertions. The training-process test has an unterminated string at line 140 and cannot collect. Earlier source-review-only notes describe their original inspection; this subsequent run adds evidence, not a green release gate or live validation. No Python behavior was changed. Logs: operating-system temporary directory, `tba_docs_army_queue_ocr_20261110.log` and `tba_docs_full_suite_ocr_20261110.log`.
+
+**Test-harness/refactor follow-up (2026-11-11):** removed a stray orphaned source fragment that prevented `tests/test_army_training_process.py` from collecting and removed duplicate function definitions that silently overwrote two tests; the army selector OCR consensus helper was factored without changing recognition rules. The latest combined selector/process/queue/manager suite passed **74/74**. These focused results do not resolve the other failures in the 2026-11-10 full-suite aggregate or establish live execution safety.
+
+## Feature Contents
+
+- [Maximum unlocked army level](#maximum-unlocked-army-level) - documentation-first pilot: current heuristic, inputs, limitations, and proposed manual override.
+- [Slot identity and training target selection](#slot-identity-and-training-target-selection) - persistent goal identity, visible-frame resolution, and campaign policies.
+- [Training observation and stock reconciliation](#training-observation-and-stock-reconciliation) - scanner states, evidence lifetime, and saved decisions.
+- [Resource preflight and quantity](#resource-preflight-and-quantity) - same-slot resource checks and optional quantity entry.
+- [Start, Help, finish and evidence](#start-help-finish-and-evidence) - one-order execution, ownership markers, finish retries, and the isolated E2E exception.
+- [Live test action checkpoints](#live-test-action-checkpoints-2026-11-09)
+- [Parameterless live navigation check](#parameterless-live-navigation-check-2026-11-10)
+- [One-command live Barracks test](#one-command-live-barracks-test-2026-11-09)
+- [Optional training quantity](#optional-training-quantity-approved-2026-11-09)
+- [Implementation status](#implementation-status) - legacy cross-feature table; not a replacement for the pilot's scoped status.
+
+The five feature contracts above own the current descriptions within their stated source-review scope. Dated scenarios, implementation notes, and the legacy implementation table below preserve history and anchors, not a second current status. Navigation, scrolling, browser recognition, and category-registry snapshots are not blanket-certified by this migration. In particular, the later Specialists snapshot conflicts with the reviewed manager/executor path; see the limitations below. Existing maximum-level and slot-identity contracts are retained.
+
+## Maximum Unlocked Army Level
+
+### Purpose and Current Behavior
+
+Estimate the highest visible selector level for the supplied army-training frame. The bot currently treats this as a candidate for the maximum unlocked level, using a default-selection heuristic. It does not independently verify which levels are unlocked or inspect the entire army list. The layout field `global_highest_visible_level` means the maximum across the supplied visible slots, not a proven account-wide maximum.
+
+### Inputs and Defaults
+
+- The visual reader takes an image and detected slots; each slot provides its `unit_troop_level` crop. `observe_image` invokes it when the slot layout is valid.
+- There is currently no optional `max_unlocked_level` override in these reader/observation functions. Supplying a target level does not bypass visual level recognition.
+- Manager campaign expansion reads the supplied `--image` when present, saves a valid fresh maximum in the profile's army state, and resolves the maximum through the existing fresh-reading/cache policy. Without an image it uses that policy's cached state; it is not a new manual-override API.
+- Campaign `fixed`/`--level` selects the desired training level, not the maximum unlocked level. Lower-level campaign functions already accept a `max_level` value for planning; they do not detect unlocks or implement the proposed automatic fallback.
+
+### Algorithm and Outputs
+
+1. Crop each visible slot's selector and detect circular badges with OpenCV Hough circles after 5x enlargement. Order accepted centers from top to bottom.
+2. Require the largest badge to exceed the other radii by at least 0.5 selector pixels and to be the last badge. Otherwise return `unknown`.
+3. OCR the largest badge's Roman numeral using masked/raw preparations and paired Tesseract modes. Accepted paired readings must agree and meet the reader's confidence threshold (60); conflicting accepted labels or unreadable labels are rejected.
+4. Return `unsupported` for local I/II because these can represent global VIII/IX. For other accepted labels, return a `candidate`, preserving the confidence and `uses_default_highest_assumption=True`.
+5. Infer max-1 only when the immediately preceding badge is 20-30 selector pixels above. Infer the lowest visible level only when every gap is consecutive.
+6. The layout is a `candidate` only if every supplied slot is a candidate. Its maximum is the largest of the slot maxima; otherwise it is `unknown`. `frame_max_level` returns that value for a candidate, or `None`.
+
+### Safety and Limitations
+
+- The documented UI signal is that the selected badge is enlarged. Treating it as the highest unlocked level is a heuristic based on the usual default selection, not independently verified unlock evidence. Manual lower-level selection can invalidate that assumption; ambiguous geometry is rejected, but the heuristic is not a general unlock-state check.
+- Dimmed/locked-state verification and local I/II-to-global-VIII/IX mapping are not implemented by this reader. Visible-frame success does not prove that off-screen slots or other troop categories have the same maximum.
+- These readers do not click or change the game. A candidate maximum alone never authorizes training: slot identity, selection, resources, and action confirmation remain separate gates.
+
+### Status and Verification
+
+Current implementation: the automatic heuristic and its manager observation path are implemented. An optional manual maximum with automatic fallback is not implemented.
+
+Last source review: 2026-11-10, limited to the selector reader, its manager observation/campaign-expansion callers, campaign level resolution, and the focused selector test source. On 2026-11-11 the repeated per-PSM OCR consensus logic was extracted into `_read_consensus_roman_label` without changing thresholds or output mapping. The focused selector suite passed **10 tests** with the installed Windows Tesseract executable available on PATH for that process. This verifies the current fixtures and synthetic consensus cases, not account-wide unlock state or live interaction.
+
+### Proposed and Deferred Changes
+
+Proposed API contract, recorded for a separate implementation task: accept `max_unlocked_level=None`; a supplied valid integer maximum bypasses automatic maximum determination, while `None` calls a dedicated replaceable detector. Reject an invalid explicit value rather than falling back to detection. An uncertain automatic result must not authorize dependent actions. Manual input does not replace locating the correct slot, selector, or action button.
+
+The dedicated detector would initially retain the existing heuristic and permit later improvement behind the same boundary. Exact integration points and the accepted numeric range must be defined in that implementation task. This documentation migration does not add the parameter, enable new actions, or assert implementation approval for the proposed API.
+
+### Implementation and Tests
+
+- [Selector reader](../../army_training_levels.py): `detect_selector_badges`, `read_slot_selector_levels`, `read_layout_selector_levels`.
+- [Manager](../../army_training_manager.py): `observe_image`, `frame_max_level`, `_command_expand`.
+- [Campaign planning](../../army_campaign.py): `resolve_campaign_level`, `expand_campaign`; [army state](../../army_state.py): maximum cache resolution.
+- [Selector tests](../../tests/test_army_training_levels.py): `test_reads_highest_visible_level_per_slot`, `test_layout_reports_global_max_and_one_below`, `test_local_one_or_two_is_not_misreported_as_global_level`, `test_largest_badge_not_at_end_is_unknown`.
+- [Screen evidence](../screens/army_training.md): selector regions and selected-badge appearance. This feature section owns the behavior/status explanation if older duplicated notes differ.
+
+## Slot Identity and Training Target Selection
+
+### Purpose and Current Behavior
+
+Represent a stock goal independently of screen coordinates, then resolve it to a visible training card for observation. This is not troop-name recognition or a complete list-traversal identity system. Campaign expansion creates stock goals; it does not start training or select the next executable task. Scheduling belongs to the [task manager contract](task_manager.md).
+
+### Inputs and Defaults
+
+- A persistent `Slot` contains `{unit_type, global_level, match_number}`. A `TrainingGoal` binds it to a nonempty `profile_id`. `match_number` is one-based among cards matching the requested level, not among all visible cards.
+- The resolver takes selector readings already in frame order, the category, requested global level, and matching number. Production callers must supply a validated `Slot`: the low-level resolver does not itself validate the positive range of `level` or `match_number`.
+- For Guardsmen, the model accepts levels 1-9, with three matches at levels 1-4 and four at levels 5-9. A valid goal in the model does not prove that the visual reader can resolve it.
+- Categories other than Guardsmen may be represented in data, but their slot maps are not verified; current resolution and campaign expansion reject them. Legacy stored campaigns without a category default to Guardsmen.
+- A campaign stores category, `level_policy` (`max`, `max_minus_1`, or `fixed`), optional fixed level, enabled state, and optional priority. A fixed policy requires a positive integer level; other policies must not include a fixed level. Maximum acquisition is described in [Maximum unlocked army level](#maximum-unlocked-army-level).
+
+### Algorithm and Outputs
+
+**Resolving a visible slot:**
+
+1. Validate the category and require the verified Guardsmen map.
+2. Walk every supplied selector reading. Every reading must be a `candidate` with a known lowest visible level; otherwise return `blocked` with `slot_selector_range_uncertain`, even if another card appears to match.
+3. Keep frame indexes whose inclusive selector range contains the requested global level. Preserve the supplied frame order.
+4. No matches returns `unsupported` / `level_not_in_visible_slots`. Too few matches for the requested ordinal returns `unsupported` / `match_not_visible_without_scrolling`, carrying the available candidate indexes.
+5. Otherwise return `ok` / `slot_resolved`, the requested candidate's `frame_index`, and all matching candidate indexes. That frame index is transient, not the persistent goal ID.
+
+**Choosing and expanding a campaign target:**
+
+1. A disabled campaign expands to no goals. Otherwise `max` selects the supplied maximum, `max_minus_1` subtracts one, and `fixed` selects the configured target independently of that maximum inside the pure policy function. A computed level below one is rejected.
+2. Expansion requires the Guardsmen map and a mapped level. It creates one goal for each matching number, with the campaign priority supplied for new goals.
+3. Repeated expansion creates missing goals (`created`), reopens completed goals (`rearmed`), and leaves other existing goals in place (`kept`). It does not duplicate pending work or treat expansion as a confirmed game action. Compatibility matching also recognizes older goal payloads without a category.
+4. A single-slot goal and the corresponding campaign-generated goal use the same persistent identity. Newly expanded goals still need a valid observation and decision before becoming eligible for execution.
+
+### Safety and Limitations
+
+- The resolver explicitly assumes that the frame starts at the top of the list. It does not verify that origin, scroll, accumulate observations, or deduplicate cards across frames. An `ok` result is therefore conditional on the caller satisfying that assumption; it is not proof of persistent identity after scrolling.
+- Known categories without a verified map return `unit_type_slot_map_unverified`; an unknown category returns `unit_type_unknown`. Do not substitute Guardsmen for another category.
+- The [maximum-level reader](#maximum-unlocked-army-level) still uses a default-selection heuristic and rejects ambiguous local I/II. The model's ability to store levels VIII/IX does not imply visual support for them.
+- Resolving a card does not prove the requested level is selected. Manager observation tests distinguish a presumed-highest selection from a lower target requiring selection and re-observation. Resource preflight, current training state, and confirmed action results remain separate gates.
+- The pure `fixed` policy can choose a target without a maximum, but this does not establish that the manager CLI bypasses its maximum/cache checks or that visual level recognition is disabled.
+
+### Status and Verification
+
+Implemented: typed goal identity, current-frame range-based resolution, campaign policies, mapped goal expansion, and handling of existing goals. Not implemented by this resolver: verified list-origin detection, persistent cross-scroll card identity, or slot resolution for other categories.
+
+Last source review: 2026-11-10, limited to `Slot`/`TrainingGoal` validation, `resolve_goal_slot`, campaign policy/expansion, and the focused manager/campaign test source. Tests were inspected, not run during this documentation-only migration. Their assertions cover matching order, missing matches, uncertain ranges, category restrictions, policy results, low/high-level match counts, repeat expansion, and equivalence of single-slot and campaign goals. No new automated PASS result or supervised live identity verification is claimed.
+
+Refactor slice completed 2026-11-11: extracted the existing typed/legacy slot lookup in `expand_goals` into `_find_existing_goal`. Matching order, legacy untyped compatibility, and `created`/`rearmed`/`kept` outcomes are preserved. Added `test_expansion_keeps_existing_legacy_untyped_goal_identity`. Campaign tests passed **11/11**; combined campaign/process/queue tests passed **50/50**. This was a structural cleanup; campaign policy, queue mutations, and task scheduling did not change.
+
+### Proposed and Deferred Changes
+
+Verified list traversal, cross-frame identity, and additional category maps remain follow-up work. Their descriptions elsewhere in this workflow are not evidence that the current resolver implements them. This documentation change adds no scrolling, category switching, new campaign policy, or execution permission. The proposed manual maximum remains a separate change under the maximum-level feature.
+
+### Implementation and Tests
+
+- [Goal model](../../army_training_process.py): `Slot`, `TrainingGoal`.
+- [Visible-frame resolver](../../army_training_resolver.py): `resolve_goal_slot`, `SlotResolution`.
+- [Campaign](../../army_campaign.py): `Campaign`, `resolve_campaign_level`, `_find_existing_goal`, `expand_goals`, `expand_campaign`.
+- [Manager tests](../../tests/test_army_training_manager.py): `test_resolver_picks_mth_slot_containing_the_level`, `test_resolver_reports_unsupported_and_blocked_cases`, `test_unresolvable_goals_do_not_touch_the_queue_and_are_reported`, `test_goal_at_max_level_needs_preflight_and_lower_level_needs_selection`.
+- [Campaign tests](../../tests/test_army_campaign.py): `test_expansion_creates_three_goals_for_low_levels_and_four_for_high_levels`, `test_policies_resolve_from_max_level_and_reject_out_of_range`, `test_repeated_expansion_keeps_open_goals_and_rearms_only_completed_ones`, `test_expansion_keeps_existing_legacy_untyped_goal_identity`, `test_single_slot_goal_equals_campaign_goal`, `test_legacy_campaign_defaults_to_guardsmen_and_unverified_type_cannot_expand`.
+- [Screen evidence](../screens/army_training.md): card layout and selector appearance; action decisions and persistent identity belong to this workflow.
+
+## Training Observation and Stock Reconciliation
+
+### Purpose and Current Behavior
+
+Turn one Barracks frame into profile-bound stock evidence and a decision, without authorizing clicks by OCR alone. The scanner reports current training controls; the manager resolves persistent goals to frame-local slots and reconciles pending goals. This is separate from task scheduling and from confirming an order's actual completion.
+
+### Inputs and Defaults
+
+- `observe_image` receives an image, timestamp (default current UTC), variant, and caller-supplied category (default Guardsmen). It detects layout/levels and caches per-slot OCR only inside that frame's closure; this is not a reusable resource/stock cache.
+- `build_slot_observation` binds profile, typed slot, timestamp, source, training status, highest-level candidate, city count, and that slot's own queue amount. It shares that amount under the goal level, highest, and highest-minus-one keys. Selection is considered verified only when the presumed highest equals the goal level.
+- Decision defaults are a 30-second observation lifetime and confidence 70. `evaluate_goals` defaults to dry-run. `run --image --unit-type` persists decisions only with `--save`, although its load helper can persist a legacy-goal migration first.
+- The separate maximum cache is category/profile-scoped, defaults to 24 hours, and is used by campaign expansion, not as stock/resource authorization. A valid fresh maximum wins; only `None` permits cache fallback. Future/stale or malformed cache timestamps block; legacy untyped cache maps only to Guardsmen.
+
+### Algorithm and Outputs
+
+1. One desktop control reader evaluates Help/Speed Up at threshold 0.85 and Finish at threshold 0.95 with its existing 2 px search margin. Exactly one recognized state returns `help`, `speedup` or `finish`; no matches returns `absent`; conflicting matches return `ambiguous`. Help/Speed Up means `active`, Finish means `completed`, absence means `idle`, and ambiguity means `unknown`. Panel relocation and separate per-state annotations remain unchanged; portrait texture and button color do not authorize actions.
+2. The reader returns matched geometry, confidence scores and the recognized Finish center from the same frame. The test finisher reuses that center instead of matching Finish again. Recognition errors propagate; `observe_image` and `_read_current_training_state` share this classifier. Fresh post-click observations remain mandatory.
+3. Evaluate pending `slot_stock_v1` tasks of the requested category only. A paused queue returns no evaluations. Automatic execution enables retry-deadline handling before slot resolution/OCR: a future `next_check_at` returns `deferred` with `next_check_not_due`, preserving the task and its process. Exact-deadline tasks are due. Category selection also skips deferred goals; another due goal may proceed, but a pinned E2E goal is never substituted. Manual `run --image` retains early observation and only saves with `--save`. Bad layout, category mismatch, or unresolved slot is reported without reconciling that goal.
+4. The pure decision rejects mismatched profile/slot, missing source, stale/future evidence, unknown state, or unreliable level. Active training yields `waiting_training`. Exact highest `L-1` satisfies the goal as unavailable without count/limit checks; a still-lower highest blocks.
+5. Otherwise require selection, reliable positive reference/selected limits and reliable city count. Target is twice the slot reference limit; threshold is its 80% ceiling. Return `satisfied` or `needs_preflight` with counts. Lower-level selection can yield `selection_unverified` / `select_level_then_reobserve`.
+6. Non-dry reconciliation stores evidence, decision, expiry at observation time plus lifetime, and history. Satisfied becomes queue `completed`; all other decisions become `queued` and clear `next_check_at`. A saved decision is not a confirmed training start.
+
+### Safety and Limitations
+
+- Desktop absence-of-buttons is a heuristic, not proof against occlusion or a wrong screen. Conflicting matches are unknown and cannot authorize actions. Help and Finish are green, Speed Up is purple, but color-only or blind green clicks are not implemented. The existing Finish and Speed Up annotation crops differ; their coordinates are not merged.
+- Profile/category labels come from the caller in this reviewed `observe_image`; it does not independently identify the account or highlighted category. The lower-level selector/default-highest and top-of-list identity assumptions still apply.
+- Browser scanner uses its separate empty-unit/detail classifier, not desktop buttons; its recognition-only contract is outside this review. No browser actions are enabled here.
+- `decision_valid_until` protects generic scheduler selection, not every manager path. Automatic execution skips future retry times before reconciliation; explicit manual or due-goal reconciliation may still clear `next_check_at`. The manager retains its separate selection path and fallback precedence; see [task selection](task_manager.md#selection-and-priority).
+- The later category-registry snapshot claims highlighted-category checks and Specialists execution. The reviewed executor still explicitly rejects non-Guardsmen and manager expects `DEFAULT_CATEGORY_ASSUMED`. Do not infer implemented Specialists execution from that snapshot or from test names.
+
+### Status and Verification
+
+Implemented and offline-tested 2026-11-11: one shared-control result includes Help/Speed Up/Finish confidence, matched Help/Speed Up region and Finish center. Conflicting matches return `ambiguous`/`unknown` without an action point. The test finisher reuses the Finish center from its current snapshot, eliminating the second Finish match on that frame. Scanner/executor/manager/E2E/marker-finish tests passed **96 tests**, including single Finish read, conflict blocking, missing-point blocking and no rematch. The prior broader desktop E2E baseline was 193 passing tests before this slice. No live recognition or action was authorized or validated; runtime speedup is not measured. Color filtering remains deferred.
+
+### Proposed and Deferred Changes
+
+Independent profile/category confirmation, robust obscured-state handling and durable cross-frame identity remain separate work. Cache validity does not approve any of these changes. Shared scanner/Finish semantics are implemented; generic pauses, decision lifetime and expiration behavior remain unchanged.
+
+### Implementation and Tests
+
+- [Manager](../../army_training_manager.py): `observe_image`, `evaluate_goals`, `_command_run`, `_command_expand`; [observation adapter](../../army_training_observation.py): `build_slot_observation`.
+- [Process](../../army_training_process.py): `decide_training_goal`, `reconcile_training_goal`; [army state](../../army_state.py): `resolve_max_level`.
+- [Scanner](../../army_training_scanner.py): `read_training_button_state_from_image`, `read_army_training_snapshot_from_image`, `locate_finish_training_button`; [execution helper](../../army_training_live_e2e.py): `_read_current_training_state`.
+- [Manager tests](../../tests/test_army_training_manager.py): adapter limits/selection, dry-run versus saved decisions, unresolved goals and active/bad layout; [scanner tests](../../tests/test_army_training_scanner.py): button presence, completed fixture and fail-closed Finish errors; [executor tests](../../tests/test_army_training_executor.py): Guardsmen-only execution gate.
+
+## Resource Preflight and Quantity
+
+### Purpose and Current Behavior
+
+Check the selected slot and current resources immediately in the execution path, then optionally set a bounded explicit quantity before a single Train attempt. Stock planning, resource preflight, quantity verification, and start confirmation are distinct gates; none substitutes for another.
+
+### Inputs and Defaults
+
+- `execute_training_goal(..., quantity=None)` leaves the displayed full-queue amount unchanged. An explicit quantity must be a positive integer (not bool) and no larger than the freshly read displayed maximum. CLI exposes it as `--quantity`.
+- Reads come from that slot's translated quantity, city-count, silver-cost and duration regions, plus global food/silver. Numeric slot readings require confidence 70-100; resource readings require the resource reader's confidence gate. No resource cache substitutes for these frame reads.
+- The displayed quantity is treated as the maximum before explicit entry; the reader does not independently establish slider-at-maximum. Full-queue duration uses the dedicated slot-time reader; the executor requires a non-null value/confidence at least 70.
+
+### Algorithm and Outputs
+
+1. Require idle training and reliable quantity/city/cost/resources. Food must be white and strictly positive; silver must cover displayed cost. This is not a numerical post-order food-budget calculation.
+2. Compute `target = 2 * slot_limit`, `completion = ceil(0.8 * target)`, and `order = min(max(0, target-city), slot_limit)`. Satisfied stock and nonpositive order block Train. Without explicit quantity, a planned amount different from the displayed amount blocks rather than moving the slider.
+3. With explicit quantity, retain the original limit for the stock threshold. An initial preflight skips only the silver sufficiency comparison (`check_silver=False`), not reliable silver/resource reading. Then click the quantity field, send six Backspaces, and type the digits, with emergency-stop checks.
+4. Capture again; require unchanged origin/1920x1080 geometry, the same slot (within 2 px horizontal/3 px vertical), idle state, and reliable quantity OCR exactly equal to the request. Repeat preflight with the new displayed cost and original goal limit; require duration before Train.
+5. Results distinguish `BLOCKED_BEFORE_QUANTITY`, `BLOCKED_QUANTITY_UNCONFIRMED`, `BLOCKED_BEFORE_TRAIN`, and later start outcomes. An oversized request is caught before field input; exceptions inside preflight are reported as `BLOCKED_BEFORE_TRAIN`.
+6. Approved silver retry integration: only a reliable final preflight with silver insufficiency as its sole blocker enters the passive hidden-resource recovery step. Initial `not_implemented` means no recovery input is sent. Count three total failed attempts; defer attempts one/two by `resource_retry_seconds`, then hold all new army starts for this profile without cancelling tasks. Keep other task types and existing-training completion available. Explicit confirmed `resume-army` preserves attempt history, resets the pending-task budget and invalidates launch decisions for fresh full preflight. No Train, purchases, gold or smaller-order heuristic is introduced. Unknown reads, food problems and other blockers do not consume this budget. Future recovery/read-repair actions require a separate approved workflow.
+7. Direct `execute_training_goal` calls also reject a future `next_check_at` before capture, selector or quantity input. The exact deadline is due. Preview and explicit manual image reconciliation remain unchanged; rejection does not consume an attempt or mutate the queue.
+
+Implemented 2026-11-11 in `_confirmed_silver_shortfall`, passive `try_replenish_hidden_silver`, queue `record_resource_retry_failure`/`resume_army_training`, and manager hold/list/resume handling. The normal manager persists the executor's mutated queue. Result statuses are `WAITING_RESOURCES` then `ARMY_TRAINING_HELD`; neither implies training started. The hold reason and per-task retry records are visible through `list`. Resume is a local state operation, for example `army_training_manager.py --profile <profile> resume-army --confirm "RESUME ARMY TRAINING"`; it sends no input and does not itself prove silver sufficiency. Focused safety suite: **180 passed**, including no Train, uncertainty exclusions, fallback availability and marker preservation. No live recovery was validated.
+
+### Safety and Limitations
+
+- An explicit quantity overrides the computed order amount after the stock threshold checks; it is bounded by the initial displayed maximum, not by a separate remaining-deficit cap. It does not redefine the persistent goal.
+- A field/input/verification failure never authorizes Train and is not automatically retried; selector or quantity input may already have occurred. `BLOCKED` therefore does not imply no game input.
+- The selected level remains unconfirmed in this executor (`selection_confirmed=false`), even after same-slot redetection. Resource/cost reads do not independently prove the intended level was selected.
+- The manager uses its latest captured/quantity-confirmed frame for these checks, not a newly captured frame at every individual calculation. Primary-monitor geometry and resource-region offsets are desktop assumptions; no browser action support is implied.
+
+### Status and Verification
+
+Implemented in the reviewed manager-owned executor and shared preflight helper. Source-reviewed 2026-11-10; executor/manager test sources were inspected, not executed by this documentation agent. Assertions cover quantity entry/OCR equality, oversized request rejection, OCR mismatch before Train, and missing duration. No new resource-spend validation or live quantity entry was performed.
+
+### Proposed and Deferred Changes
+
+Independent maximum/selected-level verification, slider manipulation, additional resource-budget rules, and broader supported geometry remain separate tasks. This contract does not approve them or relax preflight for the E2E quantity of 100.
+
+### Implementation and Tests
+
+- [Executor](../../army_training_executor.py): `_enter_training_quantity`, `execute_training_goal`; [shared plan helper](../../army_training_live_e2e.py): `_build_selected_slot_plan`, `_resource_readings`.
+- [Slot reader](../../army_training_slot_reader.py), [time reader](../../army_training_slot_time.py), [manager CLI](../../army_training_manager.py): `_positive_quantity`, `_command_execute`.
+- [Executor tests](../../tests/test_army_training_executor.py): `test_requested_quantity_is_typed_and_confirmed_before_train`, `test_quantity_ocr_mismatch_blocks_before_train`, `test_requested_quantity_above_queue_maximum_blocks_before_field_click`, `test_missing_or_unreliable_time_blocks_before_train`.
+
+## Start, Help, Finish and Evidence
+
+### Purpose and Current Behavior
+
+Start at most one persistent stock-goal order per manager invocation, request central-panel Help once, and retain ownership until training is observed idle. Task-window expiration is scheduling bookkeeping, not evidence that the game finished. The isolated test-profile finisher is an explicit exception to normal marker ownership.
+
+### Inputs and Defaults
+
+- Live manager execution requires `--execute` and exact `EXECUTE ARMY TRAINING`; preview only reports startup. Navigation-only is separate. The game/account must already be intended and foreground; profile labels isolate local state, not game resources.
+- Global queue pause blocks all manager-dispatched automatic input before navigation, including navigation-only, test finish and ordinary fallback. Direct fallback execution also stops before marker reads/mutation or capture. Preview is unchanged. Silver-only army hold remains distinct: it blocks new orders but allows existing-training completion.
+- Pause-boundary implementation verified offline 2026-11-11: manager/finish/E2E/queue/executor/lifecycle/process **178 passed**, including six global-pause regressions and existing silver-hold fallback tests. No live pause/finish behavior was exercised. This is not a new broader live-support claim.
+- Queue defaults: post-order delay 2 s (allowed 1-3), Help-to-Speed-Up settle 0.2 s, Help window 1800 s, finish grace 600 s, normal retry 3600 s. Task Help-window override wins over queue/default.
+- `state_path` identifies the selected profile's army state. Marker contains order/task/goal, start/expiry, attempt counts and retry times. `speedup_fn` is an injected finish adapter; ordinary manager calls reviewed here do not supply one.
+- The E2E runner pins its prepared stock goal with `--test-task-id`, restricted to profile `test` in training mode. If that goal is missing, non-pending or ineligible, stop rather than train another queued goal. Ordinary manager scheduling is unchanged.
+
+### Algorithm and Outputs
+
+1. Normal live manager processes expiry and saves, performs Barracks startup, gives a due fallback finish task precedence, then evaluates/selects a stock goal. The executor checks queue pause, pending status, same-type activity and cross-type lifecycle gates, re-resolves a fresh 1920x1080 slot, and only supports Guardsmen.
+2. If preexisting state is not idle, the ordinary executor calls `finish_open_training`: foreign active/completed training without a marker blocks. An owned finish requires the adapter and observed-idle result before proceeding; after success wait 5 s and re-observe. An initially idle observation does not enter this finish branch, so it does not itself reconcile a stale marker there.
+3. Select a lower target badge if needed, re-detect the same slot without verifying the enlarged marker, perform [preflight](#resource-preflight-and-quantity), and attempt Train once. Require fresh `active` state and unchanged geometry. Uncertain Train acknowledgement/postcondition invalidates the process decision, pauses the profile, and never retries the click.
+4. Only confirmed active training calls `mark_task_started`, using actual UTC at confirmation, then writes the marker when `state_path` is supplied. Queue save is the caller's responsibility. Expiry is confirmed start plus post-order delay plus Help window, not the OCR duration.
+5. After the post-order delay require active plus exactly Help; click once, wait settle delay, and require active plus Speed Up. Confirmation advances through `waiting_speedup` to `waiting_completion` (or `ready_to_accelerate` for quick finish). `START_CONFIRMED` is the completed start/Help sequence, not finished troops. Missing/uncertain Help evidence and uncertain Help attempts pause; emergency stop immediately before Help retains the started task without pausing or clicking Help.
+6. `process_expirations` closes active expired tasks with `window_expired`, retains the marker, and creates at most one `army_finish:<order_id>` after grace. Fallback no-ops when its marker is absent/different; it never re-evaluates stock. Owned finish clears the marker only on idle or an adapter return of idle; failures keep it and mirror a retry timestamp into the pending task without pausing.
+7. Attempted failed finishes retry after 120 s while their next count is below 3, then the configured normal interval; unavailable adapters use the normal interval immediately. `needs_attention` starts at 3 failed attempts but does not stop speedup retries. Separately, 3 recorded Finish-button attempts stop further finish actions with `finish_button_attempts_exhausted`; the recorder is persisted before a cooperating adapter's click.
+8. E2E-only `--navigate-only --finish-active-for-test` is restricted to profile `test` before navigation. On a verified desktop Barracks frame, a uniquely recognized central Help or Speed Up means `active`, Finish means `completed`, and absence of all three means `idle`. Conflicting matches mean `unknown` and block action. Portrait detail must not decide desktop activity. Browser fixture behavior is unchanged.
+9. The test helper may finish unmarked training: click Help at most once if needed, require Speed Up on a fresh frame with unchanged geometry, open its dialog once, and call the existing owned-item module with `execute=True`. Require `FINISHED`, handle a recognized Finish button once, and require fresh idle. Insufficient items, unknown reads, exceptions or unconfirmed outcomes stop without retry or a new goal. Never buy items or spend gold.
+10. Keep the old queue and marker unchanged until idle is confirmed. Then reconcile only the marker-owned training task and its fallback, persist the queue before clearing the marker, and prepare the configured test goal without deleting unrelated tasks/history. An unrelated active task or paused queue blocks goal preparation. This exception is not inherited by ordinary marker-based execution or other profiles.
+11. Significant actions/decisions use timestamped workflow events. Successful transitions do not need PNGs; failed/uncertain recognition, actions, postconditions or exceptions may save evidence. Diagnostic capture after uncertain input is observation only, never permission to repeat it.
+
+### Safety and Limitations
+
+- Ordinary marker-based finishing is implemented but not fully wired to live speedup execution by the reviewed manager: no adapter is supplied to stock/fallback calls. Expect `speedup_module_unavailable` and scheduled retry, not automatic item consumption. The E2E helper does import the live speedup module. Item-selection safety belongs to the [speedup workflow](speedup_module_workflow.md).
+- Queue pause and deferred finish are different: uncertain Train/Help pauses; unsuccessful owned finish does not. Generic quick-finish resource exhaustion can also pause through the [queue lifecycle](task_manager.md#lifecycle-and-isolation). No automatic reconciliation of uncertain game input is promised by manual unpause.
+- Manager evaluation on an active scanner frame can return no executable stock goal before reaching its executor finish step. Do not describe every pending army invocation as guaranteed to finish an old order. Due fallback selection is a separate path.
+- Marker and queue are separately persisted files, not a cross-file transaction. A marker proves local recorded ownership, not actual account identity. An expired stock goal remains completed until a new campaign expansion re-arms it; expiration is not stock satisfaction.
+- The reviewed E2E helper has a `completed`/Finish path in addition to Help/Speed Up; the old absence-of-both-means-proceed scenario omits it. The standalone second-slot one-shot is a different API with no persistent goals/Help and a different confirmation phrase.
+
+### Status and Verification
+
+Current stage 2 structural/offline scope completed 2026-11-11: shared desktop control classification; test-only existing-training completion; no-retry/geometry/profile gates; preserved queue/marker reconciliation; named manager selection decisions; isolated post-start Help coordinator. Final validation: **262 tests passed** across all `tests/test_army_*.py` plus task-controller/client-router/E2E tests, with installed Windows Tesseract temporarily on PATH. Adjacent Speed Up adapter/core/planner/reader tests: **54 passed**. Four old planner fixture assertions were aligned with the approved button-based rather than portrait-based contract. Selection regressions preserve fallback list order and stock-goal priority/creation/report ties; Help regressions preserve lifecycle timestamps, uncertainty pauses, marker ownership and quick-finish readiness without acceleration. `configure_tesseract` imports correctly. No game was launched, no live input was sent and no live completion is certified.
+
+Retained validation limits: the earlier offline verify matched Finish at 100% on the completion fixture, while unrelated screen elements included below-threshold results. Browser fixture tests remain outside desktop certification and were previously blocked by the unchanged `planned` variant gate. Pylance previously reported unresolved live `mss`/`pyautogui` dependencies. Ordinary live finish-adapter integration, independent account confirmation and occluded-screen recovery remain deferred. Stage 2 does not certify the repository-wide suite, unify schedulers or deliver the stage 4 wrapper program.
+
+### Proposed and Deferred Changes
+
+Wire and validate an ordinary owned-training live finish adapter separately; reconcile stale markers and manager eligibility/finish ordering without inferring completion. New categories, browser actions, broader live automation and recovery from uncertain input need their own approved scope. This migration adds no game input or execution permissions.
+
+### Implementation and Tests
+
+- [Executor](../../army_training_executor.py): `execute_training_goal` owns preflight/selection/Train acceptance and marker creation; `_request_help_after_confirmed_start` owns post-start Help/Speed Up confirmation only; `finish_active_training_for_test` remains the isolated E2E finisher. [Manager](../../army_training_manager.py): `_command_execute` owns dispatch and gates, `_next_due_finish_task` and `_select_executable_goal` preserve its existing selection rules, and `_finish_test_training` owns test-only executor invocation and queue-before-marker reconciliation. [Lifecycle](../../army_training_lifecycle.py): pure Help state coordination. These structural extractions change no scheduling or live permissions.
+- [Finish](../../army_training_finish.py): `finish_open_training`, `process_expirations`, `execute_finish_task`; [state](../../army_state.py): marker and attempt persistence; [queue](../../task_controller.py): start/expiry transitions.
+- [Trace](../../workflow_trace.py), [E2E wrapper](../../tools/run_army_e2e.py); wrapper details below are historical scenario notes, not independently revalidated here.
+- Offline module/E2E checks: [test_army_training_module.py](../../tools/test_army_training_module.py) reads the completed-training fixture only; [test_army_queue_e2e.py](../../tools/test_army_queue_e2e.py) runs synthetic stock reconciliation and scheduler selection in memory. The live [run_army_e2e.py](../../tools/run_army_e2e.py) is a separate resource-affecting wrapper and was not run in this stage-4 slice.
+- Run offline checks with `python tools/test_army_training_module.py` and `python tools/test_army_queue_e2e.py`; argument and failure reporting contracts are covered by `tests/test_module_wrappers.py`. The E2E wrapper uses the generic Speed Up core with in-memory callbacks, not desktop input or inventory OCR.
+- [Executor tests](../../tests/test_army_training_executor.py): single Train/Help, no retry, test finisher geometry/profile/insufficient-items/Finish gates and existing adapter invocation. [Finish tests](../../tests/test_army_training_finish.py): expiry versus marker, fallback/no-op and foreign training. [Manager tests](../../tests/test_army_training_manager.py): failure preserves queue/marker, save-before-clear and pinned task selection. [E2E tests](../../tests/test_run_army_e2e.py): preflight stop/reporting, preserved unrelated tasks/history and preparation blockers.
+
+## Live Test Action Checkpoints (2026-11-09)
+
+**Historical scenario note:** current evidence semantics and verification status are owned by [Start, Help, finish and evidence](#start-help-finish-and-evidence). Statements below about a test stopping before Speed Up refer to the new-order stage, not the test-only pre-finish exception.
+
+The one-command live case records every meaningful transition in `workflow_trace.jsonl`, including timestamp, profile, step, action/decision, observation, and verification. Successful transitions are logged without screenshots. Save a `checkpoint_*.png` only when recognition is blocked, an action result is uncertain, or an expected postcondition fails. If the run fails without a checkpoint image, the wrapper saves one `failure.png` fallback. Do not save screenshots for each Escape press, OCR operation, scroll, or repeated Speed Up `Use` click; those operations belong in the event log and should be grouped at screen-transition or batch boundaries. The test stops before Speed Up.
+
+Implementation status: implemented in `workflow_trace.py`, `army_training_navigation.py`, `army_training_executor.py`, and `tools/run_army_e2e.py`. All checkpoint events append to `workflow_trace.jsonl` and are summarized in `log.txt` and `report.json`; image evidence is failure-only and includes frame size and monitor origin. Uncertain Armia, Train, or Help click acknowledgements trigger one fresh diagnostic capture and never retry the click. The Speed Up adapter similarly keeps captures in memory and writes only the final failure frame for `BLOCKED`, `UNCERTAIN`, or an exception. No live run has yet exercised this instrumentation.
+
 ## One-Command Live Barracks Test (2026-11-09)
+
+**Historical scenario snapshot:** category, pre-finish, and validation claims below are not a current implementation certification. See [training observation](#training-observation-and-stock-reconciliation) and [start/finish](#start-help-finish-and-evidence), including the test-profile exception.
+
+## Parameterless Live Navigation Check (2026-11-10)
+
+### Purpose and Contract
+
+Provide a one-command supervised live smoke test for the native desktop client without adding a task, changing a task queue, clicking a troop selector, submitting Train, or consuming game resources. The wrapper has no runtime arguments; its scope is fixed in `tools/run_army_navigation_live.py`.
+
+1. Observe the foreground client and read the visible player name through the normal router. Continue only for a confidently identified desktop player with a resolved profile. The router may add that player's local profile-registry entry if it is new.
+2. Invoke the existing navigation-only flow exactly once: send three Escape presses, click only a sufficiently confident local `world_map.armia` template match, then capture a fresh frame and require valid Barracks slot geometry.
+3. Stop on any blocked route, capture/OCR failure, unconfirmed template, navigation error, or unconfirmed Barracks layout. Never retry an uncertain input or navigation action.
+4. Report the route, navigation result, and artifact directory. Always save a JSON report; save a workflow trace once navigation starts. Screenshots remain failure-only. If navigation raises after a desktop profile is resolved, the wrapper takes at most one fresh diagnostic capture and saves it as `failure.png` only when no checkpoint image exists. Route failures do not trigger capture. This capture is evidence only; never retry navigation or any uncertain input.
+5. A successful result is `BARRACKS_OPENED`. It validates only this observed client, account, monitor geometry, and transition; it does not certify training, queue execution, or other UI variants.
+
+Run from the repository root with no arguments:
+
+```powershell
+.\.venv\Scripts\python.exe .\tools\run_army_navigation_live.py
+```
+
+The native game must already be foregrounded on the primary 1920x1080 monitor at the world map. This live check can send Escape and one Armia click. It may create a local profile-registry entry, but it does not access or modify task queues. The separate `tools/run_army_e2e.py` is the resource-consuming training test and is not the smoke-test command.
+
+### Status and Verification
+
+Implemented and offline-tested 2026-11-11: after a resolved desktop route, a navigation exception triggers at most one fresh diagnostic capture if no checkpoint PNG exists; the result or capture error is included in `report.json`. Route failures do not capture, an existing checkpoint suppresses the fallback, and navigation is never retried. The parameterless wrapper otherwise performs the foreground route check, invokes navigation at most once, and writes a JSON report plus navigation trace. `tests/test_army_navigation_live.py`: 8 passed. No live run has yet been performed; do not claim live validation until the wrapper has been run against the intended desktop game and returns `BARRACKS_OPENED`.
+
+### Implementation and Tests
+
+- Wrapper: [run_army_navigation_live.py](../../tools/run_army_navigation_live.py).
+- Tests: [test_army_navigation_live.py](../../tests/test_army_navigation_live.py).
+- Tests use injected route/navigation functions and verify the wrapper stops before navigation on an unresolved or unsupported route, makes one navigation attempt, and reports success only after Barracks slots are confirmed.
 
 Navigation accepts the ready `legacy` registry ID as the current desktop client, as well as the transitional `desktop` ID. Browser and unavailable variants remain blocked. This fixes `BLOCKED_UNSUPPORTED_VARIANT` when the default registry resolves to `legacy`.
 
@@ -10,9 +325,9 @@ Run the complete configured live case from the project root with:
 .\.venv\Scripts\python.exe .\tools\run_army_e2e.py
 ```
 
-The script uses the local `test` profile, clears its prior task list, creates exactly one Guardsmen stock goal, then runs the manager from the world map with `--quantity 100`. Before clearing, it refuses to proceed if that profile has an open-training marker, an active task, or a paused queue; in those cases it leaves the queue untouched. Completed and pending inactive test tasks are cleared. Evidence is written under `device_runs/<device>/army_training_quantity/<run-number>_<timestamp>/` as `log.txt`, `report.json`, `screen_before.png`, and `screen_after.png`; the run number increments within this scenario and existing legacy timestamp folders are counted. The screenshot records in `report.json` include capture time, frame dimensions, monitor origin, and any capture error. The script returns success only when the manager reports `START_CONFIRMED` and OCR confirms quantity 100. It does not use or publish through Git.
+The script uses only the local `test` profile. It first opens Barracks and completes existing training through the isolated test finisher. Only confirmed idle permits marker-owned task/fallback reconciliation and preparation of the configured Guardsmen goal; other tasks and history remain. A completed matching goal is re-armed, not deleted. A remaining marker, active task or paused queue blocks preparation. The manager receives `--quantity 100` and `--test-task-id` so it cannot substitute another stock goal. Evidence is written under `device_runs/<device>/army_training_quantity/<run-number>_<timestamp>/`, including `preflight.json`, `preflight_log.txt`, `report.json`, training `log.txt` and `workflow_trace.jsonl`; failed/uncertain checkpoints alone add PNGs. Success requires a zero training-process exit code, `START_CONFIRMED` and confirmed quantity 100. No Git operation is performed.
 
-Before running, log into the intended desktop game account, leave the game on the world map, ensure there is no active training, and ensure the Barracks remembers the Guardsmen category. Category selection is not implemented or verified by the current manager, so this test does not attempt to switch it. The live test can click Armia, selector, quantity field, Train, and Help; it spends the game resources for 100 Guardsmen and records an open-training marker. It stops before Speed Up. After a successful start, do not rerun until that training has been completed and the marker/task state reconciled. The script intentionally refuses to delete active state.
+Before a separately authorized live run, log into the intended desktop test account, leave the game on the world map and ensure Barracks remembers Guardsmen. Existing training may be completed using owned speedups during preflight; Help, Speed Up and Finish can be clicked once in that stage. New training may click selector, quantity, Train and Help, spends resources for 100 Guardsmen and records a marker; this new-order stage stops before acceleration. Do not rerun an uncertain result. There is no independent foreground-account check in this wrapper and no automatic queue unpause.
 
 ## Default Test Profile (2026-11-09)
 
@@ -20,11 +335,13 @@ Army manager commands no longer require `--profile`: when omitted they use the l
 
 ## Optional Training Quantity (Approved 2026-11-09)
 
+**Approval history:** the single current quantity contract/status is [Resource preflight and quantity](#resource-preflight-and-quantity). Preserve this scenario description as historical context, not a second validation record.
+
 The manager `execute` command accepts an optional positive `--quantity`. When omitted, retain the existing full-queue behavior. When supplied, require the requested count not to exceed the freshly read queue maximum; then, before Train, click the detected `unit_troop_count_to_train` field, press Backspace six times, type the requested digits, capture a fresh frame, confirm the same slot and idle state, and require OCR of that field to equal the requested count. Re-run the resource/cost/time preflight on that frame while retaining the original maximum for the stock-goal threshold. Any input exception, changed geometry/slot/state, weak OCR, or mismatch stops before Train; do not retry an uncertain input sequence. The E2E training test uses `100` to limit resource consumption. This is an execution parameter, not a change to campaign goals or task-controller scheduling.
 
 Implementation status: manager CLI forwards the optional value, and `tools/run_army_e2e.py` is the one-command live test case. It prepares the inactive `test` profile queue and writes each run's manager output/report locally. No live input has been performed. The manager CLI starts and `list` without `--profile` returns the empty local `test` profile. The browser remains unsupported for this action.
 
-**Status:** MVP behavior and decisions as of 2026-11-05. This document is the current source of truth for slot detection and the read-only stock-goal workflow. Historical implementation notes in other documents may be stale; follow this contract and the implementation-status table below.
+**Historical baseline (2026-11-05) and later snapshots:** sections below preserve anchors, decisions and proposed routes; they are not one current implementation status. Use the five feature contracts in [Feature Contents](#feature-contents) for reviewed behavior. Old claims that the observation adapter or Help are absent, all retries are hourly, the scanner uses portraits, or every ordinary manager run finishes previous training conflict with those contracts. The legacy implementation table is not authoritative. Navigation, scrolling, browser and category-specific snapshots remain scoped/unrevalidated unless explicitly covered above.
 
 ## Purpose
 
@@ -142,6 +459,8 @@ python .\army_training_live_e2e.py --execute --confirm "TRAIN SECOND SLOT MAX-1"
 This test uses the second visible slot in one frame; it does not mean global `match_number=2`. It does not persist a manager goal, scroll the list, click Help, or automatically retry.
 
 ## Manager-Driven Replenishment Contract (Phases B-D Implemented; Supervised Run Pending)
+
+**Historical integration snapshot:** see [observation](#training-observation-and-stock-reconciliation), [preflight](#resource-preflight-and-quantity), and [start/finish](#start-help-finish-and-evidence) for current scoped contracts. Pending-Help/adapter, category and validation claims in this dated snapshot must not override them.
 
 **Status:** approved 2026-11-06 and implemented through the manager-owned one-goal executor (phases B-D). No supervised live run has been performed. Re-arming follows the recommended option (completed goals are reopened by a new campaign run, history kept). The legacy one-shot executor remains unchanged; the manager executor owns the persistent goal flow.
 
@@ -379,6 +698,8 @@ Non-Gwardzist goals can be explicitly represented in the queue, but the current 
 
 ## Training Completion Without Wake-ups (Approved 2026-11-06)
 
+**Historical approval snapshot:** current status, retry timing/Finish-button cap and actual ordinary-versus-E2E adapter wiring are consolidated in [Start, Help, finish and evidence](#start-help-finish-and-evidence). The hourly-only and unimplemented-Speed-Up claims below do not describe all current paths.
+
 **Status:** approved and being implemented. It supersedes the earlier idea of parking a task and waking it to speed up; the pure coordinator in `army_training_lifecycle.py` stays but its wake-up path is not used by this flow.
 
 ### Goal
@@ -443,6 +764,10 @@ flowchart TD
 ### Code Status
 
 Implemented (mock and fixture level): `expires_at`/`help_window_seconds` and `expire_tasks`/`complete_task` in `task_controller.py`; marker helpers in `army_state.py`; `army_training_finish.py` (finish step, expiry processing, fallback creation and execution); integration in `army_training_executor.py` and `army_training_manager.py`. Desktop Help recognition/clicking and post-click Speed Up confirmation are integrated into the manager executor and pass fixture/mocked tests. A supervised live click, Speed Up dialog recognition, and item selection are not implemented/verified.
+
+## E2E Test: Finish Existing Training Before Test Goal (Approved 2026-11-09)
+
+Historical approval anchor retained. The single current contract, implementation status and executed test evidence are maintained in [Start, Help, Finish and Evidence](#start-help-finish-and-evidence); shared classifier semantics are in [Training Observation and Stock Reconciliation](#training-observation-and-stock-reconciliation). The original absence-of-both-means-proceed diagram omitted the separate Finish state and is superseded. Test-profile unmarked completion does not enable ordinary or browser finishing. No live completion has been validated.
 
 ### Tests
 
@@ -558,6 +883,8 @@ flowchart TD
 
 ## Implementation Status
 
+**Historical capability table:** retained for existing links, not a current checklist. In particular, the observation adapter and Help rows are stale; use [Feature Contents](#feature-contents) for the single reviewed status per migrated feature. Unreviewed scrolling/browser/category claims are not certified by this table.
+
 | Capability | Status | Code |
 | --- | --- | --- |
 | Find and order visible slots in a frame | Implemented, read-only | `army_training_slots.py` |
@@ -632,6 +959,8 @@ browser capture + desktop templates as search references
 **Contract tests:** `tests/test_browser_army_training.py::test_browser_scanner_classifies_active_and_idle_training_from_fixture_roi`, `test_browser_scanner_keeps_ambiguous_training_roi_unknown`, and existing browser slot/OCR and UI-variant isolation tests. Existing desktop scanner tests continue to validate desktop output.
 
 ## Category Registry and Specialists (Implemented 2026-11-07)
+
+**Conflicting historical snapshot, not current execution permission:** the reviewed manager/observation/executor do not implement the highlighted-category path described here; the executor still restricts execution to Guardsmen. See [training observation limitations](#training-observation-and-stock-reconciliation). This section and its anchors are retained without adopting its implementation claims.
 
 **Goal:** Train Specialists through the same goal, campaign, resolver and executor path as Gwardzists, selecting the Barracks category explicitly instead of assuming it.
 

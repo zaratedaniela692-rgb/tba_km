@@ -1,4 +1,4 @@
-"""Read-only foreground game client and player-profile observer."""
+"""Observe the foreground game client and resolve its local player profile."""
 
 import argparse
 import json
@@ -120,9 +120,9 @@ def observe_foreground_profile(
     capture_fn=None,
     profiles_dir=PROFILES_DIR,
     name_reader=read_player_name,
-    register_missing=False,
+    register_missing=True,
 ):
-    """Observe client and account. A result is routable only for a unique configured profile."""
+    """Observe client and account, registering a new desktop profile after confident OCR."""
     window = get_foreground_window() if window is None else window
     title = window.title if window else ""
     process_name = window.process_name if window else ""
@@ -163,10 +163,15 @@ def observe_foreground_profile(
             "blocked", client_id, reading.player_name, None, None,
             f"profile_unresolved:{error}", title, process_name,
         )
+    except OSError as error:
+        return RouteObservation(
+            "blocked", client_id, reading.player_name, None, None,
+            f"profile_registry_write_failed:{error}", title, process_name,
+        )
     return RouteObservation(
         "routed", client_id, reading.player_name, profile.profile_id,
         str(task_queue_path(profile.profile_id, profiles_dir)),
-        "profile_registered" if profile.action == "created" else "unique_registered_profile",
+        "profile_registered" if profile.action == "created" else "profile_reused",
         title, process_name,
     )
 
@@ -199,24 +204,30 @@ def watch_foreground(
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description="Observe the foreground game client and its registered profile; no actions are run."
+        description=(
+            "Observe the foreground game client and resolve its local profile. "
+            "A confidently read new desktop player is saved to the local profile registry; "
+            "no game actions or queue operations run."
+        )
     )
     parser.add_argument("--once", action="store_true", help="report one foreground observation and exit")
     parser.add_argument(
-        "--register-missing", action="store_true",
-        help="with --once, create a profile when the visible desktop player name is not registered",
+        "--no-register-missing", action="store_false", dest="register_missing",
+        help="do not create a profile when the visible desktop player name is not registered",
     )
+    parser.set_defaults(register_missing=True)
     parser.add_argument("--interval", type=float, default=1.0, help="watch polling interval in seconds")
     args = parser.parse_args(argv)
     if args.interval <= 0:
         parser.error("--interval must be positive")
-    if args.register_missing and not args.once:
-        parser.error("--register-missing requires --once")
     if args.once:
         print(json.dumps(asdict(observe_foreground_profile(register_missing=args.register_missing)), ensure_ascii=False, indent=2))
         return 0
     try:
-        watch_foreground(interval_seconds=args.interval)
+        watch_foreground(
+            observe_fn=lambda: observe_foreground_profile(register_missing=args.register_missing),
+            interval_seconds=args.interval,
+        )
     except KeyboardInterrupt:
         return 0
     return 0

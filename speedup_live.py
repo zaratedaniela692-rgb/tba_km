@@ -295,15 +295,15 @@ def run_desktop_speedups(
         evidence_dir = ROOT_DIR / "debug" / "speedup" / f"run_{timestamp}"
     evidence_dir = Path(evidence_dir)
     evidence_dir.mkdir(parents=True, exist_ok=False)
-    captures = []
+    observations = []
+    latest_frame = None
+    latest_origin = None
 
     def observe_capture(frame, origin):
-        file_name = f"frame_{len(captures):03d}.png"
-        path = evidence_dir / file_name
-        if not cv2.imwrite(str(path), frame):
-            raise LiveSpeedupError(f"capture_save_failed:{path}")
-        captures.append({
-            "file": file_name,
+        nonlocal latest_frame, latest_origin
+        latest_frame = frame.copy()
+        latest_origin = tuple(origin)
+        observations.append({
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "frame_size": [int(frame.shape[1]), int(frame.shape[0])],
             "monitor_origin": list(origin),
@@ -312,6 +312,7 @@ def run_desktop_speedups(
     manifest_path = evidence_dir / "manifest.json"
     result = None
     error = None
+    evidence_file = None
     state = {"reads": []}
     try:
         result, state = finish_open_dialog(
@@ -327,14 +328,24 @@ def run_desktop_speedups(
             capture_observer=observe_capture,
         )
         state["evidence_dir"] = str(evidence_dir)
+        if result.status in {"BLOCKED", "UNCERTAIN"} and latest_frame is not None:
+            evidence_file = "failure.png"
+            if not cv2.imwrite(str(evidence_dir / evidence_file), latest_frame):
+                evidence_file = None
         return result, state
     except Exception as caught:
         error = str(caught)
+        if latest_frame is not None:
+            evidence_file = "failure.png"
+            if not cv2.imwrite(str(evidence_dir / evidence_file), latest_frame):
+                evidence_file = None
         raise
     finally:
         manifest = {
             "mode": "execute" if execute else "dry_run",
-            "captures": captures,
+            "observations": observations,
+            "evidence_file": evidence_file,
+            "latest_monitor_origin": list(latest_origin) if latest_origin is not None else None,
             "reads": state.get("reads", []),
             "result": result.__dict__ if result is not None else None,
             "error": error,

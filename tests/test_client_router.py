@@ -79,7 +79,7 @@ def test_desktop_routes_only_to_one_registered_profile_queue(tmp_path):
     assert observation.queue_path == str(task_queue_path(profile_id, tmp_path))
 
 
-def test_desktop_auto_registration_creates_missing_profile_once(tmp_path):
+def test_desktop_auto_registration_creates_and_reuses_missing_profile(tmp_path):
     registry_path = profile_registry_path(tmp_path)
     reader = lambda *_args, **_kwargs: SimpleNamespace(
         status="ok", player_name="Snoweye", candidates=("Snoweye",) * 4,
@@ -90,7 +90,6 @@ def test_desktop_auto_registration_creates_missing_profile_once(tmp_path):
         capture_fn=lambda: (object(), (0, 0)),
         profiles_dir=tmp_path,
         name_reader=reader,
-        register_missing=True,
     )
     routed = observe_foreground_profile(
         ForegroundWindow("Total Battle", "TotalBattle.exe"),
@@ -105,12 +104,30 @@ def test_desktop_auto_registration_creates_missing_profile_once(tmp_path):
     assert routed.status == "routed"
 
 
-@pytest.mark.parametrize("duplicate", (False, True))
-def test_unregistered_or_duplicate_player_name_never_returns_a_queue(tmp_path, duplicate):
-    registry_path = profile_registry_path(tmp_path)
-    if duplicate:
-        resolve_profile("Snoweye", registry_path, now=NOW)
-        resolve_profile("Snoweye", registry_path, new_profile=True, now=NOW)
+def test_read_only_opt_out_does_not_register_missing_profile(tmp_path):
+    observation = observe_foreground_profile(
+        ForegroundWindow("Total Battle", "TotalBattle.exe"),
+        capture_fn=lambda: (object(), (0, 0)),
+        profiles_dir=tmp_path,
+        name_reader=lambda *_args, **_kwargs: SimpleNamespace(
+            status="ok", player_name="Snoweye", candidates=("Snoweye",) * 4,
+        ),
+        register_missing=False,
+    )
+
+    assert observation.status == "blocked"
+    assert observation.reason.startswith("profile_unresolved:")
+    assert not profile_registry_path(tmp_path).exists()
+
+
+def test_registry_write_failure_blocks_profile_routing(tmp_path, monkeypatch):
+    import profile_identity
+
+    monkeypatch.setattr(
+        profile_identity,
+        "save_profile_registry",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("access denied")),
+    )
 
     observation = observe_foreground_profile(
         ForegroundWindow("Total Battle", "TotalBattle.exe"),
@@ -124,12 +141,38 @@ def test_unregistered_or_duplicate_player_name_never_returns_a_queue(tmp_path, d
     assert observation.status == "blocked"
     assert observation.profile_id is None
     assert observation.queue_path is None
-    assert observation.reason.startswith("profile_unresolved:")
+    assert observation.reason.startswith("profile_registry_write_failed:")
 
 
-def test_auto_registration_does_not_choose_between_duplicate_profiles(tmp_path):
+@pytest.mark.parametrize("duplicate", (False, True))
+def test_auto_registration_routes_first_duplicate_profile_or_creates_new_profile(tmp_path, duplicate):
     registry_path = profile_registry_path(tmp_path)
-    resolve_profile("Snoweye", registry_path, now=NOW)
+    first_profile = None
+    if duplicate:
+        first_profile = resolve_profile("Snoweye", registry_path, now=NOW)
+        resolve_profile("Snoweye", registry_path, new_profile=True, now=NOW)
+
+    observation = observe_foreground_profile(
+        ForegroundWindow("Total Battle", "TotalBattle.exe"),
+        capture_fn=lambda: (object(), (0, 0)),
+        profiles_dir=tmp_path,
+        name_reader=lambda *_args, **_kwargs: SimpleNamespace(
+            status="ok", player_name="Snoweye", candidates=("Snoweye",) * 4,
+        ),
+    )
+
+    assert observation.status == "routed"
+    assert observation.profile_id is not None
+    assert observation.queue_path == str(task_queue_path(observation.profile_id, tmp_path))
+    if duplicate:
+        assert observation.profile_id == first_profile.profile_id
+    else:
+        assert observation.reason == "profile_registered"
+
+
+def test_auto_registration_routes_first_duplicate_profile(tmp_path):
+    registry_path = profile_registry_path(tmp_path)
+    first_profile = resolve_profile("Snoweye", registry_path, now=NOW)
     resolve_profile("Snoweye", registry_path, new_profile=True, now=NOW)
 
     observation = observe_foreground_profile(
@@ -139,12 +182,10 @@ def test_auto_registration_does_not_choose_between_duplicate_profiles(tmp_path):
         name_reader=lambda *_args, **_kwargs: SimpleNamespace(
             status="ok", player_name="Snoweye", candidates=("Snoweye",) * 4,
         ),
-        register_missing=True,
     )
 
-    assert observation.status == "blocked"
-    assert observation.profile_id is None
-    assert observation.reason.startswith("profile_unresolved:Multiple profiles match")
+    assert observation.status == "routed"
+    assert observation.profile_id == first_profile.profile_id
 
 
 def test_unknown_name_ocr_blocks_profile_routing(tmp_path):
@@ -161,6 +202,49 @@ def test_unknown_name_ocr_blocks_profile_routing(tmp_path):
     assert observation.profile_id is None
     assert observation.queue_path is None
     assert observation.reason.startswith("player_name_ambiguous:")
+    assert not profile_registry_path(tmp_path).exists()
+
+
+def test_cli_defaults_to_registration_and_supports_read_only_opt_out(monkeypatch, capsys):
+    import client_router
+
+    registration_modes = []
+
+    def observe(register_missing=True):
+        registration_modes.append(register_missing)
+        return RouteObservation("blocked", "desktop", None, None, None, "test", "Total Battle", "game.exe")
+
+    monkeypatch.setattr(client_router, "observe_foreground_profile", observe)
+
+    assert client_router.main(["--once"]) == 0
+    capsys.readouterr()
+    assert client_router.main(["--once", "--no-register-missing"]) == 0
+    capsys.readouterr()
+
+    assert registration_modes == [True, False]
+
+
+def test_continuous_cli_defaults_to_registration(monkeypatch):
+    import client_router
+
+    called = {}
+
+    def fake_watch(observe_fn, interval_seconds):
+        called["observation"] = observe_fn()
+        called["interval"] = interval_seconds
+
+    monkeypatch.setattr(client_router, "watch_foreground", fake_watch)
+    monkeypatch.setattr(
+        client_router,
+        "observe_foreground_profile",
+        lambda register_missing=True: RouteObservation(
+            "routed", "desktop", "Snoweye", "snoweye_12345", "queue", "ok", "Total Battle", "game.exe",
+        ) if register_missing else None,
+    )
+
+    assert client_router.main([]) == 0
+    assert called["observation"].profile_id == "snoweye_12345"
+    assert called["interval"] == 1.0
 
 
 def test_watch_outputs_only_when_foreground_route_changes():

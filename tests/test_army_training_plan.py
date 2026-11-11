@@ -165,22 +165,26 @@ def test_army_training_snapshot_detects_active_training_and_speedup_button():
         assert 0 <= snapshot["trained_unit_count_confidence"] <= 100
 
 
-def test_army_training_snapshot_detects_empty_queue_from_unit_image():
+def test_army_training_snapshot_detects_empty_queue_from_absent_control():
     image_path = Path(__file__).resolve().parents[1] / "screenshots" / "army_training" / "pelny_army_training_empty_queue.png"
 
     snapshot = read_army_training_snapshot(image_path)
 
     assert snapshot["has_active_training"] is False
     assert snapshot["status"] == "idle"
-    assert snapshot["training_unit_image_detail"] < 8
+    assert snapshot["button_state"] == "absent"
+    assert snapshot["finish_button_detected"] is False
+    assert snapshot["training_unit_image_detail"] is None
 
 
 @pytest.mark.parametrize("image_name", ("army_training1.png", "army_training3.png", "army_training4.png"))
-def test_army_training_snapshot_detects_active_unit_image(image_name):
+def test_army_training_snapshot_detects_active_control(image_name):
     image_path = Path(__file__).resolve().parents[1] / "templates" / image_name
 
     snapshot = read_army_training_snapshot(image_path)
 
     assert snapshot["has_active_training"] is True
     assert snapshot["status"] == "active"
-    assert snapshot["training_unit_image_detail"] >= 20
+    assert snapshot["button_state"] in {"help", "speedup"}
+    assert snapshot["help_button_detected"] or snapshot["speedup_button_detected"]
+    assert snapshot["training_unit_image_detail"] is None

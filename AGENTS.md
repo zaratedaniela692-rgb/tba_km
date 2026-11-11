@@ -1,73 +1,37 @@
 # Zasady pracy nad botem Total Battle
 
 ## Zasady stałe
-1. Przed zmianą kodu przeczytaj kartę ekranu, zaproponuj plan i zadaj pytania. Kod zmieniaj dopiero po akceptacji użytkowniczki.
+1. Przed zmianą zachowania przeczytaj właściwy workflow i kartę ekranu, jeśli dotyczy, oraz krótko przedstaw mały plan. Pytaj tylko o nierozstrzygnięte decyzje wpływające na zakres lub ryzyko; wyraźne polecenie wdrożenia wraz z doprecyzowanym zachowaniem jest akceptacją tego zakresu. Nie pytaj ponownie o zgodę na już zatwierdzone kroki.
 2. Jedno zadanie naraz, małe zmiany. Nie przepisuj działającego kodu przy okazji.
-3. Nie zgaduj współrzędnych na podstawie oglądania obrazu. Korzystaj z `regions.json` i szablonów. Jeśli brakuje zaznaczenia, poproś o jego przygotowanie w `tools/annotate.py`.
-4. Współrzędne zapisuj względem obszaru okna gry, nie całego ekranu. Rozdzielczość, DPI i rozmiar okna powinny być zapisane w `docs/game/konfiguracja.md`.
-5. Stałe symbole rozpoznawaj szablonami, kadrując stabilny środek ikony/przycisku bez nadmiarowego, zmiennego tła. Jeśli kolor tła jest sygnałem stanu, obejmij szablonem tylko ten potrzebny obszar. OCR stosuj do zmiennych liczb i tekstów; przygotuj obraz i waliduj wynik.
-6. Koniec listy wykrywaj po braku zmiany obrazu po przewinięciu, nie po stałej liczbie przewinięć.
-7. Każdy flow modeluj jako maszynę stanów: stan, warunek rozpoznania, akcja, oczekiwany następny stan, limit czasu i obsługa błędu.
-8. Każdy flow powinien mieć tryb dry-run (loguje planowane kliknięcia bez ich wykonywania) i awaryjne zatrzymanie klawiszem.
-9. Loguj datę i godzinę. Przy pewności poniżej progu zapisz screen w `debug/` z opisem.
-10. Po zmianie uruchom testy dotkniętego modułu (np. `pytest -q tests/test_speedup*.py`); `verify.py` uruchamiaj, gdy zmieniają się rozpoznawanie ekranu, regiony lub szablony. Pełne `pytest` uruchamiaj po zmianach przekrojowych (wiele modułów, wspólny kod, `regions.json`) oraz przed commitem kończącym większy etap. Pokaż wynik. Jeśli test lub narzędzie nie jest dostępne, zgłoś to.
-11. Wiedzę z poprawek użytkowniczki dopisz do karty ekranu w sekcji „Wiedza z poprawek” lub do `docs/game/mechaniki.md`.
-12. Nie czytaj całych folderów `debug/` ani `screenshots/`. Poproś o konkretne pliki.
-13. Po zakończonym kroku zaproponuj commit z opisem. Nie rób push bez zgody.
-14. Before implementing a behavior or algorithm change, update its authoritative workflow document with the agreed terms, algorithm/diagram, confirmed facts versus assumptions, uncertain/deferred cases, current code status, and expected tests. Keep that document synchronized with code and tests as behavior changes. Present the contract and implementation plan for explicit user approval before changing code; do not promote an assumed visual candidate to verified game state.
+3. Reguły rozpoznawania ekranu i bezpiecznej automatyzacji gry stosuj z [game-automation.instructions.md](.github/instructions/game-automation.instructions.md).
+4. Dowieź mały, użyteczny przyrost funkcjonalności i wykonaj proporcjonalną walidację. Preferuj krótki live check UI w grze, gdy użytkowniczka jawnie autoryzuje konkretny zakres; używaj wąskich testów automatycznych do logiki i krytycznych zabezpieczeń, bez rozbudowywania macierzy fixture'ów dla każdego wariantu ekranu. Pełne `pytest` uruchamiaj przy zmianach przekrojowych lub przed większym etapem; `tools/verify.py` uruchamiaj przy zmianach regionów/szablonów, gdy jest właściwe do sprawdzenia zmiany. Zgłaszaj niewykonaną walidację i znane ograniczenia. Nie pomijaj kontroli potrzebnych, by uniknąć niezamierzonego wydania zasobów, kliknięcia lub zmieszania profili.
+5. Zmiany kontraktów i dokumentacji prowadź zgodnie z [workflow-docs.instructions.md](.github/instructions/workflow-docs.instructions.md).
+6. Nie czytaj całych folderów `debug/` ani `screenshots/`; wskaż konkretne pliki.
+7. Po zakończonym kroku zaproponuj commit z krótkim opisem. Nie rób push bez zgody.
+8. Before a behavior change, update its authoritative workflow with the agreed contract, confirmed facts/assumptions, deferred cases, implementation status, and proportionate validation. A clear user request to implement the described behavior is explicit approval; ask first only when a consequential behavior or risk remains unclear. Keep one current status in the area workflow rather than adding a separate progress file per module, and keep the workflow aligned with code and tests.
+9. Follow the failure-only game screenshot policy in [game-automation.instructions.md](.github/instructions/game-automation.instructions.md); never repeat an uncertain action to collect evidence.
 
-## Założenia techniczne
-- Plan obsługi klienta desktopowego i przeglądarkowego znajduje się w `docs/game/ui_variants_plan.md`. Obecna aplikacja desktopowa ma zachować działający UI bez zmian; nowy UI przeglądarkowy wymaga osobnych screenów, regionów i szablonów. Traktuj plan jako niezaimplementowane wymaganie; przed wdrożeniem obsługi przeglądarki uzyskaj zgodę użytkowniczki i nie kopiuj współrzędnych ani wzorców desktopowych.
-- Bot działa lokalnie i wizualnie: obraz gry -> rozpoznanie -> decyzja -> kliknięcie.
-- Rozpoznawanie stałych elementów odbywa się przez OpenCV template matching; OCR (Tesseract) służy do zmiennych tekstów i liczb.
-- Odczyt danych ze stanu gry projektuj jako funkcje niezależne od feature'ów: zwracają surową wartość, wynik normalizacji, kolor/pewność i czas odczytu, bez klikania ani decyzji biznesowych. Feature deklaruje potrzebne pola, waliduje je i dopiero wtedy podejmuje akcję.
-- Cache danych planuj per pole i per profil; szybko zmienne dane odczytuj przed użyciem, a stabilne unieważniaj po akcjach, które mogły je zmienić.
+## Bezpieczeństwo automatyzacji
+- Bot działa lokalnie i wizualnie. Nie odczytujemy pamięci procesu, nie przechwytujemy ruchu sieciowego, nie wstrzykujemy kodu ani nie obchodzimy zabezpieczeń gry.
 - Nie analizujemy screenów modelem AI w czasie działania bota.
-- Nie odczytujemy pamięci procesu, nie przechwytujemy ruchu sieciowego, nie wstrzykujemy kodu i nie obchodzimy zabezpieczeń gry.
-- Gra ma dwa główne konteksty: mapa i armia. Mają różne ekrany i dostępne akcje; wspólne elementy interfejsu mogą współdzielić wzorce.
-- Docelowo bot ma obsługiwać co najmniej cztery okna gry, równolegle lub przez przełączanie. Każde okno/konto ma własny profil i izolowany stan: przechwycony obraz, rozpoznany tryb, parametry, wyniki OCR, cache i logi. Nie wolno mieszać danych ani akcji pomiędzy profilami.
 - Logowanie i uruchamianie gry pozostaje po stronie użytkowniczki; profile nie przechowują haseł.
+- Nie mieszaj danych ani akcji pomiędzy profilami. Zakres nowych flow gry wymaga osobnej zgody.
+- Browser readiness and read-only fixture coverage are separate capabilities; consult the current [client routing contract](docs/game/ui_variants_plan.md) before claiming support. Never enable browser actions from desktop assets.
 
-## Struktura projektu
-- `automate.py` – istniejący wspólny mechanizm przechwytywania ekranu, dopasowywania wzorców, OCR i kliknięć.
-- `crypt.py`, `mines.py`, `watchtower_mines.py`, `login.py`, `troops.py`, `chest_counter.py` – istniejące skrypty automatyzujące poszczególne czynności.
-- `army_training_plan.py` – nieinteraktywny model planu zleceń szkolenia z trwałym zapisem per profil; nie wykonuje OCR ani kliknięć w grze.
-- `task_controller.py` – persistent typed task queue and lifecycle state per profile; does not perform OCR or game clicks.
-- Current integration scope is army training only. Building upgrades and academy research may remain represented as task types, but do not implement or connect their game flows until requested.
-- `profiles/<profil>/army_training.json` – lokalny plan zleceń danego profilu. Nie przechowuje haseł i jest ignorowany przez Git.
-- `profiles/<profil>/tasks.json` – persistent task queue for one profile; it does not store passwords and is ignored by Git.
-- `samples/` – istniejące wzorce używane przez aktualne skrypty. Nie przenoś ich ani nie zastępuj bez uzgodnienia.
-- `templates/<ekran>/` – nowe, opisane szablony elementów.
-- `regions.json` – obszary i elementy opisane współrzędnymi względem okna gry.
-- `docs/game/` – mechaniki gry i konfiguracja środowiska.
-- `docs/screens/` – karty rozpoznawanych ekranów.
-- `screenshots/<ekran>/` – screeny źródłowe i ich wersje opisane.
-- `tests/data/<ekran>/` – screeny regresyjne i oczekiwane wyniki JSON.
-- `tools/` – narzędzia pomocnicze, docelowo `annotate.py` i `verify.py`.
-- `debug/verify/<ekran>/` – wyniki weryfikacji rozpoznawania.
+## Nawigacja po projekcie
 
-W Etapie 1 tworzone są tylko katalogi bazowe. Podkatalogi `<ekran>` powstaną po ustaleniu nazw konkretnych ekranów; „mapa” i „armia” są na razie trybami gry, nie zatwierdzonymi nazwami ekranów.
+For behavior and capability questions, start with the area's workflow and its feature contents; do not routinely inspect code when the documented answer is complete. Inspect the relevant implementation and tests when changing behavior, diagnosing a bug, or resolving missing, contradictory, or stale documentation. A workflow describes the contract; it is not proof of implementation or a passing test run. Screen cards own visual recognition evidence, while shared game facts belong in [mechaniki.md](docs/game/mechaniki.md).
 
-## Uruchamianie i zależności
-Uruchamiaj polecenia z katalogu projektu. W PowerShell przykłady:
+Documentation ownership, the feature-section format, and maintenance rules are defined in [workflow-docs.instructions.md](.github/instructions/workflow-docs.instructions.md#feature-contract-format). The area workflows below have feature contents and scoped contracts. Their status sections distinguish inspected implementation, tests actually executed, live evidence, and unresolved conflicts. Retained historical notes are not additional current contracts; legacy coverage explicitly names unaudited branches. Project structure, AI-assisted workflow optimization, and daily review are tracked in the [AI agent workflow audit and improvement plan](docs/agent_workflow_refactor.md).
 
-```powershell
-python .\crypt.py --help
-python .\crypt.py --type common --min-progress 50
-python .\mines.py --help
-python .\watchtower_mines.py --help
-python .\tools\verify.py --screen world_map --input .\tests\data\world_map
-python .\tools\resource_ocr.py --screen world_map --input .\tests\data\world_map
-python -m pytest -q .\tests\test_speedup_calibration.py
-python -m pytest
-python .\login.py .\credentials.json
-python .\troops.py .\troops.json
-python .\chest_counter.py
-```
+| Obszar | Workflow / źródło prawdy | Kod | Testy |
+| --- | --- | --- | --- |
+| Training army | [Army training workflow](docs/game/army_training_slot_workflow.md) | `army_training_*.py`, `army_training_manager.py`, `army_training_executor.py` | `tests/test_army_training_*.py` |
+| Speedups | [Speedup workflow](docs/game/speedup_module_workflow.md) | `speedup*.py` | `tests/test_speedup*.py` |
+| Task queue | [Task manager contract](docs/game/task_manager.md); see [task-queue.instructions.md](.github/instructions/task-queue.instructions.md) | `task_controller.py` | `tests/test_task_controller.py` |
+| UI variants and client routing | [UI variants plan](docs/game/ui_variants_plan.md) | `ui_variants.py`, `client_router.py` | `tests/test_client_router.py`, `tests/test_browser_army_training.py` |
+| Shared resource readings | [Resource reading workflow](docs/game/resource_reading_workflow.md) | `tools/resource_ocr.py` | `tests/test_resource_ocr.py` |
+| Legacy mines, Watchtower, crypts | [Legacy automation workflow](docs/game/legacy_automation_workflow.md) | `mines.py`, `watchtower_mines.py`, `crypt.py`, `automate.py` | Recognition tests only; see scoped evidence and gaps in the workflow |
+| Screen recognition | [Screen cards](docs/screens/) | `automate.py`, `regions.json`, `templates/` | `tests/data/`, `tools/verify.py` |
 
-`login.py` wymaga JSON z polami `username` i `password`; `troops.py` wymaga JSON mapującego nazwy jednostek na liczby. `mines.py` i `watchtower_mines.py` udostępniają własne argumenty CLI. Dla `mines.py` kliknięcia są opt-in przez `--click`; sprawdź `--help` przed użyciem innych trybów.
-
-Kod importuje m.in. PyAutoGUI, OpenCV (`cv2`), NumPy, MSS, imutils i pytesseract. Wymagany jest także zainstalowany program Tesseract OCR; niektóre skrypty kopalń używają opcjonalnych bibliotek dźwiękowych. W repozytorium nie ma obecnie manifestu zależności z przypiętymi wersjami.
-
-## Stan przechwytywania obrazu
-Aktualne `Automator.update()` przechwytuje pierwszy monitor (`mss.monitors[1]`), a nie wybrane okno gry. Docelowe współrzędne względem okna oraz wybór okna przeglądarki/klienta nie są jeszcze zaimplementowane. Nie zakładaj, że wymagania z sekcji „Zasady stałe” są już spełnione przez istniejący kod.
+Run commands and domain-specific recognition rules are in [game-automation.instructions.md](.github/instructions/game-automation.instructions.md). Test and supervised-run requirements are in [game-tests.instructions.md](.github/instructions/game-tests.instructions.md).

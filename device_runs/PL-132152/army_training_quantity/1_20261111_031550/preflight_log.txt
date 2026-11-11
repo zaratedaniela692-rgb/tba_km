@@ -1,0 +1,1 @@
+{"status": "TRAINING_STATE_UNKNOWN", "reason": "not_confirmed_idle"}

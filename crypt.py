@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from automate import Automator
 import time
 import argparse
 import os
@@ -151,38 +150,49 @@ def speedup(a):
         return True
     return False
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-t", "--type", default = "common", help = "crypt type")
-parser.add_argument("-p", "--min-progress", type = int, default = 0, help = "minimum exploration percent to select crypt (0 = no filtering)")
-args = parser.parse_args()
-
-# Global threshold (percentage) for selecting crypts via OCR
-MIN_PROGRESS = args.min_progress
-
-crypt_type = args.type
-
+MIN_PROGRESS = 0
 rare = False
-if crypt_type == "common":
-    crypts = common_crypts
-elif crypt_type == "epic":
-    crypts = epic_crypts
-elif crypt_type == "rare":
-    crypts = rare_crypts
-    rare = True
-else:
-    print("Unknown crypt type")
-    exit(1)
+crypts = common_crypts
 
-a = Automator()
-fails = 0
-last_restart = time.time()
-while True:
-    if fails >= 10 or time.time() > last_restart + 900:
-        a.restart_game(True)
-        last_restart = time.time()
-        fails = 0
-    if not speedup(a):
-        if crypt(a):
+
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--type", default="common", help="crypt type")
+    parser.add_argument(
+        "-p", "--min-progress", type=int, default=0,
+        help="minimum exploration percent to select crypt (0 = no filtering)",
+    )
+    args = parser.parse_args(argv)
+
+    global MIN_PROGRESS, crypts, rare
+    MIN_PROGRESS = args.min_progress
+    rare = args.type == "rare"
+    crypt_types = {
+        "common": common_crypts,
+        "epic": epic_crypts,
+        "rare": rare_crypts,
+    }
+    if args.type not in crypt_types:
+        print("Unknown crypt type")
+        return 1
+    crypts = crypt_types[args.type]
+
+    from automate import Automator
+
+    automator = Automator()
+    fails = 0
+    last_restart = time.time()
+    while True:
+        if fails >= 10 or time.time() > last_restart + 900:
+            automator.restart_game(True)
+            last_restart = time.time()
             fails = 0
-        else:
-            fails += 1
+        if not speedup(automator):
+            if crypt(automator):
+                fails = 0
+            else:
+                fails += 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

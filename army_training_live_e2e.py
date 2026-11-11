@@ -16,7 +16,6 @@ from army_training_levels import read_slot_selector_levels
 from army_training_scanner import (
     ArmyTrainingScannerError,
     _load_regions,
-    locate_finish_training_button,
     read_army_training_snapshot_from_image,
 )
 from army_training_slot_reader import read_slot_readings
@@ -102,17 +101,9 @@ def _select_max_minus_one(frame, variant, slot):
 
 
 def _read_current_training_state(frame, variant, include_numeric=True):
-    snapshot = read_army_training_snapshot_from_image(
+    return read_army_training_snapshot_from_image(
         frame, variant=variant, include_numeric=include_numeric,
     )
-    if snapshot["status"] == "unknown":
-        try:
-            _, finish_point = locate_finish_training_button(frame, variant)
-        except ArmyTrainingScannerError:
-            finish_point = None
-        if finish_point is not None:
-            snapshot = {**snapshot, "status": "completed", "finish_button_detected": True}
-    return snapshot
 
 
 def _reading_is_reliable(reading):

@@ -164,6 +164,14 @@ def validate_task_queue(queue, expected_profile_id=None):
         raise TaskQueueError("paused i pause_reason muszą być ze sobą zgodne.")
     _validate_settings(queue.get("settings"))
     _parse_time(queue.get("created_at"))
+    if "army_training_hold_history" in queue and not isinstance(queue["army_training_hold_history"], list):
+        raise TaskQueueError("Army training hold history must be a list.")
+    hold = queue.get("army_training_hold")
+    if hold is not None:
+        if not isinstance(hold, dict) or not all(isinstance(hold.get(key), str) and hold[key] for key in ("reason", "task_id")):
+            raise TaskQueueError("Invalid army training hold.")
+        if _parse_time(hold.get("at")) is None:
+            raise TaskQueueError("Army training hold requires a timestamp.")
 
     tasks = queue.get("tasks")
     if not isinstance(tasks, list):
@@ -197,6 +205,24 @@ def validate_task_queue(queue, expected_profile_id=None):
             _validate_positive_seconds(task["help_window_seconds"], "help_window_seconds")
         if task.get("completed_reason") is not None and not isinstance(task["completed_reason"], str):
             raise TaskQueueError(f"completed_reason zadania {task_id} musi być tekstem.")
+        if "resource_retry_history" in task and not isinstance(task["resource_retry_history"], list):
+            raise TaskQueueError("Resource retry archive must be a list.")
+        retry = task.get("resource_retry")
+        if retry is not None:
+            if not isinstance(retry, dict):
+                raise TaskQueueError("resource_retry must be an object.")
+            attempts, limit = retry.get("attempts"), retry.get("max_attempts")
+            if (isinstance(limit, bool) or not isinstance(limit, int) or limit < 1
+                    or isinstance(attempts, bool) or not isinstance(attempts, int) or not 0 <= attempts <= limit):
+                raise TaskQueueError("Invalid resource retry attempt count or limit.")
+            history = retry.get("history")
+            if not isinstance(history, list) or len(history) != attempts:
+                raise TaskQueueError("Resource retry history must match the attempt count.")
+            for entry in history:
+                if not isinstance(entry, dict) or not all(isinstance(entry.get(key), str) and entry[key] for key in ("reason", "recovery_status")):
+                    raise TaskQueueError("Invalid resource retry history entry.")
+                if _parse_time(entry.get("at")) is None:
+                    raise TaskQueueError("Resource retry timestamp is required.")
         for key in ("created_at", "next_check_at", "started_at", "help_due_at", "help_requested_at",
                     "speedup_check_at", "speedup_available_at", "completed_at", "expires_at"):
             _parse_time(task.get(key))
@@ -266,6 +292,51 @@ def enqueue_task(
     return task
 
 
+def _stock_goal_decision_is_current(task, current_time):
+    if task["payload"].get("goal_kind") != "slot_stock_v1":
+        return True
+    process = task["payload"].get("process", {})
+    valid_until = _parse_time(process.get("decision_valid_until"))
+    return (
+        process.get("state") == "needs_preflight"
+        and valid_until is not None
+        and current_time < valid_until
+    )
+
+
+def army_training_start_is_held(queue, task):
+    return (
+        queue.get("army_training_hold") is not None
+        and task["task_type"] == "army_training"
+        and task["payload"].get("goal_kind") != "finish_training_v1"
+    )
+
+
+def task_parallelism_blocker(task, active_tasks, threshold_seconds):
+    """Return a lifecycle blocker for validated task data, without mutating it."""
+    if any(active["task_type"] == task["task_type"] for active in active_tasks):
+        return "same_type_active"
+    if any(
+        active["status"] != "waiting_completion"
+        or active.get("last_remaining_seconds") is None
+        or active["last_remaining_seconds"] <= threshold_seconds
+        for active in active_tasks
+    ):
+        return "parallel_wait_not_ready"
+    return None
+
+
+def _parallel_task_gate_allows(task, active_tasks, threshold_seconds):
+    return task_parallelism_blocker(task, active_tasks, threshold_seconds) is None
+
+
+def _has_required_resources(task, available_resources):
+    return all(
+        available_resources.get(name, 0) >= amount
+        for name, amount in task["required_resources"].items()
+    )
+
+
 def get_next_task(queue, available_resources, now=None):
     """Return the next eligible task; defer resource-blocked tasks without dropping them."""
     validate_task_queue(queue)
@@ -285,29 +356,21 @@ def get_next_task(queue, available_resources, now=None):
         key=lambda task: (effective_priority(queue, task), _parse_time(task["created_at"])),
     )
     for task in candidates:
-        if task["payload"].get("goal_kind") == "slot_stock_v1":
-            process = task["payload"].get("process", {})
-            valid_until = _parse_time(process.get("decision_valid_until"))
-            if (
-                process.get("state") != "needs_preflight"
-                or valid_until is None
-                or current_time >= valid_until
-            ):
-                continue
+        if army_training_start_is_held(queue, task):
+            continue
+        if not _stock_goal_decision_is_current(task, current_time):
+            continue
         next_check = _parse_time(task.get("next_check_at"))
         if next_check is not None and current_time < next_check:
             continue
-        if any(active["task_type"] == task["task_type"] for active in active_tasks):
-            continue
-        if active_tasks and any(
-            active["status"] != "waiting_completion"
-            or active.get("last_remaining_seconds") is None
-            or active["last_remaining_seconds"] <= queue["settings"]["parallel_wait_threshold_seconds"]
-            for active in active_tasks
+        if not _parallel_task_gate_allows(
+            task,
+            active_tasks,
+            queue["settings"]["parallel_wait_threshold_seconds"],
         ):
             continue
 
-        if any(available_resources.get(name, 0) < amount for name, amount in task["required_resources"].items()):
+        if not _has_required_resources(task, available_resources):
             task["status"] = "waiting_resources"
             task["next_check_at"] = (
                 current_time + timedelta(seconds=queue["settings"]["resource_retry_seconds"])
@@ -327,18 +390,18 @@ def mark_task_started(queue, task_id, initial_remaining_seconds, now=None):
     task = _find_task(queue, task_id)
     if task["status"] not in {"queued", "waiting_resources"}:
         raise TaskQueueError("Zadanie można uruchomić tylko ze stanu queued lub waiting_resources.")
+    if army_training_start_is_held(queue, task):
+        raise TaskQueueError("New army training is held; explicit resume is required.")
     active_tasks = [
         other for other in queue["tasks"]
         if other["task_id"] != task_id and other["status"] in ACTIVE_STATUSES
     ]
-    if any(other["task_type"] == task["task_type"] for other in active_tasks):
+    blocker = task_parallelism_blocker(
+        task, active_tasks, queue["settings"]["parallel_wait_threshold_seconds"],
+    )
+    if blocker == "same_type_active":
         raise TaskQueueError("Nie można uruchomić drugiego aktywnego zadania tego samego typu.")
-    if active_tasks and any(
-        other["status"] != "waiting_completion"
-        or other.get("last_remaining_seconds") is None
-        or other["last_remaining_seconds"] <= queue["settings"]["parallel_wait_threshold_seconds"]
-        for other in active_tasks
-    ):
+    if blocker is not None:
         raise TaskQueueError("Inne zadanie może ruszyć dopiero, gdy aktywne zadania czekają ponad próg równoległości.")
     if isinstance(initial_remaining_seconds, bool) or not isinstance(initial_remaining_seconds, int) or initial_remaining_seconds < 0:
         raise TaskQueueError("initial_remaining_seconds musi być nieujemną liczbą całkowitą.")
@@ -430,6 +493,69 @@ def complete_task(queue, task_id, reason, now=None):
     task["completed_reason"] = reason
     validate_task_queue(queue)
     return deepcopy(task)
+
+
+def record_resource_retry_failure(queue, task_id, reason, recovery_status, now=None):
+    """Record one confirmed resource failure; callers persist the resulting queue."""
+    validate_task_queue(queue)
+    task = _find_task(queue, task_id)
+    if task["status"] not in {"queued", "waiting_resources"}:
+        raise TaskQueueError("Resource retry requires a pending task.")
+    if task["task_type"] != "army_training" or task["payload"].get("goal_kind") == "finish_training_v1":
+        raise TaskQueueError("Silver retry applies only to new army training.")
+    if army_training_start_is_held(queue, task):
+        raise TaskQueueError("Army training is already held.")
+    if not all(isinstance(value, str) and value for value in (reason, recovery_status)):
+        raise TaskQueueError("Resource failure and recovery reasons are required.")
+    current_time = _utc_time(now)
+    next_check = _parse_time(task.get("next_check_at"))
+    if next_check is not None and current_time < next_check:
+        raise TaskQueueError("Resource retry is not due.")
+    retry = task.setdefault("resource_retry", {"attempts": 0, "max_attempts": 3, "history": []})
+    if retry["attempts"] >= retry["max_attempts"]:
+        raise TaskQueueError("Resource retry budget is exhausted.")
+    retry["attempts"] += 1
+    exhausted = retry["attempts"] >= retry["max_attempts"]
+    deadline = None if exhausted else (
+        current_time + timedelta(seconds=queue["settings"]["resource_retry_seconds"])
+    ).isoformat()
+    retry["history"].append({
+        "at": current_time.isoformat(), "reason": reason, "recovery_status": recovery_status,
+        "outcome": "held" if exhausted else "deferred", "next_check_at": deadline,
+    })
+    task.update(status="waiting_resources", next_check_at=deadline)
+    if exhausted:
+        queue["army_training_hold"] = {
+            "at": current_time.isoformat(), "task_id": task_id,
+            "reason": f"{reason}; {retry['attempts']}/{retry['max_attempts']} attempts exhausted; recovery={recovery_status}",
+        }
+    validate_task_queue(queue)
+    return deepcopy(task)
+
+
+def resume_army_training(queue, now=None):
+    """Clear a resource hold and renew pending training budgets, without game input."""
+    validate_task_queue(queue)
+    if queue.get("army_training_hold") is None:
+        return False
+    current_time = _utc_time(now)
+    for task in queue["tasks"]:
+        if task["status"] not in {"queued", "waiting_resources"} or task["task_type"] != "army_training" or task["payload"].get("goal_kind") == "finish_training_v1":
+            continue
+        retry = task.get("resource_retry")
+        if retry is not None:
+            task.setdefault("resource_retry_history", []).append(deepcopy(retry))
+            task["resource_retry"] = {"attempts": 0, "max_attempts": retry["max_attempts"], "history": []}
+        task.update(status="queued", next_check_at=None)
+        process = task["payload"].get("process")
+        if isinstance(process, dict):
+            process.update(decision=None, decision_valid_until=None)
+    queue.setdefault("army_training_hold_history", []).append({
+        "hold": deepcopy(queue["army_training_hold"]), "resumed_at": current_time.isoformat(),
+    })
+    queue.pop("army_training_hold")
+    validate_task_queue(queue)
+    return True
 
 
 def confirm_task_completed(queue, task_id, now=None):

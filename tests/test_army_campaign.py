@@ -47,6 +47,25 @@ def test_repeated_expansion_keeps_open_goals_and_rearms_only_completed_ones():
     assert {task["priority"] for task in queue["tasks"]} == {2}
 
 
+def test_expansion_keeps_existing_legacy_untyped_goal_identity():
+    queue = create_task_queue("p")
+    expand_campaign(queue, Campaign("guardsmen", "fixed", 4), None, NOW)
+    legacy_task = queue["tasks"][0]
+    legacy_task["payload"]["slot"].pop("unit_type")
+    legacy_task["task_id"] = "army_stock:level_4:match_1"
+
+    expanded = expand_campaign(queue, Campaign("guardsmen", "fixed", 4), None, NOW)
+
+    assert expanded[0] == {
+        "task_id": "army_stock:level_4:match_1",
+        "unit_type": "guardsmen",
+        "level": 4,
+        "match_number": 1,
+        "action": "kept",
+    }
+    assert len(queue["tasks"]) == 3
+
+
 def test_rearm_rejects_open_goal():
     queue = create_task_queue("p")
     task = enqueue_training_goal(queue, TrainingGoal("p", Slot("guardsmen", 5, 1)), NOW)

@@ -1,0 +1,10 @@
+{
+  "status": "FINISH_PREFLIGHT_FAILED",
+  "live_test_status": "FAILED_OR_UNCERTAIN",
+  "finish": {
+    "status": "TRAINING_STATE_UNKNOWN",
+    "reason": "not_confirmed_idle"
+  },
+  "test_profile": "test",
+  "run_dir": "C:\\Users\\kmazur012\\repo\\ctech\\ctechchat\\tba_km\\device_runs\\PL-132152\\army_training_quantity\\1_20261111_031550"
+}

@@ -160,6 +160,11 @@ def execute_finish_task(
         raise TaskQueueError("Fallback finish task not found.")
     if task["status"] not in {"queued", "waiting_resources"}:
         raise TaskQueueError("Only a pending fallback task can run.")
+    if execute and queue["paused"]:
+        return {
+            "status": "BLOCKED_PAUSED_QUEUE", "reason": queue["pause_reason"],
+            "actions_executed": False, "queue_modified": False,
+        }
     trace = WorkflowTrace("army_training_finish", profile_id=queue.get("profile_id"))
 
     def finish(result):

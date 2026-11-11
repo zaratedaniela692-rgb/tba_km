@@ -52,3 +52,40 @@ def test_blank_region_is_an_unrecognized_layout():
 
     assert reading.value is None
     assert reading.status == "layout_unrecognized"
+
+
+def test_configure_tesseract_prefers_explicit_executable(monkeypatch):
+    monkeypatch.setenv("TESSERACT_CMD", "environment-tesseract")
+    monkeypatch.setattr(
+        speedup_reader.shutil,
+        "which",
+        lambda candidate: {"explicit-tesseract": "resolved-explicit", "tesseract": "path-tesseract"}.get(candidate),
+    )
+    monkeypatch.setattr(speedup_reader.Path, "is_file", lambda _path: False)
+
+    result = speedup_reader.configure_tesseract("explicit-tesseract")
+
+    assert result == "resolved-explicit"
+    assert speedup_reader.pytesseract.pytesseract.tesseract_cmd == "resolved-explicit"
+
+
+def test_configure_tesseract_uses_environment_before_path(monkeypatch):
+    monkeypatch.setenv("TESSERACT_CMD", "environment-tesseract")
+    monkeypatch.setattr(
+        speedup_reader.shutil,
+        "which",
+        lambda candidate: {"environment-tesseract": "resolved-environment", "tesseract": "path-tesseract"}.get(candidate),
+    )
+    monkeypatch.setattr(speedup_reader.Path, "is_file", lambda _path: False)
+
+    assert speedup_reader.configure_tesseract() == "resolved-environment"
+
+
+def test_configure_tesseract_returns_none_when_no_executable_is_available(monkeypatch):
+    monkeypatch.delenv("TESSERACT_CMD", raising=False)
+    monkeypatch.setattr(speedup_reader.shutil, "which", lambda _candidate: None)
+    monkeypatch.setattr(speedup_reader.Path, "is_file", lambda _path: False)
+    monkeypatch.setattr(speedup_reader.pytesseract.pytesseract, "tesseract_cmd", "unchanged")
+
+    assert speedup_reader.configure_tesseract() is None
+    assert speedup_reader.pytesseract.pytesseract.tesseract_cmd == "unchanged"

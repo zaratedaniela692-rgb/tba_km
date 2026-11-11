@@ -18,7 +18,6 @@ PLANNED = "PLANNED"
 
 MAX_SCROLLS = 12
 SETTLE_SECONDS = 0.3
-REPLAN_BELOW_FRACTION = 0.2
 
 
 @dataclass(frozen=True)
@@ -177,25 +176,29 @@ class _Run:
         if dry_run:
             return SpeedupResult(PLANNED, "dry_run", plan)
 
-        stock = dict(inventory)
         queue = _expand(plan)
         replan = None
         after = dialog
+        # Deferred MVP replan option; disabled until separately approved:
+        # replan_below_fraction = 0.2
+        # stock = dict(inventory)
         while queue:
             duration = queue.pop(0)
             after = self.use_once(duration, seen, views, last_use=not queue)
-            stock[duration] -= 1
             if after is None or after.timer.value == 0:
                 return SpeedupResult(FINISHED, "task_finished", plan, tuple(self.used.items()), replan=replan)
-            timer = after.timer.value
-            if replan is None and timer is not None and timer < initial * REPLAN_BELOW_FRACTION:
-                replan = plan_speedups(timer, stock)
-                if replan.status == STATUS_SHORTFALL:
-                    return SpeedupResult(
-                        NOT_ENOUGH, "owned_items_do_not_cover_remaining_time_after_replan", plan,
-                        tuple(self.used.items()), replan.shortfall_seconds, replan,
-                    )
-                queue = _expand(replan)
+            # MVP uses only the originally planned items. If the timer changes
+            # after Help, do not calculate or execute replacement uses.
+            # Deferred future option, do not uncomment without user approval:
+            # stock[duration] -= 1
+            # if replan is None and after.timer.value < initial * replan_below_fraction:
+            #     replan = plan_speedups(after.timer.value, stock)
+            #     if replan.status == STATUS_SHORTFALL:
+            #         return SpeedupResult(
+            #             NOT_ENOUGH, "owned_items_do_not_cover_remaining_time_after_replan", plan,
+            #             tuple(self.used.items()), replan.shortfall_seconds, replan,
+            #         )
+            #     queue = _expand(replan)
         raise _Abort(UNCERTAIN, "timer_not_zero_after_plan")
 
 

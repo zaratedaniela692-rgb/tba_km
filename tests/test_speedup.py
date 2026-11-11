@@ -108,7 +108,7 @@ def test_item_in_an_earlier_view_is_scrolled_back_to_before_the_click():
     assert game.scrolls[-3:] == [-1, -1, -1]
 
 
-def test_plan_is_rebuilt_once_when_the_timer_falls_below_twenty_percent(monkeypatch):
+def test_plan_is_not_rebuilt_when_the_timer_falls_below_twenty_percent(monkeypatch):
     game = FakeGame(100 * H, stock(H, 3 * H, 8 * H, 15 * H, D, count=100), clan_help=75 * H)
     plans = []
     real = speedup.plan_speedups
@@ -116,10 +116,15 @@ def test_plan_is_rebuilt_once_when_the_timer_falls_below_twenty_percent(monkeypa
 
     result = run(game)
 
-    assert result.status == FINISHED
-    assert plans == [100 * H, 17 * H]
-    assert result.replan.uses == ((8 * H, 2), (H, 1))
-    assert [point[0] for point in game.clicks] == [8 * H, 8 * H, 8 * H, H]
+    assert result.status == UNCERTAIN
+    assert result.reason == "dialog_closed_before_plan_end"
+    assert plans == [100 * H]
+    assert result.replan is None
+    initially_planned = [duration for duration, count in real(100 * H, stock(H, 3 * H, 8 * H, 15 * H, D, count=100)).uses for _ in range(count)]
+    used_durations = [point[0] for point in game.clicks]
+    assert used_durations == initially_planned[:len(used_durations)]
+    assert len(used_durations) == 4
+    assert game.remaining == 0
 
 
 def test_plan_is_not_rebuilt_while_the_timer_stays_above_twenty_percent():

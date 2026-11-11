@@ -90,6 +90,21 @@ def resolve_campaign_level(campaign, max_level):
     return level
 
 
+def _find_existing_goal(queue, slot):
+    slot_data = asdict(slot)
+    legacy_slot_data = {
+        "global_level": slot.global_level,
+        "match_number": slot.match_number,
+    }
+    compatible_slots = (slot_data, legacy_slot_data)
+    return next((
+        task for task in queue["tasks"]
+        if task["task_type"] == "army_training"
+        and task["payload"].get("goal_kind") == "slot_stock_v1"
+        and task["payload"].get("slot") in compatible_slots
+    ), None)
+
+
 def expand_goals(queue, unit_type, level, now: datetime, priority=None):
     """Enqueue goals for a category with a verified slot-count map."""
     try:
@@ -105,15 +120,7 @@ def expand_goals(queue, unit_type, level, now: datetime, priority=None):
     for match_number in range(1, MATCH_COUNTS_BY_LEVEL[level] + 1):
         slot = Slot(unit_type, level, match_number)
         task_id = goal_task_id(slot)
-        existing = next((
-            task for task in queue["tasks"]
-            if task["task_type"] == "army_training"
-            and task["payload"].get("goal_kind") == "slot_stock_v1"
-            and task["payload"].get("slot") in (
-                {"unit_type": unit_type, "global_level": level, "match_number": match_number},
-                {"global_level": level, "match_number": match_number},
-            )
-        ), None)
+        existing = _find_existing_goal(queue, slot)
         if existing is None:
             enqueue_training_goal(queue, TrainingGoal(queue["profile_id"], slot), now, priority)
             action = "created"
