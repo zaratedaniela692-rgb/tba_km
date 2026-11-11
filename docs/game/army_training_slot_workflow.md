@@ -16,6 +16,8 @@ Executed 2026-11-10 with the workspace Python 3.13 venv, installed Tesseract tem
 - [Live test action checkpoints](#live-test-action-checkpoints-2026-11-09)
 - [Parameterless live navigation check](#parameterless-live-navigation-check-2026-11-10)
 - [One-command live Barracks test](#one-command-live-barracks-test-2026-11-09)
+- [One-shot live E2E](#one-shot-live-e2e-contract-implemented-supervised-live-run-pending)
+- [Read-only army category inspector](#read-only-army-category-inspector-implemented-live-capture-pending)
 - [Optional training quantity](#optional-training-quantity-approved-2026-11-09)
 - [Implementation status](#implementation-status) - legacy cross-feature table; not a replacement for the pilot's scoped status.
 
@@ -254,7 +256,7 @@ Start at most one persistent stock-goal order per manager invocation, request ce
 - Queue pause and deferred finish are different: uncertain Train/Help pauses; unsuccessful owned finish does not. Generic quick-finish resource exhaustion can also pause through the [queue lifecycle](task_manager.md#lifecycle-and-isolation). No automatic reconciliation of uncertain game input is promised by manual unpause.
 - Manager evaluation on an active scanner frame can return no executable stock goal before reaching its executor finish step. Do not describe every pending army invocation as guaranteed to finish an old order. Due fallback selection is a separate path.
 - Marker and queue are separately persisted files, not a cross-file transaction. A marker proves local recorded ownership, not actual account identity. An expired stock goal remains completed until a new campaign expansion re-arms it; expiration is not stock satisfaction.
-- The reviewed E2E helper has a `completed`/Finish path in addition to Help/Speed Up; the old absence-of-both-means-proceed scenario omits it. The standalone second-slot one-shot is a different API with no persistent goals/Help and a different confirmation phrase.
+- The reviewed E2E helper has a `completed`/Finish path in addition to Help/Speed Up; the old absence-of-both-means-proceed scenario omits it. The standalone first-slot explicit-level one-shot remains a separate API with no persistent goals/Help and its own level-specific confirmation phrase.
 
 ### Status and Verification
 
@@ -420,22 +422,22 @@ For another computer, copy/clone the repository with its `regions.json`, `templa
 
 The first live E2E is a one-shot experiment, not a persistent stock goal and not a permanent `match_number` assignment:
 
-1. The user launches the game and places the Barracks screen fully visible on the primary monitor. Capture the primary monitor at the configured 1920x1080 size. Do not select or attach to another process/window.
-2. Detect all visible slots in the fresh frame. Choose the second visible slot in top-left-to-bottom-right order. If fewer than two slots are detected, or geometry is ambiguous, stop.
-3. Use the existing default-highest assumption for that slot. Find its immediately preceding visible selector badge as the requested `max-1` level and click that badge. Do not attempt to verify the enlarged selected marker after clicking: no representative post-click fixture is available and the current marker check proved too brittle. Report `selection_confirmed=false`; there is a known risk that the click did not change the level and the existing level remains selected.
+1. The user launches the game and places the Barracks screen fully visible on the primary monitor. Capture the primary monitor at the configured 1920x1080 size. Do not select or attach to another process/window. Require the highlighted category to be uniquely recognized as Guardsmen before any click, and verify it again after selector input and immediately before Train.
+2. Detect all visible slots in the fresh frame. Choose the first visible slot in top-left-to-bottom-right order. If no slot is detected or geometry is ambiguous, stop.
+3. Accept the requested global level as an explicit positive CLI argument. Resolve it only when the slot's visible selector range is confidently consecutive and contains that level. Click the corresponding badge once; do not infer a target from `max-1`.
 4. Require the current training state to be idle. If active or unknown, stop without clicking Train.
 5. Read this slot's city count, displayed training amount/limit, selected-level silver cost, and global food/silver. Require reliable OCR, white positive food, and sufficient silver.
 6. Use the stock planner math for this one-shot goal: `target=2*slot_limit`, completion threshold `ceil(0.8*target)`, order amount `min(target-city_count, slot_limit)`. The UI quantity must equal the planned amount. If it differs, stop; quantity-slider manipulation is not part of this first executor.
-7. Default execution is dry-run. Real execution requires explicit `--execute`. After the level click, capture and recheck only the same slot/anchor; do not gate on selected-marker OCR. Immediately before Train, capture and recheck idle state, same slot/anchor, resources, and displayed amount. Then issue exactly one click at the Train button's position detected in that fresh primary-monitor frame. The level itself remains unconfirmed.
+7. Default execution is preview-only. Real execution requires explicit `--execute` and the exact confirmation phrase `TRAIN FIRST SLOT LEVEL <level>`. After the level click, capture a fresh frame and require the enlarged selected badge to be at the requested badge position. If selection is not positively confirmed, stop before preflight/Train; never retry the selector click. Immediately before Train, capture and recheck idle state, the same slot, the same selected-level marker, resources, and displayed amount. Then issue exactly one click at the Train button's position detected in that fresh primary-monitor frame.
 8. Capture after the click and classify training. Only a fresh `active` result confirms acceptance. `idle` or `unknown` is reported as uncertain; never retry the click automatically.
 9. Keep queue/goal state in memory for this one-shot test; do not persist a frame index as `{global_level, match_number}`. No Help/Speed Up clicks, scrolling, or additional training orders.
-10. Honor PyAutoGUI's fail-safe and check the project's emergency-stop file before selector and Train clicks. The current executor does not write timestamped logs or save debug frames; uncertain outcomes are printed in the JSON report and require manual inspection.
+10. Honor PyAutoGUI's fail-safe and check the project's emergency-stop file before selector and Train clicks. Uncertain outcomes are printed in the JSON report and require manual inspection.
 
 ## Live E2E Implementation Status
 
-Implemented as an isolated, opt-in one-shot executor in `army_training_live_e2e.py`. Preview is the default. Live mode requires both `--execute` and the exact confirmation phrase, requires a 1920x1080 primary-monitor capture, and does not persist queue state. It no longer verifies level selection after clicking and reports `selection_confirmed=false`. Mocked tests cover its gates, click sequence, and failures after a click. A real, supervised game run has not yet been performed.
+Implemented in `army_training_live_e2e.py`: Guardsmen-only category verification, arbitrary visible-level targeting in the first slot, and fresh category/selected-marker checks after selection and immediately before Train. Preview remains the default; execution remains opt-in, one-shot, 1920x1080 primary-monitor only, and does not persist queue state. Focused offline validation on 2026-11-12 passed **14 tests** in `tests/test_army_training_live_e2e.py`, including requested-level mapping and no-Train gates for category or selector uncertainty. The fixture harness uses mocked callbacks. No live run was performed.
 
-The current workstation lacks `mss` and `pyautogui`. The preview was attempted and safely returned `BLOCKED` with `Live capture requires the 'mss' package`, `actions_executed=false`, and `queue_modified=false`. Primary-monitor capture and physical clicks have not been exercised here. Install the declared runtime packages on the intended PC and inspect the preview there before executing. The one-below click still relies on the default-highest assumption. The planned order must equal the currently displayed amount; slider manipulation is deliberately not implemented. The executor does not create a persistent manager goal or `match_number`.
+The earlier implementation lacked selected-marker verification and targeted the second visible slot's presumed max-1. This task replaces that behavior. Primary-monitor capture and physical clicks have not been exercised as part of this change. The planned order must equal the currently displayed amount; slider manipulation is deliberately not implemented. The executor does not create a persistent manager goal or `match_number`.
 
 ### Operator Procedure
 
@@ -445,26 +447,34 @@ The current workstation lacks `mss` and `pyautogui`. The preview was attempted a
 
 ```powershell
 python -m pip install -r .\requirements-dev.txt
-python .\army_training_live_e2e.py
+python .\army_training_live_e2e.py --level 6
 ```
 
-4. Review the JSON. Confirm `slot_frame_index` is 1, `requested_level` is the intended max-1, `preflight.blockers` is empty, the game is idle, resources are sufficient, and `planned_quantity` equals the full displayed queue amount. Do not execute if any value is uncertain or the preview is blocked.
-5. To execute the one-shot test, enter the explicit confirmation command. The program clicks max-1 without verifying the enlarged marker, checks that the same visible slot remains, repeats resource/stock checks, then can click Train once. This can train the previously selected level if the selector click failed:
+4. Review the JSON. Confirm `unit_type` is `guardsmen`, `slot_frame_index` is 0, `requested_level` equals the requested level, the visible selector range contains it, `preflight.blockers` is empty, the game is idle, resources are sufficient, and `planned_quantity` equals the full displayed queue amount. Do not execute if any value is uncertain or the preview is blocked.
+5. To execute one Guardsmen training attempt, enter the explicit command and matching level confirmation. The program verifies the selected marker on fresh frames before it can click Train once:
 
 ```powershell
-python .\army_training_live_e2e.py --execute --confirm "TRAIN SECOND SLOT MAX-1"
+python .\army_training_live_e2e.py --level 6 --execute --confirm "TRAIN FIRST SLOT LEVEL 6"
 ```
 
-6. Interpret `START_CONFIRMED` as confirmation that some training started, not proof it started at max-1. `BLOCKED` means Train was not submitted, though the level selector may already have been clicked. `UNKNOWN_AFTER_CLICK` means Train may have been submitted: inspect the game manually and do not rerun automatically.
+6. Interpret `START_CONFIRMED` as confirmation that training started after the requested selection was visually confirmed. `BLOCKED_AFTER_LEVEL_CLICK` means Train was not submitted, though the selector may already have been clicked. `UNKNOWN_AFTER_CLICK` means Train may have been submitted: inspect the game manually and do not rerun automatically.
 7. Emergency stop: create `%USERPROFILE%\.tba_stop` before the next gated action. PyAutoGUI's corner fail-safe is also enabled for real clicks.
 
-This test uses the second visible slot in one frame; it does not mean global `match_number=2`. It does not persist a manager goal, scroll the list, click Help, or automatically retry.
+This test uses the first visible slot in one frame; it does not establish a persistent global `match_number`. It does not persist a manager goal, scroll the list, click Help, or automatically retry.
+
+## Read-Only Army Category Inspector (Implemented; Live Capture Pending)
+
+The inspector recognizes the highlighted Barracks category and reports visible slot geometry, selector-level readings, and per-slot numeric readings. The initial recognized categories are Guardsmen and Specialists, using existing selected-state templates. It is an inspection tool only: it never clicks, changes category, starts training, or mutates a queue. The operator opens Barracks and selects the category before capture. An optional expected `--unit-type` asserts the highlighted category; mismatch or ambiguous recognition blocks the slot report.
+
+Category recognition requires exactly one selected-state template to match at score >= 0.95 inside the annotated `troops_types` region. Slot and OCR readings preserve `unknown`; a successful label does not prove a verified campaign slot map or enable manager/executor support. Browser assets/actions are rejected. Adding a category requires its own selected-state evidence/template and slot-layout validation; Engineers and monster categories remain unsupported.
+
+Implementation: [inspector](../../army_training_inspector.py), [fixture tests](../../tests/test_army_training_inspector.py), and the parameterless [live wrapper](../../tools/run_army_category_inspector_live.py). The wrapper performs best-effort `git pull --ff-only` before capture and publishes only textual failure reports; it sends no game input. On 2026-11-12, offline tests passed **5 tests**. Fixture recognition scored 1.0 and found three slots for both `pelny.png` (Guardsmen) and `specialist_view.png` (Specialists). Tesseract was unavailable in the local environment, so OCR values were correctly reported as unknown. No live capture was performed.
 
 ## Manager-Driven Replenishment Contract (Phases B-D Implemented; Supervised Run Pending)
 
 **Historical integration snapshot:** see [observation](#training-observation-and-stock-reconciliation), [preflight](#resource-preflight-and-quantity), and [start/finish](#start-help-finish-and-evidence) for current scoped contracts. Pending-Help/adapter, category and validation claims in this dated snapshot must not override them.
 
-**Status:** approved 2026-11-06 and implemented through the manager-owned one-goal executor (phases B-D). No supervised live run has been performed. Re-arming follows the recommended option (completed goals are reopened by a new campaign run, history kept). The legacy one-shot executor remains unchanged; the manager executor owns the persistent goal flow.
+**Status:** approved 2026-11-06 and implemented through the manager-owned one-goal executor (phases B-D). No supervised live run has been performed. Re-arming follows the recommended option (completed goals are reopened by a new campaign run, history kept). The separate one-shot executor owns only its isolated test scenario; the manager executor owns the persistent goal flow.
 
 ### Implementation Notes (2026-11-06)
 
@@ -905,7 +915,8 @@ flowchart TD
 | Food/silver live resource preflight and one Train click | Implemented in opt-in manager executor; fixture/mock validation only | `army_training_executor.py` |
 | Help and speed-up click flow | Not implemented | Follow-up after supervised executor run |
 | Primary-monitor capture in isolated one-shot executor | Implemented; requires `mss`, fixed 1920x1080 frame | `army_training_live_e2e.py` |
-| Opt-in max-1 selector click, same-slot re-detection, preflight, one Train click, post-click confirmation | Implemented; selector marker is not verified and report says `selection_confirmed=false`; mocked tests only | `army_training_live_e2e.py`, `tests/test_army_training_live_e2e.py` |
+| Opt-in explicit-level selector click in first visible slot, same-slot re-detection, selected-marker confirmation, preflight, one Train click, post-click confirmation | Implemented; mocked callbacks/fixtures only, no supervised live validation | `army_training_live_e2e.py`, `tests/test_army_training_live_e2e.py` |
+| Read-only Guardsmen/Specialists category and slot inspection | Implemented for desktop fixtures; live capture not run; OCR remains unknown when Tesseract is unavailable | `army_training_inspector.py`, `tests/test_army_training_inspector.py`, `tools/run_army_category_inspector_live.py` |
 | Window selection and scroll workflow | Not implemented | Out of MVP scope |
 
 ## Contract Checks
@@ -921,7 +932,7 @@ Use the tests below as executable checks for the corresponding documented rules.
 | Exact `L-1` completes with a reason without count/limit reads; more than one level below remains blocked | `tests/test_army_training_process.py::test_slot_one_level_below_target_completes_goal_without_other_readings`, `test_slot_more_than_one_level_below_target_stays_blocked` |
 | Stale, mismatched, active, or low-confidence evidence cannot authorize training | `tests/test_army_training_process.py::test_uncertain_evidence_blocks_action`, `test_active_training_cannot_satisfy_goal_or_start_another_order` |
 | Click/capture failures after an action are reported as uncertain and never retried | `tests/test_army_training_live_e2e.py::test_capture_failure_after_level_click_reports_action_and_unknown`, `test_train_click_exception_is_unknown_and_never_retried`, `test_uncertain_post_click_does_not_retry` |
-| Skipping marker verification does not skip same-slot redetection or fresh preflight | `tests/test_army_training_live_e2e.py::test_unconfirmed_selection_still_requires_same_slot_and_fresh_preflight` |
+| Requested selector level must be confirmed after selection and immediately before Train | `tests/test_army_training_live_e2e.py::test_unconfirmed_requested_level_stops_before_preflight_and_train`, `test_requested_level_must_still_be_selected_immediately_before_train` |
 | Manager executor starts at most one order, requires reliable time, never retries uncertain Train, and pauses on unknown result | `tests/test_army_training_executor.py` |
 | Day/hour time reader returns exact fixture values and rejects merged or incomplete glyph layouts | `tests/test_army_training_slot_time.py` |
 | Help timing, Speed Up confirmation, uncertain Help pause, and completion re-observation | `tests/test_army_training_lifecycle.py` |
@@ -930,7 +941,7 @@ For a future change that connects components, add an integration test that start
 
 ## Next Integration Step
 
-Install the declared runtime dependencies on the intended PC, keep the game's Barracks fully visible at 1920x1080 on the primary monitor, and run preview first. The first supervised `--execute` run will use only the second visible slot in the current frame and will not persist a manager goal. It can select max-1, run slot-specific preflight, click Train at most once, and confirm active state. If preview blocks because stock is already at target, a queue is active, resources are insufficient, or the planned order is not exactly one full queue, do not bypass the blocker. After that one-shot E2E works, separately build the persistent queue-manager adapter and prove the global `match_number` over the full list.
+For supervised validation, install runtime dependencies including Tesseract, keep the intended Barracks fully visible at 1920x1080 on the primary monitor, and review the preview before separately authorizing one exact `--level` execution. The one-shot uses the first visible slot and does not persist a manager goal. If preview blocks because stock is already at target, a queue is active, resources are insufficient, or the planned order is not exactly one full queue, do not bypass the blocker. The category inspector is independently runnable against fixtures or one read-only live capture. Persistent queue identity and scrolling remain separate work.
 
 ## Browser client: first-screen recognition contract
 

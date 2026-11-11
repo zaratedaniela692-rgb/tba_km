@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One-shot, explicitly opted-in live army-training E2E for the second visible slot."""
+"""One-shot, explicitly opted-in live army-training E2E for the first visible slot."""
 
 import argparse
 import json
@@ -12,7 +12,8 @@ import cv2
 import numpy as np
 import pytesseract
 
-from army_training_levels import read_slot_selector_levels
+from army_training_inspector import read_selected_category
+from army_training_levels import detect_selector_badges, read_slot_selector_levels
 from army_training_scanner import (
     ArmyTrainingScannerError,
     _load_regions,
@@ -29,7 +30,8 @@ SCREEN = "army_training"
 WORLD_MAP_FRAME_OFFSET_Y = 39
 MIN_CONFIDENCE = 70
 EXPECTED_SIZE = (1920, 1080)
-CONFIRMATION_PHRASE = "TRAIN SECOND SLOT MAX-1"
+DEFAULT_LEVEL = 6
+CONFIRMATION_PHRASE = "TRAIN FIRST SLOT LEVEL {level}"
 STOP_FILE = Path.home() / ".tba_stop"
 
 
@@ -72,32 +74,52 @@ def _resource_readings(image, regions):
 def _slot_position_is_same(frame, variant, expected_slot):
     regions = _load_regions(variant["regions"]).get(SCREEN, {})
     layout = locate_slots(frame, regions, variant)
-    if layout.status != STATUS_OK or len(layout.slots) < 2:
+    if layout.status != STATUS_OK or not layout.slots:
         return False, None
-    slot = layout.slots[1]
+    slot = layout.slots[0]
     same = abs(slot.dx - expected_slot.dx) <= 2 and abs(slot.dy - expected_slot.dy) <= 3
     return same, slot if same else None
 
 
-def _select_max_minus_one(frame, variant, slot):
+def _select_requested_level(frame, slot, requested_level):
     level = read_slot_selector_levels(frame, slot)
-    if level.status != "candidate" or level.one_below_visible_level is None:
-        raise LiveTrainingError("The slot's adjacent max-1 selector level is not confidently visible.")
-    centers = level.badge_centers
-    if len(centers) < 2:
-        raise LiveTrainingError("The slot does not show both the maximum and max-1 selector badges.")
-    lower_badge = centers[-2]
+    if isinstance(requested_level, bool) or not isinstance(requested_level, int) or not 1 <= requested_level <= 9:
+        raise LiveTrainingError("Requested level must be an integer from 1 through 9.")
+    if level.status != "candidate" or level.lowest_visible_level is None or level.highest_visible_level is None:
+        raise LiveTrainingError("The slot's visible selector range is not confidently consecutive.")
+    if not level.lowest_visible_level <= requested_level <= level.highest_visible_level:
+        raise LiveTrainingError("The requested level is not in the slot's confidently read visible range.")
+    badge_index = requested_level - level.lowest_visible_level
+    badge = level.badge_centers[badge_index]
     selector = slot_crop(frame, slot, "unit_troop_level")
     selected_region = slot.regions["unit_troop_level"]
     return {
-        "level": level.one_below_visible_level,
-        "local_x": int(lower_badge[0]),
-        "local_y": int(lower_badge[1]),
-        "screen_x": int(selected_region["x"]) + int(lower_badge[0]),
-        "screen_y": int(selected_region["y"]) + int(lower_badge[1]),
-        "badge_count": len(centers),
+        "level": requested_level,
+        "badge_index": badge_index,
+        "local_x": int(badge[0]),
+        "local_y": int(badge[1]),
+        "screen_x": int(selected_region["x"]) + int(badge[0]),
+        "screen_y": int(selected_region["y"]) + int(badge[1]),
+        "badge_count": len(level.badge_centers),
+        "lowest_visible_level": level.lowest_visible_level,
+        "highest_visible_level": level.highest_visible_level,
         "selector_shape": selector.shape[:2],
     }
+
+
+def _requested_level_is_selected(frame, slot, selection):
+    selector = slot_crop(frame, slot, "unit_troop_level")
+    badges = detect_selector_badges(selector)
+    expected_index = selection["badge_index"]
+    if len(badges) != selection["badge_count"] or expected_index >= len(badges):
+        return False
+    selected_index = max(range(len(badges)), key=lambda index: badges[index][2])
+    other_radii = [badge[2] for index, badge in enumerate(badges) if index != selected_index]
+    if other_radii and badges[selected_index][2] - max(other_radii) < 0.5:
+        return False
+    expected = (selection["local_x"], selection["local_y"])
+    actual = badges[selected_index][:2]
+    return selected_index == expected_index and max(abs(actual[axis] - expected[axis]) for axis in (0, 1)) <= 3
 
 
 def _read_current_training_state(frame, variant, include_numeric=True):
@@ -184,34 +206,43 @@ def _enable_live_failsafe(click_fn):
     pyautogui.FAILSAFE = True
 
 
-def run_one_shot(capture_fn=None, click_fn=None, execute=False, confirmation="", sleep_fn=time.sleep):
-    """Prepare or execute one second-visible-slot max-1 training attempt."""
+def run_one_shot(
+    capture_fn=None, click_fn=None, execute=False, confirmation="", level=DEFAULT_LEVEL, sleep_fn=time.sleep,
+):
+    """Prepare or execute one training attempt for an explicit level in the first visible slot."""
     capture_fn = capture_fn or capture_primary_monitor
     click_fn = click_fn or _click_screen_point
-    if execute and confirmation != CONFIRMATION_PHRASE:
-        raise LiveTrainingError(f"Live execution requires confirmation phrase: {CONFIRMATION_PHRASE}")
+    if isinstance(level, bool) or not isinstance(level, int) or not 1 <= level <= 9:
+        raise LiveTrainingError("Requested level must be an integer from 1 through 9.")
+    required_confirmation = CONFIRMATION_PHRASE.format(level=level)
+    if execute and confirmation != required_confirmation:
+        raise LiveTrainingError(f"Live execution requires confirmation phrase: {required_confirmation}")
     variant = resolve_variant()
     regions = _load_regions(variant["regions"])
     frame, origin = capture_fn()
     if (frame.shape[1], frame.shape[0]) != EXPECTED_SIZE:
         raise LiveTrainingError(f"Expected primary-monitor frame {EXPECTED_SIZE}, got {(frame.shape[1], frame.shape[0])}.")
     layout = locate_slots(frame, regions.get(SCREEN, {}), variant)
-    if layout.status != STATUS_OK or len(layout.slots) < 2:
-        raise LiveTrainingError("Could not confidently detect at least two visible training slots.")
-    second_slot = layout.slots[1]
+    if layout.status != STATUS_OK or not layout.slots:
+        raise LiveTrainingError("Could not confidently detect a visible training slot.")
+    category = read_selected_category(frame, variant)
+    if category.get("status") != "confirmed" or category.get("unit_type") != "guardsmen":
+        raise LiveTrainingError("The highlighted Barracks category is not confidently confirmed as Guardsmen.")
+    first_slot = layout.slots[0]
     before_state = _read_current_training_state(frame, variant)
     if before_state["status"] != "idle":
         raise LiveTrainingError(f"Training is not confirmed idle ({before_state['status']}); no selector or Train click performed.")
 
-    selection = _select_max_minus_one(frame, variant, second_slot)
+    selection = _select_requested_level(frame, first_slot, level)
     result = {
         "mode": "live_one_shot",
         "actions_executed": False,
         "queue_modified": False,
-        "slot_frame_index": second_slot.index,
-        "slot_row": second_slot.row,
-        "slot_column": second_slot.column,
-        "presumed_highest_level": read_slot_selector_levels(frame, second_slot).highest_visible_level,
+        "slot_frame_index": first_slot.index,
+        "slot_row": first_slot.row,
+        "slot_column": first_slot.column,
+        "unit_type": category["unit_type"],
+        "presumed_highest_level": selection["highest_visible_level"],
         "requested_level": selection["level"],
         "selection_confirmed": False,
         "selection": selection,
@@ -240,18 +271,28 @@ def run_one_shot(capture_fn=None, click_fn=None, execute=False, confirmation="",
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
             result["blockers"] = ["capture_geometry_changed_after_level_selection"]
             return result
-        same_slot, current_slot = _slot_position_is_same(selected_frame, variant, second_slot)
+        same_slot, current_slot = _slot_position_is_same(selected_frame, variant, first_slot)
         if not same_slot:
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
             result["blockers"] = ["same_slot_not_confirmed_after_level_click"]
             return result
+        current_category = read_selected_category(selected_frame, variant)
+        if current_category.get("status") != "confirmed" or current_category.get("unit_type") != "guardsmen":
+            result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
+            result["blockers"] = ["guardsmen_category_not_confirmed_after_level_click"]
+            return result
+        if not _requested_level_is_selected(selected_frame, current_slot, selection):
+            result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
+            result["blockers"] = ["requested_level_not_visually_confirmed"]
+            return result
+        result["selection_confirmed"] = True
 
         read_frame, read_origin = capture_fn()
         if read_origin != origin or (read_frame.shape[1], read_frame.shape[0]) != EXPECTED_SIZE:
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
             result["blockers"] = ["capture_geometry_changed_before_slot_read"]
             return result
-        same_slot, read_slot = _slot_position_is_same(read_frame, variant, second_slot)
+        same_slot, read_slot = _slot_position_is_same(read_frame, variant, first_slot)
         if not same_slot:
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
             result["blockers"] = ["same_slot_not_confirmed_before_slot_read"]
@@ -268,15 +309,24 @@ def run_one_shot(capture_fn=None, click_fn=None, execute=False, confirmation="",
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
             result["blockers"] = ["capture_geometry_changed_before_train"]
             return result
-        same_slot, final_slot = _slot_position_is_same(fresh_frame, variant, second_slot)
+        same_slot, final_slot = _slot_position_is_same(fresh_frame, variant, first_slot)
         if not same_slot:
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
             result["blockers"] = ["same_slot_not_confirmed_before_train"]
+            return result
+        if not _requested_level_is_selected(fresh_frame, final_slot, selection):
+            result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
+            result["blockers"] = ["requested_level_not_visually_confirmed_before_train"]
             return result
         final_state = _read_current_training_state(fresh_frame, variant)
         if final_state["status"] != "idle":
             result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
             result["blockers"] = [f"training_changed_before_train_{final_state['status']}"]
+            return result
+        final_category = read_selected_category(fresh_frame, variant)
+        if final_category.get("status") != "confirmed" or final_category.get("unit_type") != "guardsmen":
+            result["status"] = "BLOCKED_AFTER_LEVEL_CLICK"
+            result["blockers"] = ["guardsmen_category_not_confirmed_before_train"]
             return result
         final_plan = _build_selected_slot_plan(fresh_frame, variant, final_slot)
         result["preflight"] = final_plan
@@ -328,12 +378,13 @@ def run_one_shot(capture_fn=None, click_fn=None, execute=False, confirmation="",
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="One-shot E2E for the second visible slot, max-1 level.")
+    parser = argparse.ArgumentParser(description="One-shot E2E for an explicit level in the first visible slot.")
+    parser.add_argument("--level", type=int, required=True, help="visible Guardsmen level to select (1-9)")
     parser.add_argument("--execute", action="store_true", help="allow live selector and at most one Train click")
-    parser.add_argument("--confirm", default="", help=f"type exactly: {CONFIRMATION_PHRASE}")
+    parser.add_argument("--confirm", default="", help="type the exact level-specific confirmation phrase")
     args = parser.parse_args(argv)
     try:
-        result = run_one_shot(execute=args.execute, confirmation=args.confirm)
+        result = run_one_shot(execute=args.execute, confirmation=args.confirm, level=args.level)
     except (LiveTrainingError, ArmyTrainingScannerError, ResourceReadError, UIVariantError, OSError, ValueError, pytesseract.TesseractNotFoundError) as error:
         print(json.dumps({"status": "BLOCKED", "error": str(error), "actions_executed": False, "queue_modified": False}, ensure_ascii=False, indent=2), file=sys.stderr)
         return 2

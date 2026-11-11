@@ -1,4 +1,5 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import cv2
 import numpy as np
@@ -22,7 +23,13 @@ def _live_fixtures(monkeypatch, post_status="active"):
 
     monkeypatch.setattr(live, "capture_primary_monitor", lambda: (image.copy(), (0, 0)))
     monkeypatch.setattr(live, "_read_current_training_state", lambda frame, selected_variant: {"status": "idle"})
-    monkeypatch.setattr(live, "_slot_position_is_same", lambda frame, selected_variant, expected: (True, layout.slots[1]))
+    monkeypatch.setattr(live, "_slot_position_is_same", lambda frame, selected_variant, expected: (True, layout.slots[0]))
+    monkeypatch.setattr(live, "_select_requested_level", lambda frame, slot, requested_level: {
+        "level": requested_level, "badge_index": 1, "local_x": 10, "local_y": 40,
+        "screen_x": 656, "screen_y": 403, "badge_count": 3,
+        "lowest_visible_level": 5, "highest_visible_level": 7, "selector_shape": (118, 21),
+    })
+    monkeypatch.setattr(live, "_requested_level_is_selected", lambda frame, slot, selection: True)
     monkeypatch.setattr(live, "_check_emergency_stop", lambda: None)
     monkeypatch.setattr(live, "_build_selected_slot_plan", lambda frame, selected_variant, slot: {
         "training": {"status": "idle"}, "readings": {}, "resources": {},
@@ -43,12 +50,12 @@ def _live_fixtures(monkeypatch, post_status="active"):
     return clicked, captured, image, layout, click
 
 
-def test_preview_is_for_second_visible_slot_and_does_not_click(monkeypatch):
+def test_preview_is_for_first_visible_slot_and_does_not_click(monkeypatch):
     clicked, _, _, _, click = _live_fixtures(monkeypatch)
 
     result = live.run_one_shot(execute=False, click_fn=click)
 
-    assert result["slot_frame_index"] == 1
+    assert result["slot_frame_index"] == 0
     assert result["requested_level"] == 6
     assert result["selection_confirmed"] is False
     assert result["status"] == "PREVIEW_ONLY"
@@ -72,6 +79,18 @@ def test_non_1920_capture_is_rejected_before_actions(monkeypatch):
     assert clicked == []
 
 
+def test_non_guardsmen_category_is_rejected_before_any_click(monkeypatch):
+    clicked, _, _, _, click = _live_fixtures(monkeypatch)
+    monkeypatch.setattr(live, "read_selected_category", lambda frame, variant: {
+        "status": "confirmed", "unit_type": "specialists",
+    })
+
+    with pytest.raises(live.LiveTrainingError, match="confirmed as Guardsmen"):
+        live.run_one_shot(execute=True, confirmation=live.CONFIRMATION_PHRASE.format(level=6), click_fn=click)
+
+    assert clicked == []
+
+
 def test_preflight_block_stops_after_level_selection_without_train(monkeypatch):
     clicked, _, _, _, click = _live_fixtures(monkeypatch)
     monkeypatch.setattr(live, "_build_selected_slot_plan", lambda frame, selected_variant, slot: {
@@ -80,7 +99,7 @@ def test_preflight_block_stops_after_level_selection_without_train(monkeypatch):
         "planned_quantity": 31310, "blockers": ["silver_insufficient_or_uncertain"],
     })
 
-    result = live.run_one_shot(execute=True, confirmation=live.CONFIRMATION_PHRASE, click_fn=click)
+    result = live.run_one_shot(execute=True, confirmation=live.CONFIRMATION_PHRASE.format(level=6), click_fn=click)
 
     assert result["status"] == "BLOCKED_AFTER_LEVEL_CLICK"
     assert result["actions_executed"] is True
@@ -89,24 +108,24 @@ def test_preflight_block_stops_after_level_selection_without_train(monkeypatch):
     assert len(clicked) == 1
 
 
-def test_unconfirmed_selection_still_requires_same_slot_and_fresh_preflight(monkeypatch):
+def test_confirmed_selection_still_requires_same_slot_and_fresh_preflight(monkeypatch):
     clicked, captured, _, _, click = _live_fixtures(monkeypatch)
     slot_checks = []
 
     def same_slot(frame, variant, expected):
         slot_checks.append(True)
-        return True, find_slots(EMPTY).slots[1]
+        return True, find_slots(EMPTY).slots[0]
 
     monkeypatch.setattr(live, "_slot_position_is_same", same_slot)
 
     result = live.run_one_shot(
         execute=True,
-        confirmation=live.CONFIRMATION_PHRASE,
+        confirmation=live.CONFIRMATION_PHRASE.format(level=6),
         click_fn=click,
         sleep_fn=lambda _: None,
     )
 
-    assert result["selection_confirmed"] is False
+    assert result["selection_confirmed"] is True
     assert result["status"] == "START_CONFIRMED"
     assert len(slot_checks) == 3
     assert len(clicked) == 2
@@ -127,7 +146,7 @@ def test_capture_failure_after_level_click_reports_action_and_unknown(monkeypatc
 
     result = live.run_one_shot(
         execute=True,
-        confirmation=live.CONFIRMATION_PHRASE,
+        confirmation=live.CONFIRMATION_PHRASE.format(level=6),
         click_fn=click,
         sleep_fn=lambda _: None,
     )
@@ -142,7 +161,7 @@ def test_capture_failure_after_level_click_reports_action_and_unknown(monkeypatc
 def test_one_train_click_and_active_confirmation(monkeypatch):
     clicked, _, _, _, click = _live_fixtures(monkeypatch)
 
-    result = live.run_one_shot(execute=True, confirmation=live.CONFIRMATION_PHRASE, click_fn=click, sleep_fn=lambda _: None)
+    result = live.run_one_shot(execute=True, confirmation=live.CONFIRMATION_PHRASE.format(level=6), click_fn=click, sleep_fn=lambda _: None)
 
     assert result["status"] == "START_CONFIRMED"
     assert result["train_click_issued"] is True
@@ -162,7 +181,7 @@ def test_train_click_exception_is_unknown_and_never_retried(monkeypatch):
 
     result = live.run_one_shot(
         execute=True,
-        confirmation=live.CONFIRMATION_PHRASE,
+        confirmation=live.CONFIRMATION_PHRASE.format(level=6),
         click_fn=click,
         sleep_fn=lambda _: None,
     )
@@ -178,9 +197,84 @@ def test_train_click_exception_is_unknown_and_never_retried(monkeypatch):
 def test_uncertain_post_click_does_not_retry(monkeypatch):
     clicked, _, _, _, click = _live_fixtures(monkeypatch, post_status="unknown")
 
-    result = live.run_one_shot(execute=True, confirmation=live.CONFIRMATION_PHRASE, click_fn=click, sleep_fn=lambda _: None)
+    result = live.run_one_shot(execute=True, confirmation=live.CONFIRMATION_PHRASE.format(level=6), click_fn=click, sleep_fn=lambda _: None)
 
     assert result["status"] == "UNKNOWN_AFTER_CLICK"
     assert result["queue_modified"] == "unknown"
     assert result["blockers"] == ["train_click_not_visually_confirmed_do_not_retry"]
     assert len(clicked) == 2
+
+
+def test_unconfirmed_requested_level_stops_before_preflight_and_train(monkeypatch):
+    clicked, _, _, _, click = _live_fixtures(monkeypatch)
+    monkeypatch.setattr(live, "_requested_level_is_selected", lambda frame, slot, selection: False)
+    plan_calls = []
+    monkeypatch.setattr(live, "_build_selected_slot_plan", lambda *args, **kwargs: plan_calls.append(True))
+
+    result = live.run_one_shot(
+        execute=True,
+        confirmation=live.CONFIRMATION_PHRASE.format(level=6),
+        click_fn=click,
+        sleep_fn=lambda _: None,
+    )
+
+    assert result["status"] == "BLOCKED_AFTER_LEVEL_CLICK"
+    assert result["selection_confirmed"] is False
+    assert result["blockers"] == ["requested_level_not_visually_confirmed"]
+    assert result["queue_modified"] is False
+    assert len(clicked) == 1
+    assert plan_calls == []
+
+
+def test_requested_level_must_still_be_selected_immediately_before_train(monkeypatch):
+    clicked, _, _, _, click = _live_fixtures(monkeypatch)
+    selected_checks = iter((True, False))
+    monkeypatch.setattr(live, "_requested_level_is_selected", lambda frame, slot, selection: next(selected_checks))
+
+    result = live.run_one_shot(
+        execute=True,
+        confirmation=live.CONFIRMATION_PHRASE.format(level=6),
+        click_fn=click,
+        sleep_fn=lambda _: None,
+    )
+
+    assert result["status"] == "BLOCKED_AFTER_LEVEL_CLICK"
+    assert result["selection_confirmed"] is True
+    assert result["blockers"] == ["requested_level_not_visually_confirmed_before_train"]
+    assert result["queue_modified"] is False
+    assert len(clicked) == 1
+
+
+def test_guardsmen_category_must_still_be_selected_before_train(monkeypatch):
+    clicked, _, _, _, click = _live_fixtures(monkeypatch)
+    categories = iter(("guardsmen", "guardsmen", "specialists"))
+    monkeypatch.setattr(live, "read_selected_category", lambda frame, variant: {
+        "status": "confirmed", "unit_type": next(categories),
+    })
+
+    result = live.run_one_shot(
+        execute=True,
+        confirmation=live.CONFIRMATION_PHRASE.format(level=6),
+        click_fn=click,
+        sleep_fn=lambda _: None,
+    )
+
+    assert result["status"] == "BLOCKED_AFTER_LEVEL_CLICK"
+    assert result["blockers"] == ["guardsmen_category_not_confirmed_before_train"]
+    assert result["queue_modified"] is False
+    assert len(clicked) == 1
+
+
+def test_requested_level_maps_only_inside_consecutive_visible_range(monkeypatch):
+    layout = find_slots(EMPTY)
+    centers = ((10.0, 15.0, 4.0), (10.0, 40.0, 4.0), (10.0, 65.0, 6.0))
+    monkeypatch.setattr(live, "read_slot_selector_levels", lambda frame, slot: SimpleNamespace(
+        status="candidate", lowest_visible_level=5, highest_visible_level=7, badge_centers=centers,
+    ))
+
+    selection = live._select_requested_level(_read_image(EMPTY), layout.slots[0], 6)
+
+    assert selection["badge_index"] == 1
+    assert (selection["local_x"], selection["local_y"]) == (10, 40)
+    with pytest.raises(live.LiveTrainingError, match="not in the slot"):
+        live._select_requested_level(_read_image(EMPTY), layout.slots[0], 4)
