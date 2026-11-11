@@ -1,0 +1,21 @@
+{
+  "mode": "army_navigation_live",
+  "status": "BLOCKED_ROUTE",
+  "actions_executed": false,
+  "queue_modified": false,
+  "route": {
+    "status": "blocked",
+    "client_id": "desktop",
+    "player_name": null,
+    "profile_id": null,
+    "queue_path": null,
+    "reason": "player_name_ambiguous:ocr_passes_disagree",
+    "window_title": "Total Battle",
+    "process_name": "TotalBattle.exe",
+    "observed_at": "2026-11-11T04:37:16.243411+00:00"
+  },
+  "navigation": null,
+  "reason": "foreground_route_must_resolve_one_desktop_profile",
+  "run_dir": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\army_navigation\\20261111_053714_653718",
+  "report_file": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\army_navigation\\20261111_053714_653718\\report.json"
+}

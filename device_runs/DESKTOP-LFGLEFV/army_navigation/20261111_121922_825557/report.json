@@ -1,0 +1,50 @@
+{
+  "mode": "army_navigation_live",
+  "status": "BARRACKS_OPENED",
+  "actions_executed": true,
+  "queue_modified": false,
+  "git_sync": {
+    "status": "up_to_date"
+  },
+  "route": {
+    "status": "routed",
+    "client_id": "desktop",
+    "player_name": "agg",
+    "profile_id": "agg_ekvnr",
+    "queue_path": "C:\\Users\\Konrad\\tba\\profiles\\agg_ekvnr_0a461b7d7c\\tasks.json",
+    "reason": "profile_registered",
+    "window_title": "Total Battle",
+    "process_name": "TotalBattle.exe",
+    "observed_at": "2026-11-11T11:19:26.724394+00:00"
+  },
+  "navigation": {
+    "steps": [
+      "press_escape_three_times",
+      "click_army",
+      "confirm_barracks_slots"
+    ],
+    "actions_executed": true,
+    "queue_modified": false,
+    "armia_match_confidence": 98.70339361950755,
+    "armia_match_threshold": 94.6,
+    "armia_match_candidate_point": [
+      939,
+      943
+    ],
+    "search_region": {
+      "x": 911,
+      "y": 916,
+      "w": 57,
+      "h": 50
+    },
+    "armia_click_point": [
+      939,
+      943
+    ],
+    "status": "BARRACKS_OPENED",
+    "layout_status": "ok",
+    "visible_slots": 3
+  },
+  "run_dir": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\army_navigation\\20261111_121922_825557",
+  "report_file": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\army_navigation\\20261111_121922_825557\\report.json"
+}
