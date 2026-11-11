@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from dataclasses import asdict, dataclass, field
@@ -15,6 +16,7 @@ from profile_identity import (
     read_player_name,
     resolve_registered_profile,
     resolve_registered_profile_or_create,
+    save_player_name_crop,
 )
 from task_controller import PROFILES_DIR, task_queue_path
 from ui_variants import resolve_variant
@@ -43,6 +45,23 @@ class RouteObservation:
     window_title: str
     process_name: str
     observed_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    evidence_path: str | None = None
+    evidence_error: str | None = None
+
+
+def _save_ambiguous_player_name_crop(frame):
+    device = os.environ.get("COMPUTERNAME") or "device"
+    device = re.sub(r"[^A-Za-z0-9_-]+", "_", device).strip("_") or "device"
+    run_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    path = (
+        Path(__file__).resolve().parent
+        / "device_runs"
+        / device
+        / "profile_identity"
+        / run_id
+        / "player_name_region.png"
+    )
+    return save_player_name_crop(frame, path, variant=resolve_variant("legacy"))
 
 
 def classify_foreground_window(window, game_title_token="total battle"):
@@ -150,9 +169,20 @@ def observe_foreground_profile(
     except Exception as error:
         return RouteObservation("blocked", client_id, None, None, None, f"player_name_read_failed:{error}", title, process_name)
     if reading.status != "ok" or not reading.player_name:
+        evidence_path = None
+        evidence_error = None
+        if reading.status == "ambiguous":
+            try:
+                evidence_path = _save_ambiguous_player_name_crop(frame)
+                if evidence_path is None:
+                    evidence_error = "player_name_region_unavailable"
+            except Exception as error:
+                evidence_error = f"{type(error).__name__}: {error}"
         return RouteObservation(
             "blocked", client_id, None, None, None,
             f"player_name_{reading.status}:{reading.reason}", title, process_name,
+            evidence_path=evidence_path,
+            evidence_error=evidence_error,
         )
 
     try:

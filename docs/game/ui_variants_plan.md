@@ -18,15 +18,15 @@ Own the current client-selection, profile-identity/registration/routing, and bro
 
 ## Current Status and Verification
 
-Source-reviewed date: **2026-11-10**. This is the single current status for these features; historical sections below are not competing contracts.
+Source-reviewed date: **2026-11-11**. This is the single current status for these features; historical sections below are not competing contracts.
 
 | Feature | Current implementation | Evidence and remaining boundary |
 | --- | --- | --- |
 | Client selection | Registry resolver defaults to ready `legacy`; `modern` and `browser` are planned and rejected. Foreground classification reports `desktop` or `browser` independently of variant readiness. | Resolver and foreground-classification source/tests inspected. Classification is a title/process heuristic, not verified account or screen recognition. |
-| Profile identity, registration and routing | Desktop observer auto-registers unknown names by default and selects the first normalized-name match, including duplicates. Diagnostic opt-out disables creation, not first-match routing. | Router and identity source, router tests, and manager caller inspected. No queue access or game input occurs in the observer. The current manager does not call the identity helper. |
+| Profile identity, registration and routing | Desktop observer auto-registers unknown names by default and selects the first normalized-name match, including duplicates. On ambiguous OCR it saves only the exact player-name crop and returns its evidence path; routing remains blocked without profile creation. | Focused `tests/test_client_router.py`: **18 passed** on 2026-11-11, including crop geometry and fail-closed routing. This does not verify live OCR accuracy. No live capture was performed for this change. |
 | Browser readiness | Foreground browser classification exists; profile routing is unconditionally blocked before capture. Browser-specific read-only training scanner code and fixture tests exist, but the normal resolver rejects `browser`. Speed Up is the sole approved future feature exception: its adapter has an independent false readiness gate and may not promote global browser readiness. No browser Speed Up assets or reader/input adapter exist. | Browser registry, regions, scanner branch, and fixture test source inspected. Fixture expectations do not establish runnable browser support or live identity/action readiness. Speed Up skeleton tests establish callback/core wiring only, not browser recognition or operation. |
 
-Automated tests were **inspected, not executed in this migration**. No passing result is claimed, including for browser fixtures whose prerequisites conflict with the current planned registry state. No live validation, game input, captures, OCR execution, or asset changes were performed. Documentation validation consists of a scoped executable PowerShell link/heading check and editor diagnostics; its outcome is reported in the migration handoff. The main agent will run tests separately.
+The original migration's automated tests were **inspected, not executed**. The profile-routing focused test set was subsequently run as recorded above; no passing result is claimed for other features, including browser fixtures whose prerequisites conflict with the current planned registry state. No live validation was performed for this diagnostic change. Earlier migration documentation checks do not establish OCR accuracy.
 
 ## Client Selection
 
@@ -87,7 +87,7 @@ Observe the visible desktop player, resolve a local profile, and report a queue 
 4. Search the registry in stored order. Reuse its first normalized-name match, even if several exist. Otherwise create a mapping unless registration is disabled. New IDs use an ASCII slug (up to 32 characters, fallback `player`) plus a random five-character lowercase/digit suffix, checked against existing IDs with at most 100 attempts.
 5. Persist new mappings with creation/last-seen timestamps using a temporary file and atomic replacement. Observer reuse does not refresh `last_seen_at`. Return the profile ID and the path from `task_queue_path(profile_id, profiles_dir)`, which uses a profile-specific slug/digest directory and `tasks.json`; do not create or open the queue.
 
-`RouteObservation` includes `status`, `client_id`, `player_name`, `profile_id`, `queue_path`, `reason`, window title/process, and UTC observation timestamp. A routed result reports `profile_registered` or `profile_reused`; it is not an execution authorization. It does not contain OCR candidates or a numeric confidence score. The lower-level `PlayerNameReading` retains candidates, status, and reason.
+`RouteObservation` includes `status`, `client_id`, `player_name`, `profile_id`, `queue_path`, `reason`, window title/process, UTC observation timestamp, and optional OCR evidence path/error. When OCR passes disagree, routing remains blocked and no profile is created; the router saves only the exact color `player_name` crop to `device_runs/<device>/profile_identity/<run-id>/player_name_region.png` and returns its path. This is failure-only evidence, not a full-screen capture. A routed result reports `profile_registered` or `profile_reused`; it is not an execution authorization. It does not contain OCR candidates or a numeric confidence score. The lower-level `PlayerNameReading` retains candidates, status, and reason.
 
 Capture/name-reader exceptions return `blocked` with `capture_failed:` or `player_name_read_failed:`. Non-OK OCR returns a `player_name_<status>:` reason. Identity/registry validation failures return `profile_unresolved:`; registry write errors return `profile_registry_write_failed:`. These blocked results have no profile or queue path. They do not fall back to another profile. The one-shot CLI returns zero after printing an observation even when routing is blocked; consumers must inspect JSON `status`, not just the process exit code.
 
@@ -112,9 +112,9 @@ The [approved routing scope](#foreground-client-and-account-queue-routing-approv
 ### Implementation and tests
 
 - [client_router.py](../../client_router.py): `observe_foreground_profile`, `watch_foreground`, `main`.
-- [profile_identity.py](../../profile_identity.py): `read_player_name`, registry persistence, the three resolution modes, and `resolve_profile_from_game`.
+- [profile_identity.py](../../profile_identity.py): `read_player_name`, exact-crop evidence saving, registry persistence, the three resolution modes, and `resolve_profile_from_game`.
 - [task_controller.py](../../task_controller.py): `PROFILES_DIR`, `task_queue_path`; [army_training_manager.py](../../army_training_manager.py): literal CLI profile selection.
-- [tests/test_client_router.py](../../tests/test_client_router.py): registration/reuse, first duplicate selection, opt-out, OCR and write-failure blocks, CLI defaults, and change-only polling. Injected readers do not prove real OCR accuracy or action-time isolation. No dedicated profile-identity test file was present at source review.
+- [tests/test_client_router.py](../../tests/test_client_router.py): registration/reuse, first duplicate selection, opt-out, ambiguous OCR crop evidence and fail-closed behavior, OCR and write-failure blocks, CLI defaults, and change-only polling. Injected readers do not prove real OCR accuracy or action-time isolation. No dedicated profile-identity test file was present at source review.
 
 ## Browser Readiness
 

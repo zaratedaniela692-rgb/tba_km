@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
+import cv2
+import numpy as np
 import pytest
 
 from client_router import (
@@ -188,10 +190,20 @@ def test_auto_registration_routes_first_duplicate_profile(tmp_path):
     assert observation.profile_id == first_profile.profile_id
 
 
-def test_unknown_name_ocr_blocks_profile_routing(tmp_path):
+def test_ambiguous_name_ocr_saves_crop_and_blocks_routing(tmp_path, monkeypatch):
+    import client_router
+
+    frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    frame[115:135, 714:914] = (13, 27, 41)
+    output_path = tmp_path / "player_name_region.png"
+    monkeypatch.setattr(
+        client_router,
+        "_save_ambiguous_player_name_crop",
+        lambda actual_frame: client_router.save_player_name_crop(actual_frame, output_path),
+    )
     observation = observe_foreground_profile(
         ForegroundWindow("Total Battle", "TotalBattle.exe"),
-        capture_fn=lambda: (object(), (0, 0)),
+        capture_fn=lambda: (frame, (0, 0)),
         profiles_dir=tmp_path,
         name_reader=lambda *_args, **_kwargs: SimpleNamespace(
             status="ambiguous", player_name=None, candidates=("Snoweye", "Snoweye_"), reason="ocr_disagree",
@@ -202,7 +214,12 @@ def test_unknown_name_ocr_blocks_profile_routing(tmp_path):
     assert observation.profile_id is None
     assert observation.queue_path is None
     assert observation.reason.startswith("player_name_ambiguous:")
+    assert observation.evidence_path == str(output_path)
+    assert observation.evidence_error is None
     assert not profile_registry_path(tmp_path).exists()
+    saved_crop = cv2.imread(str(output_path))
+    assert saved_crop.shape == (20, 200, 3)
+    assert tuple(saved_crop[0, 0]) == (13, 27, 41)
 
 
 def test_cli_defaults_to_registration_and_supports_read_only_opt_out(monkeypatch, capsys):

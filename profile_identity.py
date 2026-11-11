@@ -51,23 +51,43 @@ def _normalize_name(value):
 	return re.sub(r"\s+", " ", normalized).strip(" _-")
 
 
-def read_player_name(frame, variant=None, tesseract_cmd=None):
-	"""Read the HUD name only when four independent OCR passes agree."""
+def _player_name_crop(frame, variant):
 	if frame is None or (frame.shape[1], frame.shape[0]) != FULL_FRAME_SIZE:
-		return PlayerNameReading("blocked", None, (), "unsupported_frame_size")
-	if tesseract_cmd:
-		pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
-	variant = variant or resolve_variant()
+		return None, "unsupported_frame_size"
 	regions = _load_regions(variant["regions"])
 	region = regions.get("world_map", {}).get("player_name")
 	if region is None:
-		return PlayerNameReading("blocked", None, (), "player_name_region_missing")
+		return None, "player_name_region_missing"
 
 	x, y, width, height = (int(region[key]) for key in ("x", "y", "w", "h"))
 	y += FULL_FRAME_Y_OFFSET
 	crop = frame[y:y + height, x:x + width]
 	if crop.shape[:2] != (height, width):
-		return PlayerNameReading("blocked", None, (), "player_name_region_outside_frame")
+		return None, "player_name_region_outside_frame"
+	return crop, ""
+
+
+def save_player_name_crop(frame, output_path, variant=None):
+	"""Save the exact color crop used for player-name OCR."""
+	variant = variant or resolve_variant()
+	crop, reason = _player_name_crop(frame, variant)
+	if reason:
+		return None
+	path = Path(output_path)
+	path.parent.mkdir(parents=True, exist_ok=True)
+	if not cv2.imwrite(str(path), crop):
+		raise OSError("Could not write player-name OCR evidence image.")
+	return str(path)
+
+
+def read_player_name(frame, variant=None, tesseract_cmd=None):
+	"""Read the HUD name only when four independent OCR passes agree."""
+	if tesseract_cmd:
+		pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+	variant = variant or resolve_variant()
+	crop, reason = _player_name_crop(frame, variant)
+	if reason:
+		return PlayerNameReading("blocked", None, (), reason)
 
 	gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
 	reads = []
