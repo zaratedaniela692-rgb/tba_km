@@ -14,6 +14,12 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from tools.run_live_test_git import prepare_live_checkout, publish_failure_reports
+
+GIT_SYNC_RESULT = {"status": "not_run"}
+if __name__ == "__main__":
+    GIT_SYNC_RESULT = prepare_live_checkout(ROOT_DIR, Path(__file__))
+
 from task_controller import DEFAULT_PROFILE_ID
 
 PYTHON = Path(sys.executable)
@@ -151,8 +157,10 @@ def run_e2e():
     }:
         (run_dir / "report.json").write_text(json.dumps({
             "status": "FINISH_PREFLIGHT_FAILED", "live_test_status": "FAILED_OR_UNCERTAIN",
-            "finish": finish_report, "test_profile": TEST_PROFILE_ID, "run_dir": str(run_dir.resolve()),
+            "finish": finish_report, "test_profile": TEST_PROFILE_ID,
+            "git_sync": GIT_SYNC_RESULT, "run_dir": str(run_dir.resolve()),
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        publish_failure_reports(ROOT_DIR, run_dir)
         raise E2EError(
             f"Pre-test Barracks check did not confirm idle ({finish_report.get('status')}): "
             f"{finish_report.get('reason', finish_report.get('blockers', 'no details'))}. "
@@ -214,6 +222,7 @@ def run_e2e():
     report.update(
         finish=finish_report,
         test_profile=TEST_PROFILE_ID,
+        git_sync=GIT_SYNC_RESULT,
         expected_quantity=TRAINING_QUANTITY,
         test_task_id=task["task_id"],
         run_dir=str(run_dir.resolve()),
@@ -232,6 +241,8 @@ def run_e2e():
     (run_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(output, end="" if output.endswith("\n") else "\n")
     print(f"Live test {report['live_test_status']}; evidence: {run_dir}")
+    if report["live_test_status"] != "PASSED":
+        publish_failure_reports(ROOT_DIR, run_dir)
     return 0 if report["live_test_status"] == "PASSED" else 2
 
 

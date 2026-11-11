@@ -55,6 +55,7 @@ def test_live_flow_is_testable_with_mocked_subprocess_and_profile(monkeypatch, t
 
 def test_preflight_failure_stops_before_profile_or_training_changes(monkeypatch, tmp_path):
     calls = []
+    published = []
 
     def fake_run(command, **_kwargs):
         calls.append(command)
@@ -68,6 +69,11 @@ def test_preflight_failure_stops_before_profile_or_training_changes(monkeypatch,
     monkeypatch.setattr(wrapper, "_create_numbered_run_dir", lambda _: tmp_path)
     monkeypatch.setattr(
         wrapper,
+        "publish_failure_reports",
+        lambda root, run_dir: published.append((root, run_dir)),
+    )
+    monkeypatch.setattr(
+        wrapper,
         "prepare_test_profile",
         lambda **_kwargs: pytest.fail("profile preparation must not run when preflight is blocked"),
     )
@@ -79,6 +85,7 @@ def test_preflight_failure_stops_before_profile_or_training_changes(monkeypatch,
     assert "--finish-active-for-test" in calls[0]
     assert "--quantity" not in calls[0]
     assert json.loads((tmp_path / "report.json").read_text())["status"] == "FINISH_PREFLIGHT_FAILED"
+    assert published == [(wrapper.ROOT_DIR, tmp_path)]
 
 
 @pytest.mark.parametrize("output", ("not json", "[]", '{"status":"BLOCKED_ACTIVE_TRAINING_FINISH"}'))

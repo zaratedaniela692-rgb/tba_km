@@ -13,6 +13,12 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from tools.run_live_test_git import prepare_live_checkout, publish_failure_reports
+
+GIT_SYNC_RESULT = {"status": "not_run"}
+if __name__ == "__main__" and len(sys.argv) == 1:
+    GIT_SYNC_RESULT = prepare_live_checkout(ROOT_DIR, Path(__file__))
+
 from army_training_navigation import open_army_training_screen
 from client_router import observe_foreground_profile
 
@@ -48,6 +54,8 @@ def _write_report(run_dir, report, output):
     report["report_file"] = str(report_path.resolve())
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     output(json.dumps(report, ensure_ascii=False, indent=2))
+    if report.get("status") != "BARRACKS_OPENED":
+        publish_failure_reports(ROOT_DIR, run_dir, output)
 
 
 def _save_failure_screen(run_dir):
@@ -101,6 +109,7 @@ def run_live_navigation(
         "status": "BLOCKED_ROUTE",
         "actions_executed": False,
         "queue_modified": False,
+        "git_sync": GIT_SYNC_RESULT,
         "route": None,
         "navigation": None,
     }

@@ -48,8 +48,14 @@ def test_live_navigation_wrapper_runs_once_and_reports_confirmed_slots(tmp_path)
     "route",
     (_route(status="blocked"), _route(client_id="browser"), _route(profile_id=None)),
 )
-def test_unresolved_or_unsupported_route_stops_before_navigation(tmp_path, route):
+def test_unresolved_or_unsupported_route_stops_before_navigation(tmp_path, route, monkeypatch):
     navigation_calls = []
+    published = []
+    monkeypatch.setattr(
+        wrapper,
+        "publish_failure_reports",
+        lambda root, run_dir, output: published.append((root, run_dir)),
+    )
 
     result = wrapper.run_live_navigation(
         route_fn=lambda: route,
@@ -64,6 +70,7 @@ def test_unresolved_or_unsupported_route_stops_before_navigation(tmp_path, route
     assert report["status"] == "BLOCKED_ROUTE"
     assert report["actions_executed"] is False
     assert report["queue_modified"] is False
+    assert published == [(wrapper.ROOT_DIR, tmp_path)]
 
 
 def test_unconfirmed_navigation_is_reported_without_retry(tmp_path):
