@@ -1,0 +1,48 @@
+{
+  "mode": "army_navigation_live",
+  "status": "BLOCKED_ARMY_BUTTON_UNCONFIRMED",
+  "actions_executed": true,
+  "queue_modified": false,
+  "git_sync": {
+    "status": "up_to_date"
+  },
+  "route": {
+    "status": "routed",
+    "client_id": "desktop",
+    "player_name": "xirrus",
+    "profile_id": "xirrus_0w0s6",
+    "queue_path": "C:\\Users\\Konrad\\tba\\profiles\\xirrus_0w0s6_b72a4ba46d\\tasks.json",
+    "reason": "profile_reused",
+    "window_title": "Total Battle",
+    "process_name": "TotalBattle.exe",
+    "observed_at": "2026-11-11T11:17:06.663821+00:00"
+  },
+  "navigation": {
+    "steps": [
+      "press_escape_three_times",
+      "click_army",
+      "confirm_barracks_slots"
+    ],
+    "actions_executed": true,
+    "queue_modified": false,
+    "armia_match_confidence": 61.10583245754242,
+    "armia_match_threshold": 94.6,
+    "armia_match_candidate_point": [
+      937,
+      940
+    ],
+    "search_region": {
+      "x": 911,
+      "y": 916,
+      "w": 57,
+      "h": 50
+    },
+    "status": "BLOCKED_ARMY_BUTTON_UNCONFIRMED",
+    "blockers": [
+      "world_map.armia confidence 61.11% is below 94.60%"
+    ]
+  },
+  "reason": "navigation_did_not_confirm_barracks_slots_do_not_retry",
+  "run_dir": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\army_navigation\\20261111_121658_510348",
+  "report_file": "C:\\Users\\Konrad\\tba\\device_runs\\DESKTOP-LFGLEFV\\army_navigation\\20261111_121658_510348\\report.json"
+}
